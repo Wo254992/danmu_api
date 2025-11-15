@@ -5732,11 +5732,52 @@ async function handleHomepage(req) {
        const response = await fetch(apiUrl);
        const result = await response.json();
 
-       if (!result.success) {
-         throw new Error(result.errorMessage || '获取弹幕失败');
+       // 🔍 调试：打印后端返回的完整数据
+       console.log('[Debug] 后端返回数据:', result);
+       console.log('[Debug] response.status:', response.status);
+       console.log('[Debug] result.success:', result.success);
+       console.log('[Debug] result.comments:', result.comments?.length);
+       console.log('[Debug] result.count:', result.count);
+
+       // ✅ 修复：兼容多种响应格式
+       // 情况1: 标准格式 { success: true, comments: [...] }
+       // 情况2: 简化格式 { count: 100, comments: [...] }
+       // 情况3: 直接返回数组 [...]
+       let comments = [];
+       
+       if (Array.isArray(result)) {
+         // 直接返回数组
+         comments = result;
+       } else if (result.comments) {
+         // 有 comments 字段
+         comments = result.comments;
+       } else if (result.danmus) {
+         // 或者叫 danmus
+         comments = result.danmus;
        }
 
-       currentDanmuData = result.comments || result.danmus || [];
+       // 检查是否明确失败
+       if (result.success === false) {
+         throw new Error(result.errorMessage || result.message || '获取弹幕失败');
+       }
+
+       // 检查 HTTP 状态码
+       if (!response.ok) {
+         throw new Error(\`HTTP \${response.status}: \${result.errorMessage || '请求失败'}\`);
+       }
+
+       currentDanmuData = comments;
+       filteredDanmuData = [...currentDanmuData];
+
+       if (currentDanmuData.length === 0) {
+         previewContainer.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: var(--text-tertiary);"><div style="font-size: 48px; margin-bottom: 16px;">😢</div><div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">未获取到弹幕</div><div style="font-size: 13px;">该视频可能没有弹幕数据</div></div>';
+         document.getElementById('danmuTestCount').textContent = '0 条';
+         return;
+       }
+
+       displayDanmuList(filteredDanmuData);
+       updateDanmuStats();
+       showToast(\`成功获取 \${currentDanmuData.length} 条弹幕\`, 'success');
        filteredDanmuData = [...currentDanmuData];
 
        if (currentDanmuData.length === 0) {
