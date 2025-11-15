@@ -5702,30 +5702,39 @@ async function handleHomepage(req) {
          let animeName = input;
          let episodeNumber = 1; // 默认第1集
          
-         // 优先匹配 "SxxExx" 格式（不区分大小写）
-         const episodeMatch1 = input.match(/^(.+?)\s+S\d+E(\d+)$/i);
+         // 优先匹配 "SxxExx" 格式（不区分大小写，去掉前后空格）
+         const episodeMatch1 = input.match(/(.+?)\s+S\d+E(\d+)/i);
          if (episodeMatch1) {
            animeName = episodeMatch1[1].trim();
            episodeNumber = parseInt(episodeMatch1[2]);
+           console.log(\`[解析] 格式: SxxExx, 番剧名: \${animeName}, 集数: \${episodeNumber}\`);
          } else {
            // 匹配 "第X集" 格式
-           const episodeMatch2 = input.match(/^(.+?)\s*第\s*(\d+)\s*集$/);
+           const episodeMatch2 = input.match(/(.+?)\s*第\s*(\d+)\s*集/);
            if (episodeMatch2) {
              animeName = episodeMatch2[1].trim();
              episodeNumber = parseInt(episodeMatch2[2]);
+             console.log(\`[解析] 格式: 第X集, 番剧名: \${animeName}, 集数: \${episodeNumber}\`);
            } else {
              // 匹配纯数字格式 "番剧名 10"
-             const episodeMatch3 = input.match(/^(.+?)\s+(\d+)$/);
+             const episodeMatch3 = input.match(/(.+?)\s+(\d+)$/);
              if (episodeMatch3) {
                animeName = episodeMatch3[1].trim();
                episodeNumber = parseInt(episodeMatch3[2]);
+               console.log(\`[解析] 格式: 纯数字, 番剧名: \${animeName}, 集数: \${episodeNumber}\`);
+             } else {
+               // 未匹配到集数，使用完整输入作为番剧名
+               console.log(\`[解析] 未匹配到集数，使用默认第1集\`);
              }
            }
          }
          
-         // Step 2: 搜索番剧（只传番剧名）
+         console.log(\`[最终解析结果] 番剧名: "\${animeName}", 集数: \${episodeNumber}\`);
+         
+         // Step 2: 搜索番剧（✅ 只传番剧名，不传集数）
          showToast(\`正在搜索番剧: \${animeName}...\`, 'info', 2000);
          const searchUrl = \`/api/v2/search/anime?keyword=\${encodeURIComponent(animeName)}\`;
+         console.log(\`[搜索URL] \${searchUrl}\`);
          const searchResponse = await fetch(searchUrl);
          const searchResult = await searchResponse.json();
 
