@@ -5700,7 +5700,7 @@ async function handleHomepage(req) {
        } else {
          // 先搜索番剧
          showToast('正在搜索番剧...', 'info', 2000);
-         const searchUrl = `/api/v2/search/anime?keyword=${encodeURIComponent(input)}`;
+         const searchUrl = \`/api/v2/search/anime?keyword=\${encodeURIComponent(input)}\`;
          const searchResponse = await fetch(searchUrl);
          const searchResult = await searchResponse.json();
 
