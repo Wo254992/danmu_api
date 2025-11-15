@@ -5698,78 +5698,35 @@ async function handleHomepage(req) {
        if (input.startsWith('http://') || input.startsWith('https://')) {
          apiUrl = \`/api/v2/comment?url=\${encodeURIComponent(input)}&format=json\`;
        } else {
-         // ✅ 关键修复：前端解析输入格式
-         let animeName = input;
-         let episodeNumber = 1;
+         // ✅ 使用 /api/v2/match 接口智能匹配
+         showToast(\`正在智能匹配: \${input}...\`, 'info', 2000);
          
-         // 匹配 "S1E1" 格式 (优先级最高)
-         if (/\sS\d+E\d+$/i.test(input)) {
-           const match = input.match(/^(.+?)\s+S\d+E(\d+)$/i);
-           if (match) {
-             animeName = match[1].trim();
-             episodeNumber = parseInt(match[2]);
-             showToast(\`📖 解析成功: 番剧="\${animeName}", 第\${episodeNumber}集\`, 'info', 2000);
-           }
-         }
-         // 匹配 "第X集" 格式
-         else if (/第\d+集$/.test(input)) {
-           const match = input.match(/^(.+?)\s*第(\d+)集$/);
-           if (match) {
-             animeName = match[1].trim();
-             episodeNumber = parseInt(match[2]);
-             showToast(\`📖 解析成功: 番剧="\${animeName}", 第\${episodeNumber}集\`, 'info', 2000);
-           }
-         }
-         // 匹配末尾纯数字 "番剧名 10"
-         else if (/\s+\d+$/.test(input)) {
-           const match = input.match(/^(.+?)\s+(\d+)$/);
-           if (match) {
-             animeName = match[1].trim();
-             episodeNumber = parseInt(match[2]);
-             showToast(\`📖 解析成功: 番剧="\${animeName}", 第\${episodeNumber}集\`, 'info', 2000);
-           }
+         const matchResponse = await fetch('/api/v2/match', {
+           method: 'POST',
+           headers: {
+             'Content-Type': 'application/json'
+           },
+           body: JSON.stringify({
+             fileName: input
+           })
+         });
+         
+         const matchResult = await matchResponse.json();
+         
+         if (!matchResult.success) {
+           throw new Error(matchResult.errorMessage || '匹配失败');
          }
          
-         // ✅ Step 1: 只用番剧名搜索
-         showToast(\`正在搜索番剧: \${animeName}...\`, 'info', 2000);
-         const searchUrl = \`/api/v2/search/anime?keyword=\${encodeURIComponent(animeName)}\`;
-         const searchResponse = await fetch(searchUrl);
-         const searchResult = await searchResponse.json();
-
-         if (!searchResult.success || !searchResult.animes || searchResult.animes.length === 0) {
-           throw new Error(\`未找到番剧 "\${animeName}"\`);
+         if (!matchResult.isMatched || !matchResult.matches || matchResult.matches.length === 0) {
+           throw new Error(\`未找到匹配结果："\${input}"\`);
          }
-
-         const firstAnime = searchResult.animes[0];
-         showToast(\`找到番剧: \${firstAnime.animeTitle}，正在获取剧集列表...\`, 'info', 2000);
-
-         // ✅ Step 2: 获取剧集列表
-         const bangumiUrl = \`/api/v2/bangumi/\${firstAnime.animeId}\`;
-         const bangumiResponse = await fetch(bangumiUrl);
-         const bangumiResult = await bangumiResponse.json();
-
-         if (!bangumiResult.success || !bangumiResult.bangumi || !bangumiResult.bangumi.episodes) {
-           throw new Error('获取剧集列表失败');
-         }
-
-         const episodes = bangumiResult.bangumi.episodes;
-         if (episodes.length === 0) {
-           throw new Error('该番剧没有剧集数据');
-         }
-
-         // ✅ Step 3: 匹配集数
-         const targetEpisode = episodes.find(ep => 
-           parseInt(ep.episodeNumber) === episodeNumber
-         );
-
-         if (!targetEpisode) {
-           throw new Error(\`未找到第 \${episodeNumber} 集（该番剧共 \${episodes.length} 集）\`);
-         }
-
-         showToast(\`正在获取 "\${targetEpisode.episodeTitle || '第'+episodeNumber+'集'}" 的弹幕...\`, 'info', 2000);
-
-         // ✅ Step 4: 获取弹幕
-         apiUrl = \`/api/v2/comment/\${targetEpisode.episodeId}?format=json\`;
+         
+         const match = matchResult.matches[0];
+         showToast(\`✅ 匹配成功: \${match.animeTitle} - \${match.episodeTitle}\`, 'success', 2000);
+         showToast(\`正在获取弹幕...\`, 'info', 2000);
+         
+         // 使用匹配到的 episodeId 获取弹幕
+         apiUrl = \`/api/v2/comment/\${match.episodeId}?format=json\`;
        }
 
        const response = await fetch(apiUrl);
