@@ -6871,50 +6871,95 @@ if (path === "/api/logout" && method === "POST") {
 
       log("info", "[update] 开始执行 Docker 容器更新...");
 
-      // 使用 Node.js 的 child_process 执行更新脚本
       const { exec } = await import('child_process');
       const { promisify } = await import('util');
       const execAsync = promisify(exec);
 
-      // 执行更新命令（在后台执行，避免阻塞响应）
-      const updateScript = `
-        #!/bin/bash
-        echo "开始更新 Docker 容器..."
-        sleep 2
-        docker pull w254992/danmu-api:latest
-        docker restart danmu-api
-      `;
+      // 🔍 尝试通过 HTTP API 触发 Watchtower 更新
+      let watchtowerApiUrl = process.env.WATCHTOWER_HTTP_API_URL || 'http://watchtower:8080';
+      let watchtowerToken = process.env.WATCHTOWER_HTTP_API_TOKEN || '';
+      
+      log("info", `[update] 尝试通过 Watchtower HTTP API 触发更新: ${watchtowerApiUrl}`);
 
-      // 写入临时脚本文件
-      const fs = await import('fs');
-      const path = await import('path');
-      const scriptPath = path.join('/tmp', 'update-container.sh');
-      
-      fs.writeFileSync(scriptPath, updateScript, { mode: 0o755 });
-      
-      // 后台执行更新脚本
-      exec(`bash ${scriptPath} > /tmp/update.log 2>&1 &`, (error) => {
-        if (error) {
-          log("error", `[update] 更新脚本执行失败: ${error.message}`);
+      // 🎯 方案 1: 通过 HTTP API 触发 Watchtower（推荐）
+      try {
+        const updateUrl = `${watchtowerApiUrl}/v1/update`;
+        const headers = {
+          'Content-Type': 'application/json'
+        };
+        
+        if (watchtowerToken) {
+          headers['Authorization'] = `Bearer ${watchtowerToken}`;
         }
-      });
+        
+        log("info", `[update] 发送 HTTP 请求到 Watchtower: ${updateUrl}`);
+        
+        const response = await fetch(updateUrl, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            containers: ['danmu-api']
+          })
+        });
+        
+        if (response.ok) {
+          log("info", "[update] ✅ Watchtower HTTP API 触发成功");
+          return jsonResponse({
+            success: true,
+            message: '✅ 更新已触发（Watchtower HTTP API），容器将在几秒后自动更新并重启',
+            method: 'watchtower-http-api',
+            note: '⏳ 更新过程需要 30-60 秒，请稍后刷新页面查看新版本'
+          });
+        } else {
+          const errorText = await response.text();
+          log("warn", `[update] Watchtower HTTP API 返回错误: ${response.status} - ${errorText}`);
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+        
+      } catch (watchtowerError) {
+        log("error", `[update] Watchtower HTTP API 失败: ${watchtowerError.message}`);
+        // 继续执行手动更新提示
+      }
 
-      log("info", "[update] 更新命令已提交，容器将在几秒后自动重启");
+      // 🔧 方案 2: 返回手动更新指令
+      log("info", "[update] 自动更新失败，返回手动更新指令");
+      
+      const manualUpdateCommand = `# 在宿主机执行以下命令更新容器：
+docker pull w254992/danmu-api:latest && docker restart danmu-api
 
+# 或者如果使用 docker-compose：
+docker-compose pull danmu-api && docker-compose up -d danmu-api`;
+      
       return jsonResponse({
-        success: true,
-        message: '更新命令已提交，容器将在几秒后自动重启...',
-        note: '更新过程需要 30-60 秒，请稍后刷新页面'
-      });
+        success: false,
+        error: '⚠️ 自动更新失败：容器内无法执行 Docker 命令',
+        method: 'manual',
+        suggestion: '请在宿主机手动执行更新命令',
+        manualUpdateCommand: manualUpdateCommand,
+        watchtowerSetup: `# 如需启用自动更新，请配置 Watchtower HTTP API：
+1. 在 docker-compose.yml 中添加环境变量：
+   WATCHTOWER_HTTP_API_UPDATE: "true"
+   WATCHTOWER_HTTP_API_TOKEN: "your-secret-token"
+   
+2. 在应用容器中添加环境变量：
+   WATCHTOWER_HTTP_API_URL: "http://watchtower:8080"
+   WATCHTOWER_HTTP_API_TOKEN: "your-secret-token"
+   
+3. 重启容器后即可使用一键更新功能`
+      }, 400);
 
     } catch (error) {
       log("error", `[update] 更新失败: ${error.message}`);
+      log("error", `[update] 错误堆栈: ${error.stack}`);
+      
       return jsonResponse({
         success: false,
-        error: `更新失败: ${error.message}`
+        error: `❌ 更新失败: ${error.message}`,
+        suggestion: '建议手动执行: docker pull w254992/danmu-api:latest && docker restart danmu-api'
       }, 500);
     }
   }
+
 
   return jsonResponse({ message: "Not found" }, 404);
 }
