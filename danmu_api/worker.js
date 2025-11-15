@@ -5698,7 +5698,7 @@ async function handleHomepage(req) {
        if (input.startsWith('http://') || input.startsWith('https://')) {
          apiUrl = \`/api/v2/comment?url=\${encodeURIComponent(input)}&format=json\`;
        } else {
-         // Step 1: 解析输入格式
+         // ✅ 【关键修复】Step 1: 解析输入格式
          let animeName = input;
          let episodeNumber = 1;
          
@@ -5708,6 +5708,7 @@ async function handleHomepage(req) {
            if (match) {
              animeName = match[1].trim();
              episodeNumber = parseInt(match[2]);
+             showToast(\`📖 解析成功: 番剧="\${animeName}", 第\${episodeNumber}集\`, 'info', 2000);
            }
          }
          // 匹配 "第X集" 格式
@@ -5716,6 +5717,7 @@ async function handleHomepage(req) {
            if (match) {
              animeName = match[1].trim();
              episodeNumber = parseInt(match[2]);
+             showToast(\`📖 解析成功: 番剧="\${animeName}", 第\${episodeNumber}集\`, 'info', 2000);
            }
          }
          // 匹配末尾纯数字 "番剧名 10"
@@ -5724,10 +5726,11 @@ async function handleHomepage(req) {
            if (match) {
              animeName = match[1].trim();
              episodeNumber = parseInt(match[2]);
+             showToast(\`📖 解析成功: 番剧="\${animeName}", 第\${episodeNumber}集\`, 'info', 2000);
            }
          }
          
-         // Step 2: 只用番剧名搜索
+         // ✅ Step 2: 只用番剧名搜索
          showToast(\`正在搜索番剧: \${animeName}...\`, 'info', 2000);
          const searchUrl = \`/api/v2/search/anime?keyword=\${encodeURIComponent(animeName)}\`;
          const searchResponse = await fetch(searchUrl);
@@ -5740,7 +5743,7 @@ async function handleHomepage(req) {
          const firstAnime = searchResult.animes[0];
          showToast(\`找到番剧: \${firstAnime.animeTitle}，正在获取剧集列表...\`, 'info', 2000);
 
-         // Step 3: 获取剧集列表
+         // ✅ Step 3: 获取剧集列表
          const bangumiUrl = \`/api/v2/bangumi/\${firstAnime.animeId}\`;
          const bangumiResponse = await fetch(bangumiUrl);
          const bangumiResult = await bangumiResponse.json();
@@ -5754,7 +5757,7 @@ async function handleHomepage(req) {
            throw new Error('该番剧没有剧集数据');
          }
 
-         // Step 4: 匹配集数
+         // ✅ Step 4: 匹配集数
          const targetEpisode = episodes.find(ep => 
            parseInt(ep.episodeNumber) === episodeNumber
          );
@@ -5765,7 +5768,7 @@ async function handleHomepage(req) {
 
          showToast(\`正在获取 "\${targetEpisode.episodeTitle || '第'+episodeNumber+'集'}" 的弹幕...\`, 'info', 2000);
 
-         // Step 5: 获取弹幕
+         // ✅ Step 5: 获取弹幕
          apiUrl = \`/api/v2/comment/\${targetEpisode.episodeId}?format=json\`;
        }
 
