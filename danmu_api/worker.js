@@ -5698,18 +5698,18 @@ async function handleHomepage(req) {
        if (input.startsWith('http://') || input.startsWith('https://')) {
          apiUrl = \`/api/v2/comment?url=\${encodeURIComponent(input)}&format=json\`;
        } else {
-         // 解析输入：支持 "番剧名 第X集" 或 "番剧名 SxxExx" 格式
+                  // 解析输入：支持 "番剧名 第X集" 或 "番剧名 SxxExx" 格式
          let animeName = input;
          let episodeNumber = 1; // 默认第1集
          
-         // 匹配 "第X集" 格式
-         const episodeMatch1 = input.match(/(.+?)\s*第\s*(\d+)\s*集/);
+         // 优先匹配 "SxxExx" 格式（避免被当作番剧名的一部分）
+         const episodeMatch1 = input.match(/(.+?)\s+S\d+E(\d+)/i);
          if (episodeMatch1) {
            animeName = episodeMatch1[1].trim();
            episodeNumber = parseInt(episodeMatch1[2]);
          } else {
-           // 匹配 "SxxExx" 格式
-           const episodeMatch2 = input.match(/(.+?)\s+S\d+E(\d+)/i);
+           // 匹配 "第X集" 格式
+           const episodeMatch2 = input.match(/(.+?)\s*第\s*(\d+)\s*集/);
            if (episodeMatch2) {
              animeName = episodeMatch2[1].trim();
              episodeNumber = parseInt(episodeMatch2[2]);
