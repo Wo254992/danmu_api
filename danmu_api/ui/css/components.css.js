@@ -386,6 +386,7 @@ export const componentsCssContent = /* css */ `
     margin-bottom: var(--spacing-xl);
     overflow-x: auto;
     padding-bottom: var(--spacing-xs);
+    -webkit-overflow-scrolling: touch;
 }
 
 .category-tabs::-webkit-scrollbar {
@@ -404,6 +405,7 @@ export const componentsCssContent = /* css */ `
     transition: all var(--transition-fast);
     white-space: nowrap;
     box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
 }
 
 .tab-btn:hover {
@@ -453,6 +455,7 @@ export const componentsCssContent = /* css */ `
     align-items: center;
     gap: var(--spacing-sm);
     flex-wrap: wrap;
+    word-break: break-word;
 }
 
 .value-type-badge {
@@ -463,6 +466,7 @@ export const componentsCssContent = /* css */ `
     border-radius: 12px;
     font-size: 0.7rem;
     font-weight: 500;
+    flex-shrink: 0;
 }
 
 .value-type-badge.multi {
@@ -479,12 +483,15 @@ export const componentsCssContent = /* css */ `
     border-radius: 4px;
     word-break: break-all;
     margin: var(--spacing-sm) 0;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .env-desc {
     font-size: 0.8125rem;
     color: var(--text-tertiary);
     margin-top: var(--spacing-xs);
+    word-break: break-word;
 }
 
 .env-actions {
@@ -570,6 +577,7 @@ export const componentsCssContent = /* css */ `
     align-items: center;
     justify-content: center;
     transition: all var(--transition-fast);
+    flex-shrink: 0;
 }
 
 .modal-close:hover {
@@ -634,6 +642,7 @@ export const componentsCssContent = /* css */ `
     gap: var(--spacing-sm);
     padding: var(--spacing-xl);
     border-top: 1px solid var(--border-color);
+    flex-wrap: wrap;
 }
 
 /* ========================================
