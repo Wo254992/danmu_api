@@ -10,7 +10,7 @@ export const baseCssContent = /* css */ `
     --primary-light: #818cf8;
     --primary-dark: #3730a3;
     --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --primary-gradient-soft: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    --primary-gradient-subtle: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
     
     /* 辅助色 - 更鲜明的配色 */
     --success-color: #10b981;
@@ -46,7 +46,7 @@ export const baseCssContent = /* css */ `
     --bg-tertiary: #f3f4f6;
     --bg-hover: #f3f4f6;
     --bg-body: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --bg-glass: rgba(255, 255, 255, 0.8);
+    --bg-glass: rgba(255, 255, 255, 0.9);
     --bg-glass-hover: rgba(255, 255, 255, 0.95);
     
     /* 文字颜色 */
@@ -64,15 +64,13 @@ export const baseCssContent = /* css */ `
     --border-radius-xl: 24px;
     
     /* 阴影 - 浅色模式 */
-    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-    --shadow-sm: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
-    --shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.1), 0 4px 8px -2px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 16px 40px -8px rgba(0, 0, 0, 0.12), 0 8px 16px -4px rgba(0, 0, 0, 0.08);
-    --shadow-xl: 0 24px 48px -12px rgba(0, 0, 0, 0.18), 0 12px 24px -6px rgba(0, 0, 0, 0.12);
-    --shadow-2xl: 0 32px 64px -16px rgba(0, 0, 0, 0.24);
-    --shadow-colored: 0 12px 32px -8px rgba(99, 102, 241, 0.4);
-    --shadow-colored-hover: 0 16px 40px -8px rgba(99, 102, 241, 0.5);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+    --shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 20px 40px -8px rgba(0, 0, 0, 0.15);
+    --shadow-xl: 0 30px 60px -12px rgba(0, 0, 0, 0.25);
+    --shadow-colored: 0 12px 40px -8px rgba(99, 102, 241, 0.35);
+    --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
     
     /* 过渡 */
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -87,16 +85,10 @@ export const baseCssContent = /* css */ `
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
     --spacing-2xl: 3rem;
-    --spacing-3xl: 4rem;
     
     /* 侧边栏 */
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
-    
-    /* 模糊效果 */
-    --blur-sm: 8px;
-    --blur-md: 12px;
-    --blur-lg: 16px;
 }
 
 /* ========================================
@@ -109,7 +101,7 @@ export const baseCssContent = /* css */ `
     --primary-light: #6366f1;
     --primary-dark: #4f46e5;
     --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    --primary-gradient-soft: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+    --primary-gradient-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
     
     /* 辅助色 - 深色模式适配 */
     --success-color: #34d399;
@@ -145,7 +137,7 @@ export const baseCssContent = /* css */ `
     --bg-tertiary: #27273a;
     --bg-hover: #2a2a3e;
     --bg-body: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
-    --bg-glass: rgba(30, 30, 46, 0.8);
+    --bg-glass: rgba(30, 30, 46, 0.9);
     --bg-glass-hover: rgba(30, 30, 46, 0.95);
     
     /* 文字颜色 - 深色模式 */
@@ -159,15 +151,13 @@ export const baseCssContent = /* css */ `
     --border-color-hover: #52525b;
     
     /* 阴影 - 深色模式 */
-    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-    --shadow-sm: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-    --shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.6), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.7), 0 4px 8px -2px rgba(0, 0, 0, 0.5);
-    --shadow-lg: 0 16px 40px -8px rgba(0, 0, 0, 0.8), 0 8px 16px -4px rgba(0, 0, 0, 0.6);
-    --shadow-xl: 0 24px 48px -12px rgba(0, 0, 0, 0.9), 0 12px 24px -6px rgba(0, 0, 0, 0.7);
-    --shadow-2xl: 0 32px 64px -16px rgba(0, 0, 0, 0.95);
-    --shadow-colored: 0 12px 32px -8px rgba(129, 140, 248, 0.4);
-    --shadow-colored-hover: 0 16px 40px -8px rgba(129, 140, 248, 0.5);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+    --shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.6);
+    --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.7);
+    --shadow-lg: 0 20px 40px -8px rgba(0, 0, 0, 0.8);
+    --shadow-xl: 0 30px 60px -12px rgba(0, 0, 0, 0.9);
+    --shadow-colored: 0 12px 40px -8px rgba(129, 140, 248, 0.4);
+    --shadow-glow: 0 0 20px rgba(129, 140, 248, 0.4);
 }
 
 /* ========================================
@@ -197,7 +187,7 @@ body {
     position: relative;
 }
 
-/* 背景装饰 */
+/* 背景装饰动画 */
 body::before {
     content: '';
     position: fixed;
@@ -206,14 +196,14 @@ body::before {
     width: 200%;
     height: 200%;
     background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
-    animation: backgroundPulse 15s ease-in-out infinite;
+    animation: rotateBackground 30s linear infinite;
     pointer-events: none;
     z-index: 0;
 }
 
-@keyframes backgroundPulse {
-    0%, 100% { opacity: 0.3; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.1); }
+@keyframes rotateBackground {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 /* ========================================
@@ -223,11 +213,11 @@ body::before {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
     background: var(--bg-glass);
-    backdrop-filter: blur(var(--blur-md));
-    -webkit-backdrop-filter: blur(var(--blur-md));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 2px solid var(--border-color);
     border-radius: 50%;
     display: flex;
@@ -244,20 +234,20 @@ body::before {
     content: '';
     position: absolute;
     inset: 0;
+    border-radius: 50%;
     background: var(--primary-gradient);
     opacity: 0;
     transition: opacity var(--transition-base);
-    border-radius: 50%;
+}
+
+.theme-toggle:hover::before {
+    opacity: 1;
 }
 
 .theme-toggle:hover {
     transform: scale(1.1) rotate(15deg);
     box-shadow: var(--shadow-colored);
-    border-color: var(--primary-color);
-}
-
-.theme-toggle:hover::before {
-    opacity: 0.1;
+    border-color: transparent;
 }
 
 .theme-toggle:active {
@@ -265,8 +255,8 @@ body::before {
 }
 
 .theme-icon {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     color: var(--primary-color);
     transition: all var(--transition-base);
     position: relative;
@@ -274,9 +264,10 @@ body::before {
 }
 
 .theme-toggle:hover .theme-icon {
-    color: var(--primary-hover);
+    color: white;
 }
 
+/* 太阳图标(浅色模式显示) */
 .theme-icon-sun {
     display: block;
 }
@@ -297,13 +288,13 @@ body::before {
     .theme-toggle {
         bottom: 1rem;
         right: 1rem;
-        width: 48px;
-        height: 48px;
+        width: 52px;
+        height: 52px;
     }
     
     .theme-icon {
-        width: 20px;
-        height: 20px;
+        width: 22px;
+        height: 22px;
     }
 }
 
@@ -323,9 +314,9 @@ body::before {
 .sidebar {
     width: var(--sidebar-width);
     background: var(--bg-glass);
-    backdrop-filter: blur(var(--blur-lg));
-    -webkit-backdrop-filter: blur(var(--blur-lg));
-    box-shadow: var(--shadow-xl);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-lg);
     display: flex;
     flex-direction: column;
     position: fixed;
@@ -364,7 +355,7 @@ body::before {
     align-items: center;
     justify-content: space-between;
     flex-shrink: 0;
-    background: var(--primary-gradient-soft);
+    background: var(--bg-primary);
 }
 
 .logo-wrapper {
@@ -381,12 +372,12 @@ body::before {
     border-radius: var(--border-radius-sm);
     object-fit: cover;
     flex-shrink: 0;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow);
     transition: transform var(--transition-base);
 }
 
 .logo-image:hover {
-    transform: scale(1.05) rotate(3deg);
+    transform: scale(1.05) rotate(5deg);
 }
 
 .logo-text {
@@ -411,13 +402,12 @@ body::before {
     cursor: pointer;
     align-items: center;
     justify-content: center;
-    transition: all var(--transition-fast);
+    transition: background var(--transition-fast);
     flex-shrink: 0;
 }
 
 .sidebar-toggle:hover {
     background: var(--gray-200);
-    transform: scale(1.05);
 }
 
 .toggle-icon {
@@ -468,12 +458,12 @@ body::before {
     width: 200%;
     height: 200%;
     background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-    animation: shimmer 3s ease-in-out infinite;
+    animation: shimmer 3s linear infinite;
 }
 
 @keyframes shimmer {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(-10%, -10%); }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .version-item {
@@ -502,9 +492,9 @@ body::before {
 .version-latest {
     background: rgba(255, 255, 255, 0.25);
     padding: 4px 10px;
-    border-radius: 12px;
+    border-radius: 6px;
     font-size: 0.75rem;
-    backdrop-filter: blur(var(--blur-sm));
+    backdrop-filter: blur(10px);
 }
 
 .api-endpoint-card {
@@ -513,10 +503,10 @@ body::before {
     background: rgba(255, 255, 255, 0.15);
     border-radius: var(--border-radius-sm);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all var(--transition-base);
     position: relative;
     z-index: 1;
-    backdrop-filter: blur(var(--blur-sm));
+    backdrop-filter: blur(10px);
 }
 
 .api-endpoint-card:hover {
@@ -558,7 +548,7 @@ body::before {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
-    padding: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
     border-radius: var(--border-radius-sm);
     color: var(--text-secondary);
     text-decoration: none;
@@ -578,28 +568,22 @@ body::before {
     background: var(--primary-color);
     transform: scaleY(0);
     transition: transform var(--transition-base);
-    border-radius: 0 4px 4px 0;
 }
 
 .nav-item:hover {
-    background: var(--primary-gradient-soft);
+    background: var(--gray-100);
     color: var(--text-primary);
     transform: translateX(4px);
 }
 
-.nav-item:hover::before {
-    transform: scaleY(0.6);
-}
-
 .nav-item.active {
-    background: var(--primary-gradient);
-    color: white;
-    box-shadow: var(--shadow-colored);
+    background: var(--primary-gradient-subtle);
+    color: var(--primary-color);
+    font-weight: 600;
 }
 
 .nav-item.active::before {
     transform: scaleY(1);
-    background: white;
 }
 
 .nav-icon {
@@ -607,6 +591,11 @@ body::before {
     height: 20px;
     stroke-width: 2;
     flex-shrink: 0;
+    transition: transform var(--transition-base);
+}
+
+.nav-item:hover .nav-icon {
+    transform: scale(1.1);
 }
 
 .nav-text {
@@ -621,7 +610,7 @@ body::before {
     flex: 1;
     margin-left: var(--sidebar-width);
     padding: var(--spacing-2xl);
-    background: transparent;
+    background: var(--bg-secondary);
     min-height: 100vh;
     transition: margin-left var(--transition-base);
 }
@@ -633,12 +622,10 @@ body::before {
     gap: var(--spacing-md);
     padding: var(--spacing-lg);
     background: var(--bg-glass);
-    backdrop-filter: blur(var(--blur-md));
-    -webkit-backdrop-filter: blur(var(--blur-md));
+    backdrop-filter: blur(10px);
     border-radius: var(--border-radius);
     margin-bottom: var(--spacing-xl);
     box-shadow: var(--shadow);
-    border: 1px solid var(--border-color);
 }
 
 .mobile-menu-btn {
@@ -653,12 +640,11 @@ body::before {
     align-items: center;
     justify-content: center;
     gap: 4px;
-    transition: all var(--transition-fast);
+    transition: background var(--transition-fast);
 }
 
 .mobile-menu-btn:hover {
     background: var(--gray-200);
-    transform: scale(1.05);
 }
 
 .mobile-menu-btn span {
@@ -708,12 +694,12 @@ body::before {
 }
 
 .section-title {
-    font-size: 1.875rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--text-primary);
     margin: 0;
     line-height: 1.2;
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    background: linear-gradient(135deg, var(--text-primary), var(--primary-color));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -745,7 +731,7 @@ body::before {
     transform-origin: left;
     transition: transform var(--transition-base);
     z-index: 9999;
-    box-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
+    box-shadow: var(--shadow-glow);
 }
 
 .progress-bar-top.active {
@@ -759,8 +745,7 @@ body::before {
     margin-top: var(--spacing-2xl);
     padding: var(--spacing-2xl) var(--spacing-lg);
     background: var(--bg-glass);
-    backdrop-filter: blur(var(--blur-md));
-    -webkit-backdrop-filter: blur(var(--blur-md));
+    backdrop-filter: blur(10px);
     border-radius: var(--border-radius);
     text-align: center;
     box-shadow: var(--shadow);
@@ -798,7 +783,7 @@ body::before {
 
 .footer-link:hover {
     color: var(--primary-hover);
-    background: var(--primary-gradient-soft);
+    background: var(--primary-gradient-subtle);
     transform: translateY(-2px);
 }
 
@@ -817,18 +802,18 @@ body::before {
    滚动条美化
    ======================================== */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
     background: var(--gray-100);
-    border-radius: 4px;
+    border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
     background: var(--gray-300);
-    border-radius: 4px;
+    border-radius: 5px;
     transition: background var(--transition-fast);
 }
 
