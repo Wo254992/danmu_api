@@ -121,7 +121,9 @@ function performSectionSwitch(section) {
     if (window.innerWidth <= 768) {
         toggleSidebar();
     }
-    
+    if (section === 'logs' && typeof fetchRealLogs === 'function') {
+        fetchRealLogs();
+    }    
     addLog(\`切换到\${titles[section]}模块\`, 'info');
 }
 
