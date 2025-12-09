@@ -1,22 +1,27 @@
 // language=CSS
 export const baseCssContent = /* css */ `
 /* ========================================
-   CSS变量定义
+   CSS变量定义 - 浅色模式
    ======================================== */
 :root {
-    /* 主色调 */
+    /* 主色调 - 现代化渐变色 */
     --primary-color: #6366f1;
     --primary-hover: #4f46e5;
     --primary-light: #818cf8;
     --primary-dark: #3730a3;
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     
-    /* 辅助色 */
+    /* 辅助色 - 更鲜明的配色 */
     --success-color: #10b981;
     --success-hover: #059669;
+    --success-light: #d1fae5;
     --danger-color: #ef4444;
     --danger-hover: #dc2626;
+    --danger-light: #fee2e2;
     --warning-color: #f59e0b;
+    --warning-light: #fef3c7;
     --info-color: #3b82f6;
+    --info-light: #dbeafe;
     
     /* 中性色 */
     --gray-50: #f9fafb;
@@ -30,12 +35,12 @@ export const baseCssContent = /* css */ `
     --gray-800: #1f2937;
     --gray-900: #111827;
     
-    /* 背景色 */
+    /* 背景色 - 浅色模式 */
     --bg-primary: #ffffff;
     --bg-secondary: #f9fafb;
     --bg-tertiary: #f3f4f6;
-    --bg-dark: #0f172a;
-    --bg-darker: #020617;
+    --bg-hover: #f3f4f6;
+    --bg-body: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     
     /* 文字颜色 */
     --text-primary: #111827;
@@ -45,17 +50,18 @@ export const baseCssContent = /* css */ `
     
     /* 边框 */
     --border-color: #e5e7eb;
-    --border-color-dark: #374151;
+    --border-color-hover: #d1d5db;
     --border-radius: 12px;
     --border-radius-sm: 8px;
     --border-radius-lg: 16px;
     
-    /* 阴影 */
+    /* 阴影 - 浅色模式 */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --shadow-colored: 0 10px 30px -5px rgba(99, 102, 241, 0.3);
     
     /* 过渡 */
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -76,6 +82,67 @@ export const baseCssContent = /* css */ `
 }
 
 /* ========================================
+   CSS变量定义 - 深色模式
+   ======================================== */
+[data-theme="dark"] {
+    /* 主色调 - 深色模式下更柔和 */
+    --primary-color: #818cf8;
+    --primary-hover: #a5b4fc;
+    --primary-light: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary-gradient: linear-gradient(135deg, #4c1d95 0%, #5b21b6 100%);
+    
+    /* 辅助色 - 深色模式适配 */
+    --success-color: #34d399;
+    --success-hover: #6ee7b7;
+    --success-light: rgba(16, 185, 129, 0.1);
+    --danger-color: #f87171;
+    --danger-hover: #fca5a5;
+    --danger-light: rgba(239, 68, 68, 0.1);
+    --warning-color: #fbbf24;
+    --warning-light: rgba(245, 158, 11, 0.1);
+    --info-color: #60a5fa;
+    --info-light: rgba(59, 130, 246, 0.1);
+    
+    /* 中性色 - 深色模式反转 */
+    --gray-50: #18181b;
+    --gray-100: #27272a;
+    --gray-200: #3f3f46;
+    --gray-300: #52525b;
+    --gray-400: #71717a;
+    --gray-500: #a1a1aa;
+    --gray-600: #d4d4d8;
+    --gray-700: #e4e4e7;
+    --gray-800: #f4f4f5;
+    --gray-900: #fafafa;
+    
+    /* 背景色 - 深色模式 */
+    --bg-primary: #1e1e2e;
+    --bg-secondary: #181825;
+    --bg-tertiary: #27273a;
+    --bg-hover: #2a2a3e;
+    --bg-body: linear-gradient(135deg, #1e1e2e 0%, #2d1b4e 100%);
+    
+    /* 文字颜色 - 深色模式 */
+    --text-primary: #e4e4e7;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
+    --text-inverse: #18181b;
+    
+    /* 边框 - 深色模式 */
+    --border-color: #3f3f46;
+    --border-color-hover: #52525b;
+    
+    /* 阴影 - 深色模式 */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    --shadow-colored: 0 10px 30px -5px rgba(129, 140, 248, 0.3);
+}
+
+/* ========================================
    基础重置
    ======================================== */
 *, *::before, *::after {
@@ -93,11 +160,85 @@ html {
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--bg-body);
     color: var(--text-primary);
     line-height: 1.6;
     min-height: 100vh;
     overflow-x: hidden;
+    transition: background var(--transition-base), color var(--transition-base);
+}
+
+/* ========================================
+   主题切换按钮
+   ======================================== */
+.theme-toggle {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 56px;
+    height: 56px;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    transition: all var(--transition-base);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: var(--shadow-colored);
+    border-color: var(--primary-color);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+.theme-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--primary-color);
+    transition: all var(--transition-base);
+}
+
+.theme-toggle:hover .theme-icon {
+    color: var(--primary-hover);
+}
+
+/* 太阳图标(浅色模式显示) */
+.theme-icon-sun {
+    display: block;
+}
+
+.theme-icon-moon {
+    display: none;
+}
+
+[data-theme="dark"] .theme-icon-sun {
+    display: none;
+}
+
+[data-theme="dark"] .theme-icon-moon {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .theme-toggle {
+        bottom: 1rem;
+        right: 1rem;
+        width: 48px;
+        height: 48px;
+    }
+    
+    .theme-icon {
+        width: 20px;
+        height: 20px;
+    }
 }
 
 /* ========================================
