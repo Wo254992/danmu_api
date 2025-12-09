@@ -11,7 +11,32 @@ let currentVersion = '';
 let latestVersion = '';
 let currentToken = 'globals.currentToken';
 let currentAdminToken = '';
-let originalToken = '87654321';  // 修改：默认值改为 87654321，避免初始化期间的问题
+let originalToken = '87654321';
+
+/* ========================================
+   主题切换功能
+   ======================================== */
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    addLog(\`已加载\${savedTheme === 'dark' ? '深色' : '浅色'}主题\`, 'info');
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    const themeButton = document.getElementById('theme-toggle');
+    themeButton.style.transform = 'scale(0.8) rotate(360deg)';
+    setTimeout(() => {
+        themeButton.style.transform = '';
+    }, 300);
+    
+    addLog(\`已切换到\${newTheme === 'dark' ? '深色' : '浅色'}主题\`, 'info');
+}
 
 /* ========================================
    侧边栏切换
@@ -362,6 +387,9 @@ function copyApiEndpoint() {
    ======================================== */
 async function init() {
     try {
+        // 初始化主题
+        initTheme();
+        
         await updateApiEndpoint();
         getDockerVersion();
         const config = await fetchAndSetConfig();
