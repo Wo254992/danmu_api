@@ -20,11 +20,11 @@ export const responsiveCssContent = /* css */ `
     }
 
     .section-title {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
     }
 
     .anime-grid {
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     }
 }
 
@@ -35,18 +35,12 @@ export const responsiveCssContent = /* css */ `
     :root {
         --spacing-xl: 1rem;
         --spacing-2xl: 1.5rem;
-        --border-radius: 12px;
-        --border-radius-sm: 8px;
     }
 
     /* 防止内容超出屏幕 */
     body {
         overflow-x: hidden;
         max-width: 100vw;
-    }
-
-    body::before {
-        animation-duration: 20s;
     }
 
     .main-content,
@@ -86,7 +80,6 @@ export const responsiveCssContent = /* css */ `
         position: sticky;
         top: 0;
         z-index: 100;
-        box-shadow: var(--shadow-md);
     }
 
     /* 内容区块 */
@@ -103,18 +96,15 @@ export const responsiveCssContent = /* css */ `
         flex-direction: column;
         align-items: flex-start;
         margin-bottom: var(--spacing-lg);
-        padding: var(--spacing-lg);
-        background: var(--bg-glass);
-        backdrop-filter: blur(20px);
+        padding: var(--spacing-md);
+        background: var(--bg-primary);
         border-radius: var(--border-radius);
         margin: var(--spacing-md);
         max-width: calc(100% - 2rem);
-        box-shadow: var(--shadow);
-        border: 1px solid var(--border-color);
     }
 
     .section-title {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
     }
 
     .section-desc {
@@ -134,12 +124,12 @@ export const responsiveCssContent = /* css */ `
 
     /* 按钮调整 */
     .btn {
-        padding: 0.75rem 1.25rem;
+        padding: 0.625rem 1rem;
         font-size: 0.8125rem;
     }
 
     .btn-lg {
-        padding: 0.875rem 1.5rem;
+        padding: 0.75rem 1.25rem;
         font-size: 0.875rem;
     }
 
@@ -278,14 +268,14 @@ export const responsiveCssContent = /* css */ `
     /* 表单调整 */
     .form-card,
     .response-card {
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md);
         margin: var(--spacing-md);
         border-radius: var(--border-radius-sm);
         max-width: calc(100vw - 2rem);
     }
 
     .card-title {
-        font-size: 1rem;
+        font-size: 0.9375rem;
         margin-bottom: var(--spacing-md);
     }
 
@@ -307,34 +297,32 @@ export const responsiveCssContent = /* css */ `
     }
 
     .modal-header {
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md);
         position: sticky;
         top: 0;
-        background: var(--bg-glass);
-        backdrop-filter: blur(20px);
+        background: var(--bg-primary);
         z-index: 1;
         border-bottom: 1px solid var(--border-color);
     }
 
     .modal-title {
-        font-size: 1.125rem;
+        font-size: 1rem;
         padding-right: var(--spacing-sm);
     }
 
     .modal-body {
-        padding: var(--spacing-lg);
-        max-height: calc(85vh - 160px);
+        padding: var(--spacing-md);
+        max-height: calc(85vh - 140px);
         overflow-y: auto;
     }
 
     .modal-footer {
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md);
         flex-direction: column-reverse;
         gap: var(--spacing-sm);
         position: sticky;
         bottom: 0;
-        background: var(--bg-glass);
-        backdrop-filter: blur(20px);
+        background: var(--bg-primary);
         border-top: 1px solid var(--border-color);
     }
 
@@ -356,7 +344,7 @@ export const responsiveCssContent = /* css */ `
     .form-select,
     .form-textarea {
         font-size: 0.875rem;
-        padding: 0.75rem 1rem;
+        padding: 0.625rem 0.75rem;
     }
 
     /* 数字选择器 - 移动端优化 */
@@ -364,11 +352,11 @@ export const responsiveCssContent = /* css */ `
         flex-direction: column;
         align-items: center;
         gap: var(--spacing-md);
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md);
     }
 
     .number-display {
-        font-size: 2.5rem;
+        font-size: 2rem;
         order: 1;
     }
 
@@ -379,8 +367,8 @@ export const responsiveCssContent = /* css */ `
     }
 
     .number-btn {
-        width: 52px;
-        height: 52px;
+        width: 50px;
+        height: 50px;
         font-size: 1.5rem;
     }
 
@@ -399,7 +387,7 @@ export const responsiveCssContent = /* css */ `
 
     .tag-option,
     .available-tag {
-        padding: 0.625rem 1rem;
+        padding: 0.5rem 0.875rem;
         font-size: 0.8125rem;
         flex-shrink: 0;
     }
@@ -410,12 +398,12 @@ export const responsiveCssContent = /* css */ `
     }
 
     .selected-tags {
-        min-height: 100px;
-        padding: var(--spacing-md);
+        min-height: 80px;
+        padding: var(--spacing-sm);
     }
 
     .selected-tag {
-        padding: 0.5rem 0.875rem;
+        padding: 0.5rem 0.75rem;
         font-size: 0.8125rem;
     }
 
@@ -424,14 +412,14 @@ export const responsiveCssContent = /* css */ `
     }
 
     .remove-btn {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
         font-size: 0.875rem;
     }
 
     /* 开关按钮 - 移动端优化 */
     .switch-container {
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
         background: var(--bg-secondary);
         border-radius: var(--border-radius-sm);
         width: 100%;
@@ -439,8 +427,8 @@ export const responsiveCssContent = /* css */ `
     }
 
     .switch {
-        width: 52px;
-        height: 28px;
+        width: 48px;
+        height: 26px;
     }
 
     .switch-label {
@@ -449,13 +437,9 @@ export const responsiveCssContent = /* css */ `
 
     /* 动漫网格 */
     .anime-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
         gap: var(--spacing-md);
         padding: 0 var(--spacing-md);
-    }
-
-    .anime-image {
-        height: 180px;
     }
 
     .anime-title {
@@ -464,7 +448,7 @@ export const responsiveCssContent = /* css */ `
 
     /* 剧集网格 */
     .episode-grid {
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
         gap: var(--spacing-xs);
     }
 
@@ -472,7 +456,7 @@ export const responsiveCssContent = /* css */ `
         flex-direction: column;
         align-items: stretch;
         gap: var(--spacing-sm);
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
     }
 
     .episode-title {
@@ -501,7 +485,7 @@ export const responsiveCssContent = /* css */ `
     /* 版本卡片 */
     .version-card {
         margin: var(--spacing-md);
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md);
     }
 
     .version-label,
@@ -539,7 +523,7 @@ export const responsiveCssContent = /* css */ `
 
     /* 页脚 */
     .footer {
-        padding: var(--spacing-xl) var(--spacing-md);
+        padding: var(--spacing-lg) var(--spacing-md);
         margin: var(--spacing-md);
         border-radius: var(--border-radius-sm);
     }
@@ -551,7 +535,7 @@ export const responsiveCssContent = /* css */ `
     }
 
     .footer-text {
-        font-size: 0.8125rem;
+        font-size: 0.75rem;
         line-height: 1.5;
     }
 
@@ -571,18 +555,18 @@ export const responsiveCssContent = /* css */ `
 
     .preview-category {
         margin: var(--spacing-md);
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md);
         max-width: calc(100vw - 2rem);
     }
 
     .preview-category-title {
-        font-size: 1.125rem;
-        margin-bottom: var(--spacing-md);
+        font-size: 0.9375rem;
+        margin-bottom: var(--spacing-sm);
     }
 
     .preview-item {
-        padding: var(--spacing-md);
-        border-left-width: 3px;
+        padding: var(--spacing-sm);
+        border-left-width: 2px;
     }
 
     .preview-key {
@@ -591,7 +575,7 @@ export const responsiveCssContent = /* css */ `
 
     .preview-value {
         font-size: 0.75rem;
-        padding: var(--spacing-sm);
+        padding: 6px;
         line-height: 1.3;
     }
 
@@ -606,8 +590,8 @@ export const responsiveCssContent = /* css */ `
 @media (max-width: 480px) {
     /* Logo调整 */
     .logo-image {
-        width: 42px;
-        height: 42px;
+        width: 40px;
+        height: 40px;
     }
 
     .logo-text {
@@ -616,7 +600,7 @@ export const responsiveCssContent = /* css */ `
 
     /* 区块标题 */
     .section-title {
-        font-size: 1.25rem;
+        font-size: 1.125rem;
     }
 
     .section-desc {
@@ -625,14 +609,14 @@ export const responsiveCssContent = /* css */ `
 
     /* 分类标签 */
     .tab-btn {
-        padding: 0.5rem 0.875rem;
+        padding: 0.5rem 0.75rem;
         font-size: 0.75rem;
         min-width: auto;
     }
 
     /* 环境变量项 - 超小屏幕优化 */
     .env-item {
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
         margin: 0 var(--spacing-sm);
         max-width: calc(100vw - 1rem);
     }
@@ -648,12 +632,12 @@ export const responsiveCssContent = /* css */ `
 
     .value-type-badge {
         font-size: 0.625rem;
-        padding: 2px 6px;
+        padding: 1px 5px;
     }
 
     .env-value {
         font-size: 0.7rem;
-        padding: var(--spacing-xs);
+        padding: 6px;
         max-width: calc(100vw - 48px);
     }
 
@@ -721,7 +705,7 @@ export const responsiveCssContent = /* css */ `
 
     /* 按钮 */
     .btn {
-        padding: 0.625rem 1rem;
+        padding: 0.5rem 0.875rem;
         font-size: 0.75rem;
     }
 
@@ -745,14 +729,13 @@ export const responsiveCssContent = /* css */ `
 
     /* 加载遮罩 */
     .loading-content {
-        padding: var(--spacing-xl);
+        padding: var(--spacing-lg);
         width: calc(100% - 2rem);
     }
 
     .loading-spinner {
-        width: 52px;
-        height: 52px;
-        border-width: 3px;
+        width: 48px;
+        height: 48px;
     }
 
     .loading-title {
@@ -789,17 +772,17 @@ export const responsiveCssContent = /* css */ `
     }
 
     .modal-title {
-        font-size: 1rem;
+        font-size: 0.9375rem;
     }
 
     /* 数字选择器 */
     .number-display {
-        font-size: 2rem;
+        font-size: 1.75rem;
     }
 
     .number-btn {
-        width: 48px;
-        height: 48px;
+        width: 44px;
+        height: 44px;
     }
 
     /* 表单元素 - 防止iOS自动缩放 */
@@ -807,12 +790,6 @@ export const responsiveCssContent = /* css */ `
     .form-select,
     .form-textarea {
         font-size: 16px;
-    }
-
-    /* 卡片标题 */
-    .card-title::before {
-        width: 3px;
-        height: 1.2rem;
     }
 }
 
@@ -837,7 +814,7 @@ export const responsiveCssContent = /* css */ `
     }
 
     .nav-item {
-        padding: 0.625rem;
+        padding: 0.5rem;
     }
 
     .nav-text {
@@ -846,7 +823,7 @@ export const responsiveCssContent = /* css */ `
 
     .version-card {
         margin: var(--spacing-sm);
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
     }
 
     .modal-overlay {
@@ -878,35 +855,12 @@ export const responsiveCssContent = /* css */ `
     }
 
     .anime-grid {
-        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     }
 
     .form-card,
     .response-card {
         padding: var(--spacing-2xl);
-    }
-
-    /* 更大的边距和圆角 */
-    .preview-category,
-    .env-item {
-        padding: var(--spacing-2xl);
-    }
-}
-
-/* ========================================
-   超大屏幕优化 (≥1920px)
-   ======================================== */
-@media (min-width: 1920px) {
-    .main-content {
-        max-width: 1600px;
-    }
-
-    .section-title {
-        font-size: 2.5rem;
-    }
-
-    .anime-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     }
 }
 
@@ -946,28 +900,6 @@ export const responsiveCssContent = /* css */ `
     .nav-item:active {
         opacity: 0.8;
     }
-
-    /* 触摸反馈 */
-    .btn:active::after,
-    .nav-item:active::after,
-    .tab-btn:active::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.1);
-        animation: ripple 0.6s ease-out;
-    }
-
-    @keyframes ripple {
-        from {
-            transform: scale(0);
-            opacity: 1;
-        }
-        to {
-            transform: scale(2);
-            opacity: 0;
-        }
-    }
 }
 
 /* ========================================
@@ -981,7 +913,6 @@ export const responsiveCssContent = /* css */ `
     .btn,
     .modal-overlay,
     .loading-overlay,
-    .theme-toggle,
     .footer {
         display: none !important;
     }
@@ -998,15 +929,6 @@ export const responsiveCssContent = /* css */ `
 
     .section-header {
         margin-bottom: var(--spacing-md);
-        box-shadow: none;
-        border: 1px solid #000;
-    }
-
-    .preview-category,
-    .env-item,
-    .form-card {
-        box-shadow: none;
-        border: 1px solid #000;
     }
 }
 
@@ -1020,34 +942,6 @@ export const responsiveCssContent = /* css */ `
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
-    }
-
-    body::before {
-        animation: none !important;
-    }
-}
-
-/* ========================================
-   高对比度模式支持
-   ======================================== */
-@media (prefers-contrast: high) {
-    :root {
-        --border-color: #000;
-        --shadow: none;
-        --shadow-md: none;
-        --shadow-lg: none;
-    }
-
-    [data-theme="dark"] {
-        --border-color: #fff;
-    }
-
-    .btn,
-    .nav-item,
-    .form-input,
-    .form-select,
-    .form-textarea {
-        border-width: 2px;
     }
 }
 `;
