@@ -11,7 +11,7 @@ let currentVersion = '';
 let latestVersion = '';
 let currentToken = 'globals.currentToken';
 let currentAdminToken = '';
-let originalToken = '';
+let originalToken = '87654321';  // 修改：默认值改为 87654321，避免初始化期间的问题
 
 /* ========================================
    侧边栏切换
@@ -220,7 +220,7 @@ function loadEnvVariables() {
         .then(response => response.json())
         .then(config => {
             currentAdminToken = config.originalEnvVars?.ADMIN_TOKEN || '';
-            originalToken = config.originalEnvVars?.TOKEN || '';
+            originalToken = config.originalEnvVars?.TOKEN || '87654321';  // 修改：默认值改为 87654321
             
             const originalEnvVars = config.originalEnvVars || {};
             envVariables = {};
@@ -263,20 +263,27 @@ function updateApiEndpoint() {
             const token = config.originalEnvVars?.TOKEN || '87654321';
             const adminToken = config.originalEnvVars?.ADMIN_TOKEN;
 
+            // 同步更新 originalToken，确保后续判断正确
+            originalToken = token;
+            currentAdminToken = adminToken || '';
+
             const urlPath = window.location.pathname;
             const pathParts = urlPath.split('/').filter(part => part !== '');
             const urlToken = pathParts.length > 0 ? pathParts[0] : '';
-            let apiToken = '********';
             
+            let apiEndpoint;
+            
+            // 默认 token 时，不需要带 token
             if (token === '87654321') {
-                apiToken = token;
+                apiEndpoint = protocol + '//' + host;
             } else {
+                let apiToken = '********';
                 if (urlToken === token || (adminToken !== "" && urlToken === adminToken)) {
                     apiToken = token;
                 }
+                apiEndpoint = protocol + '//' + host + '/' + apiToken;
             }
             
-            const apiEndpoint = protocol + '//' + host + '/' + apiToken;
             const apiEndpointElement = document.getElementById('api-endpoint');
             if (apiEndpointElement) {
                 apiEndpointElement.textContent = apiEndpoint;
