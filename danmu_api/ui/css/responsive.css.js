@@ -1,6 +1,13 @@
 // language=CSS
 export const responsiveCssContent = /* css */ `
 /* ========================================
+   全局移动端约束
+   ======================================== */
+* {
+    box-sizing: border-box;
+}
+
+/* ========================================
    平板设备 (≤1024px)
    ======================================== */
 @media (max-width: 1024px) {
@@ -28,6 +35,18 @@ export const responsiveCssContent = /* css */ `
     :root {
         --spacing-xl: 1rem;
         --spacing-2xl: 1.5rem;
+    }
+
+    /* 防止内容超出屏幕 */
+    body {
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+
+    .main-content,
+    .content-section {
+        overflow-x: hidden;
+        max-width: 100%;
     }
 
     /* 侧边栏移动端处理 */
@@ -81,6 +100,7 @@ export const responsiveCssContent = /* css */ `
         background: var(--bg-primary);
         border-radius: var(--border-radius);
         margin: var(--spacing-md);
+        max-width: calc(100% - 2rem);
     }
 
     .section-title {
@@ -118,8 +138,14 @@ export const responsiveCssContent = /* css */ `
         gap: var(--spacing-xs);
         padding: 0 var(--spacing-md);
         margin-bottom: var(--spacing-md);
-        /* 添加滚动指示器 */
         position: relative;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .category-tabs::-webkit-scrollbar {
+        display: none;
     }
 
     .category-tabs::after {
@@ -144,19 +170,26 @@ export const responsiveCssContent = /* css */ `
 
     /* 环境变量网格 - 移动端优化 */
     .env-grid {
-        padding: 0 var(--spacing-md);
-        gap: var(--spacing-md);
+        padding: 0;
+        gap: var(--spacing-sm);
+        display: flex;
+        flex-direction: column;
+        width: 100%;
     }
 
     .env-item {
         flex-direction: column;
         align-items: stretch;
-        gap: var(--spacing-md);
+        gap: var(--spacing-sm);
         padding: var(--spacing-md);
+        margin: 0 var(--spacing-md);
+        width: auto;
+        max-width: calc(100vw - 2rem);
     }
 
     .env-info {
         width: 100%;
+        min-width: 0;
     }
 
     .env-key {
@@ -164,16 +197,19 @@ export const responsiveCssContent = /* css */ `
         flex-wrap: wrap;
         gap: var(--spacing-xs);
         margin-bottom: var(--spacing-sm);
+        max-width: 100%;
     }
 
     .env-key strong {
         word-break: break-word;
         max-width: 100%;
+        display: inline-block;
     }
 
     .value-type-badge {
         font-size: 0.65rem;
         padding: 2px 6px;
+        flex-shrink: 0;
     }
 
     .env-value {
@@ -183,22 +219,37 @@ export const responsiveCssContent = /* css */ `
         white-space: pre-wrap;
         max-width: 100%;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .env-desc {
         font-size: 0.75rem;
         line-height: 1.4;
+        word-break: break-word;
     }
 
     .env-actions {
         width: 100%;
+        max-width: 100%;
         flex-direction: row;
         gap: var(--spacing-sm);
+        display: flex;
     }
 
     .env-actions .btn {
         flex: 1;
         min-width: 0;
+        padding: 0.625rem 0.5rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .env-actions .btn-icon {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
     }
 
     /* 导航菜单调整 */
@@ -220,6 +271,7 @@ export const responsiveCssContent = /* css */ `
         padding: var(--spacing-md);
         margin: var(--spacing-md);
         border-radius: var(--border-radius-sm);
+        max-width: calc(100vw - 2rem);
     }
 
     .card-title {
@@ -504,6 +556,7 @@ export const responsiveCssContent = /* css */ `
     .preview-category {
         margin: var(--spacing-md);
         padding: var(--spacing-md);
+        max-width: calc(100vw - 2rem);
     }
 
     .preview-category-title {
@@ -561,9 +614,11 @@ export const responsiveCssContent = /* css */ `
         min-width: auto;
     }
 
-    /* 环境变量项 */
+    /* 环境变量项 - 超小屏幕优化 */
     .env-item {
         padding: var(--spacing-sm);
+        margin: 0 var(--spacing-sm);
+        max-width: calc(100vw - 1rem);
     }
 
     .env-key {
@@ -572,6 +627,7 @@ export const responsiveCssContent = /* css */ `
 
     .env-key strong {
         font-size: 0.8125rem;
+        max-width: calc(100vw - 120px);
     }
 
     .value-type-badge {
@@ -582,18 +638,30 @@ export const responsiveCssContent = /* css */ `
     .env-value {
         font-size: 0.7rem;
         padding: 6px;
+        max-width: calc(100vw - 48px);
     }
 
     .env-desc {
         font-size: 0.7rem;
     }
 
+    /* 超小屏幕按钮改为垂直布局 */
     .env-actions {
         flex-direction: column;
+        gap: var(--spacing-xs);
     }
 
     .env-actions .btn {
         width: 100%;
+        padding: 0.625rem;
+        font-size: 0.75rem;
+        justify-content: center;
+    }
+
+    .env-actions .btn-icon {
+        width: 14px;
+        height: 14px;
+        margin-right: 6px;
     }
 
     /* 动漫网格 */
@@ -717,11 +785,11 @@ export const responsiveCssContent = /* css */ `
         height: 44px;
     }
 
-    /* 表单元素 */
+    /* 表单元素 - 防止iOS自动缩放 */
     .form-input,
     .form-select,
     .form-textarea {
-        font-size: 16px; /* 防止iOS自动缩放 */
+        font-size: 16px;
     }
 }
 
@@ -797,6 +865,44 @@ export const responsiveCssContent = /* css */ `
 }
 
 /* ========================================
+   触摸设备优化
+   ======================================== */
+@media (hover: none) and (pointer: coarse) {
+    .btn {
+        min-height: 44px;
+    }
+
+    .nav-item {
+        min-height: 48px;
+    }
+
+    .tab-btn {
+        min-height: 44px;
+    }
+
+    .tag-option,
+    .available-tag {
+        min-height: 40px;
+    }
+
+    .btn:hover,
+    .nav-item:hover,
+    .tab-btn:hover,
+    .tag-option:hover {
+        transform: none;
+    }
+
+    .btn:active {
+        transform: scale(0.97);
+        opacity: 0.8;
+    }
+
+    .nav-item:active {
+        opacity: 0.8;
+    }
+}
+
+/* ========================================
    打印样式
    ======================================== */
 @media print {
@@ -827,13 +933,6 @@ export const responsiveCssContent = /* css */ `
 }
 
 /* ========================================
-   暗色模式支持 (可选)
-   ======================================== */
-@media (prefers-color-scheme: dark) {
-    /* 可根据需要启用暗色模式 */
-}
-
-/* ========================================
    减少动画 (尊重用户偏好)
    ======================================== */
 @media (prefers-reduced-motion: reduce) {
@@ -843,78 +942,6 @@ export const responsiveCssContent = /* css */ `
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
-    }
-}
-
-/* ========================================
-   触摸设备优化
-   ======================================== */
-@media (hover: none) and (pointer: coarse) {
-    /* 增大可点击区域 */
-    .btn {
-        min-height: 44px;
-    }
-
-    .nav-item {
-        min-height: 48px;
-    }
-
-    .tab-btn {
-        min-height: 44px;
-    }
-
-    .tag-option,
-    .available-tag {
-        min-height: 40px;
-    }
-
-    /* 移除悬停效果 */
-    .btn:hover,
-    .nav-item:hover,
-    .tab-btn:hover,
-    .tag-option:hover {
-        transform: none;
-    }
-
-    /* 增强点击反馈 */
-    .btn:active {
-        transform: scale(0.97);
-        opacity: 0.8;
-    }
-
-    .nav-item:active {
-        opacity: 0.8;
-    }
-}
-
-/* ========================================
-   侧边栏折叠状态 (桌面端)
-   ======================================== */
-@media (min-width: 769px) {
-    .sidebar.collapsed {
-        width: var(--sidebar-collapsed-width);
-    }
-
-    .sidebar.collapsed .logo-text,
-    .sidebar.collapsed .nav-text,
-    .sidebar.collapsed .version-card {
-        display: none;
-    }
-
-    .sidebar.collapsed .logo-wrapper {
-        justify-content: center;
-    }
-
-    .sidebar.collapsed .nav-item {
-        justify-content: center;
-    }
-
-    .sidebar.collapsed .nav-item::before {
-        display: none;
-    }
-
-    .main-content.sidebar-collapsed {
-        margin-left: var(--sidebar-collapsed-width);
     }
 }
 `;
