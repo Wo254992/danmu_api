@@ -563,3 +563,310 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
 
 /* 继续systemsettings.js的值输入控件渲染部分... */
 `;
+
+// language=JavaScript
+// systemsettings.js 的第二部分 - 值输入控件渲染
+
+/* 将以下内容追加到 systemsettings.js 文件中 */
+
+export const systemSettingsJsPart2 = /* javascript */ `
+/* ========================================
+   渲染值输入控件
+   ======================================== */
+function renderValueInput(item) {
+    const container = document.getElementById('value-input-container');
+    const type = item ? item.type : document.getElementById('value-type').value;
+    const value = item ? item.value : '';
+
+    if (type === 'boolean') {
+        const checked = value === 'true' || value === true;
+        container.innerHTML = \`
+            <label class="form-label">值</label>
+            <div class="switch-container">
+                <label class="switch">
+                    <input type="checkbox" id="bool-value" \${checked ? 'checked' : ''}>
+                    <span class="slider"></span>
+                </label>
+                <span class="switch-label" id="bool-label">\${checked ? '启用' : '禁用'}</span>
+            </div>
+        \`;
+
+        document.getElementById('bool-value').addEventListener('change', function(e) {
+            document.getElementById('bool-label').textContent = e.target.checked ? '启用' : '禁用';
+        });
+
+    } else if (type === 'number') {
+        const min = item && item.min !== undefined ? item.min : 1;
+        const max = item && item.max !== undefined ? item.max : 100;
+        const currentValue = value || min;
+
+        container.innerHTML = \`
+            <label class="form-label">值 (\${min}-\${max})</label>
+            <div class="number-picker">
+                <div class="number-controls">
+                    <button type="button" class="number-btn" onclick="adjustNumber(1)">▲</button>
+                    <button type="button" class="number-btn" onclick="adjustNumber(-1)">▼</button>
+                </div>
+                <div class="number-display" id="num-value">\${currentValue}</div>
+            </div>
+            <div class="number-range">
+                <input type="range" id="num-slider" min="\${min}" max="\${max}" value="\${currentValue}"
+                       oninput="updateNumberDisplay(this.value)">
+            </div>
+        \`;
+
+    } else if (type === 'select') {
+        const options = item && item.options ? item.options : ['option1', 'option2', 'option3'];
+        const optionsInput = item ? '' : \`
+            <div class="form-group">
+                <label class="form-label">可选项 (逗号分隔)</label>
+                <input type="text" class="form-input" id="select-options" placeholder="例如: debug,info,warn,error"
+                       value="\${options.join(',')}" onchange="updateTagOptions()">
+            </div>
+        \`;
+
+        container.innerHTML = \`
+            \${optionsInput}
+            <label class="form-label">选择值</label>
+            <div class="tag-selector" id="tag-selector">
+                \${options.map(opt => \`
+                    <div class="tag-option \${opt === value ? 'selected' : ''}"
+                         data-value="\${opt}" onclick="selectTag(this)">
+                        \${opt}
+                    </div>
+                \`).join('')}
+            </div>
+        \`;
+
+    } else if (type === 'multi-select') {
+        const options = item && item.options ? item.options : ['option1', 'option2', 'option3', 'option4'];
+        const stringValue = typeof value === 'string' ? value : String(value || '');
+        const selectedValues = stringValue ? stringValue.split(',').map(v => v.trim()).filter(v => v) : [];
+
+        const optionsInput = item ? '' : \`
+            <div class="form-group">
+                <label class="form-label">可选项 (逗号分隔)</label>
+                <input type="text" class="form-input" id="multi-options" placeholder="例如: auth,payment,analytics"
+                       value="\${options.join(',')}" onchange="updateMultiOptions()">
+            </div>
+        \`;
+
+        container.innerHTML = \`
+            \${optionsInput}
+            <label class="form-label">已选择 (拖动调整顺序)</label>
+            <div class="multi-select-container">
+                <div class="selected-tags \${selectedValues.length === 0 ? 'empty' : ''}" id="selected-tags">
+                    \${selectedValues.map(val => \`
+                        <div class="selected-tag" draggable="true" data-value="\${val}">
+                            <span class="tag-text">\${val}</span>
+                            <button type="button" class="remove-btn" onclick="removeSelectedTag(this)">×</button>
+                        </div>
+                    \`).join('')}
+                </div>
+                <label class="form-label">可选项 (点击添加)</label>
+                <div class="available-tags" id="available-tags">
+                    \${options.map(opt => {
+                        const isSelected = selectedValues.includes(opt);
+                        return \`
+                            <div class="available-tag \${isSelected ? 'disabled' : ''}"
+                                 data-value="\${opt}" onclick="addSelectedTag(this)">
+                                \${opt}
+                            </div>
+                        \`;
+                    }).join('')}
+                </div>
+            </div>
+        \`;
+
+        setupDragAndDrop();
+
+    } else {
+        if (value && value.length > 50) {
+            const rows = Math.min(Math.max(Math.ceil(value.length / 50), 3), 10);
+            container.innerHTML = \`
+                <label class="form-label">变量值 *</label>
+                <textarea class="form-textarea" id="text-value" placeholder="例如: localhost" rows="\${rows}">\${escapeHtml(value)}</textarea>
+            \`;
+        } else {
+            container.innerHTML = \`
+                <label class="form-label">变量值 *</label>
+                <input type="text" class="form-input" id="text-value" placeholder="例如: localhost" value="\${escapeHtml(value)}" required>
+            \`;
+        }
+    }
+}
+
+/* ========================================
+   数字调整
+   ======================================== */
+function adjustNumber(delta) {
+    const display = document.getElementById('num-value');
+    const slider = document.getElementById('num-slider');
+    let value = parseInt(display.textContent) + delta;
+
+    value = Math.max(parseInt(slider.min), Math.min(parseInt(slider.max), value));
+
+    display.textContent = value;
+    slider.value = value;
+}
+
+function updateNumberDisplay(value) {
+    document.getElementById('num-value').textContent = value;
+}
+
+/* ========================================
+   标签选择
+   ======================================== */
+function selectTag(element) {
+    document.querySelectorAll('.tag-option').forEach(el => el.classList.remove('selected'));
+    element.classList.add('selected');
+}
+
+function updateTagOptions() {
+    const input = document.getElementById('select-options');
+    const options = input.value.split(',').map(s => s.trim()).filter(s => s);
+    const container = document.getElementById('tag-selector');
+
+    container.innerHTML = options.map(opt => \`
+        <div class="tag-option" data-value="\${opt}" onclick="selectTag(this)">
+            \${opt}
+        </div>
+    \`).join('');
+}
+
+/* ========================================
+   多选标签操作
+   ======================================== */
+function addSelectedTag(element) {
+    if (element.classList.contains('disabled')) return;
+
+    const value = element.dataset.value;
+    const container = document.getElementById('selected-tags');
+
+    container.classList.remove('empty');
+
+    const tag = document.createElement('div');
+    tag.className = 'selected-tag';
+    tag.draggable = true;
+    tag.dataset.value = value;
+    tag.innerHTML = \`
+        <span class="tag-text">\${value}</span>
+        <button type="button" class="remove-btn" onclick="removeSelectedTag(this)">×</button>
+    \`;
+
+    container.appendChild(tag);
+
+    element.classList.add('disabled');
+
+    setupDragAndDrop();
+}
+
+function removeSelectedTag(button) {
+    const tag = button.parentElement;
+    const value = tag.dataset.value;
+    const container = document.getElementById('selected-tags');
+
+    tag.remove();
+
+    if (container.children.length === 0) {
+        container.classList.add('empty');
+    }
+
+    const availableTag = document.querySelector(\`.available-tag[data-value="\${value}"]\`);
+    if (availableTag) {
+        availableTag.classList.remove('disabled');
+    }
+}
+
+function updateMultiOptions() {
+    const input = document.getElementById('multi-options');
+    const options = input.value.split(',').map(s => s.trim()).filter(s => s);
+    const selectedValues = Array.from(document.querySelectorAll('.selected-tag'))
+        .map(el => el.dataset.value);
+
+    const container = document.getElementById('available-tags');
+    container.innerHTML = options.map(opt => {
+        const isSelected = selectedValues.includes(opt);
+        return \`
+            <div class="available-tag \${isSelected ? 'disabled' : ''}"
+                 data-value="\${opt}" onclick="addSelectedTag(this)">
+                \${opt}
+            </div>
+        \`;
+    }).join('');
+}
+
+/* ========================================
+   拖放功能
+   ======================================== */
+let draggedElement = null;
+
+function setupDragAndDrop() {
+    const container = document.getElementById('selected-tags');
+    if (!container) return;
+    
+    const tags = container.querySelectorAll('.selected-tag');
+
+    tags.forEach(tag => {
+        tag.addEventListener('dragstart', handleDragStart);
+        tag.addEventListener('dragend', handleDragEnd);
+        tag.addEventListener('dragover', handleDragOver);
+        tag.addEventListener('drop', handleDrop);
+        tag.addEventListener('dragenter', handleDragEnter);
+        tag.addEventListener('dragleave', handleDragLeave);
+    });
+}
+
+function handleDragStart(e) {
+    draggedElement = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.selected-tag').forEach(tag => {
+        tag.classList.remove('drag-over');
+    });
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+}
+
+function handleDragEnter(e) {
+    if (this !== draggedElement) {
+        this.classList.add('drag-over');
+    }
+}
+
+function handleDragLeave(e) {
+    this.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+
+    if (draggedElement !== this) {
+        const container = document.getElementById('selected-tags');
+        const allTags = Array.from(container.querySelectorAll('.selected-tag'));
+        const draggedIndex = allTags.indexOf(draggedElement);
+        const targetIndex = allTags.indexOf(this);
+
+        if (draggedIndex < targetIndex) {
+            this.parentNode.insertBefore(draggedElement, this.nextSibling);
+        } else {
+            this.parentNode.insertBefore(draggedElement, this);
+        }
+    }
+
+    this.classList.remove('drag-over');
+    return false;
+}
+`;
