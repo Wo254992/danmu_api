@@ -1,6 +1,11 @@
 // language=CSS
 export const responsiveCssContent = /* css */ `
 /* ========================================
+   响应式布局样式
+   适配平板、手机等不同屏幕尺寸
+   ======================================== */
+
+/* ========================================
    平板设备 (≤1024px)
    ======================================== */
 @media (max-width: 1024px) {
@@ -19,10 +24,14 @@ export const responsiveCssContent = /* css */ `
     .anime-grid {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     }
+
+    .preview-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ========================================
-   移动设备 (≤768px) - 系统配置页面优化
+   移动设备 (≤768px) - 全面优化
    ======================================== */
 @media (max-width: 768px) {
     :root {
@@ -30,11 +39,12 @@ export const responsiveCssContent = /* css */ `
         --spacing-2xl: 1.5rem;
     }
 
-    /* 侧边栏移动端处理 */
+    /* ===== 侧边栏移动端处理 ===== */
     .sidebar {
         transform: translateX(-100%);
         box-shadow: none;
         z-index: 2000;
+        transition: transform var(--transition-base);
     }
 
     .sidebar.active {
@@ -46,14 +56,14 @@ export const responsiveCssContent = /* css */ `
         display: flex;
     }
 
-    /* 主内容区 */
+    /* ===== 主内容区 ===== */
     .main-content {
         margin-left: 0;
         padding: 0;
         background: var(--bg-secondary);
     }
 
-    /* 显示移动端顶栏 */
+    /* ===== 移动端顶栏 ===== */
     .mobile-header {
         display: flex;
         margin: 0;
@@ -63,7 +73,7 @@ export const responsiveCssContent = /* css */ `
         z-index: 100;
     }
 
-    /* 内容区块 */
+    /* ===== 内容区块 ===== */
     .content-section {
         padding: var(--spacing-md);
     }
@@ -72,7 +82,7 @@ export const responsiveCssContent = /* css */ `
         display: block;
     }
 
-    /* 区块头部 */
+    /* ===== 区块头部 ===== */
     .section-header {
         flex-direction: column;
         align-items: flex-start;
@@ -85,15 +95,18 @@ export const responsiveCssContent = /* css */ `
 
     .section-title {
         font-size: 1.25rem;
+        margin-bottom: var(--spacing-xs);
     }
 
     .section-desc {
         font-size: 0.8125rem;
+        margin-bottom: var(--spacing-md);
     }
 
     .header-actions {
         width: 100%;
         justify-content: stretch;
+        flex-wrap: wrap;
     }
 
     .header-actions .btn {
@@ -101,7 +114,7 @@ export const responsiveCssContent = /* css */ `
         min-width: 0;
     }
 
-    /* 按钮调整 */
+    /* ===== 按钮通用调整 ===== */
     .btn {
         padding: 0.625rem 1rem;
         font-size: 0.8125rem;
@@ -117,9 +130,11 @@ export const responsiveCssContent = /* css */ `
         font-size: 0.875rem;
     }
 
-    /* ===== 系统配置页面移动端优化 ===== */
+    /* ========================================
+       系统配置页面 - 环境变量区域优化
+       ======================================== */
     
-    /* 分类标签容器 */
+    /* 🔥 分类标签容器 */
     .category-tabs {
         gap: var(--spacing-xs);
         padding: 0 var(--spacing-md) var(--spacing-xs);
@@ -128,13 +143,14 @@ export const responsiveCssContent = /* css */ `
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scroll-snap-type: x proximity;
+        scrollbar-width: none;  /* Firefox */
     }
 
     .category-tabs::-webkit-scrollbar {
-        display: none;
+        display: none;  /* Chrome, Safari */
     }
 
-    /* 分类标签按钮 */
+    /* 🔥 分类标签按钮 */
     .tab-btn {
         padding: 0.5rem 0.875rem;
         font-size: 0.75rem;
@@ -144,26 +160,35 @@ export const responsiveCssContent = /* css */ `
         min-width: auto;
     }
 
-    /* 环境变量网格 */
+    /* 🔥 环境变量网格 */
     .env-grid {
         padding: 0 var(--spacing-md);
         gap: var(--spacing-md);
     }
 
-    /* 环境变量项 - 移动端优化 */
+    /* 🔥 环境变量项 - 核心修复：纵向布局 */
     .env-item {
-        flex-direction: column;
+        flex-direction: column !important;  /* 强制纵向排列 */
         align-items: stretch;
         gap: var(--spacing-md);
         padding: var(--spacing-md);
     }
 
-    /* 环境变量键名区域 */
+    /* 🔥 环境变量信息区域 */
+    .env-info {
+        flex: 1;
+        min-width: 0;
+        width: 100%;  /* 确保占据全宽 */
+    }
+
+    /* 🔥 环境变量键名区域 */
     .env-key {
         font-size: 0.875rem;
         flex-direction: column;
         align-items: flex-start;
         gap: var(--spacing-xs);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
 
     .env-key strong {
@@ -171,42 +196,54 @@ export const responsiveCssContent = /* css */ `
         max-width: 100%;
     }
 
-    /* 值类型标签 */
+    /* 🔥 值类型标签 */
     .value-type-badge {
         align-self: flex-start;
         font-size: 0.65rem;
         padding: 2px 6px;
+        margin-top: var(--spacing-xs);
     }
 
-    /* 环境变量值 */
+    /* 🔥 环境变量值 - 全宽显示，支持滚动 */
     .env-value {
+        width: 100%;  /* 占据全宽 */
         font-size: 0.75rem;
         padding: var(--spacing-sm);
-        line-height: 1.4;
+        line-height: 1.5;
         max-height: 150px;
         overflow-y: auto;
+        overflow-x: auto;  /* 允许横向滚动长内容 */
+        white-space: pre-wrap;
+        word-break: break-all;
+        box-sizing: border-box;
     }
 
-    /* 环境变量描述 */
+    /* 🔥 环境变量描述 */
     .env-desc {
         font-size: 0.75rem;
         line-height: 1.4;
+        word-break: break-word;
     }
 
-    /* 环境变量操作按钮区 */
+    /* 🔥 环境变量操作按钮区 - 横向平分 */
     .env-actions {
         width: 100%;
         flex-direction: row;
         gap: var(--spacing-sm);
+        flex-shrink: 0;
     }
 
     .env-actions .btn {
-        flex: 1;
+        flex: 1;  /* 按钮平分宽度 */
         justify-content: center;
-        min-height: 40px;
+        min-height: 44px;  /* 触摸友好 */
+        padding: 0.625rem 0.75rem;
+        font-size: 0.8125rem;
     }
 
-    /* ===== 模态框移动端优化 ===== */
+    /* ========================================
+       模态框移动端优化
+       ======================================== */
     
     .modal-overlay {
         padding: 0;
@@ -257,7 +294,9 @@ export const responsiveCssContent = /* css */ `
         min-height: 44px;
     }
 
-    /* ===== 表单控件移动端优化 ===== */
+    /* ========================================
+       表单控件移动端优化
+       ======================================== */
     
     /* 开关按钮 */
     .switch-container {
@@ -353,7 +392,9 @@ export const responsiveCssContent = /* css */ `
         justify-content: center;
     }
 
-    /* 导航菜单调整 */
+    /* ========================================
+       导航菜单调整
+       ======================================== */
     .nav-menu {
         padding: var(--spacing-md);
     }
@@ -364,10 +405,12 @@ export const responsiveCssContent = /* css */ `
     }
 
     .nav-text {
-                font-size: 0.875rem;
+        font-size: 0.875rem;
     }
 
-    /* 卡片组件 */
+    /* ========================================
+       卡片组件
+       ======================================== */
     .form-card,
     .response-card {
         padding: var(--spacing-md);
@@ -380,7 +423,9 @@ export const responsiveCssContent = /* css */ `
         margin-bottom: var(--spacing-md);
     }
 
-    /* 配置预览网格 */
+    /* ========================================
+       配置预览网格
+       ======================================== */
     .preview-grid {
         gap: var(--spacing-md);
         padding: 0 var(--spacing-md);
@@ -413,7 +458,9 @@ export const responsiveCssContent = /* css */ `
         font-size: 0.75rem;
     }
 
-    /* 日志终端 */
+    /* ========================================
+       日志终端
+       ======================================== */
     .log-terminal {
         font-size: 0.75rem;
         padding: var(--spacing-md);
@@ -425,7 +472,9 @@ export const responsiveCssContent = /* css */ `
         word-break: break-all;
     }
 
-    /* API测试 */
+    /* ========================================
+       API测试
+       ======================================== */
     .api-test-container {
         padding: 0 var(--spacing-md);
     }
@@ -436,7 +485,9 @@ export const responsiveCssContent = /* css */ `
         max-height: 300px;
     }
 
-    /* 推送弹幕相关 */
+    /* ========================================
+       推送弹幕相关
+       ======================================== */
     .anime-grid {
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
         gap: var(--spacing-md);
@@ -490,7 +541,9 @@ export const responsiveCssContent = /* css */ `
         width: 100%;
     }
 
-    /* 输入组 */
+    /* ========================================
+       输入组
+       ======================================== */
     .input-group {
         flex-direction: column;
     }
@@ -503,7 +556,9 @@ export const responsiveCssContent = /* css */ `
         width: 100%;
     }
 
-    /* 加载遮罩 */
+    /* ========================================
+       加载遮罩
+       ======================================== */
     .loading-content {
         padding: var(--spacing-xl);
         max-width: 90%;
@@ -526,7 +581,7 @@ export const responsiveCssContent = /* css */ `
 }
 
 /* ========================================
-   小屏幕设备 (≤480px)
+   小屏幕设备 (≤480px) - 进一步优化
    ======================================== */
 @media (max-width: 480px) {
     :root {
@@ -706,12 +761,13 @@ export const responsiveCssContent = /* css */ `
         min-height: 44px;
     }
 
-    /* 禁用悬停效果 */
+    /* 禁用悬停效果,避免触摸时的视觉混乱 */
     .btn:hover,
     .tab-btn:hover,
     .nav-item:hover,
     .env-item:hover,
-    .anime-card:hover {
+    .anime-card:hover,
+    .preview-item:hover {
         transform: none;
     }
 
@@ -725,11 +781,17 @@ export const responsiveCssContent = /* css */ `
         opacity: 0.7;
     }
 
-    /* 滚动条隐藏 */
+    /* 隐藏滚动条 */
     .category-tabs::-webkit-scrollbar,
     .env-value::-webkit-scrollbar,
     .modal-body::-webkit-scrollbar {
         display: none;
+    }
+
+    .category-tabs,
+    .env-value,
+    .modal-body {
+        scrollbar-width: none;  /* Firefox */
     }
 }
 
@@ -763,5 +825,16 @@ export const responsiveCssContent = /* css */ `
         border: 1px solid #ddd;
     }
 }
-`;
 
+/* ========================================
+   高分辨率屏幕优化 (Retina)
+   ======================================== */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .btn,
+    .tab-btn,
+    .env-item {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+`;
