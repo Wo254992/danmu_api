@@ -857,7 +857,6 @@ function handleDrop(e) {
     this.classList.remove('drag-over');
     return false;
 }
-`;
 
 /* ========================================
    移动端环境变量列表渲染增强
@@ -888,3 +887,6 @@ renderEnvList = function() {
         });
     }
 };
+
+`;
+
