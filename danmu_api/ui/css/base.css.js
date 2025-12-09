@@ -40,7 +40,7 @@ export const baseCssContent = /* css */ `
     --bg-secondary: #f9fafb;
     --bg-tertiary: #f3f4f6;
     --bg-hover: #f3f4f6;
-    --bg-body: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --bg-body: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     
     /* 文字颜色 */
     --text-primary: #111827;
@@ -51,22 +51,24 @@ export const baseCssContent = /* css */ `
     /* 边框 */
     --border-color: #e5e7eb;
     --border-color-hover: #d1d5db;
-    --border-radius: 12px;
-    --border-radius-sm: 8px;
-    --border-radius-lg: 16px;
+    --border-radius: 16px;
+    --border-radius-sm: 12px;
+    --border-radius-lg: 20px;
     
     /* 阴影 - 浅色模式 */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    --shadow-colored: 0 10px 30px -5px rgba(99, 102, 241, 0.3);
+    --shadow-colored: 0 10px 40px -5px rgba(99, 102, 241, 0.4);
+    --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
     
     /* 过渡 */
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
     
     /* 间距 */
     --spacing-xs: 0.25rem;
@@ -95,14 +97,14 @@ export const baseCssContent = /* css */ `
     /* 辅助色 - 深色模式适配 */
     --success-color: #34d399;
     --success-hover: #6ee7b7;
-    --success-light: rgba(16, 185, 129, 0.1);
+    --success-light: rgba(16, 185, 129, 0.15);
     --danger-color: #f87171;
     --danger-hover: #fca5a5;
-    --danger-light: rgba(239, 68, 68, 0.1);
+    --danger-light: rgba(239, 68, 68, 0.15);
     --warning-color: #fbbf24;
-    --warning-light: rgba(245, 158, 11, 0.1);
+    --warning-light: rgba(245, 158, 11, 0.15);
     --info-color: #60a5fa;
-    --info-light: rgba(59, 130, 246, 0.1);
+    --info-light: rgba(59, 130, 246, 0.15);
     
     /* 中性色 - 深色模式反转 */
     --gray-50: #18181b;
@@ -121,7 +123,7 @@ export const baseCssContent = /* css */ `
     --bg-secondary: #181825;
     --bg-tertiary: #27273a;
     --bg-hover: #2a2a3e;
-    --bg-body: linear-gradient(135deg, #1e1e2e 0%, #2d1b4e 100%);
+    --bg-body: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
     
     /* 文字颜色 - 深色模式 */
     --text-primary: #e4e4e7;
@@ -134,12 +136,13 @@ export const baseCssContent = /* css */ `
     --border-color-hover: #52525b;
     
     /* 阴影 - 深色模式 */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
-    --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-    --shadow-colored: 0 10px 30px -5px rgba(129, 140, 248, 0.3);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+    --shadow-colored: 0 10px 40px -5px rgba(129, 140, 248, 0.4);
+    --shadow-glow: 0 0 30px rgba(129, 140, 248, 0.4);
 }
 
 /* ========================================
@@ -166,6 +169,21 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     transition: background var(--transition-base), color var(--transition-base);
+    position: relative;
+}
+
+/* 背景装饰 */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 /* ========================================
@@ -175,8 +193,8 @@ body {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
     background: var(--bg-primary);
     border: 2px solid var(--border-color);
     border-radius: 50%;
@@ -187,12 +205,28 @@ body {
     box-shadow: var(--shadow-lg);
     z-index: 1000;
     transition: all var(--transition-base);
+    backdrop-filter: blur(10px);
+}
+
+.theme-toggle::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    z-index: -1;
 }
 
 .theme-toggle:hover {
     transform: scale(1.1) rotate(15deg);
     box-shadow: var(--shadow-colored);
-    border-color: var(--primary-color);
+    border-color: transparent;
+}
+
+.theme-toggle:hover::before {
+    opacity: 1;
 }
 
 .theme-toggle:active {
@@ -200,14 +234,14 @@ body {
 }
 
 .theme-icon {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     color: var(--primary-color);
     transition: all var(--transition-base);
 }
 
 .theme-toggle:hover .theme-icon {
-    color: var(--primary-hover);
+    color: white;
 }
 
 /* 太阳图标(浅色模式显示) */
@@ -231,13 +265,13 @@ body {
     .theme-toggle {
         bottom: 1rem;
         right: 1rem;
-        width: 48px;
-        height: 48px;
+        width: 52px;
+        height: 52px;
     }
     
     .theme-icon {
-        width: 20px;
-        height: 20px;
+        width: 22px;
+        height: 22px;
     }
 }
 
@@ -248,6 +282,7 @@ body {
     display: flex;
     min-height: 100vh;
     position: relative;
+    z-index: 1;
 }
 
 /* ========================================
@@ -267,6 +302,19 @@ body {
     transition: transform var(--transition-base);
     overflow-y: auto;
     overflow-x: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: var(--primary-gradient);
+    opacity: 0.05;
+    pointer-events: none;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -294,6 +342,7 @@ body {
     align-items: center;
     justify-content: space-between;
     flex-shrink: 0;
+    position: relative;
 }
 
 .logo-wrapper {
@@ -305,17 +354,22 @@ body {
 }
 
 .logo-image {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     border-radius: var(--border-radius-sm);
     object-fit: cover;
     flex-shrink: 0;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-base);
+}
+
+.logo-image:hover {
+    transform: scale(1.05) rotate(5deg);
 }
 
 .logo-text {
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-size: 1.375rem;
+    font-weight: 800;
     background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -323,28 +377,30 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    letter-spacing: -0.5px;
 }
 
 .sidebar-toggle {
     display: none;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     background: var(--gray-100);
     border: none;
     border-radius: var(--border-radius-sm);
     cursor: pointer;
     align-items: center;
     justify-content: center;
-    transition: background var(--transition-fast);
+    transition: all var(--transition-base);
     flex-shrink: 0;
 }
 
 .sidebar-toggle:hover {
     background: var(--gray-200);
+    transform: scale(1.05);
 }
 
 .toggle-icon {
-    width: 16px;
+    width: 18px;
     height: 2px;
     background: var(--text-primary);
     position: relative;
@@ -375,10 +431,28 @@ body {
 .version-card {
     padding: var(--spacing-lg);
     margin: var(--spacing-lg);
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    background: var(--primary-gradient);
     border-radius: var(--border-radius);
     color: white;
     box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.version-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-30%, -30%); }
 }
 
 .version-item {
@@ -386,6 +460,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: var(--spacing-sm) 0;
+    position: relative;
 }
 
 .version-item:not(:last-child) {
@@ -403,10 +478,11 @@ body {
 }
 
 .version-latest {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 2px 8px;
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.25);
+    padding: 4px 10px;
+    border-radius: 6px;
     font-size: 0.75rem;
+    backdrop-filter: blur(10px);
 }
 
 .api-endpoint-card {
@@ -415,18 +491,21 @@ body {
     background: rgba(255, 255, 255, 0.15);
     border-radius: var(--border-radius-sm);
     cursor: pointer;
-    transition: background var(--transition-fast);
+    transition: all var(--transition-base);
+    backdrop-filter: blur(10px);
+    position: relative;
 }
 
 .api-endpoint-card:hover {
     background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
 }
 
 .endpoint-label {
     display: block;
     font-size: 0.75rem;
     opacity: 0.9;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .endpoint-value {
@@ -440,7 +519,7 @@ body {
     display: block;
     font-size: 0.7rem;
     opacity: 0.7;
-    margin-top: 4px;
+    margin-top: 6px;
 }
 
 /* 导航菜单 */
@@ -456,41 +535,52 @@ body {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
-    padding: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
     border-radius: var(--border-radius-sm);
     color: var(--text-secondary);
     text-decoration: none;
-    transition: all var(--transition-fast);
+    transition: all var(--transition-base);
     cursor: pointer;
     position: relative;
 }
 
-.nav-item:hover {
-    background: var(--gray-100);
-    color: var(--text-primary);
-}
-
-.nav-item.active {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-    color: white;
-    box-shadow: var(--shadow);
-}
-
-.nav-item.active::before {
+.nav-item::before {
     content: '';
     position: absolute;
     left: 0;
     top: 50%;
     transform: translateY(-50%);
-    width: 4px;
+    width: 0;
     height: 60%;
+    background: var(--primary-color);
+    border-radius: 0 4px 4px 0;
+    transition: width var(--transition-base);
+}
+
+.nav-item:hover {
+    background: var(--gray-100);
+    color: var(--text-primary);
+    transform: translateX(4px);
+}
+
+.nav-item:hover::before {
+    width: 4px;
+}
+
+.nav-item.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.nav-item.active::before {
+    width: 4px;
     background: white;
-    border-radius: 0 2px 2px 0;
 }
 
 .nav-icon {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     stroke-width: 2;
     flex-shrink: 0;
 }
@@ -525,8 +615,8 @@ body {
 }
 
 .mobile-menu-btn {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     background: var(--gray-100);
     border: none;
     border-radius: var(--border-radius-sm);
@@ -544,16 +634,16 @@ body {
 }
 
 .mobile-menu-btn span {
-    width: 20px;
+    width: 22px;
     height: 2px;
     background: var(--text-primary);
-    border-radius: 1px;
+    border-radius: 2px;
     transition: all var(--transition-fast);
 }
 
 .mobile-title {
-    font-size: 1.125rem;
-    font-weight: 600;
+    font-size: 1.25rem;
+    font-weight: 700;
     color: var(--text-primary);
     margin: 0;
 }
@@ -561,7 +651,7 @@ body {
 /* 内容区块 */
 .content-section {
     display: none;
-    animation: fadeInUp var(--transition-base);
+    animation: fadeInUp var(--transition-slow);
 }
 
 .content-section.active {
@@ -571,7 +661,7 @@ body {
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(30px);
     }
     to {
         opacity: 1;
@@ -590,15 +680,16 @@ body {
 }
 
 .section-title {
-    font-size: 1.875rem;
-    font-weight: 700;
+    font-size: 2rem;
+    font-weight: 800;
     color: var(--text-primary);
     margin: 0;
     line-height: 1.2;
+    letter-spacing: -1px;
 }
 
 .section-desc {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     color: var(--text-secondary);
     margin: var(--spacing-sm) 0 0 0;
 }
@@ -618,12 +709,19 @@ body {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light), var(--primary-color));
+    background-size: 200% 100%;
     transform: scaleX(0);
     transform-origin: left;
     transition: transform var(--transition-base);
     z-index: 9999;
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    box-shadow: var(--shadow-glow);
+    animation: progressShine 2s infinite;
+}
+
+@keyframes progressShine {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
 }
 
 .progress-bar-top.active {
@@ -636,10 +734,11 @@ body {
 .footer {
     margin-top: var(--spacing-2xl);
     padding: var(--spacing-2xl) var(--spacing-lg);
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--bg-primary);
     border-radius: var(--border-radius);
     text-align: center;
     box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
 }
 
 .footer-text {
@@ -664,18 +763,23 @@ body {
     gap: var(--spacing-xs);
     color: var(--primary-color);
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.875rem;
-    transition: color var(--transition-fast);
+    transition: all var(--transition-base);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
 }
 
 .footer-link:hover {
     color: var(--primary-hover);
+    background: var(--primary-light);
+    background: rgba(99, 102, 241, 0.1);
+    transform: translateY(-2px);
 }
 
 .footer-icon {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
 }
 
 .footer-note {
@@ -688,23 +792,23 @@ body {
    滚动条美化
    ======================================== */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
     background: var(--gray-100);
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--gray-300);
-    border-radius: 4px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border-radius: 6px;
     transition: background var(--transition-fast);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--gray-400);
+    background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
 }
 
 /* ========================================
