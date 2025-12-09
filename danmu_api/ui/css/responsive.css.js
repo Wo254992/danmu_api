@@ -22,7 +22,7 @@ export const responsiveCssContent = /* css */ `
 }
 
 /* ========================================
-   移动设备 (≤768px)
+   移动设备 (≤768px) - 系统配置页面优化
    ======================================== */
 @media (max-width: 768px) {
     :root {
@@ -93,10 +93,12 @@ export const responsiveCssContent = /* css */ `
 
     .header-actions {
         width: 100%;
+        justify-content: stretch;
     }
 
     .header-actions .btn {
         flex: 1;
+        min-width: 0;
     }
 
     /* 按钮调整 */
@@ -105,28 +107,250 @@ export const responsiveCssContent = /* css */ `
         font-size: 0.8125rem;
     }
 
+    .btn-icon {
+        width: 16px;
+        height: 16px;
+    }
+
     .btn-lg {
         padding: 0.75rem 1.25rem;
         font-size: 0.875rem;
     }
 
-    /* 分类标签 */
+    /* ===== 系统配置页面移动端优化 ===== */
+    
+    /* 分类标签容器 */
     .category-tabs {
         gap: var(--spacing-xs);
-        padding: 0 var(--spacing-md);
+        padding: 0 var(--spacing-md) var(--spacing-xs);
         margin-bottom: var(--spacing-md);
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
     }
 
+    .category-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* 分类标签按钮 */
     .tab-btn {
-        padding: 0.5rem 0.75rem;
+        padding: 0.5rem 0.875rem;
         font-size: 0.75rem;
         white-space: nowrap;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+        min-width: auto;
     }
 
     /* 环境变量网格 */
     .env-grid {
         padding: 0 var(--spacing-md);
+        gap: var(--spacing-md);
+    }
+
+    /* 环境变量项 - 移动端优化 */
+    .env-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+    }
+
+    /* 环境变量键名区域 */
+    .env-key {
+        font-size: 0.875rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+
+    .env-key strong {
+        word-break: break-word;
+        max-width: 100%;
+    }
+
+    /* 值类型标签 */
+    .value-type-badge {
+        align-self: flex-start;
+        font-size: 0.65rem;
+        padding: 2px 6px;
+    }
+
+    /* 环境变量值 */
+    .env-value {
+        font-size: 0.75rem;
+        padding: var(--spacing-sm);
+        line-height: 1.4;
+        max-height: 150px;
+        overflow-y: auto;
+    }
+
+    /* 环境变量描述 */
+    .env-desc {
+        font-size: 0.75rem;
+        line-height: 1.4;
+    }
+
+    /* 环境变量操作按钮区 */
+    .env-actions {
+        width: 100%;
+        flex-direction: row;
         gap: var(--spacing-sm);
+    }
+
+    .env-actions .btn {
+        flex: 1;
+        justify-content: center;
+        min-height: 40px;
+    }
+
+    /* ===== 模态框移动端优化 ===== */
+    
+    .modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .modal-container {
+        max-height: 85vh;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+        width: 100%;
+        max-width: 100%;
+        animation: modalSlideUp var(--transition-base);
+    }
+
+    @keyframes modalSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-header {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    .modal-body {
+        padding: var(--spacing-md);
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    .modal-title {
+        font-size: 1.125rem;
+    }
+
+    .modal-footer {
+        padding: var(--spacing-md);
+        flex-direction: column-reverse;
+        gap: var(--spacing-sm);
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    /* ===== 表单控件移动端优化 ===== */
+    
+    /* 开关按钮 */
+    .switch-container {
+        width: 100%;
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius-sm);
+    }
+
+    /* 数字选择器 */
+    .number-picker {
+        flex-direction: column;
+        align-items: stretch;
+        padding: var(--spacing-md);
+    }
+
+    .number-display {
+        font-size: 2rem;
+        text-align: center;
+        padding: var(--spacing-md) 0;
+    }
+
+    .number-controls {
+        flex-direction: row;
+        justify-content: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .number-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 1.5rem;
+    }
+
+    .number-range {
+        width: 100%;
+    }
+
+    /* 标签选择器 */
+    .tag-selector {
+        gap: var(--spacing-sm);
+    }
+
+    .tag-option {
+        padding: 0.625rem 1rem;
+        font-size: 0.8125rem;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* 多选标签容器 */
+    .multi-select-container {
+        gap: var(--spacing-md);
+    }
+
+    /* 已选择标签区域 */
+    .selected-tags {
+        min-height: 80px;
+        padding: var(--spacing-sm);
+        gap: var(--spacing-xs);
+    }
+
+    .selected-tag {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+        touch-action: none;
+    }
+
+    .tag-text {
+        font-size: 0.8125rem;
+    }
+
+    .remove-btn {
+        width: 22px;
+        height: 22px;
+        font-size: 1.1rem;
+    }
+
+    /* 可选标签区域 */
+    .available-tags {
+        gap: var(--spacing-xs);
+    }
+
+    .available-tag {
+        padding: 0.625rem 1rem;
+        font-size: 0.8125rem;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     /* 导航菜单调整 */
@@ -136,106 +360,57 @@ export const responsiveCssContent = /* css */ `
 
     .nav-item {
         padding: 0.75rem;
+        min-height: 48px;
     }
 
     .nav-text {
-        font-size: 0.875rem;
+                font-size: 0.875rem;
     }
 
-    /* 环境变量项 */
-    .env-item {
-        flex-direction: column;
-        align-items: stretch;
-        gap: var(--spacing-md);
-        padding: var(--spacing-md);
-    }
-
-    .env-key {
-        font-size: 0.875rem;
-    }
-
-    .env-value {
-        font-size: 0.75rem;
-        padding: var(--spacing-xs);
-    }
-
-    .env-desc {
-        font-size: 0.75rem;
-    }
-
-    .env-actions {
-        width: 100%;
-        flex-direction: row;
-        gap: var(--spacing-sm);
-    }
-
-    .env-actions .btn {
-        flex: 1;
-    }
-
-    /* 表单调整 */
+    /* 卡片组件 */
     .form-card,
     .response-card {
         padding: var(--spacing-md);
         margin: var(--spacing-md);
-        border-radius: var(--border-radius-sm);
+        border-radius: var(--border-radius);
     }
 
     .card-title {
-        font-size: 0.9375rem;
+        font-size: 1rem;
         margin-bottom: var(--spacing-md);
     }
 
-    /* 模态框 */
-    .modal-overlay {
-        padding: var(--spacing-sm);
-    }
-
-    .modal-container {
-        max-height: 95vh;
-    }
-
-    .modal-header,
-    .modal-body,
-    .modal-footer {
-        padding: var(--spacing-lg);
-    }
-
-    .modal-title {
-        font-size: 1.125rem;
-    }
-
-    .modal-footer {
-        flex-direction: column-reverse;
-    }
-
-    .modal-footer .btn {
-        width: 100%;
-    }
-
-    /* 动漫网格 */
-    .anime-grid {
-        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    /* 配置预览网格 */
+    .preview-grid {
         gap: var(--spacing-md);
+        padding: 0 var(--spacing-md);
     }
 
-    .anime-title {
-        font-size: 0.8125rem;
+    .preview-category {
+        padding: var(--spacing-md);
     }
 
-    /* 剧集网格 */
-    .episode-grid {
+    .preview-category-title {
+        font-size: 1.125rem;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .preview-item {
         padding: var(--spacing-sm);
     }
 
-    .episode-item {
-        flex-direction: column;
-        align-items: stretch;
-        gap: var(--spacing-sm);
+    .preview-key {
+        font-size: 0.875rem;
+        margin-bottom: var(--spacing-xs);
     }
 
-    .episode-title {
-        white-space: normal;
+    .preview-value {
+        font-size: 0.75rem;
+        padding: var(--spacing-xs);
+    }
+
+    .preview-desc {
+        font-size: 0.75rem;
     }
 
     /* 日志终端 */
@@ -245,151 +420,31 @@ export const responsiveCssContent = /* css */ `
         max-height: 400px;
     }
 
-    /* API 响应 */
+    .log-entry {
+        padding-left: var(--spacing-xs);
+        word-break: break-all;
+    }
+
+    /* API测试 */
+    .api-test-container {
+        padding: 0 var(--spacing-md);
+    }
+
     .response-content {
         font-size: 0.75rem;
         padding: var(--spacing-md);
         max-height: 300px;
     }
 
-    /* 版本卡片 */
-    .version-card {
-        margin: var(--spacing-md);
-        padding: var(--spacing-md);
-    }
-
-    .version-label,
-    .version-value {
-        font-size: 0.8125rem;
-    }
-
-    .endpoint-value {
-        font-size: 0.8125rem;
-        word-break: break-all;
-    }
-
-    /* 表单行 */
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .form-inline {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .form-inline .btn {
-        width: 100%;
-    }
-
-    /* 输入组 */
-    .input-group {
-        flex-direction: column;
-    }
-
-    .input-group .btn {
-        width: 100%;
-    }
-
-    /* 数字选择器 */
-    .number-picker {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .number-display {
-        font-size: 2rem;
-    }
-
-    /* 页脚 */
-    .footer {
-        padding: var(--spacing-lg) var(--spacing-md);
-        margin: var(--spacing-md);
-        border-radius: var(--border-radius-sm);
-    }
-
-    .footer-links {
-        flex-direction: column;
-        gap: var(--spacing-sm);
-        align-items: center;
-    }
-
-    .footer-text {
-        font-size: 0.75rem;
-        line-height: 1.5;
-    }
-
-    .footer-link {
-        font-size: 0.8125rem;
-    }
-
-    .footer-note {
-        font-size: 0.75rem;
-    }
-
-    /* 预览网格移动端优化 */
-    .preview-grid {
-        padding: 0;
-        gap: var(--spacing-sm);
-    }
-
-    .preview-category {
-        margin: var(--spacing-md);
-        padding: var(--spacing-md);
-    }
-
-    .preview-category-title {
-        font-size: 0.9375rem;
-        margin-bottom: var(--spacing-sm);
-    }
-
-    .preview-item {
-        padding: var(--spacing-sm);
-        border-left-width: 2px;
-    }
-
-    .preview-key {
-        font-size: 0.8125rem;
-    }
-
-    .preview-value {
-        font-size: 0.75rem;
-        padding: 6px;
-        line-height: 1.3;
-    }
-
-    .preview-desc {
-        font-size: 0.7rem;
-    }
-}
-
-/* ========================================
-   小型移动设备 (≤480px)
-   ======================================== */
-@media (max-width: 480px) {
-    /* Logo调整 */
-    .logo-image {
-        width: 40px;
-        height: 40px;
-    }
-
-    .logo-text {
-        font-size: 1.125rem;
-    }
-
-    /* 区块标题 */
-    .section-title {
-        font-size: 1.25rem;
-    }
-
-    /* 动漫网格 */
+    /* 推送弹幕相关 */
     .anime-grid {
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: var(--spacing-sm);
+        gap: var(--spacing-md);
+        padding: 0 var(--spacing-md);
     }
 
     .anime-image {
-        height: 150px;
+        height: 140px;
     }
 
     .anime-info {
@@ -398,80 +453,221 @@ export const responsiveCssContent = /* css */ `
 
     .anime-title {
         font-size: 0.75rem;
+        -webkit-line-clamp: 2;
     }
 
     .anime-count {
         font-size: 0.7rem;
     }
 
-    /* 标签选择器 */
-    .tag-selector,
-    .available-tags {
+    .episode-grid {
+        padding: var(--spacing-sm);
         gap: var(--spacing-xs);
+        max-height: 400px;
     }
 
-    .tag-option,
-    .available-tag {
-        padding: 0.5rem 1rem;
-        font-size: 0.8125rem;
-    }
-
-    .selected-tag {
-        padding: 0.375rem 0.625rem;
-        font-size: 0.8125rem;
-    }
-
-    /* 分类标签 */
-    .tab-btn {
-        padding: 0.5rem 0.875rem;
-        font-size: 0.75rem;
-    }
-
-    /* 按钮 */
-    .btn {
-        padding: 0.5rem 0.875rem;
-        font-size: 0.75rem;
-    }
-
-    .btn-icon {
-        width: 16px;
-        height: 16px;
-    }
-
-    /* 版本信息 */
-    .version-item {
+    .episode-item {
         flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-xs);
+        align-items: stretch;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm);
+    }
+
+    .episode-info {
+        width: 100%;
+    }
+
+    .episode-number {
+        font-size: 0.875rem;
+    }
+
+    .episode-title {
+        font-size: 0.75rem;
+        white-space: normal;
+    }
+
+    .episode-item .btn {
+        width: 100%;
+    }
+
+    /* 输入组 */
+    .input-group {
+        flex-direction: column;
+    }
+
+    .input-group .form-input {
+        width: 100%;
+    }
+
+    .input-group .btn {
+        width: 100%;
     }
 
     /* 加载遮罩 */
     .loading-content {
         padding: var(--spacing-xl);
+        max-width: 90%;
+        margin: 0 var(--spacing-md);
     }
 
     .loading-spinner {
         width: 48px;
         height: 48px;
+        margin-bottom: var(--spacing-md);
     }
 
     .loading-title {
         font-size: 1rem;
     }
 
-    /* 日志终端 */
-    .log-terminal {
-        font-size: 0.7rem;
-        max-height: 300px;
+    .loading-desc {
+        font-size: 0.8125rem;
+    }
+}
+
+/* ========================================
+   小屏幕设备 (≤480px)
+   ======================================== */
+@media (max-width: 480px) {
+    :root {
+        --spacing-md: 0.75rem;
+        --spacing-lg: 1rem;
+        --spacing-xl: 1rem;
     }
 
-    /* 环境变量值 */
-    .env-value {
+    /* 分类标签 */
+    .tab-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.7rem;
+    }
+
+    /* 环境变量项 */
+    .env-item {
+        padding: var(--spacing-sm);
+    }
+
+    .env-key {
         font-size: 0.8125rem;
     }
 
+    .value-type-badge {
+        font-size: 0.625rem;
+        padding: 1px 5px;
+    }
+
+    .env-value {
+        font-size: 0.7rem;
+    }
+
     .env-desc {
+        font-size: 0.7rem;
+    }
+
+    /* 模态框 */
+    .modal-header {
+        padding: var(--spacing-md);
+    }
+
+    .modal-title {
+        font-size: 1rem;
+    }
+
+    .modal-close {
+        width: 28px;
+        height: 28px;
+        font-size: 1.25rem;
+    }
+
+    .modal-body {
+        padding: var(--spacing-sm);
+    }
+
+    .modal-footer {
+        padding: var(--spacing-sm);
+    }
+
+    /* 按钮 */
+    .btn {
+        padding: 0.5rem 0.875rem;
         font-size: 0.75rem;
+        min-height: 40px;
+    }
+
+    .btn-icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* 表单控件 */
+    .number-display {
+        font-size: 1.75rem;
+    }
+
+    .number-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 1.25rem;
+    }
+
+    .tag-option,
+    .available-tag {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.75rem;
+        min-height: 38px;
+    }
+
+    .selected-tag {
+        padding: 0.375rem 0.625rem;
+        font-size: 0.75rem;
+    }
+
+    .tag-text {
+        font-size: 0.75rem;
+    }
+
+    .remove-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 1rem;
+    }
+
+    /* 卡片 */
+    .form-card,
+    .response-card,
+    .preview-category {
+        padding: var(--spacing-sm);
+        margin: var(--spacing-sm);
+    }
+
+    /* 动漫网格 */
+    .anime-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: var(--spacing-sm);
+    }
+
+    .anime-image {
+        height: 120px;
+    }
+
+    .anime-info {
+        padding: var(--spacing-xs);
+    }
+
+    .anime-title {
+        font-size: 0.7rem;
+    }
+
+    /* 章节列表 */
+    .episode-item {
+        padding: var(--spacing-xs);
+    }
+
+    .episode-number {
+        font-size: 0.8125rem;
+    }
+
+    .episode-title {
+        font-size: 0.7rem;
     }
 }
 
@@ -479,58 +675,61 @@ export const responsiveCssContent = /* css */ `
    横屏模式优化
    ======================================== */
 @media (max-width: 768px) and (orientation: landscape) {
-    .sidebar {
-        width: 220px;
+    .modal-container {
+        max-height: 90vh;
     }
 
-    .sidebar.active {
-        width: 220px;
+    .modal-body {
+        max-height: 50vh;
     }
 
-    .logo-text {
-        font-size: 1rem;
+    .episode-grid,
+    .log-terminal {
+        max-height: 300px;
     }
 
-    .nav-menu {
-        padding: var(--spacing-sm);
-    }
-
-    .nav-item {
-        padding: 0.5rem;
-    }
-
-    .nav-text {
-        font-size: 0.8125rem;
-    }
-
-    .version-card {
-        margin: var(--spacing-sm);
-        padding: var(--spacing-sm);
+    .loading-overlay {
+        padding: var(--spacing-md);
     }
 }
 
 /* ========================================
-   大屏幕优化 (≥1440px)
+   触摸设备优化
    ======================================== */
-@media (min-width: 1440px) {
-    .main-content {
-        max-width: 1400px;
-        margin-left: auto;
-        margin-right: auto;
-        padding-left: calc(var(--sidebar-width) + var(--spacing-2xl));
+@media (hover: none) and (pointer: coarse) {
+    /* 增加可点击区域 */
+    .btn,
+    .tab-btn,
+    .nav-item,
+    .tag-option,
+    .available-tag {
+        min-height: 44px;
     }
 
-    .section-title {
-        font-size: 2.25rem;
+    /* 禁用悬停效果 */
+    .btn:hover,
+    .tab-btn:hover,
+    .nav-item:hover,
+    .env-item:hover,
+    .anime-card:hover {
+        transform: none;
     }
 
-    .anime-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    /* 优化拖拽提示 */
+    .selected-tag {
+        cursor: grab;
     }
 
-    .form-card,
-    .response-card {
-        padding: var(--spacing-2xl);
+    .selected-tag:active {
+        cursor: grabbing;
+        opacity: 0.7;
+    }
+
+    /* 滚动条隐藏 */
+    .category-tabs::-webkit-scrollbar,
+    .env-value::-webkit-scrollbar,
+    .modal-body::-webkit-scrollbar {
+        display: none;
     }
 }
 
@@ -540,12 +739,10 @@ export const responsiveCssContent = /* css */ `
 @media print {
     .sidebar,
     .mobile-header,
-    .header-actions,
-    .nav-menu,
+    .sidebar-toggle,
     .btn,
     .modal-overlay,
-    .loading-overlay,
-    .footer {
+    .loading-overlay {
         display: none !important;
     }
 
@@ -556,114 +753,15 @@ export const responsiveCssContent = /* css */ `
 
     .content-section {
         display: block !important;
-        page-break-after: always;
+        page-break-inside: avoid;
     }
 
-    .section-header {
-        margin-bottom: var(--spacing-md);
-    }
-}
-
-/* ========================================
-   暗色模式支持 (可选)
-   ======================================== */
-@media (prefers-color-scheme: dark) {
-    /* 可根据需要启用暗色模式 */
-    /*
-    :root {
-        --bg-primary: #1e1e1e;
-        --bg-secondary: #2d2d2d;
-        --bg-tertiary: #3d3d3d;
-        --text-primary: #e0e0e0;
-        --text-secondary: #b0b0b0;
-        --text-tertiary: #808080;
-        --border-color: #404040;
-    }
-    */
-}
-
-/* ========================================
-   减少动画 (尊重用户偏好)
-   ======================================== */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* ========================================
-   触摸设备优化
-   ======================================== */
-@media (hover: none) and (pointer: coarse) {
-    /* 增大可点击区域 */
-    .btn {
-        min-height: 44px;
-    }
-
-    .nav-item {
-        min-height: 48px;
-    }
-
-    .tab-btn {
-        min-height: 44px;
-    }
-
-    .tag-option,
-    .available-tag {
-        min-height: 40px;
-    }
-
-    /* 移除悬停效果 */
-    .btn:hover,
-    .nav-item:hover,
-    .tab-btn:hover,
-    .tag-option:hover {
-        transform: none;
-    }
-
-    /* 增强点击反馈 */
-    .btn:active {
-        transform: scale(0.97);
-        opacity: 0.8;
-    }
-
-    .nav-item:active {
-        opacity: 0.8;
-    }
-}
-
-/* ========================================
-   侧边栏折叠状态 (桌面端)
-   ======================================== */
-@media (min-width: 769px) {
-    .sidebar.collapsed {
-        width: var(--sidebar-collapsed-width);
-    }
-
-    .sidebar.collapsed .logo-text,
-    .sidebar.collapsed .nav-text,
-    .sidebar.collapsed .version-card {
-        display: none;
-    }
-
-    .sidebar.collapsed .logo-wrapper {
-        justify-content: center;
-    }
-
-    .sidebar.collapsed .nav-item {
-        justify-content: center;
-    }
-
-    .sidebar.collapsed .nav-item::before {
-        display: none;
-    }
-
-    .main-content.sidebar-collapsed {
-        margin-left: var(--sidebar-collapsed-width);
+    .env-item,
+    .preview-item {
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
     }
 }
 `;
+
