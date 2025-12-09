@@ -41,8 +41,8 @@ export const componentsCssContent = /* css */ `
 
 .btn-primary:hover:not(:disabled) {
     background: var(--primary-hover);
-    box-shadow: var(--shadow);
-    transform: translateY(-1px);
+    box-shadow: var(--shadow-colored);
+    transform: translateY(-2px);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -57,8 +57,8 @@ export const componentsCssContent = /* css */ `
 
 .btn-success:hover:not(:disabled) {
     background: var(--success-hover);
-    box-shadow: var(--shadow);
-    transform: translateY(-1px);
+    box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.3);
+    transform: translateY(-2px);
 }
 
 .btn-danger {
@@ -69,8 +69,8 @@ export const componentsCssContent = /* css */ `
 
 .btn-danger:hover:not(:disabled) {
     background: var(--danger-hover);
-    box-shadow: var(--shadow);
-    transform: translateY(-1px);
+    box-shadow: 0 10px 30px -5px rgba(239, 68, 68, 0.3);
+    transform: translateY(-2px);
 }
 
 .btn-secondary {
