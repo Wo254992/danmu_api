@@ -858,3 +858,33 @@ function handleDrop(e) {
     return false;
 }
 `;
+
+/* ========================================
+   移动端环境变量列表渲染增强
+   ======================================== */
+const originalRenderEnvList = renderEnvList;
+renderEnvList = function() {
+    originalRenderEnvList();
+    
+    // 移动端优化:为长文本添加展开/收起功能
+    if (window.innerWidth <= 768) {
+        document.querySelectorAll('.env-value').forEach(valueEl => {
+            if (valueEl.textContent.length > 100) {
+                valueEl.style.maxHeight = '3em';
+                valueEl.style.overflow = 'hidden';
+                valueEl.style.cursor = 'pointer';
+                valueEl.title = '点击查看完整内容';
+                
+                valueEl.addEventListener('click', function() {
+                    if (this.style.maxHeight === '3em') {
+                        this.style.maxHeight = 'none';
+                        this.style.overflow = 'auto';
+                    } else {
+                        this.style.maxHeight = '3em';
+                        this.style.overflow = 'hidden';
+                    }
+                });
+            }
+        });
+    }
+};
