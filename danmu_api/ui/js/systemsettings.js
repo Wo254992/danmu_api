@@ -561,15 +561,6 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
     }
 });
 
-// language=JavaScript
-// systemsettings.js 的第二部分 - 值输入控件渲染
-
-/* 将以下内容追加到 systemsettings.js 文件中 */
-
-export const systemSettingsJsPart2 = /* javascript */ `
-/* ========================================
-   渲染值输入控件
-   ======================================== */
 function renderValueInput(item) {
     const container = document.getElementById('value-input-container');
     const type = item ? item.type : document.getElementById('value-type').value;
