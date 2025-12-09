@@ -561,8 +561,6 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
     }
 });
 
-/* 继续systemsettings.js的值输入控件渲染部分... */
-`;
 // language=JavaScript
 // systemsettings.js 的第二部分 - 值输入控件渲染
 
