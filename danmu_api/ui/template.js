@@ -3,6 +3,7 @@ import { baseCssContent } from "./css/base.css.js";
 import { componentsCssContent } from "./css/components.css.js";
 import { formsCssContent } from "./css/forms.css.js";
 import { responsiveCssContent } from "./css/responsive.css.js";
+import { dynamicCssContent } from "./css/dynamic.css.js";
 import { mainJsContent } from "./js/main.js";
 import { previewJsContent } from "./js/preview.js";
 import { logviewJsContent } from "./js/logview.js";
@@ -23,6 +24,7 @@ export const HTML_TEMPLATE = /* html */ `
     <style>${componentsCssContent}</style>
     <style>${formsCssContent}</style>
     <style>${responsiveCssContent}</style>
+    <style>${dynamicCssContent}</style>
 </head>
 <body>
     <!-- 顶部进度条 -->
