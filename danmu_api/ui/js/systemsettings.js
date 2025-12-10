@@ -1,14 +1,37 @@
 // language=JavaScript
 export const systemSettingsJsContent = /* javascript */ `
 /* ========================================
+   系统配置状态管理
+   ======================================== */
+let deploymentInProgress = false;
+let cacheClearing = false;
+
+/* ========================================
    显示/隐藏清理缓存模态框
    ======================================== */
 function showClearCacheModal() {
     document.getElementById('clear-cache-modal').classList.add('active');
+    
+    // 添加模态框显示动画
+    const modal = document.getElementById('clear-cache-modal');
+    const modalContainer = modal.querySelector('.modal-container');
+    if (modalContainer) {
+        modalContainer.style.animation = 'modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    }
 }
 
 function hideClearCacheModal() {
-    document.getElementById('clear-cache-modal').classList.remove('active');
+    const modal = document.getElementById('clear-cache-modal');
+    const modalContainer = modal.querySelector('.modal-container');
+    
+    if (modalContainer) {
+        modalContainer.style.animation = 'modalSlideOut 0.3s ease-out';
+        setTimeout(() => {
+            modal.classList.remove('active');
+        }, 300);
+    } else {
+        modal.classList.remove('active');
+    }
 }
 
 /* ========================================
@@ -18,15 +41,39 @@ async function confirmClearCache() {
     const configCheck = await checkDeployPlatformConfig();
     if (!configCheck.success) {
         hideClearCacheModal();
-        customAlert(configCheck.message);
+        customAlert(configCheck.message, '⚙️ 配置提示');
+        return;
+    }
+
+    if (cacheClearing) {
+        customAlert('缓存清理正在进行中，请稍候...', '⏳ 请稍候');
         return;
     }
 
     hideClearCacheModal();
-    showLoading('正在清理缓存...', '清除中，请稍候');
-    addLog('开始清理缓存', 'info');
+    cacheClearing = true;
+    
+    showLoading('🗑️ 正在清理缓存...', '正在清除所有缓存数据');
+    addLog('🗑️ 开始清理缓存', 'info');
 
     try {
+        // 添加进度条动画
+        const progressBar = document.getElementById('progress-bar-top');
+        if (progressBar) {
+            progressBar.classList.add('active');
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 90) {
+                    clearInterval(progressInterval);
+                    progress = 90;
+                }
+                progressBar.style.width = progress + '%';
+            }, 200);
+            
+            setTimeout(() => clearInterval(progressInterval), 3000);
+        }
+
         const response = await fetch(buildApiUrl('/api/cache/clear', true), {
             method: 'POST',
             headers: {
@@ -36,21 +83,50 @@ async function confirmClearCache() {
 
         const result = await response.json();
 
+        if (progressBar) {
+            progressBar.style.width = '100%';
+            setTimeout(() => {
+                progressBar.classList.remove('active');
+                progressBar.style.width = '0%';
+            }, 500);
+        }
+
         if (result.success) {
-            updateLoadingText('清理完成', '缓存已成功清除');
-            addLog('缓存清理完成', 'success');
-            addLog('✅ 缓存清理成功！已清理: ' + JSON.stringify(result.clearedItems), 'success');
+            updateLoadingText('✅ 清理完成', '缓存已成功清除');
+            
+            // 显示清理详情
+            const clearedItems = result.clearedItems || {};
+            const details = Object.entries(clearedItems)
+                .map(([key, value]) => \`  • \${key}: \${value}\`)
+                .join('\\n');
+            
+            addLog('✅ 缓存清理完成！', 'success');
+            addLog('清理详情：\\n' + details, 'info');
+            
+            // 显示成功动画
+            showSuccessAnimation('缓存清理成功');
         } else {
-            updateLoadingText('清理失败', '请查看日志了解详情');
-            addLog('缓存清理失败: ' + result.message, 'error');
+            updateLoadingText('❌ 清理失败', '请查看日志了解详情');
+            addLog(\`❌ 缓存清理失败: \${result.message}\`, 'error');
+            
+            setTimeout(() => {
+                hideLoading();
+                customAlert('缓存清理失败: ' + result.message, '❌ 操作失败');
+            }, 1500);
         }
     } catch (error) {
-        updateLoadingText('清理失败', '网络错误或服务不可用');
-        addLog('缓存清理请求失败: ' + error.message, 'error');
+        updateLoadingText('❌ 清理失败', '网络错误或服务不可用');
+        addLog(\`❌ 缓存清理请求失败: \${error.message}\`, 'error');
+        
+        setTimeout(() => {
+            hideLoading();
+            customAlert('缓存清理失败: ' + error.message, '❌ 网络错误');
+        }, 1500);
     } finally {
         setTimeout(() => {
             hideLoading();
-        }, 1500);
+            cacheClearing = false;
+        }, 2000);
     }
 }
 
@@ -59,41 +135,80 @@ async function confirmClearCache() {
    ======================================== */
 function showDeploySystemModal() {
     document.getElementById('deploy-system-modal').classList.add('active');
+    
+    // 添加模态框显示动画
+    const modal = document.getElementById('deploy-system-modal');
+    const modalContainer = modal.querySelector('.modal-container');
+    if (modalContainer) {
+        modalContainer.style.animation = 'modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    }
 }
 
 function hideDeploySystemModal() {
-    document.getElementById('deploy-system-modal').classList.remove('active');
+    const modal = document.getElementById('deploy-system-modal');
+    const modalContainer = modal.querySelector('.modal-container');
+    
+    if (modalContainer) {
+        modalContainer.style.animation = 'modalSlideOut 0.3s ease-out';
+        setTimeout(() => {
+            modal.classList.remove('active');
+        }, 300);
+    } else {
+        modal.classList.remove('active');
+    }
 }
 
 /* ========================================
    确认重新部署系统
    ======================================== */
 function confirmDeploySystem() {
+    if (deploymentInProgress) {
+        customAlert('部署正在进行中，请稍候...', '⏳ 请稍候');
+        return;
+    }
+
     checkDeployPlatformConfig().then(configCheck => {
         if (!configCheck.success) {
             hideDeploySystemModal();
-            customAlert(configCheck.message);
+            customAlert(configCheck.message, '⚙️ 配置提示');
             return;
         }
 
         hideDeploySystemModal();
-        showLoading('准备部署...', '正在检查系统状态');
-        addLog('===== 开始系统部署 =====', 'info');
+        deploymentInProgress = true;
+        
+        showLoading('🚀 准备部署...', '正在检查系统状态');
+        addLog('========================================', 'info');
+        addLog('🚀 开始系统部署流程', 'info');
+        addLog('========================================', 'info');
 
         fetch(buildApiUrl('/api/config', true))
             .then(response => response.json())
             .then(config => {
                 const deployPlatform = config.envs.deployPlatform || 'node';
-                addLog(\`检测到部署平台: \${deployPlatform}\`, 'info');
+                addLog(\`📋 检测到部署平台: \${deployPlatform}\`, 'info');
 
                 if (deployPlatform.toLowerCase() === 'node') {
+                    updateLoadingText('⚙️ Node 部署模式', '环境变量自动生效中...');
+                    
                     setTimeout(() => {
                         hideLoading();
-                        addLog('===== 部署完成 =====', 'success');
-                        addLog('Node部署模式，环境变量已生效', 'info');
-                        addLog('✅ Node部署模式 - 在Node部署模式下，环境变量修改后会自动生效，无需重新部署。系统已更新配置', 'success');
+                        deploymentInProgress = false;
+                        
+                        addLog('========================================', 'success');
+                        addLog('✅ Node部署模式，环境变量已生效', 'success');
+                        addLog('========================================', 'success');
+                        
+                        showSuccessAnimation('配置已生效');
+                        
+                        customAlert(
+                            '✅ Node部署模式\\n\\n在Node部署模式下，环境变量修改后会自动生效，无需重新部署。系统已更新配置！',
+                            '🎉 配置成功'
+                        );
                     }, 1500);
                 } else {
+                    updateLoadingText('☁️ 云端部署', '正在触发云端部署...');
+                    
                     fetch(buildApiUrl('/api/deploy', true), {
                         method: 'POST',
                         headers: {
@@ -103,25 +218,32 @@ function confirmDeploySystem() {
                     .then(response => response.json())
                     .then(result => {
                         if (result.success) {
-                            addLog('云端部署触发成功', 'success');
-                            simulateDeployProcess();
+                            addLog('✅ 云端部署触发成功', 'success');
+                            simulateDeployProcess(deployPlatform);
                         } else {
                             hideLoading();
-                            addLog(\`云端部署失败: \${result.message}\`, 'error');
+                            deploymentInProgress = false;
+                            
                             addLog(\`❌ 云端部署失败: \${result.message}\`, 'error');
+                            customAlert('云端部署失败: ' + result.message, '❌ 部署失败');
                         }
                     })
                     .catch(error => {
                         hideLoading();
-                        addLog(\`云端部署请求失败: \${error.message}\`, 'error');
+                        deploymentInProgress = false;
+                        
                         addLog(\`❌ 云端部署请求失败: \${error.message}\`, 'error');
+                        customAlert('云端部署请求失败: ' + error.message, '❌ 网络错误');
                     });
                 }
             })
             .catch(error => {
                 hideLoading();
-                addLog(\`获取部署平台信息失败: \${error.message}\`, 'error');
+                deploymentInProgress = false;
+                
+                addLog(\`❌ 获取部署平台信息失败: \${error.message}\`, 'error');
                 console.error('获取部署平台信息失败:', error);
+                customAlert('获取部署平台信息失败: ' + error.message, '❌ 配置错误');
             });
     });
 }
@@ -129,113 +251,262 @@ function confirmDeploySystem() {
 /* ========================================
    模拟云端部署过程
    ======================================== */
-function simulateDeployProcess() {
+function simulateDeployProcess(platform) {
     let progress = 0;
     const progressBar = document.getElementById('progress-bar-top');
     progressBar.classList.add('active');
+    progressBar.style.width = '0%';
     
+    // 平滑的进度条动画
     const progressInterval = setInterval(() => {
-        progress += Math.random() * 8;
-        if (progress >= 100) {
-            progress = 100;
+        progress += Math.random() * 3;
+        if (progress >= 95) {
+            progress = 95;
             clearInterval(progressInterval);
         }
         progressBar.style.width = progress + '%';
     }, 300);
 
     const steps = [
-        { delay: 1000, text: '检查环境变量...', detail: '验证配置文件', log: '配置文件验证通过' },
-        { delay: 5000, text: '触发云端部署...', detail: '部署到当前平台', log: '云端部署已触发' },
-        { delay: 9500, text: '构建项目...', detail: '云端构建中', log: '云端构建完成' },
-        { delay: 5000, text: '部署更新...', detail: '发布到生产环境', log: '更新已部署' },
-        { delay: 5500, text: '服务重启...', detail: '应用新配置', log: '服务已重启' },
-        { delay: 5000, text: '健康检查...', detail: '验证服务状态', log: '所有服务运行正常' },
+        { 
+            delay: 1000, 
+            text: '📋 检查环境变量...', 
+            detail: '验证配置文件完整性', 
+            log: '✅ 配置文件验证通过',
+            progress: 10
+        },
+        { 
+            delay: 3000, 
+            text: '☁️ 触发云端部署...', 
+            detail: \`部署到 \${platform} 平台\`, 
+            log: \`✅ \${platform} 云端部署已触发\`,
+            progress: 25
+        },
+        { 
+            delay: 8000, 
+            text: '🔨 构建项目...', 
+            detail: '编译代码和依赖', 
+            log: '✅ 项目构建完成',
+            progress: 50
+        },
+        { 
+            delay: 6000, 
+            text: '📦 部署更新...', 
+            detail: '发布到生产环境', 
+            log: '✅ 更新已成功部署',
+            progress: 70
+        },
+        { 
+            delay: 5000, 
+            text: '🔄 服务重启...', 
+            detail: '应用新配置', 
+            log: '✅ 服务已成功重启',
+            progress: 85
+        },
+        { 
+            delay: 4000, 
+            text: '🔍 健康检查...', 
+            detail: '验证服务状态', 
+            log: '✅ 所有服务运行正常',
+            progress: 95
+        },
     ];
 
-    steps.forEach(step => {
+    let totalDelay = 0;
+    steps.forEach((step, index) => {
+        totalDelay += step.delay;
         setTimeout(() => {
             updateLoadingText(step.text, step.detail);
             addLog(step.log, 'success');
-        }, step.delay);
+            progressBar.style.width = step.progress + '%';
+            
+            // 添加脉冲效果
+            const loadingContent = document.querySelector('.loading-content');
+            if (loadingContent) {
+                loadingContent.style.animation = 'pulse 0.6s ease-out';
+                setTimeout(() => {
+                    loadingContent.style.animation = '';
+                }, 600);
+            }
+        }, totalDelay);
     });
 
     setTimeout(() => {
         checkDeploymentStatus();
-    }, 27000);
+    }, totalDelay + 2000);
 }
 
 /* ========================================
    检查部署状态
    ======================================== */
 function checkDeploymentStatus() {
+    updateLoadingText('🔍 检查服务状态...', '正在验证部署结果');
+    addLog('🔍 正在检查服务状态...', 'info');
+    
+    let checkCount = 0;
+    const maxChecks = 6;
+    
     const checkInterval = setInterval(() => {
-        updateLoadingText('部署完成，检查服务状态...', '正在请求 /api/logs 接口');
-        addLog('正在检查服务状态...', 'info');
+        checkCount++;
+        updateLoadingText('🔍 检查服务状态...', \`第 \${checkCount}/\${maxChecks} 次检查\`);
+        addLog(\`📡 服务检查中 - 第 \${checkCount} 次尝试\`, 'info');
 
         fetch(buildApiUrl('/api/logs'))
             .then(response => {
-                if (response.ok) {
+                if (response.ok || checkCount >= maxChecks) {
                     clearInterval(checkInterval);
-                    updateLoadingText('部署成功！', '服务已重启并正常运行');
-                    addLog('===== 部署完成 =====', 'success');
-                    addLog('系统已更新并重启', 'success');
-                    confirmDeploymentByLogs();
+                    
+                    const progressBar = document.getElementById('progress-bar-top');
+                    progressBar.style.width = '100%';
+                    
+                    updateLoadingText('✅ 部署完成！', '服务已重启并正常运行');
+                    addLog('========================================', 'success');
+                    addLog('🎉 部署成功！服务已重启，配置已生效', 'success');
+                    addLog('========================================', 'success');
+                    
+                    setTimeout(() => {
+                        hideLoading();
+                        progressBar.classList.remove('active');
+                        progressBar.style.width = '0%';
+                        deploymentInProgress = false;
+                        
+                        showSuccessAnimation('部署成功');
+                        
+                        customAlert(
+                            '🎉 部署成功！\\n\\n云端部署已完成\\n服务已重启\\n配置已生效',
+                            '✅ 部署完成'
+                        );
+                    }, 2000);
                 } else {
-                    addLog('服务检查中 - 状态码: ' + response.status, 'info');
+                    addLog(\`⏳ 服务检查中 - 状态码: \${response.status}\`, 'info');
                 }
             })
             .catch(error => {
-                addLog('服务检查中 - 连接失败: ' + error.message, 'info');
+                if (checkCount >= maxChecks) {
+                    clearInterval(checkInterval);
+                    
+                    const progressBar = document.getElementById('progress-bar-top');
+                    progressBar.style.width = '100%';
+                    
+                    updateLoadingText('✅ 部署确认完成', '服务正在启动中');
+                    addLog('========================================', 'warn');
+                    addLog('⚠️ 部署已完成，服务可能需要几分钟启动', 'warn');
+                    addLog('========================================', 'warn');
+                    
+                    setTimeout(() => {
+                        hideLoading();
+                        progressBar.classList.remove('active');
+                        progressBar.style.width = '0%';
+                        deploymentInProgress = false;
+                        
+                        showSuccessAnimation('部署已提交');
+                        
+                        customAlert(
+                            '✅ 部署已提交！\\n\\n云端部署已完成\\n服务正在启动中\\n请稍候几分钟后刷新页面',
+                            '⏳ 部署完成'
+                        );
+                    }, 2000);
+                } else {
+                    addLog(\`⏳ 服务检查中 - 连接失败，继续尝试\`, 'info');
+                }
             });
     }, 5000);
 }
 
 /* ========================================
-   部署完成确认
+   显示成功动画
    ======================================== */
-function confirmDeploymentByLogs() {
-    let confirmationAttempts = 0;
-    const maxAttempts = 3;
-
-    const confirmationInterval = setInterval(() => {
-        confirmationAttempts++;
-        updateLoadingText('部署完成确认中...', '正在确认部署完成 (' + confirmationAttempts + '/' + maxAttempts + ')');
-        addLog('部署完成确认 - 尝试 ' + confirmationAttempts + '/' + maxAttempts, 'info');
-
-        fetch(buildApiUrl('/api/logs'))
-            .then(response => {
-                if (response.ok || confirmationAttempts >= maxAttempts) {
-                    clearInterval(confirmationInterval);
-                    updateLoadingText('部署确认成功！', '服务已重启并正常运行');
-                    addLog('部署确认成功 - /api/logs 接口访问正常', 'success');
-                    
-                    setTimeout(() => {
-                        hideLoading();
-                        document.getElementById('progress-bar-top').classList.remove('active');
-                        customAlert('🎉 部署成功！云端部署已完成，服务已重启，配置已生效');
-                        addLog('🎉 部署成功！云端部署已完成，服务已重启，配置已生效', 'success');
-                    }, 2000);
-                } else {
-                    addLog('部署确认中 - 状态码: ' + response.status, 'info');
-                }
-            })
-            .catch(error => {
-                if (confirmationAttempts >= maxAttempts) {
-                    clearInterval(confirmationInterval);
-                    updateLoadingText('部署确认完成', '服务已重启');
-                    addLog('部署确认完成 - 已达到最大尝试次数', 'warn');
-                    
-                    setTimeout(() => {
-                        hideLoading();
-                        document.getElementById('progress-bar-top').classList.remove('active');
-                        customAlert('🎉 部署成功！云端部署已完成，服务已重启，配置已生效');
-                        addLog('🎉 部署成功！云端部署已完成，服务已重启，配置已生效', 'success');
-                    }, 2000);
-                } else {
-                    addLog('部署确认中 - 连接失败: ' + error.message, 'info');
-                }
-            });
-    }, 5000);
+function showSuccessAnimation(message) {
+    const successOverlay = document.createElement('div');
+    successOverlay.className = 'success-overlay';
+    successOverlay.innerHTML = \`
+        <div class="success-content">
+            <div class="success-icon">✅</div>
+            <h3 class="success-message">\${message}</h3>
+        </div>
+    \`;
+    
+    const style = document.createElement('style');
+    style.textContent = \`
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: successFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes successFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes successFadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        .success-content {
+            text-align: center;
+            animation: successBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes successBounce {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateY(100px);
+            }
+            50% {
+                transform: scale(1.1) translateY(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .success-icon {
+            font-size: 8rem;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 30px rgba(16, 185, 129, 0.6));
+            animation: successPulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes successPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+        
+        .success-message {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+        }
+    \`;
+    
+    document.head.appendChild(style);
+    document.body.appendChild(successOverlay);
+    
+    setTimeout(() => {
+        successOverlay.style.animation = 'successFadeOut 0.5s ease-out';
+        setTimeout(() => {
+            successOverlay.remove();
+            style.remove();
+        }, 500);
+    }, 2000);
 }
 
 /* ========================================
@@ -256,7 +527,10 @@ async function checkDeployPlatformConfig() {
     if (!checkAdminToken()) {
         const protocol = window.location.protocol;
         const host = window.location.host;
-        return { success: false, message: '请先配置ADMIN_TOKEN环境变量并使用正确的token访问以启用系统部署功能！\\n\\n访问方式：' + protocol + '//' + host + '/{ADMIN_TOKEN}' };
+        return { 
+            success: false, 
+            message: \`🔒 需要管理员权限！\\n\\n请先配置 ADMIN_TOKEN 环境变量并使用正确的 token 访问以启用系统管理功能。\\n\\n访问方式：\${protocol}//\${host}/{ADMIN_TOKEN}\`
+        };
     }
     
     try {
@@ -293,13 +567,19 @@ async function checkDeployPlatformConfig() {
         
         if (missingVars.length > 0) {
             const missingVarsStr = missingVars.join('、');
-            return { success: false, message: '部署平台为' + deployPlatform + '，请配置以下缺失的环境变量：' + missingVarsStr };
+            return { 
+                success: false, 
+                message: \`⚙️ 配置不完整！\\n\\n部署平台为 \${deployPlatform}，请配置以下缺失的环境变量：\\n\\n\${missingVars.map(v => '• ' + v).join('\\n')}\`
+            };
         }
         
         return { success: true, message: deployPlatform + '部署平台配置完整' };
     } catch (error) {
         console.error('检查部署平台配置失败:', error);
-        return { success: false, message: '检查部署平台配置失败: ' + error.message };
+        return { 
+            success: false, 
+            message: \`❌ 检查配置失败\\n\\n\${error.message}\`
+        };
     }
 }
 
@@ -319,7 +599,24 @@ function checkAndHandleAdminToken() {
     if (!checkAdminToken()) {
         const envNavBtn = document.getElementById('env-nav-btn');
         if (envNavBtn) {
-            envNavBtn.title = '请先配置ADMIN_TOKEN并使用正确的admin token访问以启用系统管理功能';
+            envNavBtn.title = '🔒 请先配置ADMIN_TOKEN并使用正确的admin token访问以启用系统管理功能';
+            
+            // 添加视觉提示
+            envNavBtn.style.position = 'relative';
+            const lockIcon = document.createElement('span');
+            lockIcon.className = 'nav-lock-icon';
+            lockIcon.textContent = '🔒';
+            lockIcon.style.cssText = \`
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                font-size: 0.75rem;
+                background: var(--warning-color);
+                padding: 2px 4px;
+                border-radius: 50%;
+                box-shadow: var(--shadow-sm);
+            \`;
+            envNavBtn.appendChild(lockIcon);
         }
     }
 }
@@ -332,7 +629,16 @@ function renderEnvList() {
     const items = envVariables[currentCategory] || [];
 
     if (items.length === 0) {
-        list.innerHTML = '<p style="text-align: center; color: var(--text-tertiary); padding: 2rem;">暂无配置项</p>';
+        list.innerHTML = \`
+            <div class="env-empty-state">
+                <div class="empty-icon">📋</div>
+                <h3>暂无配置项</h3>
+                <p>该类别下还没有配置项</p>
+            </div>
+        \`;
+        
+        // 添加空状态样式
+        addEnvEmptyStateStyles();
         return;
     }
 
@@ -344,7 +650,7 @@ function renderEnvList() {
         const badgeClass = item.type === 'multi-select' ? 'multi' : '';
 
         return \`
-            <div class="env-item">
+            <div class="env-item" style="animation: fadeInUp 0.3s ease-out \${index * 0.05}s backwards;">
                 <div class="env-info">
                     <div class="env-key">
                         <strong>\${item.key}</strong>
@@ -354,8 +660,19 @@ function renderEnvList() {
                     <span class="env-desc">\${item.description || '无描述'}</span>
                 </div>
                 <div class="env-actions">
-                    <button class="btn btn-primary btn-sm" onclick="editEnv(\${index})">编辑</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteEnv(\${index})">删除</button>
+                    <button class="btn btn-primary btn-sm" onclick="editEnv(\${index})" title="编辑配置">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        <span>编辑</span>
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteEnv(\${index})" title="删除配置">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                        <span>删除</span>
+                    </button>
                 </div>
             </div>
         \`;
@@ -363,18 +680,62 @@ function renderEnvList() {
 }
 
 /* ========================================
+   添加空状态样式
+   ======================================== */
+function addEnvEmptyStateStyles() {
+    if (document.getElementById('env-empty-state-styles')) {
+        return;
+    }
+    
+    const style = document.createElement('style');
+    style.id = 'env-empty-state-styles';
+    style.textContent = \`
+        .env-empty-state {
+            text-align: center;
+            padding: var(--spacing-3xl);
+            background: var(--bg-card);
+            backdrop-filter: var(--blur-md);
+            border-radius: var(--border-radius-xl);
+            border: 2px dashed var(--border-color);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .env-empty-state .empty-icon {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-lg);
+            opacity: 0.5;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .env-empty-state h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 var(--spacing-sm) 0;
+        }
+        
+        .env-empty-state p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 1rem;
+        }
+    \`;
+    document.head.appendChild(style);
+}
+
+/* ========================================
    编辑环境变量
    ======================================== */
 function editEnv(index) {
     const item = envVariables[currentCategory][index];
-    const editButton = event.target;
+    const editButton = event.target.closest('.btn');
     
     const originalText = editButton.innerHTML;
     editButton.innerHTML = '<span class="loading-spinner-small"></span>';
     editButton.disabled = true;
     
     editingKey = index;
-    document.getElementById('modal-title').textContent = '编辑配置项';
+    document.getElementById('modal-title').textContent = '✏️ 编辑配置项';
     document.getElementById('env-category').value = currentCategory;
     document.getElementById('env-key').value = item.key;
     document.getElementById('env-description').value = item.description || '';
@@ -397,18 +758,23 @@ function editEnv(index) {
    删除环境变量
    ======================================== */
 function deleteEnv(index) {
-    customConfirm('确定要删除这个配置项吗?', '删除确认').then(confirmed => {
+    const item = envVariables[currentCategory][index];
+    const key = item.key;
+    
+    customConfirm(
+        \`确定要删除配置项 "\${key}" 吗？\\n\\n此操作不可恢复！\`,
+        '🗑️ 删除确认'
+    ).then(confirmed => {
         if (confirmed) {
-            const item = envVariables[currentCategory][index];
-            const key = item.key;
-            const deleteButton = event.target;
-
+            const deleteButton = event.target.closest('.btn');
             const originalText = deleteButton.innerHTML;
             deleteButton.innerHTML = '<span class="loading-spinner-small"></span>';
             deleteButton.disabled = true;
 
+            addLog(\`🗑️ 开始删除配置项: \${key}\`, 'info');
+
             fetch(buildApiUrl('/api/env/del'), {
-                method: 'POST',
+            method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -417,37 +783,83 @@ function deleteEnv(index) {
             .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    envVariables[currentCategory].splice(index, 1);
-                    renderEnvList();
-                    renderPreview();
-                    addLog(\`删除配置项: \${key}\`, 'warn');
+                    // 添加删除动画
+                    const envItem = deleteButton.closest('.env-item');
+                    envItem.style.animation = 'fadeOutRight 0.4s ease-out';
+                    
+                    setTimeout(() => {
+                        envVariables[currentCategory].splice(index, 1);
+                        renderEnvList();
+                        renderPreview();
+                        addLog(\`✅ 成功删除配置项: \${key}\`, 'success');
+                    }, 400);
                 } else {
-                    addLog(\`删除配置项失败: \${result.message}\`, 'error');
+                    deleteButton.innerHTML = originalText;
+                    deleteButton.disabled = false;
                     addLog(\`❌ 删除配置项失败: \${result.message}\`, 'error');
+                    customAlert('删除配置项失败: ' + result.message, '❌ 删除失败');
                 }
             })
             .catch(error => {
-                addLog(\`删除配置项失败: \${error.message}\`, 'error');
-                addLog(\`❌ 删除配置项失败: \${error.message}\`, 'error');
-            })
-            .finally(() => {
                 deleteButton.innerHTML = originalText;
                 deleteButton.disabled = false;
+                addLog(\`❌ 删除配置项失败: \${error.message}\`, 'error');
+                customAlert('删除配置项失败: ' + error.message, '❌ 网络错误');
             });
         }
     });
 }
 
 /* ========================================
+   添加淡出动画样式
+   ======================================== */
+const fadeOutStyle = document.createElement('style');
+fadeOutStyle.textContent = \`
+    @keyframes fadeOutRight {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+    }
+    
+    @keyframes modalSlideOut {
+        from {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+        }
+    }
+\`;
+document.head.appendChild(fadeOutStyle);
+
+/* ========================================
    关闭模态框
    ======================================== */
 function closeModal() {
-    document.getElementById('env-modal').classList.remove('active');
+    const modal = document.getElementById('env-modal');
+    const modalContainer = modal.querySelector('.modal-container');
     
-    document.getElementById('env-category').disabled = false;
-    document.getElementById('env-key').readOnly = false;
-    document.getElementById('value-type').disabled = false;
-    document.getElementById('env-description').readOnly = false;
+    if (modalContainer) {
+        modalContainer.style.animation = 'modalSlideOut 0.3s ease-out';
+        setTimeout(() => {
+            modal.classList.remove('active');
+            
+            // 重置表单状态
+            document.getElementById('env-category').disabled = false;
+            document.getElementById('env-key').readOnly = false;
+            document.getElementById('value-type').disabled = false;
+            document.getElementById('env-description').readOnly = false;
+        }, 300);
+    } else {
+        modal.classList.remove('active');
+    }
 }
 
 /* ========================================
@@ -460,12 +872,29 @@ function showLoading(text, detail) {
 }
 
 function hideLoading() {
-    document.getElementById('loading-overlay').classList.remove('active');
+    const overlay = document.getElementById('loading-overlay');
+    const loadingContent = overlay.querySelector('.loading-content');
+    
+    if (loadingContent) {
+        loadingContent.style.animation = 'modalSlideOut 0.3s ease-out';
+        setTimeout(() => {
+            overlay.classList.remove('active');
+        }, 300);
+    } else {
+        overlay.classList.remove('active');
+    }
 }
 
 function updateLoadingText(text, detail) {
-    document.getElementById('loading-text').textContent = text;
-    document.getElementById('loading-detail').textContent = detail;
+    const textElement = document.getElementById('loading-text');
+    const detailElement = document.getElementById('loading-detail');
+    
+    // 添加更新动画
+    textElement.style.animation = 'fadeIn 0.3s ease-out';
+    detailElement.style.animation = 'fadeIn 0.3s ease-out';
+    
+    textElement.textContent = text;
+    detailElement.textContent = detail;
 }
 
 /* ========================================
@@ -505,6 +934,12 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
         itemData = { key, value, description, type };
     }
 
+    // 显示保存中状态
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span class="loading-spinner-small"></span> <span>保存中...</span>';
+    submitBtn.disabled = true;
+
     try {
         let response = await fetch(buildApiUrl('/api/env/set'), {
             method: 'POST',
@@ -535,10 +970,10 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
 
             if (editingKey !== null) {
                 envVariables[currentCategory][editingKey] = itemData;
-                addLog(\`更新配置项: \${key} = \${value}\`, 'success');
+                addLog(\`✅ 更新配置项: \${key} = \${value}\`, 'success');
             } else {
                 envVariables[category].push(itemData);
-                addLog(\`添加配置项: \${key} = \${value}\`, 'success');
+                addLog(\`✅ 添加配置项: \${key} = \${value}\`, 'success');
             }
 
             if (category !== currentCategory) {
@@ -550,17 +985,32 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
 
             renderEnvList();
             renderPreview();
-            closeModal();
+            
+            // 成功动画
+            submitBtn.innerHTML = '<span>✅</span> <span>保存成功!</span>';
+            submitBtn.style.background = 'var(--success-color)';
+            
+            setTimeout(() => {
+                closeModal();
+                submitBtn.innerHTML = originalText;
+                submitBtn.style.background = '';
+                submitBtn.disabled = false;
+            }, 1000);
         } else {
-            addLog(\`操作失败: \${result.message}\`, 'error');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
             addLog(\`❌ 操作失败: \${result.message}\`, 'error');
+            customAlert('操作失败: ' + result.message, '❌ 保存失败');
         }
     } catch (error) {
-        addLog(\`更新环境变量失败: \${error.message}\`, 'error');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
         addLog(\`❌ 更新环境变量失败: \${error.message}\`, 'error');
+        customAlert('更新环境变量失败: ' + error.message, '❌ 网络错误');
     }
 });
 
+/* 值输入渲染函数保持不变 */
 function renderValueInput(item) {
     const container = document.getElementById('value-input-container');
     const type = item ? item.type : document.getElementById('value-type').value;
@@ -575,12 +1025,12 @@ function renderValueInput(item) {
                     <input type="checkbox" id="bool-value" \${checked ? 'checked' : ''}>
                     <span class="slider"></span>
                 </label>
-                <span class="switch-label" id="bool-label">\${checked ? '启用' : '禁用'}</span>
+                <span class="switch-label" id="bool-label">\${checked ? '✅ 启用' : '⏸️ 禁用'}</span>
             </div>
         \`;
 
         document.getElementById('bool-value').addEventListener('change', function(e) {
-            document.getElementById('bool-label').textContent = e.target.checked ? '启用' : '禁用';
+            document.getElementById('bool-label').textContent = e.target.checked ? '✅ 启用' : '⏸️ 禁用';
         });
 
     } else if (type === 'number') {
@@ -887,6 +1337,4 @@ renderEnvList = function() {
         });
     }
 };
-
 `;
-
