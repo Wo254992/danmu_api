@@ -114,14 +114,21 @@ function toggleSidebar() {
         document.body.appendChild(overlay);
         
         // 添加动画样式
-        const style = document.createElement('style');
-        style.textContent = \`
-            @keyframes overlayFadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-        \`;
-        document.head.appendChild(style);
+        if (!document.getElementById('overlay-animation-styles')) {
+            const style = document.createElement('style');
+            style.id = 'overlay-animation-styles';
+            style.textContent = \`
+                @keyframes overlayFadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes overlayFadeOut {
+                    from { opacity: 1; }
+                    to { opacity: 0; }
+                }
+            \`;
+            document.head.appendChild(style);
+        }
     } else {
         const overlay = document.querySelector('.sidebar-overlay');
         if (overlay) {
