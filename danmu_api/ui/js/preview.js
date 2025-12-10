@@ -1,5 +1,7 @@
+// language=JavaScript
+export const previewJsContent = /* javascript */ `
 /* ========================================
-   渲染配置预览 - 现代化仪表板
+   渲染配置预览
    ======================================== */
 function renderPreview() {
     const preview = document.getElementById('preview-area');
@@ -12,85 +14,7 @@ function renderPreview() {
         .then(config => {
             const categorizedVars = config.categorizedEnvVars || {};
             
-            // 统计信息
-            const stats = {
-                total: 0,
-                categories: Object.keys(categorizedVars).length,
-                byCategory: {}
-            };
-            
-            Object.keys(categorizedVars).forEach(cat => {
-                const count = categorizedVars[cat].length;
-                stats.total += count;
-                stats.byCategory[cat] = count;
-            });
-            
-            let html = `
-                <div class="dashboard-container">
-                    <!-- 欢迎卡片 -->
-                    <div class="welcome-card">
-                        <div class="welcome-icon">🎉</div>
-                        <div class="welcome-content">
-                            <h2 class="welcome-title">欢迎使用 LogVar 弹幕API</h2>
-                            <p class="welcome-subtitle">系统配置总览 - 一切运行正常</p>
-                        </div>
-                        <div class="welcome-status">
-                            <div class="status-indicator status-online"></div>
-                            <span class="status-text">在线运行中</span>
-                        </div>
-                    </div>
-                    
-                    <!-- 统计卡片区 -->
-                    <div class="stats-grid">
-                        <div class="stat-card stat-primary">
-                            <div class="stat-icon-wrapper">
-                                <div class="stat-icon">📊</div>
-                            </div>
-                            <div class="stat-content">
-                                <div class="stat-value">${stats.total}</div>
-                                <div class="stat-label">配置项总数</div>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card stat-success">
-                            <div class="stat-icon-wrapper">
-                                <div class="stat-icon">📁</div>
-                            </div>
-                            <div class="stat-content">
-                                <div class="stat-value">${stats.categories}</div>
-                                <div class="stat-label">配置类别</div>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card stat-info">
-                            <div class="stat-icon-wrapper">
-                                <div class="stat-icon">✅</div>
-                            </div>
-                            <div class="stat-content">
-                                <div class="stat-value">100%</div>
-                                <div class="stat-label">配置完整度</div>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card stat-warning">
-                            <div class="stat-icon-wrapper">
-                                <div class="stat-icon">🚀</div>
-                            </div>
-                            <div class="stat-content">
-                                <div class="stat-value">活跃</div>
-                                <div class="stat-label">系统状态</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 配置类别概览 -->
-                    <div class="categories-overview">
-                        <h3 class="section-heading">
-                            <span class="heading-icon">🎯</span>
-                            配置类别概览
-                        </h3>
-                        <div class="category-cards-grid">
-            `;
+            let html = '';
             
             // 按类别顺序排列
             const categoryOrder = ['api', 'source', 'match', 'danmu', 'cache', 'system'];
@@ -101,104 +25,72 @@ function renderPreview() {
                 const categoryIcon = getCategoryIcon(category);
                 const categoryName = getCategoryName(category);
                 const categoryColor = getCategoryColor(category);
-                const categoryDesc = getCategoryDescription(category);
                 
-                html += `
-                    <div class="category-overview-card" style="animation: fadeInUp 0.4s ease-out ${index * 0.1}s backwards;">
-                        <div class="category-card-header">
-                            <div class="category-card-icon" style="background: ${categoryColor};">
-                                ${categoryIcon}
-                            </div>
-                            <div class="category-card-info">
-                                <h4 class="category-card-title">${categoryName}</h4>
-                                <p class="category-card-desc">${categoryDesc}</p>
-                            </div>
+                html += \`
+                    <div class="preview-category" style="animation: fadeInUp 0.4s ease-out \${index * 0.1}s backwards;">
+                        <div class="preview-category-header">
+                            <h3 class="preview-category-title">
+                                <span class="category-icon" style="background: \${categoryColor};">\${categoryIcon}</span>
+                                <span>\${categoryName}</span>
+                                <span class="category-badge">\${items.length} 项</span>
+                            </h3>
                         </div>
-                        <div class="category-card-stats">
-                            <div class="category-stat">
-                                <span class="category-stat-icon">📝</span>
-                                <span class="category-stat-value">${items.length}</span>
-                                <span class="category-stat-label">配置项</span>
-                            </div>
-                            <div class="category-stat">
-                                <span class="category-stat-icon">✨</span>
-                                <span class="category-stat-value">已生效</span>
-                            </div>
-                        </div>
-                        <div class="category-card-items">
-                            ${items.slice(0, 4).map(item => `
-                                <div class="category-item-chip">
-                                    <span class="chip-icon">🔹</span>
-                                    <span class="chip-text">${escapeHtml(item.key)}</span>
+                        <div class="preview-items">
+                            \${items.map((item, itemIndex) => \`
+                                <div class="preview-item" style="animation: fadeInUp 0.3s ease-out \${(index * 0.1) + (itemIndex * 0.05)}s backwards;">
+                                    <div class="preview-item-header">
+                                        <strong class="preview-key">
+                                            <span class="key-icon">🔑</span>
+                                            \${escapeHtml(item.key)}
+                                        </strong>
+                                        <span class="preview-type-badge">\${getTypeBadge(item.type || 'text')}</span>
+                                    </div>
+                                    <div class="preview-value-container">
+                                        <code class="preview-value">\${escapeHtml(formatValue(item.value))}</code>
+                                        <button class="preview-copy-btn" onclick="copyPreviewValue('\${escapeHtml(String(item.value)).replace(/'/g, "\\\\'")}', this)" title="复制值">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    \${item.description ? \`
+                                        <div class="preview-desc">
+                                            <span class="desc-icon">💡</span>
+                                            \${escapeHtml(item.description)}
+                                        </div>
+                                    \` : ''}
                                 </div>
-                            `).join('')}
-                            ${items.length > 4 ? `
-                                <div class="category-item-chip chip-more">
-                                    <span class="chip-icon">➕</span>
-                                    <span class="chip-text">还有 ${items.length - 4} 项...</span>
-                                </div>
-                            ` : ''}
+                            \`).join('')}
                         </div>
-                        <button class="category-card-button" onclick="viewCategoryDetails('${category}')">
-                            <span>查看详情</span>
-                            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </button>
                     </div>
-                `;
+                \`;
             });
             
-            html += `
-                        </div>
+            if (html === '') {
+                html = \`
+                    <div class="preview-empty">
+                        <div class="empty-icon">📭</div>
+                        <h3>暂无配置</h3>
+                        <p>还没有配置任何环境变量</p>
                     </div>
-                    
-                    <!-- 快速操作区 -->
-                    <div class="quick-actions">
-                        <h3 class="section-heading">
-                            <span class="heading-icon">⚡</span>
-                            快速操作
-                        </h3>
-                        <div class="action-cards-grid">
-                            <div class="action-card" onclick="switchSection('logs')">
-                                <div class="action-card-icon action-icon-blue">📝</div>
-                                <h4 class="action-card-title">查看日志</h4>
-                                <p class="action-card-desc">实时监控系统运行状态</p>
-                            </div>
-                            <div class="action-card" onclick="switchSection('api')">
-                                <div class="action-card-icon action-icon-green">🔧</div>
-                                <h4 class="action-card-title">接口调试</h4>
-                                <p class="action-card-desc">测试和调试API接口</p>
-                            </div>
-                            <div class="action-card" onclick="switchSection('push')">
-                                <div class="action-card-icon action-icon-purple">🚀</div>
-                                <h4 class="action-card-title">推送弹幕</h4>
-                                <p class="action-card-desc">向播放器推送弹幕</p>
-                            </div>
-                            <div class="action-card" onclick="switchSection('env')">
-                                <div class="action-card-icon action-icon-orange">⚙️</div>
-                                <h4 class="action-card-title">系统配置</h4>
-                                <p class="action-card-desc">管理环境变量设置</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+                \`;
+            }
             
             preview.innerHTML = html;
             
-            // 添加现代化样式
-            addModernDashboardStyles();
+            // 添加动画样式
+            addPreviewAnimationStyles();
             
-            addLog('✅ 主界面加载完成，共 ' + sortedCategories.length + ' 个类别', 'success');
+            addLog('✅ 配置预览加载完成，共 ' + sortedCategories.length + ' 个类别', 'success');
         })
         .catch(error => {
             console.error('Failed to load config for preview:', error);
-            preview.innerHTML = `
+            preview.innerHTML = \`
                 <div class="preview-error">
                     <div class="error-icon">⚠️</div>
                     <h3>加载失败</h3>
-                    <p>${escapeHtml(error.message)}</p>
+                    <p>\${escapeHtml(error.message)}</p>
                     <button class="btn btn-primary" onclick="renderPreview()">
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -206,22 +98,22 @@ function renderPreview() {
                         重新加载
                     </button>
                 </div>
-            `;
-            addLog('❌ 主界面加载失败: ' + error.message, 'error');
+            \`;
+            addLog('❌ 配置预览加载失败: ' + error.message, 'error');
         });
 }
 
 /* ========================================
-   添加现代化仪表板样式
+   添加预览动画样式
    ======================================== */
-function addModernDashboardStyles() {
-    if (document.getElementById('modern-dashboard-styles')) {
+function addPreviewAnimationStyles() {
+    if (document.getElementById('preview-animation-styles')) {
         return;
     }
     
     const style = document.createElement('style');
-    style.id = 'modern-dashboard-styles';
-    style.textContent = `
+    style.id = 'preview-animation-styles';
+    style.textContent = \`
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -234,544 +126,340 @@ function addModernDashboardStyles() {
         }
         
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
         }
         
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+        .preview-category-header {
+            position: relative;
+            margin-bottom: var(--spacing-lg);
         }
         
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-        
-        .dashboard-container {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-2xl);
-        }
-        
-        /* 欢迎卡片 */
-        .welcome-card {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            border-radius: var(--border-radius-xl);
-            padding: var(--spacing-2xl);
+        .preview-category-title {
             display: flex;
             align-items: center;
-            gap: var(--spacing-xl);
-            box-shadow: var(--shadow-colored);
-            color: white;
-            position: relative;
-            overflow: hidden;
-            animation: fadeInUp 0.6s ease-out;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
         }
         
-        .welcome-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 200%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(255, 255, 255, 0.2), 
-                transparent
-            );
-            animation: shimmer 3s infinite;
-        }
-        
-        .welcome-icon {
-            font-size: 4rem;
-            animation: float 3s ease-in-out infinite;
-            flex-shrink: 0;
-        }
-        
-        .welcome-content {
-            flex: 1;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .welcome-title {
-            font-size: 1.75rem;
-            font-weight: 800;
-            margin: 0 0 var(--spacing-xs) 0;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        .welcome-subtitle {
-            font-size: 1rem;
-            margin: 0;
-            opacity: 0.95;
-        }
-        
-        .welcome-status {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            padding: var(--spacing-sm) var(--spacing-lg);
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            position: relative;
-            z-index: 1;
-            flex-shrink: 0;
-        }
-        
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        .status-online {
-            background: #10b981;
-            box-shadow: 0 0 10px #10b981;
-        }
-        
-        .status-text {
-            font-weight: 600;
-            font-size: 0.9375rem;
-        }
-        
-        /* 统计卡片网格 */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: var(--spacing-xl);
-            animation: fadeInUp 0.6s ease-out 0.1s backwards;
-        }
-        
-        .stat-card {
-            background: var(--bg-card);
-            backdrop-filter: var(--blur-md);
-            border-radius: var(--border-radius-lg);
-            padding: var(--spacing-xl);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-lg);
-            box-shadow: var(--shadow-md);
-            border: 2px solid var(--border-color);
-            transition: all var(--transition-base);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform var(--transition-base);
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--primary-color);
-        }
-        
-        .stat-card:hover::before {
-            transform: scaleX(1);
-        }
-        
-        .stat-icon-wrapper {
-            width: 64px;
-            height: 64px;
-            border-radius: var(--border-radius);
+        .category-icon {
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
-            position: relative;
-        }
-        
-        .stat-primary .stat-icon-wrapper {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
-        }
-        
-        .stat-success .stat-icon-wrapper {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.1));
-        }
-        
-        .stat-info .stat-icon-wrapper {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.1));
-        }
-        
-        .stat-warning .stat-icon-wrapper {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
-        }
-        
-        .stat-icon {
-            font-size: 2rem;
-        }
-        
-        .stat-content {
-            flex: 1;
-        }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            line-height: 1.2;
-            margin-bottom: var(--spacing-xs);
-        }
-        
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-        
-        /* 配置类别概览 */
-        .categories-overview {
-            animation: fadeInUp 0.6s ease-out 0.2s backwards;
-        }
-        
-        .section-heading {
+            border-radius: var(--border-radius);
             font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin: 0 0 var(--spacing-xl) 0;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-        
-        .heading-icon {
-            font-size: 1.75rem;
-        }
-        
-        .category-cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: var(--spacing-xl);
-        }
-        
-        .category-overview-card {
-            background: var(--bg-card);
-            backdrop-filter: var(--blur-md);
-            border-radius: var(--border-radius-lg);
-            padding: var(--spacing-xl);
             box-shadow: var(--shadow-md);
+            flex-shrink: 0;
+        }
+        
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            background: var(--bg-secondary);
             border: 2px solid var(--border-color);
-            transition: all var(--transition-base);
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-lg);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
         }
         
-        .category-overview-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--primary-color);
-        }
-        
-        .category-card-header {
+        .preview-item-header {
             display: flex;
+            justify-content: space-between;
             align-items: flex-start;
             gap: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            flex-wrap: wrap;
         }
         
-        .category-card-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: var(--border-radius);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.75rem;
-            flex-shrink: 0;
-            box-shadow: var(--shadow-md);
-        }
-        
-        .category-card-info {
+        .preview-key {
+            word-break: break-word;
+            max-width: 100%;
             flex: 1;
             min-width: 0;
         }
         
-        .category-card-title {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin: 0 0 var(--spacing-xs) 0;
-        }
-        
-        .category-card-desc {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin: 0;
-            line-height: 1.5;
-        }
-        
-        .category-card-stats {
-            display: flex;
-            gap: var(--spacing-xl);
-            padding: var(--spacing-md) 0;
-            border-top: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .category-stat {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-xs);
-            font-size: 0.875rem;
-        }
-        
-        .category-stat-icon {
+        .key-icon {
+            display: inline-block;
+            margin-right: var(--spacing-xs);
             font-size: 1rem;
         }
         
-        .category-stat-value {
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        
-        .category-stat-label {
-            color: var(--text-secondary);
-        }
-        
-        .category-card-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--spacing-xs);
-        }
-        
-        .category-item-chip {
+        .preview-type-badge {
             display: inline-flex;
             align-items: center;
-            gap: var(--spacing-xs);
-            padding: 4px 12px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            font-size: 0.8125rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-        
-        .chip-icon {
-            font-size: 0.75rem;
-        }
-        
-        .chip-more {
+            padding: 3px 10px;
             background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             color: white;
-            border-color: transparent;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            box-shadow: var(--shadow-sm);
+            flex-shrink: 0;
         }
         
-        .category-card-button {
+        .preview-value-container {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-sm);
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        .preview-value {
+            flex: 1;
+            min-width: 0;
+            word-break: break-all;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+        
+        .preview-copy-btn {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: var(--spacing-xs);
-            padding: var(--spacing-md);
-            background: var(--bg-secondary);
-            border: 2px solid var(--border-color);
-            border-radius: var(--border-radius);
-            color: var(--text-primary);
-            font-weight: 600;
-            font-size: 0.9375rem;
             cursor: pointer;
             transition: all var(--transition-fast);
+            opacity: 0.7;
         }
         
-        .category-card-button:hover {
+        .preview-item:hover .preview-copy-btn,
+        .preview-item:active .preview-copy-btn {
+            opacity: 1;
+        }
+        
+        .preview-copy-btn:hover {
             background: var(--primary-color);
-            color: white;
             border-color: var(--primary-color);
-            transform: translateX(4px);
+            transform: scale(1.1);
         }
         
-        .button-icon {
+        .preview-copy-btn:hover svg {
+            stroke: white;
+        }
+        
+        .preview-copy-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .preview-copy-btn svg {
             width: 16px;
             height: 16px;
-            stroke-width: 2.5;
-            transition: transform var(--transition-fast);
+            stroke: var(--text-secondary);
+            transition: stroke var(--transition-fast);
         }
         
-        .category-card-button:hover .button-icon {
-            transform: translateX(4px);
+        .preview-desc {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--bg-tertiary);
+            border-radius: var(--border-radius-sm);
+            border-left: 3px solid var(--primary-color);
+            word-break: break-word;
+            max-width: 100%;
         }
         
-        /* 快速操作区 */
-        .quick-actions {
-            animation: fadeInUp 0.6s ease-out 0.3s backwards;
+        .desc-icon {
+            font-size: 0.875rem;
+            flex-shrink: 0;
+            margin-top: 2px;
         }
         
-        .action-cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: var(--spacing-xl);
-        }
-        
-        .action-card {
+        .preview-empty,
+        .preview-error {
+            text-align: center;
+            padding: var(--spacing-3xl);
             background: var(--bg-card);
             backdrop-filter: var(--blur-md);
-            border-radius: var(--border-radius-lg);
-            padding: var(--spacing-xl);
-            box-shadow: var(--shadow-md);
-            border: 2px solid var(--border-color);
-            transition: all var(--transition-base);
-            cursor: pointer;
-            text-align: center;
-        }
-        
-        .action-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--primary-color);
-        }
-        
-        .action-card-icon {
-            width: 72px;
-            height: 72px;
-            margin: 0 auto var(--spacing-lg);
-            border-radius: var(--border-radius-lg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
+            border-radius: var(--border-radius-xl);
+            border: 2px dashed var(--border-color);
             box-shadow: var(--shadow-md);
         }
         
-        .action-icon-blue {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.1));
+        .empty-icon,
+        .error-icon {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-lg);
+            animation: pulse 2s ease-in-out infinite;
         }
         
-        .action-icon-green {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.1));
-        }
-        
-        .action-icon-purple {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(167, 139, 250, 0.1));
-        }
-        
-        .action-icon-orange {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
-        }
-        
-        .action-card-title {
-            font-size: 1.125rem;
+        .preview-empty h3,
+        .preview-error h3 {
+            font-size: 1.5rem;
             font-weight: 700;
             color: var(--text-primary);
-            margin: 0 0 var(--spacing-xs) 0;
+            margin: 0 0 var(--spacing-sm) 0;
         }
         
-        .action-card-desc {
-            font-size: 0.875rem;
+        .preview-empty p,
+        .preview-error p {
             color: var(--text-secondary);
-            margin: 0;
-            line-height: 1.5;
+            margin: 0 0 var(--spacing-lg) 0;
+            font-size: 1rem;
+            word-break: break-word;
         }
         
-        /* 移动端适配 */
+        /* 移动端特殊优化 */
         @media (max-width: 768px) {
-            .welcome-card {
-                flex-direction: column;
-                text-align: center;
-                padding: var(--spacing-xl);
+            .preview-category-title {
+                font-size: 1.125rem;
             }
             
-            .welcome-icon {
-                font-size: 3rem;
+            .category-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1.25rem;
             }
             
-            .welcome-title {
-                font-size: 1.5rem;
+            .category-badge {
+                font-size: 0.7rem;
+                padding: 3px 10px;
             }
             
-            .welcome-subtitle {
+            .preview-item-header {
+                gap: var(--spacing-sm);
+            }
+            
+            .preview-key {
                 font-size: 0.9375rem;
             }
             
-            .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: var(--spacing-md);
+            .key-icon {
+                font-size: 0.875rem;
             }
             
-            .stat-card {
-                flex-direction: column;
-                text-align: center;
-                padding: var(--spacing-lg);
+            .preview-type-badge {
+                font-size: 0.65rem;
+                padding: 2px 8px;
             }
             
-            .stat-icon-wrapper {
-                width: 52px;
-                height: 52px;
+            .preview-value {
+                font-size: 0.8125rem;
+                padding: var(--spacing-sm);
             }
             
-            .stat-icon {
-                font-size: 1.5rem;
+            .preview-copy-btn {
+                width: 28px;
+                height: 28px;
+                opacity: 1;
             }
             
-            .stat-value {
-                font-size: 1.5rem;
+            .preview-copy-btn svg {
+                width: 14px;
+                height: 14px;
             }
             
-            .stat-label {
+            .preview-desc {
+                font-size: 0.75rem;
+                padding: var(--spacing-xs) var(--spacing-sm);
+            }
+            
+            .desc-icon {
                 font-size: 0.75rem;
             }
-            
-            .category-cards-grid {
-                grid-template-columns: 1fr;
+        }
+        
+        @media (max-width: 480px) {
+            .preview-category-title {
+                font-size: 1rem;
             }
             
-            .category-card-icon {
-                width: 48px;
-                height: 48px;
-                font-size: 1.5rem;
+            .category-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 1.125rem;
             }
             
-            .action-cards-grid {
-                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            .preview-key {
+                font-size: 0.875rem;
             }
             
-            .action-card-icon {
-                width: 56px;
-                height: 56px;
-                font-size: 2rem;
+            .preview-value {
+                font-size: 0.75rem;
             }
         }
-    `;
+    \`;
     document.head.appendChild(style);
 }
 
 /* ========================================
-   查看类别详情
+   复制预览值
    ======================================== */
-function viewCategoryDetails(category) {
-    switchSection('env');
-    setTimeout(() => {
-        switchCategory(category);
-    }, 300);
+function copyPreviewValue(value, button) {
+    // 确保value是字符串
+    const textToCopy = String(value);
+    
+    navigator.clipboard.writeText(textToCopy)
+        .then(() => {
+            const originalHTML = button.innerHTML;
+            button.innerHTML = \`
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            \`;
+            button.style.background = 'var(--success-color)';
+            button.style.borderColor = 'var(--success-color)';
+            button.style.animation = 'pulse 0.4s ease-out';
+            
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.style.background = '';
+                button.style.borderColor = '';
+                button.style.animation = '';
+            }, 1500);
+            
+            addLog('📋 已复制配置值到剪贴板', 'success');
+        })
+        .catch(err => {
+            console.error('复制失败:', err);
+            addLog('❌ 复制失败: ' + err.message, 'error');
+        });
 }
 
 /* ========================================
-   获取类别描述
+   格式化值显示
    ======================================== */
-function getCategoryDescription(category) {
-    const descriptions = {
-        api: '管理API端点和认证配置',
-        source: '配置弹幕数据源和来源',
-        match: '智能匹配规则和算法',
-        danmu: '弹幕显示和过滤设置',
-        cache: '缓存策略和性能优化',
-        system: '系统级配置和部署参数'
+function formatValue(value) {
+    // 确保value是字符串
+    const stringValue = String(value);
+    if (stringValue.length > 200) {
+        return stringValue.substring(0, 200) + '...';
+    }
+    return stringValue;
+}
+
+/* ========================================
+   获取类型徽章
+   ======================================== */
+function getTypeBadge(type) {
+    const badges = {
+        text: '文本',
+        boolean: '布尔',
+        number: '数字',
+        select: '单选',
+        'multi-select': '多选'
     };
-    return descriptions[category] || '配置项管理';
+    return badges[type] || '文本';
 }
 
 /* ========================================
