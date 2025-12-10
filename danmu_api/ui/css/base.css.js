@@ -299,7 +299,7 @@ body::before {
     left: 0;
     top: 0;
     bottom: 0;
-    z-index: 1000;
+    z-index: 1001;
     transition: transform var(--transition-base);
     overflow-y: auto;
     overflow-x: hidden;
