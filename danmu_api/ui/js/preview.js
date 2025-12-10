@@ -47,7 +47,7 @@ function renderPreview() {
                                     </div>
                                     <div class="preview-value-container">
                                         <code class="preview-value">\${escapeHtml(formatValue(item.value))}</code>
-                                        <button class="preview-copy-btn" onclick="copyPreviewValue('\${escapeHtml(item.value).replace(/'/g, "\\\\'")}', this)" title="复制值">
+                                        <button class="preview-copy-btn" onclick="copyPreviewValue('\${escapeHtml(String(item.value)).replace(/'/g, "\\\\'")}', this)" title="复制值">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -177,6 +177,14 @@ function addPreviewAnimationStyles() {
             align-items: flex-start;
             gap: var(--spacing-md);
             margin-bottom: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+        
+        .preview-key {
+            word-break: break-word;
+            max-width: 100%;
+            flex: 1;
+            min-width: 0;
         }
         
         .key-icon {
@@ -205,6 +213,16 @@ function addPreviewAnimationStyles() {
             display: flex;
             align-items: flex-start;
             gap: var(--spacing-sm);
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        .preview-value {
+            flex: 1;
+            min-width: 0;
+            word-break: break-all;
+            overflow-wrap: break-word;
+            max-width: 100%;
         }
         
         .preview-copy-btn {
@@ -219,13 +237,12 @@ function addPreviewAnimationStyles() {
             justify-content: center;
             cursor: pointer;
             transition: all var(--transition-fast);
-            opacity: 0;
-            transform: translateX(-10px);
+            opacity: 0.7;
         }
         
-        .preview-item:hover .preview-copy-btn {
+        .preview-item:hover .preview-copy-btn,
+        .preview-item:active .preview-copy-btn {
             opacity: 1;
-            transform: translateX(0);
         }
         
         .preview-copy-btn:hover {
@@ -258,6 +275,8 @@ function addPreviewAnimationStyles() {
             background: var(--bg-tertiary);
             border-radius: var(--border-radius-sm);
             border-left: 3px solid var(--primary-color);
+            word-break: break-word;
+            max-width: 100%;
         }
         
         .desc-icon {
@@ -297,6 +316,87 @@ function addPreviewAnimationStyles() {
             color: var(--text-secondary);
             margin: 0 0 var(--spacing-lg) 0;
             font-size: 1rem;
+            word-break: break-word;
+        }
+        
+        /* 移动端特殊优化 */
+        @media (max-width: 768px) {
+            .preview-category-title {
+                font-size: 1.125rem;
+            }
+            
+            .category-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1.25rem;
+            }
+            
+            .category-badge {
+                font-size: 0.7rem;
+                padding: 3px 10px;
+            }
+            
+            .preview-item-header {
+                gap: var(--spacing-sm);
+            }
+            
+            .preview-key {
+                font-size: 0.9375rem;
+            }
+            
+            .key-icon {
+                font-size: 0.875rem;
+            }
+            
+            .preview-type-badge {
+                font-size: 0.65rem;
+                padding: 2px 8px;
+            }
+            
+            .preview-value {
+                font-size: 0.8125rem;
+                padding: var(--spacing-sm);
+            }
+            
+            .preview-copy-btn {
+                width: 28px;
+                height: 28px;
+                opacity: 1;
+            }
+            
+            .preview-copy-btn svg {
+                width: 14px;
+                height: 14px;
+            }
+            
+            .preview-desc {
+                font-size: 0.75rem;
+                padding: var(--spacing-xs) var(--spacing-sm);
+            }
+            
+            .desc-icon {
+                font-size: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .preview-category-title {
+                font-size: 1rem;
+            }
+            
+            .category-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 1.125rem;
+            }
+            
+            .preview-key {
+                font-size: 0.875rem;
+            }
+            
+            .preview-value {
+                font-size: 0.75rem;
+            }
         }
     \`;
     document.head.appendChild(style);
@@ -306,7 +406,10 @@ function addPreviewAnimationStyles() {
    复制预览值
    ======================================== */
 function copyPreviewValue(value, button) {
-    navigator.clipboard.writeText(value)
+    // 确保value是字符串
+    const textToCopy = String(value);
+    
+    navigator.clipboard.writeText(textToCopy)
         .then(() => {
             const originalHTML = button.innerHTML;
             button.innerHTML = \`
@@ -337,10 +440,12 @@ function copyPreviewValue(value, button) {
    格式化值显示
    ======================================== */
 function formatValue(value) {
-    if (typeof value === 'string' && value.length > 200) {
-        return value.substring(0, 200) + '...';
+    // 确保value是字符串
+    const stringValue = String(value);
+    if (stringValue.length > 200) {
+        return stringValue.substring(0, 200) + '...';
     }
-    return value;
+    return stringValue;
 }
 
 /* ========================================
