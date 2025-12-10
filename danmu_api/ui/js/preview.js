@@ -1,5 +1,5 @@
 /* ========================================
-   渲染配置预览 - 现代化主界面
+   渲染配置预览 - 现代化仪表板
    ======================================== */
 function renderPreview() {
     const preview = document.getElementById('preview-area');
@@ -12,72 +12,84 @@ function renderPreview() {
         .then(config => {
             const categorizedVars = config.categorizedEnvVars || {};
             
-            // 统计数据
-            const stats = calculateStats(categorizedVars);
+            // 统计信息
+            const stats = {
+                total: 0,
+                categories: Object.keys(categorizedVars).length,
+                byCategory: {}
+            };
+            
+            Object.keys(categorizedVars).forEach(cat => {
+                const count = categorizedVars[cat].length;
+                stats.total += count;
+                stats.byCategory[cat] = count;
+            });
             
             let html = `
-                <!-- 欢迎横幅 -->
-                <div class="welcome-banner">
-                    <div class="banner-content">
-                        <div class="banner-icon">🚀</div>
-                        <div class="banner-text">
-                            <h1 class="banner-title">LogVar 弹幕API 管理平台</h1>
-                            <p class="banner-subtitle">现代化的配置管理，强大的功能支持</p>
+                <div class="dashboard-container">
+                    <!-- 欢迎卡片 -->
+                    <div class="welcome-card">
+                        <div class="welcome-icon">🎉</div>
+                        <div class="welcome-content">
+                            <h2 class="welcome-title">欢迎使用 LogVar 弹幕API</h2>
+                            <p class="welcome-subtitle">系统配置总览 - 一切运行正常</p>
                         </div>
-                    </div>
-                    <div class="banner-wave"></div>
-                </div>
-
-                <!-- 统计卡片 -->
-                <div class="stats-grid">
-                    <div class="stat-card" style="animation-delay: 0.1s;">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            📊
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-value">${stats.total}</div>
-                            <div class="stat-label">配置项总数</div>
+                        <div class="welcome-status">
+                            <div class="status-indicator status-online"></div>
+                            <span class="status-text">在线运行中</span>
                         </div>
                     </div>
                     
-                    <div class="stat-card" style="animation-delay: 0.2s;">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                            📁
+                    <!-- 统计卡片区 -->
+                    <div class="stats-grid">
+                        <div class="stat-card stat-primary">
+                            <div class="stat-icon-wrapper">
+                                <div class="stat-icon">📊</div>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">${stats.total}</div>
+                                <div class="stat-label">配置项总数</div>
+                            </div>
                         </div>
-                        <div class="stat-content">
-                            <div class="stat-value">${stats.categories}</div>
-                            <div class="stat-label">配置类别</div>
+                        
+                        <div class="stat-card stat-success">
+                            <div class="stat-icon-wrapper">
+                                <div class="stat-icon">📁</div>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">${stats.categories}</div>
+                                <div class="stat-label">配置类别</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card stat-info">
+                            <div class="stat-icon-wrapper">
+                                <div class="stat-icon">✅</div>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">100%</div>
+                                <div class="stat-label">配置完整度</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card stat-warning">
+                            <div class="stat-icon-wrapper">
+                                <div class="stat-icon">🚀</div>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">活跃</div>
+                                <div class="stat-label">系统状态</div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="stat-card" style="animation-delay: 0.3s;">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                            ✅
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-value">${stats.configured}</div>
-                            <div class="stat-label">已配置项</div>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card" style="animation-delay: 0.4s;">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                            🎯
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-value">${stats.active}</div>
-                            <div class="stat-label">生效中</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 配置概览 -->
-                <div class="config-overview">
-                    <h2 class="section-heading">
-                        <span class="heading-icon">⚙️</span>
-                        配置概览
-                        <span class="heading-badge">实时状态</span>
-                    </h2>
+                    <!-- 配置类别概览 -->
+                    <div class="categories-overview">
+                        <h3 class="section-heading">
+                            <span class="heading-icon">🎯</span>
+                            配置类别概览
+                        </h3>
+                        <div class="category-cards-grid">
             `;
             
             // 按类别顺序排列
@@ -92,109 +104,106 @@ function renderPreview() {
                 const categoryDesc = getCategoryDescription(category);
                 
                 html += `
-                    <div class="config-category-card" style="animation: fadeInUp 0.4s ease-out ${index * 0.1}s backwards;">
+                    <div class="category-overview-card" style="animation: fadeInUp 0.4s ease-out ${index * 0.1}s backwards;">
                         <div class="category-card-header">
-                            <div class="category-header-left">
-                                <div class="category-card-icon" style="background: ${categoryColor};">
-                                    ${categoryIcon}
-                                </div>
-                                <div class="category-card-info">
-                                    <h3 class="category-card-title">${categoryName}</h3>
-                                    <p class="category-card-desc">${categoryDesc}</p>
-                                </div>
+                            <div class="category-card-icon" style="background: ${categoryColor};">
+                                ${categoryIcon}
                             </div>
-                            <div class="category-card-badge">
-                                <span class="badge-icon">📋</span>
-                                <span>${items.length} 项</span>
+                            <div class="category-card-info">
+                                <h4 class="category-card-title">${categoryName}</h4>
+                                <p class="category-card-desc">${categoryDesc}</p>
                             </div>
                         </div>
-                        
-                        <div class="config-items-grid">
-                            ${items.map((item, itemIndex) => `
-                                <div class="config-item-card" style="animation: fadeInUp 0.3s ease-out ${(index * 0.1) + (itemIndex * 0.03)}s backwards;">
-                                    <div class="item-card-header">
-                                        <div class="item-status ${getItemStatus(item.value)}">
-                                            <span class="status-dot"></span>
-                                            <span class="status-text">${getStatusText(item.value)}</span>
-                                        </div>
-                                        <div class="item-type-badge">${getTypeBadge(item.type || 'text')}</div>
-                                    </div>
-                                    
-                                    <div class="item-card-body">
-                                        <h4 class="item-card-title">
-                                            <span class="item-icon">🔑</span>
-                                            ${escapeHtml(item.key)}
-                                        </h4>
-                                        
-                                        <div class="item-card-desc">
-                                            ${item.description ? escapeHtml(item.description) : '<span class="text-muted">暂无描述</span>'}
-                                        </div>
-                                        
-                                        <div class="item-card-value-preview">
-                                            ${getValuePreview(item)}
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="item-card-footer">
-                                        <button class="item-action-btn" onclick="viewFullValue('${escapeHtml(String(item.value)).replace(/'/g, "\\'")}', '${escapeHtml(item.key).replace(/'/g, "\\'")}')">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                            <span>查看详情</span>
-                                        </button>
-                                        <button class="item-action-btn secondary" onclick="copyItemValue('${escapeHtml(String(item.value)).replace(/'/g, "\\'")}')">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                            </svg>
-                                            <span>复制</span>
-                                        </button>
-                                    </div>
+                        <div class="category-card-stats">
+                            <div class="category-stat">
+                                <span class="category-stat-icon">📝</span>
+                                <span class="category-stat-value">${items.length}</span>
+                                <span class="category-stat-label">配置项</span>
+                            </div>
+                            <div class="category-stat">
+                                <span class="category-stat-icon">✨</span>
+                                <span class="category-stat-value">已生效</span>
+                            </div>
+                        </div>
+                        <div class="category-card-items">
+                            ${items.slice(0, 4).map(item => `
+                                <div class="category-item-chip">
+                                    <span class="chip-icon">🔹</span>
+                                    <span class="chip-text">${escapeHtml(item.key)}</span>
                                 </div>
                             `).join('')}
+                            ${items.length > 4 ? `
+                                <div class="category-item-chip chip-more">
+                                    <span class="chip-icon">➕</span>
+                                    <span class="chip-text">还有 ${items.length - 4} 项...</span>
+                                </div>
+                            ` : ''}
                         </div>
+                        <button class="category-card-button" onclick="viewCategoryDetails('${category}')">
+                            <span>查看详情</span>
+                            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
                     </div>
                 `;
             });
             
-            html += '</div>';
-            
-            if (sortedCategories.length === 0) {
-                html = `
-                    <div class="preview-empty-state">
-                        <div class="empty-illustration">🎨</div>
-                        <h3 class="empty-title">还没有配置</h3>
-                        <p class="empty-desc">开始添加你的第一个环境变量配置吧</p>
-                        <button class="btn btn-primary" onclick="switchSection('env')">
-                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path d="M12 4v16m8-8H4"/>
-                            </svg>
-                            <span>添加配置</span>
-                        </button>
+            html += `
+                        </div>
                     </div>
-                `;
-            }
+                    
+                    <!-- 快速操作区 -->
+                    <div class="quick-actions">
+                        <h3 class="section-heading">
+                            <span class="heading-icon">⚡</span>
+                            快速操作
+                        </h3>
+                        <div class="action-cards-grid">
+                            <div class="action-card" onclick="switchSection('logs')">
+                                <div class="action-card-icon action-icon-blue">📝</div>
+                                <h4 class="action-card-title">查看日志</h4>
+                                <p class="action-card-desc">实时监控系统运行状态</p>
+                            </div>
+                            <div class="action-card" onclick="switchSection('api')">
+                                <div class="action-card-icon action-icon-green">🔧</div>
+                                <h4 class="action-card-title">接口调试</h4>
+                                <p class="action-card-desc">测试和调试API接口</p>
+                            </div>
+                            <div class="action-card" onclick="switchSection('push')">
+                                <div class="action-card-icon action-icon-purple">🚀</div>
+                                <h4 class="action-card-title">推送弹幕</h4>
+                                <p class="action-card-desc">向播放器推送弹幕</p>
+                            </div>
+                            <div class="action-card" onclick="switchSection('env')">
+                                <div class="action-card-icon action-icon-orange">⚙️</div>
+                                <h4 class="action-card-title">系统配置</h4>
+                                <p class="action-card-desc">管理环境变量设置</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
             
             preview.innerHTML = html;
             
-            // 添加预览样式
-            addModernPreviewStyles();
+            // 添加现代化样式
+            addModernDashboardStyles();
             
             addLog('✅ 主界面加载完成，共 ' + sortedCategories.length + ' 个类别', 'success');
         })
         .catch(error => {
             console.error('Failed to load config for preview:', error);
             preview.innerHTML = `
-                <div class="preview-error-state">
-                    <div class="error-illustration">⚠️</div>
-                    <h3 class="error-title">加载失败</h3>
-                    <p class="error-desc">${escapeHtml(error.message)}</p>
+                <div class="preview-error">
+                    <div class="error-icon">⚠️</div>
+                    <h3>加载失败</h3>
+                    <p>${escapeHtml(error.message)}</p>
                     <button class="btn btn-primary" onclick="renderPreview()">
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                        <span>重新加载</span>
+                        重新加载
                     </button>
                 </div>
             `;
@@ -203,207 +212,551 @@ function renderPreview() {
 }
 
 /* ========================================
-   统计数据计算
+   添加现代化仪表板样式
    ======================================== */
-function calculateStats(categorizedVars) {
-    let total = 0;
-    let configured = 0;
-    let active = 0;
+function addModernDashboardStyles() {
+    if (document.getElementById('modern-dashboard-styles')) {
+        return;
+    }
     
-    Object.values(categorizedVars).forEach(items => {
-        total += items.length;
-        items.forEach(item => {
-            if (item.value && String(item.value).trim() !== '') {
-                configured++;
-                if (isValueActive(item.value)) {
-                    active++;
-                }
+    const style = document.createElement('style');
+    style.id = 'modern-dashboard-styles';
+    style.textContent = `
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
             }
-        });
-    });
-    
-    return {
-        total,
-        categories: Object.keys(categorizedVars).length,
-        configured,
-        active
-    };
-}
-
-/* ========================================
-   判断值是否激活
-   ======================================== */
-function isValueActive(value) {
-    const strValue = String(value).trim().toLowerCase();
-    // 认为非空、非false、非0的值为激活状态
-    return strValue !== '' && strValue !== 'false' && strValue !== '0';
-}
-
-/* ========================================
-   获取配置项状态
-   ======================================== */
-function getItemStatus(value) {
-    if (!value || String(value).trim() === '') {
-        return 'status-empty';
-    }
-    if (isValueActive(value)) {
-        return 'status-active';
-    }
-    return 'status-inactive';
-}
-
-/* ========================================
-   获取状态文本
-   ======================================== */
-function getStatusText(value) {
-    if (!value || String(value).trim() === '') {
-        return '未配置';
-    }
-    if (isValueActive(value)) {
-        return '生效中';
-    }
-    return '已禁用';
-}
-
-/* ========================================
-   获取值预览
-   ======================================== */
-function getValuePreview(item) {
-    const value = String(item.value || '');
-    const type = item.type || 'text';
-    
-    if (!value || value.trim() === '') {
-        return '<span class="value-empty">暂未设置</span>';
-    }
-    
-    if (type === 'boolean') {
-        const isTrue = value.toLowerCase() === 'true';
-        return `<span class="value-boolean ${isTrue ? 'true' : 'false'}">
-            <span class="boolean-icon">${isTrue ? '✅' : '❌'}</span>
-            <span>${isTrue ? '已启用' : '已禁用'}</span>
-        </span>`;
-    }
-    
-    if (type === 'number') {
-        return `<span class="value-number">
-            <span class="number-icon">🔢</span>
-            <span>${value}</span>
-        </span>`;
-    }
-    
-    if (type === 'multi-select') {
-        const items = value.split(',').filter(v => v.trim());
-        return `<span class="value-multi">
-            <span class="multi-icon">📋</span>
-            <span>${items.length} 项已选择</span>
-        </span>`;
-    }
-    
-    // 普通文本，显示类型和长度
-    const length = value.length;
-    return `<span class="value-text">
-        <span class="text-icon">📝</span>
-        <span>${length > 50 ? '长文本' : '短文本'} (${length} 字符)</span>
-    </span>`;
-}
-
-/* ========================================
-   查看完整值
-   ======================================== */
-function viewFullValue(value, key) {
-    const modal = document.createElement('div');
-    modal.className = 'value-detail-modal active';
-    modal.innerHTML = `
-        <div class="modal-container" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3 class="modal-title">
-                    <span>🔍</span>
-                    <span>${escapeHtml(key)}</span>
-                </h3>
-                <button class="modal-close" onclick="this.closest('.value-detail-modal').remove()">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="value-detail-content">
-                    <div class="value-detail-label">配置值</div>
-                    <pre class="value-detail-code">${escapeHtml(value)}</pre>
-                </div>
-                <div class="value-detail-actions">
-                    <button class="btn btn-primary" onclick="copyDetailValue('${escapeHtml(value).replace(/'/g, "\\'")}', this)">
-                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                        <span>复制值</span>
-                    </button>
-                    <button class="btn btn-secondary" onclick="this.closest('.value-detail-modal').remove()">
-                        <span>关闭</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // 点击背景关闭
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.remove();
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-    });
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-2xl);
+        }
+        
+        /* 欢迎卡片 */
+        .welcome-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            border-radius: var(--border-radius-xl);
+            padding: var(--spacing-2xl);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xl);
+            box-shadow: var(--shadow-colored);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent
+            );
+            animation: shimmer 3s infinite;
+        }
+        
+        .welcome-icon {
+            font-size: 4rem;
+            animation: float 3s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        
+        .welcome-content {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .welcome-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin: 0 0 var(--spacing-xs) 0;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .welcome-subtitle {
+            font-size: 1rem;
+            margin: 0;
+            opacity: 0.95;
+        }
+        
+        .welcome-status {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+            flex-shrink: 0;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .status-online {
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+        }
+        
+        .status-text {
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+        
+        /* 统计卡片网格 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: var(--spacing-xl);
+            animation: fadeInUp 0.6s ease-out 0.1s backwards;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur-md);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-xl);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+            border: 2px solid var(--border-color);
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform var(--transition-base);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-color);
+        }
+        
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .stat-icon-wrapper {
+            width: 64px;
+            height: 64px;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+        }
+        
+        .stat-primary .stat-icon-wrapper {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+        }
+        
+        .stat-success .stat-icon-wrapper {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.1));
+        }
+        
+        .stat-info .stat-icon-wrapper {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.1));
+        }
+        
+        .stat-warning .stat-icon-wrapper {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+        }
+        
+        .stat-content {
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.2;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        
+        /* 配置类别概览 */
+        .categories-overview {
+            animation: fadeInUp 0.6s ease-out 0.2s backwards;
+        }
+        
+        .section-heading {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 var(--spacing-xl) 0;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .heading-icon {
+            font-size: 1.75rem;
+        }
+        
+        .category-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--spacing-xl);
+        }
+        
+        .category-overview-card {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur-md);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            border: 2px solid var(--border-color);
+            transition: all var(--transition-base);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+        
+        .category-overview-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-color);
+        }
+        
+        .category-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+        }
+        
+        .category-card-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .category-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .category-card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 var(--spacing-xs) 0;
+        }
+        
+        .category-card-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        .category-card-stats {
+            display: flex;
+            gap: var(--spacing-xl);
+            padding: var(--spacing-md) 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .category-stat {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            font-size: 0.875rem;
+        }
+        
+        .category-stat-icon {
+            font-size: 1rem;
+        }
+        
+        .category-stat-value {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .category-stat-label {
+            color: var(--text-secondary);
+        }
+        
+        .category-card-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xs);
+        }
+        
+        .category-item-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: 4px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        
+        .chip-icon {
+            font-size: 0.75rem;
+        }
+        
+        .chip-more {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border-color: transparent;
+        }
+        
+        .category-card-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-md);
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .category-card-button:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateX(4px);
+        }
+        
+        .button-icon {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2.5;
+            transition: transform var(--transition-fast);
+        }
+        
+        .category-card-button:hover .button-icon {
+            transform: translateX(4px);
+        }
+        
+        /* 快速操作区 */
+        .quick-actions {
+            animation: fadeInUp 0.6s ease-out 0.3s backwards;
+        }
+        
+        .action-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: var(--spacing-xl);
+        }
+        
+        .action-card {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur-md);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            border: 2px solid var(--border-color);
+            transition: all var(--transition-base);
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-color);
+        }
+        
+        .action-card-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto var(--spacing-lg);
+            border-radius: var(--border-radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .action-icon-blue {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.1));
+        }
+        
+        .action-icon-green {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.1));
+        }
+        
+        .action-icon-purple {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(167, 139, 250, 0.1));
+        }
+        
+        .action-icon-orange {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
+        }
+        
+        .action-card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 var(--spacing-xs) 0;
+        }
+        
+        .action-card-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .welcome-card {
+                flex-direction: column;
+                text-align: center;
+                padding: var(--spacing-xl);
+            }
+            
+            .welcome-icon {
+                font-size: 3rem;
+            }
+            
+            .welcome-title {
+                font-size: 1.5rem;
+            }
+            
+            .welcome-subtitle {
+                font-size: 0.9375rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: var(--spacing-md);
+            }
+            
+            .stat-card {
+                flex-direction: column;
+                text-align: center;
+                padding: var(--spacing-lg);
+            }
+            
+            .stat-icon-wrapper {
+                width: 52px;
+                height: 52px;
+            }
+            
+            .stat-icon {
+                font-size: 1.5rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .stat-label {
+                font-size: 0.75rem;
+            }
+            
+            .category-cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .category-card-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.5rem;
+            }
+            
+            .action-cards-grid {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
+            
+            .action-card-icon {
+                width: 56px;
+                height: 56px;
+                font-size: 2rem;
+            }
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 /* ========================================
-   复制配置项值
+   查看类别详情
    ======================================== */
-function copyItemValue(value) {
-    navigator.clipboard.writeText(value)
-        .then(() => {
-            addLog('📋 已复制配置值到剪贴板', 'success');
-            
-            // 显示临时提示
-            const toast = document.createElement('div');
-            toast.className = 'copy-toast';
-            toast.innerHTML = '<span>✅</span><span>已复制到剪贴板</span>';
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.add('fade-out');
-                setTimeout(() => toast.remove(), 300);
-            }, 2000);
-        })
-        .catch(err => {
-            console.error('复制失败:', err);
-            addLog('❌ 复制失败: ' + err.message, 'error');
-        });
-}
-
-/* ========================================
-   复制详情值
-   ======================================== */
-function copyDetailValue(value, button) {
-    navigator.clipboard.writeText(value)
-        .then(() => {
-            const originalHTML = button.innerHTML;
-            button.innerHTML = `
-                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                <span>已复制!</span>
-            `;
-            button.style.background = 'var(--success-color)';
-            
-            setTimeout(() => {
-                button.innerHTML = originalHTML;
-                button.style.background = '';
-            }, 2000);
-            
-            addLog('📋 已复制配置值到剪贴板', 'success');
-        })
-        .catch(err => {
-            console.error('复制失败:', err);
-            addLog('❌ 复制失败: ' + err.message, 'error');
-        });
+function viewCategoryDetails(category) {
+    switchSection('env');
+    setTimeout(() => {
+        switchCategory(category);
+    }, 300);
 }
 
 /* ========================================
@@ -411,39 +764,14 @@ function copyDetailValue(value, button) {
    ======================================== */
 function getCategoryDescription(category) {
     const descriptions = {
-        api: 'API接口相关配置，控制服务端点和认证',
-        source: '数据源配置，管理弹幕来源和平台',
-        match: '匹配规则配置，优化内容识别准确度',
-        danmu: '弹幕处理配置，控制弹幕获取和格式化',
-        cache: '缓存策略配置，提升系统响应速度',
-        system: '系统级配置，管理部署和运行环境'
+        api: '管理API端点和认证配置',
+        source: '配置弹幕数据源和来源',
+        match: '智能匹配规则和算法',
+        danmu: '弹幕显示和过滤设置',
+        cache: '缓存策略和性能优化',
+        system: '系统级配置和部署参数'
     };
     return descriptions[category] || '配置项管理';
-}
-
-/* ========================================
-   格式化值显示
-   ======================================== */
-function formatValue(value) {
-    const stringValue = String(value);
-    if (stringValue.length > 200) {
-        return stringValue.substring(0, 200) + '...';
-    }
-    return stringValue;
-}
-
-/* ========================================
-   获取类型徽章
-   ======================================== */
-function getTypeBadge(type) {
-    const badges = {
-        text: '文本',
-        boolean: '布尔',
-        number: '数字',
-        select: '单选',
-        'multi-select': '多选'
-    };
-    return badges[type] || '文本';
 }
 
 /* ========================================
@@ -504,19 +832,4 @@ function escapeHtml(text) {
     };
     return String(text).replace(/[&<>"']/g, m => map[m]);
 }
-
-/* ========================================
-   添加现代化预览样式
-   ======================================== */
-function addModernPreviewStyles() {
-    if (document.getElementById('modern-preview-styles')) {
-        return;
-    }
-    
-    const style = document.createElement('style');
-    style.id = 'modern-preview-styles';
-    style.textContent = `
-        /* 继续部分在下一个回复 */
-    `;
-    document.head.appendChild(style);
-}
+`;
