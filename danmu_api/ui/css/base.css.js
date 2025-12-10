@@ -782,6 +782,37 @@ body::before {
 }
 
 /* ========================================
+   移动端响应式样式 - 无遮罩版本
+   ======================================== */
+@media (max-width: 768px) {
+    /* 侧边栏在移动端隐藏在左侧 */
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    /* 当侧边栏打开时，滑入视野 */
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    /* 主内容区不再有左边距 */
+    .main-content {
+        margin-left: 0;
+        padding: var(--spacing-lg);
+    }
+    
+    /* 显示移动端头部 */
+    .mobile-header {
+        display: flex;
+    }
+    
+    /* 确保侧边栏在移动端有更高的层级，但不添加遮罩 */
+    .sidebar {
+        z-index: 1001;
+    }
+}
+
+/* ========================================
    滚动条美化
    ======================================== */
 ::-webkit-scrollbar {
