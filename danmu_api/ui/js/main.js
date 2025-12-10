@@ -543,9 +543,6 @@ function copyApiEndpoint() {
    ======================================== */
 async function init() {
     try {
-        // 显示启动动画
-        showWelcomeAnimation();
-        
         // 初始化主题
         initTheme();
         
@@ -559,70 +556,11 @@ async function init() {
         renderPreview();
         addLog('🎉 系统初始化完成', 'success');
         fetchRealLogs();
-        
-        // 隐藏启动动画
-        hideWelcomeAnimation();
     } catch (error) {
         console.error('初始化失败:', error);
         addLog('❌ 系统初始化失败: ' + error.message, 'error');
         fetchRealLogs();
-        hideWelcomeAnimation();
     }
-}
-
-/* ========================================
-   欢迎动画
-   ======================================== */
-function showWelcomeAnimation() {
-    const welcomeScreen = document.createElement('div');
-    welcomeScreen.id = 'welcome-screen';
-    welcomeScreen.style.cssText = \`
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10000;
-        animation: welcomeFadeOut 1s ease-out 1.5s forwards;
-    \`;
-    
-    welcomeScreen.innerHTML = \`
-        <div style="text-align: center; color: white;">
-            <div style="font-size: 4rem; margin-bottom: 1rem; animation: welcomeBounce 0.6s ease-out;">🚀</div>
-            <h1 style="font-size: 2rem; font-weight: 800; margin: 0; animation: welcomeSlideUp 0.6s ease-out;">LogVar API</h1>
-            <p style="font-size: 1rem; margin-top: 0.5rem; opacity: 0.9; animation: welcomeSlideUp 0.6s ease-out 0.1s backwards;">弹幕管理平台</p>
-        </div>
-    \`;
-    
-    const style = document.createElement('style');
-    style.textContent = \`
-        @keyframes welcomeFadeOut {
-            to { opacity: 0; visibility: hidden; }
-        }
-        @keyframes welcomeBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-        @keyframes welcomeSlideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    \`;
-    document.head.appendChild(style);
-    document.body.appendChild(welcomeScreen);
-}
-
-function hideWelcomeAnimation() {
-    setTimeout(() => {
-        const welcomeScreen = document.getElementById('welcome-screen');
-        if (welcomeScreen) {
-            welcomeScreen.remove();
-        }
-    }, 2500);
 }
 
 /* ========================================
@@ -631,13 +569,6 @@ function hideWelcomeAnimation() {
 document.addEventListener('DOMContentLoaded', function() {
     createCustomAlert();
     init();
-    
-    // 添加页面加载完成的淡入效果
-    document.body.style.opacity = '0';
-    setTimeout(() => {
-        document.body.style.transition = 'opacity 0.5s ease';
-        document.body.style.opacity = '1';
-    }, 100);
 });
 
 /* ========================================
