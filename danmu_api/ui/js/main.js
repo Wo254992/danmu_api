@@ -19,23 +19,71 @@ let originalToken = '87654321';
 function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
-    addLog(\`已加载\${savedTheme === 'dark' ? '深色' : '浅色'}主题\`, 'info');
+    
+    // 添加主题切换动画
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.style.opacity = '0';
+        themeToggle.style.transform = 'scale(0.8)';
+        setTimeout(() => {
+            themeToggle.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            themeToggle.style.opacity = '1';
+            themeToggle.style.transform = 'scale(1)';
+        }, 300);
+    }
+    
+    addLog(\`已加载\${savedTheme === 'dark' ? '深色' : '浅色'}主题 ✨\`, 'info');
 }
 
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     
+    // 添加页面过渡效果
+    document.body.style.transition = 'background 0.3s ease';
+    
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
     
     const themeButton = document.getElementById('theme-toggle');
     themeButton.style.transform = 'scale(0.8) rotate(360deg)';
+    
+    // 创建主题切换涟漪效果
+    const ripple = document.createElement('div');
+    ripple.style.cssText = \`
+        position: fixed;
+        border-radius: 50%;
+        background: \${newTheme === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)'};
+        width: 20px;
+        height: 20px;
+        left: \${themeButton.offsetLeft + themeButton.offsetWidth / 2}px;
+        top: \${themeButton.offsetTop + themeButton.offsetHeight / 2}px;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 9999;
+        animation: themeRipple 0.6s ease-out;
+    \`;
+    
+    const style = document.createElement('style');
+    style.textContent = \`
+        @keyframes themeRipple {
+            to {
+                width: 3000px;
+                height: 3000px;
+                opacity: 0;
+            }
+        }
+    \`;
+    document.head.appendChild(style);
+    document.body.appendChild(ripple);
+    
     setTimeout(() => {
         themeButton.style.transform = '';
-    }, 300);
+        ripple.remove();
+        style.remove();
+    }, 600);
     
-    addLog(\`已切换到\${newTheme === 'dark' ? '深色' : '浅色'}主题\`, 'info');
+    addLog(\`已切换到\${newTheme === 'dark' ? '深色' : '浅色'}主题 🎨\`, 'success');
 }
 
 /* ========================================
@@ -43,18 +91,43 @@ function toggleTheme() {
    ======================================== */
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
+    const isActive = sidebar.classList.contains('active');
+    
     sidebar.classList.toggle('active');
     
     // 点击遮罩关闭侧边栏
-    if (sidebar.classList.contains('active')) {
+    if (!isActive) {
         const overlay = document.createElement('div');
         overlay.className = 'sidebar-overlay';
-        overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;';
+        overlay.style.cssText = \`
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            animation: overlayFadeIn 0.3s ease-out;
+        \`;
         overlay.onclick = toggleSidebar;
         document.body.appendChild(overlay);
+        
+        // 添加动画样式
+        const style = document.createElement('style');
+        style.textContent = \`
+            @keyframes overlayFadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+        \`;
+        document.head.appendChild(style);
     } else {
         const overlay = document.querySelector('.sidebar-overlay');
-        if (overlay) overlay.remove();
+        if (overlay) {
+            overlay.style.animation = 'overlayFadeOut 0.3s ease-out';
+            setTimeout(() => overlay.remove(), 300);
+        }
     }
 }
 
@@ -72,7 +145,7 @@ function switchSection(section) {
             setTimeout(() => {
                 const protocol = window.location.protocol;
                 const host = window.location.host;
-                customAlert('请在URL中配置相应的TOKEN以访问此功能！\\n\\n访问方式：' + protocol + '//' + host + '/{TOKEN}');
+                customAlert('请在URL中配置相应的TOKEN以访问此功能！\\n\\n访问方式：' + protocol + '//' + host + '/{TOKEN}', '🔒 需要认证');
             }, 100);
             return;
         }
@@ -81,7 +154,7 @@ function switchSection(section) {
             checkDeployPlatformConfig().then(result => {
                 if (!result.success) {
                     setTimeout(() => {
-                        customAlert(result.message);
+                        customAlert(result.message, '⚙️ 配置提示');
                     }, 100);
                 } else {
                     performSectionSwitch(section);
@@ -96,21 +169,31 @@ function switchSection(section) {
 
 function performSectionSwitch(section) {
     // 移除所有active类
-    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.content-section').forEach(s => {
+        s.classList.remove('active');
+        s.style.opacity = '0';
+    });
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
     
     // 添加active类
-    document.getElementById(section + '-section').classList.add('active');
+    const targetSection = document.getElementById(section + '-section');
+    targetSection.classList.add('active');
+    
+    // 淡入动画
+    setTimeout(() => {
+        targetSection.style.opacity = '1';
+    }, 50);
+    
     const activeNav = document.querySelector(\`[data-section="\${section}"]\`);
     if (activeNav) activeNav.classList.add('active');
     
     // 更新移动端标题
     const titles = {
-        preview: '配置预览',
-        logs: '日志查看',
-        api: '接口调试',
-        push: '推送弹幕',
-        env: '系统配置'
+        preview: '📋 配置预览',
+        logs: '📝 日志查看',
+        api: '🔧 接口调试',
+        push: '🚀 推送弹幕',
+        env: '⚙️ 系统配置'
     };
     const mobileTitle = document.getElementById('mobile-title');
     if (mobileTitle) {
@@ -121,10 +204,11 @@ function performSectionSwitch(section) {
     if (window.innerWidth <= 768) {
         toggleSidebar();
     }
-    if (section === 'logs' && typeof fetchRealLogs === 'function') {
-        fetchRealLogs();
-    }    
-    addLog(\`切换到\${titles[section]}模块\`, 'info');
+    
+    // 滚动到顶部
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    addLog(\`切换到\${titles[section]}模块 📍\`, 'info');
 }
 
 /* ========================================
@@ -132,9 +216,21 @@ function performSectionSwitch(section) {
    ======================================== */
 function switchCategory(category) {
     currentCategory = category;
+    
+    // 添加切换动画
+    const envList = document.getElementById('env-list');
+    envList.style.opacity = '0';
+    envList.style.transform = 'translateY(20px)';
+    
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     event.target.classList.add('active');
-    renderEnvList();
+    
+    setTimeout(() => {
+        renderEnvList();
+        envList.style.transition = 'all 0.3s ease';
+        envList.style.opacity = '1';
+        envList.style.transform = 'translateY(0)';
+    }, 150);
 }
 
 /* ========================================
@@ -147,16 +243,18 @@ function createCustomAlert() {
 
     const alertHTML = \`
         <div class="modal-overlay" id="custom-alert-overlay">
-            <div class="modal-container">
+            <div class="modal-container" style="max-width: 480px;">
                 <div class="modal-header">
-                    <h3 class="modal-title" id="custom-alert-title">提示</h3>
+                    <h3 class="modal-title" id="custom-alert-title">💡 提示</h3>
                     <button class="modal-close" id="custom-alert-close">×</button>
                 </div>
                 <div class="modal-body">
-                    <p id="custom-alert-message" style="color: var(--text-secondary); margin: 0;"></p>
+                    <p id="custom-alert-message" style="color: var(--text-secondary); margin: 0; line-height: 1.7;"></p>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary" id="custom-alert-confirm">确定</button>
+                    <button class="btn btn-primary" id="custom-alert-confirm">
+                        <span>确定</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -170,7 +268,9 @@ function createCustomAlert() {
 
     function closeAlert() {
         overlay.classList.remove('active');
-        document.getElementById('custom-alert-title').textContent = '提示';
+        setTimeout(() => {
+            document.getElementById('custom-alert-title').textContent = '💡 提示';
+        }, 300);
     }
 
     closeBtn.addEventListener('click', closeAlert);
@@ -183,7 +283,7 @@ function createCustomAlert() {
     });
 }
 
-function customAlert(message, title = '提示') {
+function customAlert(message, title = '💡 提示') {
     createCustomAlert();
     const overlay = document.getElementById('custom-alert-overlay');
     const titleElement = document.getElementById('custom-alert-title');
@@ -194,7 +294,7 @@ function customAlert(message, title = '提示') {
     overlay.classList.add('active');
 }
 
-function customConfirm(message, title = '确认') {
+function customConfirm(message, title = '❓ 确认') {
     return new Promise((resolve) => {
         createCustomAlert();
         const overlay = document.getElementById('custom-alert-overlay');
@@ -243,11 +343,13 @@ function buildApiUrl(path, isSystemPath = false) {
    加载环境变量
    ======================================== */
 function loadEnvVariables() {
+    showLoadingIndicator('env-list');
+    
     fetch(buildApiUrl('/api/config', true))
         .then(response => response.json())
         .then(config => {
             currentAdminToken = config.originalEnvVars?.ADMIN_TOKEN || '';
-            originalToken = config.originalEnvVars?.TOKEN || '87654321';  // 修改：默认值改为 87654321
+            originalToken = config.originalEnvVars?.TOKEN || '87654321';
             
             const originalEnvVars = config.originalEnvVars || {};
             envVariables = {};
@@ -271,11 +373,45 @@ function loadEnvVariables() {
                 });
             });
             
+            hideLoadingIndicator('env-list');
             renderEnvList();
         })
         .catch(error => {
             console.error('Failed to load env variables:', error);
+            hideLoadingIndicator('env-list');
+            showErrorMessage('env-list', '加载配置失败: ' + error.message);
         });
+}
+
+/* ========================================
+   显示加载指示器
+   ======================================== */
+function showLoadingIndicator(containerId) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        container.innerHTML = \`
+            <div style="text-align: center; padding: 3rem;">
+                <div class="loading-spinner" style="margin: 0 auto;"></div>
+                <p style="margin-top: 1rem; color: var(--text-secondary); font-weight: 500;">加载中...</p>
+            </div>
+        \`;
+    }
+}
+
+function hideLoadingIndicator(containerId) {
+    // 加载指示器会被实际内容替换
+}
+
+function showErrorMessage(containerId, message) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        container.innerHTML = \`
+            <div style="text-align: center; padding: 3rem; color: var(--danger-color);">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                <p style="font-weight: 600;">\${message}</p>
+            </div>
+        \`;
+    }
 }
 
 /* ========================================
@@ -290,7 +426,6 @@ function updateApiEndpoint() {
             const token = config.originalEnvVars?.TOKEN || '87654321';
             const adminToken = config.originalEnvVars?.ADMIN_TOKEN;
 
-            // 同步更新 originalToken，确保后续判断正确
             originalToken = token;
             currentAdminToken = adminToken || '';
 
@@ -300,7 +435,6 @@ function updateApiEndpoint() {
             
             let apiEndpoint;
             
-            // 默认 token 时，不需要带 token
             if (token === '87654321') {
                 apiEndpoint = protocol + '//' + host;
             } else {
@@ -342,17 +476,21 @@ function getDockerVersion() {
             const versionMatch = svgContent.match(/version<\\/text><text.*?>(v[\\d\\.]+)/);
 
             if (versionMatch && versionMatch[1]) {
-                console.log("Version:", versionMatch[1]);
                 const latestVersionElement = document.getElementById('latest-version');
                 if (latestVersionElement) {
                     latestVersionElement.textContent = versionMatch[1];
+                    
+                    // 添加版本号动画
+                    latestVersionElement.style.animation = 'pulse 0.6s ease-out';
                 }
-            } else {
-                console.log("Version not found");
             }
         })
         .catch(error => {
             console.error("Error fetching the SVG:", error);
+            const latestVersionElement = document.getElementById('latest-version');
+            if (latestVersionElement) {
+                latestVersionElement.textContent = '获取失败';
+            }
         });
 }
 
@@ -369,16 +507,25 @@ function copyApiEndpoint() {
                 apiEndpointElement.textContent = '✓ 已复制!';
                 apiEndpointElement.style.color = '#10b981';
                 
+                // 添加复制成功动画
+                const card = apiEndpointElement.closest('.api-endpoint-card');
+                if (card) {
+                    card.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        card.style.transform = '';
+                    }, 300);
+                }
+                
                 setTimeout(() => {
                     apiEndpointElement.textContent = originalText;
                     apiEndpointElement.style.color = '';
                 }, 2000);
                 
-                addLog('API端点已复制到剪贴板: ' + apiEndpoint, 'success');
+                addLog('API端点已复制到剪贴板 📋: ' + apiEndpoint, 'success');
             })
             .catch(err => {
                 console.error('复制失败:', err);
-                customAlert('复制失败: ' + err);
+                customAlert('复制失败: ' + err, '❌ 复制失败');
                 addLog('复制API端点失败: ' + err, 'error');
             });
     }
@@ -389,6 +536,9 @@ function copyApiEndpoint() {
    ======================================== */
 async function init() {
     try {
+        // 显示启动动画
+        showWelcomeAnimation();
+        
         // 初始化主题
         initTheme();
         
@@ -400,13 +550,72 @@ async function init() {
         loadEnvVariables();
         renderEnvList();
         renderPreview();
-        addLog('系统初始化完成', 'success');
+        addLog('🎉 系统初始化完成', 'success');
         fetchRealLogs();
+        
+        // 隐藏启动动画
+        hideWelcomeAnimation();
     } catch (error) {
         console.error('初始化失败:', error);
-        addLog('系统初始化失败: ' + error.message, 'error');
+        addLog('❌ 系统初始化失败: ' + error.message, 'error');
         fetchRealLogs();
+        hideWelcomeAnimation();
     }
+}
+
+/* ========================================
+   欢迎动画
+   ======================================== */
+function showWelcomeAnimation() {
+    const welcomeScreen = document.createElement('div');
+    welcomeScreen.id = 'welcome-screen';
+    welcomeScreen.style.cssText = \`
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: welcomeFadeOut 1s ease-out 1.5s forwards;
+    \`;
+    
+    welcomeScreen.innerHTML = \`
+        <div style="text-align: center; color: white;">
+            <div style="font-size: 4rem; margin-bottom: 1rem; animation: welcomeBounce 0.6s ease-out;">🚀</div>
+            <h1 style="font-size: 2rem; font-weight: 800; margin: 0; animation: welcomeSlideUp 0.6s ease-out;">LogVar API</h1>
+            <p style="font-size: 1rem; margin-top: 0.5rem; opacity: 0.9; animation: welcomeSlideUp 0.6s ease-out 0.1s backwards;">弹幕管理平台</p>
+        </div>
+    \`;
+    
+    const style = document.createElement('style');
+    style.textContent = \`
+        @keyframes welcomeFadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+        @keyframes welcomeBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes welcomeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    \`;
+    document.head.appendChild(style);
+    document.body.appendChild(welcomeScreen);
+}
+
+function hideWelcomeAnimation() {
+    setTimeout(() => {
+        const welcomeScreen = document.getElementById('welcome-screen');
+        if (welcomeScreen) {
+            welcomeScreen.remove();
+        }
+    }, 2500);
 }
 
 /* ========================================
@@ -415,5 +624,33 @@ async function init() {
 document.addEventListener('DOMContentLoaded', function() {
     createCustomAlert();
     init();
+    
+    // 添加页面加载完成的淡入效果
+    document.body.style.opacity = '0';
+    setTimeout(() => {
+        document.body.style.transition = 'opacity 0.5s ease';
+        document.body.style.opacity = '1';
+    }, 100);
+});
+
+/* ========================================
+   添加键盘快捷键
+   ======================================== */
+document.addEventListener('keydown', function(e) {
+    // Alt + T: 切换主题
+    if (e.altKey && e.key === 't') {
+        e.preventDefault();
+        toggleTheme();
+    }
+    
+    // Alt + 数字: 快速切换导航
+    if (e.altKey && e.key >= '1' && e.key <= '5') {
+        e.preventDefault();
+        const sections = ['preview', 'logs', 'api', 'push', 'env'];
+        const index = parseInt(e.key) - 1;
+        if (sections[index]) {
+            switchSection(sections[index]);
+        }
+    }
 });
 `;
