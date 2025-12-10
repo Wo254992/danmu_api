@@ -1,3 +1,5 @@
+// language=JavaScript
+export const previewJsContent = /* javascript */ `
 /* ========================================
    渲染现代化主界面 - 仪表板风格
    ======================================== */
