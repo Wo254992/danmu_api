@@ -77,7 +77,7 @@ export const componentsCssContent = /* css */ `
 
 .btn-success:hover:not(:disabled) {
     background: linear-gradient(135deg, var(--success-hover), var(--success-color));
-    box-shadow: var(--success-glow);
+    box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.4);
     transform: translateY(-3px) scale(1.02);
 }
 
@@ -662,7 +662,7 @@ export const componentsCssContent = /* css */ `
 }
 
 /* ========================================
-   模态框
+   模态框 - 优化版(不透明)
    ======================================== */
 .modal-overlay {
     display: none;
@@ -671,8 +671,8 @@ export const componentsCssContent = /* css */ `
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: var(--blur-lg);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
     z-index: 2000;
     padding: var(--spacing-lg);
     overflow-y: auto;
@@ -695,10 +695,9 @@ export const componentsCssContent = /* css */ `
 }
 
 .modal-container {
-    background: var(--bg-card);
-    backdrop-filter: var(--blur-md);
+    background: var(--bg-primary);
     border-radius: var(--border-radius-xl);
-    box-shadow: var(--shadow-xl);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     width: 100%;
     max-width: 540px;
     max-height: 90vh;
@@ -728,6 +727,7 @@ export const componentsCssContent = /* css */ `
     align-items: center;
     padding: var(--spacing-2xl);
     border-bottom: 2px solid var(--border-color);
+    background: var(--bg-secondary);
 }
 
 .modal-title {
@@ -762,6 +762,7 @@ export const componentsCssContent = /* css */ `
 
 .modal-body {
     padding: var(--spacing-2xl);
+    background: var(--bg-primary);
 }
 
 .modal-desc {
@@ -822,10 +823,11 @@ export const componentsCssContent = /* css */ `
     padding: var(--spacing-2xl);
     border-top: 2px solid var(--border-color);
     flex-wrap: wrap;
+    background: var(--bg-secondary);
 }
 
 /* ========================================
-   加载遮罩
+   加载遮罩 - 优化版(不透明)
    ======================================== */
 .loading-overlay {
     display: none;
@@ -834,8 +836,8 @@ export const componentsCssContent = /* css */ `
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: var(--blur-lg);
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(12px);
     z-index: 3000;
     align-items: center;
     justify-content: center;
@@ -847,12 +849,11 @@ export const componentsCssContent = /* css */ `
 }
 
 .loading-content {
-    background: var(--bg-card);
-    backdrop-filter: var(--blur-md);
+    background: var(--bg-primary);
     border-radius: var(--border-radius-xl);
     padding: var(--spacing-3xl);
     text-align: center;
-    box-shadow: var(--shadow-xl);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
     max-width: 420px;
     animation: modalSlideIn var(--transition-spring);
     border: 2px solid var(--border-color);
@@ -866,7 +867,7 @@ export const componentsCssContent = /* css */ `
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin: 0 auto var(--spacing-xl);
-    box-shadow: var(--primary-glow);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
 }
 
 @keyframes spin {
