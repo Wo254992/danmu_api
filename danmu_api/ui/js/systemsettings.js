@@ -636,9 +636,6 @@ function renderEnvList() {
                 <p>该类别下还没有配置项</p>
             </div>
         \`;
-        
-        // 添加空状态样式
-        addEnvEmptyStateStyles();
         return;
     }
 
@@ -677,50 +674,6 @@ function renderEnvList() {
             </div>
         \`;
     }).join('');
-}
-
-/* ========================================
-   添加空状态样式
-   ======================================== */
-function addEnvEmptyStateStyles() {
-    if (document.getElementById('env-empty-state-styles')) {
-        return;
-    }
-    
-    const style = document.createElement('style');
-    style.id = 'env-empty-state-styles';
-    style.textContent = \`
-        .env-empty-state {
-            text-align: center;
-            padding: var(--spacing-3xl);
-            background: var(--bg-card);
-            backdrop-filter: var(--blur-md);
-            border-radius: var(--border-radius-xl);
-            border: 2px dashed var(--border-color);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .env-empty-state .empty-icon {
-            font-size: 5rem;
-            margin-bottom: var(--spacing-lg);
-            opacity: 0.5;
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        .env-empty-state h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin: 0 0 var(--spacing-sm) 0;
-        }
-        
-        .env-empty-state p {
-            color: var(--text-secondary);
-            margin: 0;
-            font-size: 1rem;
-        }
-    \`;
-    document.head.appendChild(style);
 }
 
 /* ========================================
