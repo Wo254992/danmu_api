@@ -290,9 +290,8 @@ body::before {
    ======================================== */
 .sidebar {
     width: var(--sidebar-width);
-    background: var(--bg-card);
-    backdrop-filter: var(--blur-md);
-    box-shadow: var(--shadow-xl);
+    background: var(--bg-primary);
+    box-shadow: var(--shadow-lg);
     display: flex;
     flex-direction: column;
     position: fixed;
@@ -303,7 +302,6 @@ body::before {
     transition: transform var(--transition-base);
     overflow-y: auto;
     overflow-x: hidden;
-    border-right: 1px solid var(--border-color);
 }
 
 .sidebar::-webkit-scrollbar {
