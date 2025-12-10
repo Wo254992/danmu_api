@@ -356,6 +356,18 @@ function addApiTestStyles() {
             margin-right: var(--spacing-xs);
         }
         
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+            padding: var(--spacing-md);
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius-md);
+            border: 1px solid var(--border-color);
+        }
+        
         .response-status {
             display: inline-flex;
             align-items: center;
@@ -364,7 +376,7 @@ function addApiTestStyles() {
             border-radius: 20px;
             font-size: 0.8125rem;
             font-weight: 700;
-            margin-bottom: var(--spacing-md);
+            white-space: nowrap;
         }
         
         .response-status.success {
@@ -389,7 +401,24 @@ function addApiTestStyles() {
             font-size: 0.8125rem;
             font-weight: 600;
             color: var(--text-secondary);
-            margin-left: var(--spacing-sm);
+            white-space: nowrap;
+        }
+        
+        .copy-response-btn {
+            margin-left: auto;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-response-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .copy-response-btn.copied {
+            background: var(--success-color) !important;
+            color: white !important;
+            border-color: var(--success-color) !important;
         }
         
         @media (max-width: 768px) {
@@ -409,6 +438,23 @@ function addApiTestStyles() {
             
             .api-info-details {
                 grid-template-columns: 1fr;
+            }
+            
+            .response-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: var(--spacing-sm);
+            }
+            
+            .response-status,
+            .response-time {
+                justify-content: center;
+            }
+            
+            .copy-response-btn {
+                margin-left: 0;
+                width: 100%;
+                justify-content: center;
             }
         }
     \`;
@@ -536,35 +582,21 @@ function testApi() {
             
             responseContainer.style.display = 'block';
             
-            // 添加响应头部信息
-            const responseHeader = \`
-                <div class="response-header">
-                    <span class="response-status success">
-                        <span>✅</span>
-                        <span>成功 (\${result.status})</span>
-                    </span>
-                    <span class="response-time">
-                        <span>⏱️</span>
-                        <span>\${result.responseTime}ms</span>
-                    </span>
-                </div>
+            // 创建响应头部
+            const responseHeaderDiv = document.createElement('div');
+            responseHeaderDiv.className = 'response-header';
+            responseHeaderDiv.innerHTML = \`
+                <span class="response-status success">
+                    <span>✅</span>
+                    <span>成功 (\${result.status})</span>
+                </span>
+                <span class="response-time">
+                    <span>⏱️</span>
+                    <span>\${result.responseTime}ms</span>
+                </span>
             \`;
             
-            if (result.format === 'xml') {
-                responseDiv.innerHTML = responseHeader;
-                const codeBlock = document.createElement('div');
-                codeBlock.className = 'response-content xml';
-                codeBlock.textContent = result.data;
-                responseDiv.appendChild(codeBlock);
-            } else {
-                responseDiv.innerHTML = responseHeader;
-                const codeBlock = document.createElement('div');
-                codeBlock.className = 'response-content';
-                codeBlock.innerHTML = highlightJSON(result.data);
-                responseDiv.appendChild(codeBlock);
-            }
-            
-            // 添加复制按钮
+            // 创建复制按钮
             const copyBtn = document.createElement('button');
             copyBtn.className = 'btn btn-secondary btn-sm copy-response-btn';
             copyBtn.innerHTML = \`
@@ -574,8 +606,27 @@ function testApi() {
                 </svg>
                 <span>复制响应</span>
             \`;
-            copyBtn.onclick = () => copyApiResponse(result.data, result.format);
-            responseDiv.insertBefore(copyBtn, responseDiv.firstChild.nextSibling);
+            copyBtn.onclick = function() {
+                copyApiResponse(result.data, result.format, this);
+            };
+            responseHeaderDiv.appendChild(copyBtn);
+            
+            // 清空并添加新内容
+            responseDiv.innerHTML = '';
+            responseDiv.appendChild(responseHeaderDiv);
+            
+            // 创建响应内容
+            const codeBlock = document.createElement('div');
+            codeBlock.className = 'response-content';
+            
+            if (result.format === 'xml') {
+                codeBlock.classList.add('xml');
+                codeBlock.textContent = result.data;
+            } else {
+                codeBlock.innerHTML = highlightJSON(result.data);
+            }
+            
+            responseDiv.appendChild(codeBlock);
             
             addLog(\`✅ 接口调用成功 - 耗时 \${result.responseTime}ms\`, 'success');
             
@@ -621,12 +672,12 @@ function testApi() {
 /* ========================================
    复制API响应
    ======================================== */
-function copyApiResponse(data, format) {
+function copyApiResponse(data, format, buttonElement) {
     const text = format === 'xml' ? data : JSON.stringify(data, null, 2);
     
     navigator.clipboard.writeText(text)
         .then(() => {
-            const btn = event.target.closest('.copy-response-btn');
+            const btn = buttonElement;
             const originalHTML = btn.innerHTML;
             
             btn.innerHTML = \`
@@ -635,13 +686,13 @@ function copyApiResponse(data, format) {
                 </svg>
                 <span>已复制!</span>
             \`;
-            btn.style.background = 'var(--success-color)';
-            btn.style.color = 'white';
+            btn.classList.add('copied');
+            btn.disabled = true;
             
             setTimeout(() => {
                 btn.innerHTML = originalHTML;
-                btn.style.background = '';
-                btn.style.color = '';
+                btn.classList.remove('copied');
+                btn.disabled = false;
             }, 2000);
             
             addLog('📋 响应内容已复制到剪贴板', 'success');
@@ -649,37 +700,7 @@ function copyApiResponse(data, format) {
         .catch(err => {
             console.error('复制失败:', err);
             customAlert('复制失败: ' + err.message, '❌ 复制失败');
+            addLog('❌ 复制失败: ' + err.message, 'error');
         });
 }
-
-/* ========================================
-   添加响应头部样式
-   ======================================== */
-const responseHeaderStyle = document.createElement('style');
-responseHeaderStyle.textContent = \`
-    .response-header {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-        margin-bottom: var(--spacing-lg);
-        flex-wrap: wrap;
-    }
-    
-    .copy-response-btn {
-        margin-left: auto;
-    }
-    
-    @media (max-width: 768px) {
-        .response-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        
-        .copy-response-btn {
-            margin-left: 0;
-            width: 100%;
-        }
-    }
-\`;
-document.head.appendChild(responseHeaderStyle);
 `;
