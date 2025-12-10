@@ -69,12 +69,13 @@ export const responsiveCssContent = /* css */ `
     .sidebar {
         transform: translateX(-100%);
         box-shadow: none;
-        z-index: 2000;
+        z-index: 1001;
     }
 
     .sidebar.active {
         transform: translateX(0);
         box-shadow: var(--shadow-xl);
+        z-index: 1001;
     }
 
     .sidebar-toggle {
@@ -86,6 +87,9 @@ export const responsiveCssContent = /* css */ `
         margin-left: 0;
         padding: 0;
         background: var(--bg-secondary);
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
     }
 
     /* 显示移动端顶栏 */
@@ -107,7 +111,12 @@ export const responsiveCssContent = /* css */ `
     .content-section.active {
         display: block;
     }
-
+/* 确保所有内容不超出屏幕 */
+    .content-section,
+    .content-section > * {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
     /* 区块头部 */
     .section-header {
         flex-direction: column;
