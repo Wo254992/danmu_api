@@ -7,6 +7,11 @@ export const responsiveCssContent = /* css */ `
     box-sizing: border-box;
 }
 
+body {
+    margin: 0;
+    padding: 0;
+}
+
 /* ========================================
    平板设备 (≤1024px)
    ======================================== */
@@ -53,6 +58,8 @@ export const responsiveCssContent = /* css */ `
     body {
         overflow-x: hidden;
         max-width: 100vw;
+        margin: 0;
+        padding: 0;
     }
 
     body::before {
@@ -63,19 +70,19 @@ export const responsiveCssContent = /* css */ `
     .content-section {
         overflow-x: hidden;
         max-width: 100%;
+        width: 100%;
     }
 
     /* 侧边栏移动端处理 */
     .sidebar {
         transform: translateX(-100%);
         box-shadow: none;
-        z-index: 1001;
+        z-index: 2000;
     }
 
     .sidebar.active {
         transform: translateX(0);
         box-shadow: var(--shadow-xl);
-        z-index: 1001;
     }
 
     .sidebar-toggle {
@@ -85,11 +92,8 @@ export const responsiveCssContent = /* css */ `
     /* 主内容区 */
     .main-content {
         margin-left: 0;
-        padding: 0;
+        padding: var(--spacing-md);
         background: var(--bg-secondary);
-        width: 100%;
-        max-width: 100vw;
-        overflow-x: hidden;
     }
 
     /* 显示移动端顶栏 */
@@ -101,22 +105,20 @@ export const responsiveCssContent = /* css */ `
         top: 0;
         z-index: 100;
         box-shadow: var(--shadow-md);
+        padding: var(--spacing-md);
     }
 
     /* 内容区块 */
     .content-section {
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md);
+        margin: 0;
+        width: 100%;
     }
 
     .content-section.active {
         display: block;
     }
-/* 确保所有内容不超出屏幕 */
-    .content-section,
-    .content-section > * {
-        max-width: 100%;
-        overflow-x: hidden;
-    }
+
     /* 区块头部 */
     .section-header {
         flex-direction: column;
@@ -126,23 +128,27 @@ export const responsiveCssContent = /* css */ `
         background: var(--bg-card);
         backdrop-filter: var(--blur-md);
         border-radius: var(--border-radius-lg);
-        margin: var(--spacing-lg);
-        max-width: calc(100% - 2rem);
+        margin: 0 0 var(--spacing-lg) 0;
+        width: 100%;
         box-shadow: var(--shadow-md);
     }
 
     .section-title {
         font-size: 1.5rem;
+        margin: 0;
+        padding: 0;
     }
 
     .section-desc {
         font-size: 0.875rem;
+        margin: var(--spacing-sm) 0 0 0;
     }
 
     .header-actions {
         width: 100%;
         flex-direction: column;
         gap: var(--spacing-sm);
+        margin-top: var(--spacing-md);
     }
 
     .header-actions .btn {
@@ -164,12 +170,13 @@ export const responsiveCssContent = /* css */ `
     /* 分类标签 - 移动端优化 */
     .category-tabs {
         gap: var(--spacing-xs);
-        padding: 0 var(--spacing-lg);
+        padding: 0 var(--spacing-md);
         margin-bottom: var(--spacing-lg);
         position: relative;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
+        width: 100%;
     }
 
     .category-tabs::-webkit-scrollbar {
@@ -203,6 +210,7 @@ export const responsiveCssContent = /* css */ `
         display: flex;
         flex-direction: column;
         width: 100%;
+        margin: 0;
     }
 
     .env-item {
@@ -210,9 +218,10 @@ export const responsiveCssContent = /* css */ `
         align-items: stretch;
         gap: var(--spacing-md);
         padding: var(--spacing-lg);
-        margin: 0 var(--spacing-lg);
-        width: auto;
-        max-width: calc(100vw - 2rem);
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .env-info {
@@ -226,6 +235,7 @@ export const responsiveCssContent = /* css */ `
         gap: var(--spacing-xs);
         margin-bottom: var(--spacing-sm);
         max-width: 100%;
+        word-wrap: break-word;
     }
 
     .env-key strong {
@@ -248,6 +258,7 @@ export const responsiveCssContent = /* css */ `
         max-width: 100%;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        box-sizing: border-box;
     }
 
     .env-desc {
@@ -262,6 +273,7 @@ export const responsiveCssContent = /* css */ `
         flex-direction: row;
         gap: var(--spacing-sm);
         display: flex;
+        flex-wrap: wrap;
     }
 
     .env-actions .btn {
@@ -297,9 +309,11 @@ export const responsiveCssContent = /* css */ `
     .form-card,
     .response-card {
         padding: var(--spacing-lg);
-        margin: var(--spacing-lg);
+        margin: 0 0 var(--spacing-lg) 0;
         border-radius: var(--border-radius-lg);
-        max-width: calc(100vw - 2rem);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .card-title {
@@ -364,6 +378,7 @@ export const responsiveCssContent = /* css */ `
     /* 表单组件 - 移动端优化 */
     .form-group {
         margin-bottom: var(--spacing-lg);
+        width: 100%;
     }
 
     .form-label {
@@ -376,6 +391,8 @@ export const responsiveCssContent = /* css */ `
     .form-textarea {
         font-size: 1rem; /* 防止iOS自动缩放 */
         padding: 0.75rem 1rem;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     /* 数字选择器 - 移动端优化 */
@@ -384,6 +401,7 @@ export const responsiveCssContent = /* css */ `
         align-items: center;
         gap: var(--spacing-lg);
         padding: var(--spacing-lg);
+        width: 100%;
     }
 
     .number-display {
@@ -414,6 +432,7 @@ export const responsiveCssContent = /* css */ `
     .available-tags {
         gap: var(--spacing-xs);
         justify-content: flex-start;
+        width: 100%;
     }
 
     .tag-option,
@@ -426,11 +445,13 @@ export const responsiveCssContent = /* css */ `
     /* 多选标签容器 - 移动端优化 */
     .multi-select-container {
         gap: var(--spacing-lg);
+        width: 100%;
     }
 
     .selected-tags {
         min-height: 100px;
         padding: var(--spacing-md);
+        width: 100%;
     }
 
     .selected-tag {
@@ -470,7 +491,8 @@ export const responsiveCssContent = /* css */ `
     .anime-grid {
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
         gap: var(--spacing-lg);
-        padding: 0 var(--spacing-lg);
+        padding: 0 var(--spacing-md);
+        width: 100%;
     }
 
     .anime-image {
@@ -485,6 +507,7 @@ export const responsiveCssContent = /* css */ `
     .episode-grid {
         padding: var(--spacing-md);
         gap: var(--spacing-sm);
+        width: 100%;
     }
 
     .episode-item {
@@ -508,6 +531,8 @@ export const responsiveCssContent = /* css */ `
         font-size: 0.8125rem;
         padding: var(--spacing-lg);
         max-height: 400px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     /* API 响应 */
@@ -515,12 +540,16 @@ export const responsiveCssContent = /* css */ `
         font-size: 0.8125rem;
         padding: var(--spacing-lg);
         max-height: 350px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     /* 版本卡片 */
     .version-card {
-        margin: var(--spacing-lg);
+        margin: 0 0 var(--spacing-lg) 0;
         padding: var(--spacing-lg);
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .version-label,
@@ -536,11 +565,13 @@ export const responsiveCssContent = /* css */ `
     /* 表单行 */
     .form-row {
         grid-template-columns: 1fr;
+        width: 100%;
     }
 
     .form-inline {
         flex-direction: column;
         align-items: stretch;
+        width: 100%;
     }
 
     .form-inline .btn {
@@ -550,6 +581,7 @@ export const responsiveCssContent = /* css */ `
     /* 输入组 */
     .input-group {
         flex-direction: column;
+        width: 100%;
     }
 
     .input-group .btn {
@@ -558,9 +590,11 @@ export const responsiveCssContent = /* css */ `
 
     /* 页脚 */
     .footer {
-        padding: var(--spacing-xl) var(--spacing-lg);
-        margin: var(--spacing-lg);
+        padding: var(--spacing-xl) var(--spacing-md);
+        margin: var(--spacing-lg) 0 0 0;
         border-radius: var(--border-radius-lg);
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .footer-links {
@@ -586,12 +620,16 @@ export const responsiveCssContent = /* css */ `
     .preview-grid {
         padding: 0;
         gap: var(--spacing-md);
+        width: 100%;
+        margin: 0;
     }
 
     .preview-category {
-        margin: var(--spacing-lg);
+        margin: 0 0 var(--spacing-lg) 0;
         padding: var(--spacing-lg);
-        max-width: calc(100vw - 2rem);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .preview-category-title {
@@ -602,6 +640,8 @@ export const responsiveCssContent = /* css */ `
     .preview-item {
         padding: var(--spacing-md);
         border-left-width: 3px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .preview-key {
@@ -612,10 +652,20 @@ export const responsiveCssContent = /* css */ `
         font-size: 0.8125rem;
         padding: var(--spacing-sm);
         line-height: 1.4;
+        word-break: break-all;
+        max-width: 100%;
     }
 
     .preview-desc {
         font-size: 0.75rem;
+    }
+
+    /* 预览项容器优化 */
+    .preview-items {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        width: 100%;
     }
 }
 
@@ -627,6 +677,11 @@ export const responsiveCssContent = /* css */ `
         --spacing-lg: 1rem;
         --spacing-xl: 1.25rem;
         --spacing-2xl: 1.5rem;
+    }
+
+    /* 主内容区增加内边距 */
+    .main-content {
+        padding: var(--spacing-sm);
     }
 
     /* Logo调整 */
@@ -658,8 +713,9 @@ export const responsiveCssContent = /* css */ `
     /* 环境变量项 - 超小屏幕优化 */
     .env-item {
         padding: var(--spacing-md);
-        margin: 0 var(--spacing-md);
-        max-width: calc(100vw - 1rem);
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
     }
 
     .env-key {
@@ -668,7 +724,7 @@ export const responsiveCssContent = /* css */ `
 
     .env-key strong {
         font-size: 0.9375rem;
-        max-width: calc(100vw - 120px);
+        max-width: 100%;
     }
 
     .value-type-badge {
@@ -679,7 +735,7 @@ export const responsiveCssContent = /* css */ `
     .env-value {
         font-size: 0.75rem;
         padding: var(--spacing-sm);
-        max-width: calc(100vw - 48px);
+        max-width: 100%;
     }
 
     .env-desc {
@@ -709,6 +765,7 @@ export const responsiveCssContent = /* css */ `
     .anime-grid {
         grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
         gap: var(--spacing-md);
+        padding: 0 var(--spacing-sm);
     }
 
     .anime-image {
@@ -833,6 +890,25 @@ export const responsiveCssContent = /* css */ `
     .form-textarea {
         font-size: 16px;
     }
+
+    /* 预览类别标题优化 */
+    .preview-category-title {
+        font-size: 1rem;
+        flex-wrap: wrap;
+    }
+
+    /* 预览项优化 */
+    .preview-item {
+        padding: var(--spacing-sm);
+    }
+
+    .preview-key {
+        font-size: 0.875rem;
+    }
+
+    .preview-value {
+        font-size: 0.75rem;
+    }
 }
 
 /* ========================================
@@ -864,7 +940,7 @@ export const responsiveCssContent = /* css */ `
     }
 
     .version-card {
-        margin: var(--spacing-md);
+        margin: 0 0 var(--spacing-md) 0;
         padding: var(--spacing-md);
     }
 
