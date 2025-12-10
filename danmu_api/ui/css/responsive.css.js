@@ -82,7 +82,7 @@ body {
 
     .sidebar.active {
         transform: translateX(0);
-        box-shadow: var(--shadow-xl);
+        box-shadow: 8px 0 32px rgba(0, 0, 0, 0.3);
     }
 
     .sidebar-toggle {
@@ -321,18 +321,21 @@ body {
         margin-bottom: var(--spacing-lg);
     }
 
-    /* 模态框 - 移动端优化 */
+    /* 模态框 - 移动端优化(不透明背景) */
     .modal-overlay {
-        padding: var(--spacing-sm);
-        align-items: flex-start;
-        padding-top: 10vh;
+        padding: 0;
+        align-items: flex-end;
+        background: rgba(0, 0, 0, 0.92);
     }
 
     .modal-container {
-        max-height: 85vh;
-        width: calc(100% - 1rem);
-        margin: 0 auto;
-        border-radius: var(--border-radius-lg);
+        max-height: 95vh;
+        width: 100%;
+        max-width: 100%;
+        border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+        background: var(--bg-primary);
+        border: none;
+        border-top: 2px solid var(--border-color);
     }
 
     .modal-lg {
@@ -343,8 +346,7 @@ body {
         padding: var(--spacing-lg);
         position: sticky;
         top: 0;
-        background: var(--bg-card);
-        backdrop-filter: var(--blur-md);
+        background: var(--bg-secondary);
         z-index: 1;
         border-bottom: 2px solid var(--border-color);
     }
@@ -356,8 +358,9 @@ body {
 
     .modal-body {
         padding: var(--spacing-lg);
-        max-height: calc(85vh - 160px);
+        max-height: calc(95vh - 160px);
         overflow-y: auto;
+        background: var(--bg-primary);
     }
 
     .modal-footer {
@@ -366,8 +369,7 @@ body {
         gap: var(--spacing-sm);
         position: sticky;
         bottom: 0;
-        background: var(--bg-card);
-        backdrop-filter: var(--blur-md);
+        background: var(--bg-secondary);
         border-top: 2px solid var(--border-color);
     }
 
@@ -667,6 +669,33 @@ body {
         gap: var(--spacing-md);
         width: 100%;
     }
+
+    /* 加载遮罩 - 移动端优化 */
+    .loading-overlay {
+        background: rgba(0, 0, 0, 0.94);
+    }
+
+    .loading-content {
+        width: calc(100% - 2rem);
+        max-width: 420px;
+        margin: 0 1rem;
+        padding: var(--spacing-2xl);
+        background: var(--bg-primary);
+    }
+
+    .loading-spinner {
+        width: 64px;
+        height: 64px;
+        border-width: 4px;
+    }
+
+    .loading-title {
+        font-size: 1.125rem;
+    }
+
+    .loading-desc {
+        font-size: 0.875rem;
+    }
 }
 
 /* ========================================
@@ -855,19 +884,29 @@ body {
     /* 模态框 */
     .modal-overlay {
         padding: 0;
-        padding-top: 5vh;
+        background: rgba(0, 0, 0, 0.95);
     }
 
     .modal-container {
-        max-height: 95vh;
+        max-height: 100vh;
         width: 100%;
-        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        border-radius: 0;
+        background: var(--bg-primary);
     }
 
     .modal-header,
     .modal-body,
     .modal-footer {
         padding: var(--spacing-lg);
+        background: var(--bg-primary);
+    }
+
+    .modal-header {
+        background: var(--bg-secondary);
+    }
+
+    .modal-footer {
+        background: var(--bg-secondary);
     }
 
     .modal-title {
@@ -945,11 +984,13 @@ body {
     }
 
     .modal-overlay {
-        padding-top: 2vh;
+        padding: 2vh 0;
+        background: rgba(0, 0, 0, 0.93);
     }
 
     .modal-container {
         max-height: 96vh;
+        background: var(--bg-primary);
     }
 
     .modal-body {
