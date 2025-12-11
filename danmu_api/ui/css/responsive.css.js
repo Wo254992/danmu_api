@@ -581,34 +581,41 @@ body {
     .footer {
         padding: var(--spacing-xl) var(--spacing-md);
         margin: var(--spacing-xl) 0 0 0;
-        width: 100%;
-        box-sizing: border-box;
+    }
+
+    .footer-description {
+        margin-bottom: var(--spacing-lg);
     }
 
     .footer-text {
         font-size: 0.75rem;
         line-height: 1.6;
-        margin-bottom: var(--spacing-md);
     }
 
     .footer-links {
-        flex-direction: row;
-        gap: var(--spacing-xs);
-        padding: var(--spacing-xs);
+        gap: var(--spacing-sm);
         max-width: 100%;
-        flex-wrap: wrap;
-        justify-content: center;
     }
 
     .footer-link {
-        font-size: 0.75rem;
-        padding: var(--spacing-sm) var(--spacing-sm);
-        gap: 4px;
+        flex: 1;
+        min-width: calc(50% - var(--spacing-xs));
+        max-width: calc(50% - var(--spacing-xs));
+        padding: var(--spacing-md) var(--spacing-sm);
+        font-size: 0.8125rem;
+    }
+
+    .footer-link-icon {
+        font-size: 1rem;
+    }
+
+    .footer-link-text {
+        font-size: 0.8125rem;
     }
 
     .footer-icon {
-        width: 14px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
     }
 
     .footer-note {
@@ -838,7 +845,38 @@ body {
         width: 16px;
         height: 16px;
     }
+/* 页脚 */
+    .footer {
+        padding: var(--spacing-lg) var(--spacing-sm);
+    }
 
+    .footer-text {
+        font-size: 0.7rem;
+    }
+
+    .footer-links {
+        gap: var(--spacing-xs);
+    }
+
+    .footer-link {
+        min-width: calc(50% - 4px);
+        max-width: calc(50% - 4px);
+        padding: var(--spacing-sm);
+        font-size: 0.75rem;
+    }
+
+    .footer-link-icon {
+        font-size: 0.9375rem;
+    }
+
+    .footer-link-text {
+        font-size: 0.75rem;
+    }
+
+    .footer-icon {
+        width: 14px;
+        height: 14px;
+    }
     /* 版本信息 */
     .version-item {
         flex-direction: column;
