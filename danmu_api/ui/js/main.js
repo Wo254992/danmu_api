@@ -471,31 +471,53 @@ function updateApiEndpoint() {
         });
 }
 
-/* ========================================
-   获取Docker版本
-   ======================================== */
 function getDockerVersion() {
     const url = "https://img.shields.io/docker/v/logvar/danmu-api?sort=semver";
 
     fetch(url)
         .then(response => response.text())
         .then(svgContent => {
-            const versionMatch = svgContent.match(/version<\\/text><text.*?>(v[\\d\\.]+)/);
+            const versionMatch = svgContent.match(/version<\/text><text.*?>(v[\d\.]+)/);
 
             if (versionMatch && versionMatch[1]) {
                 const latestVersion = versionMatch[1];
                 
-                // 更新侧边栏的最新版本
                 const latestVersionElement = document.getElementById('latest-version');
                 if (latestVersionElement) {
                     latestVersionElement.textContent = latestVersion;
-                    
-                    // 添加版本号动画
                     latestVersionElement.style.animation = 'pulse 0.6s ease-out';
                 }
                 
-                // 更新预览卡片的版本状态
-                updateVersionStatus(latestVersion);
+                // 更新预览卡片版本状态
+                const statusElement = document.getElementById('preview-version-status');
+                const currentVersionElement = document.getElementById('preview-current-version');
+                if (statusElement && currentVersionElement) {
+                    const currentVersion = currentVersionElement.textContent.trim();
+                    const cleanCurrent = currentVersion.replace(/^v/, '');
+                    const cleanLatest = latestVersion.replace(/^v/, '');
+                    const currentParts = cleanCurrent.split('.').map(Number);
+                    const latestParts = cleanLatest.split('.').map(Number);
+                    
+                    let isLatest = true;
+                    for (let i = 0; i < Math.max(currentParts.length, latestParts.length); i++) {
+                        const currentPart = currentParts[i] || 0;
+                        const latestPart = latestParts[i] || 0;
+                        if (currentPart < latestPart) {
+                            isLatest = false;
+                            break;
+                        }
+                        if (currentPart > latestPart) break;
+                    }
+                    
+                    if (isLatest) {
+                        statusElement.innerHTML = '<span class="status-latest">✓ 最新</span>';
+                    } else {
+                        statusElement.innerHTML = '<span class="status-update">🔄 有更新</span>';
+                        statusElement.querySelector('.status-update').addEventListener('click', function() {
+                            window.open('https://github.com/huangxd-/danmu_api/releases', '_blank');
+                        });
+                    }
+                }
             }
         })
         .catch(error => {
@@ -504,133 +526,11 @@ function getDockerVersion() {
             if (latestVersionElement) {
                 latestVersionElement.textContent = '获取失败';
             }
-            
-            // 更新预览卡片状态为检查失败
             const statusElement = document.getElementById('preview-version-status');
             if (statusElement) {
                 statusElement.innerHTML = '<span class="status-checking">检查失败</span>';
             }
         });
-}
-
-/* ========================================
-   更新版本状态和检查更新
-   ======================================== */
-function updateVersionStatus(latestVersion) {
-    const currentVersionElement = document.getElementById('preview-current-version');
-    const statusElement = document.getElementById('preview-version-status');
-    
-    if (!currentVersionElement || !statusElement) return;
-    
-    const currentVersion = currentVersionElement.textContent.trim();
-    
-    // 比较版本号
-    const isLatest = compareVersions(currentVersion, latestVersion);
-    
-    if (isLatest) {
-        // 当前是最新版本
-        statusElement.innerHTML = '<span class="status-latest">✓ 最新</span>';
-        addLog('✅ 当前版本是最新版本', 'success');
-    } else {
-        // 有新版本可用
-        statusElement.innerHTML = '<span class="status-update" onclick="showUpdateBanner(\\'+ latestVersion + '\\')">🔄 有更新</span>';
-        addLog(\`📢 发现新版本 \${latestVersion}，当前版本 \${currentVersion}\`, 'info');
-        
-        // 自动显示更新横幅（延迟1秒显示，让用户有时间看到页面）
-        setTimeout(() => {
-            showUpdateBanner(latestVersion);
-        }, 1000);
-    }
-}
-
-/* ========================================
-   版本号比较
-   ======================================== */
-function compareVersions(current, latest) {
-    // 移除 'v' 前缀
-    const cleanCurrent = current.replace(/^v/, '');
-    const cleanLatest = latest.replace(/^v/, '');
-    
-    const currentParts = cleanCurrent.split('.').map(Number);
-    const latestParts = cleanLatest.split('.').map(Number);
-    
-    for (let i = 0; i < Math.max(currentParts.length, latestParts.length); i++) {
-        const currentPart = currentParts[i] || 0;
-        const latestPart = latestParts[i] || 0;
-        
-        if (currentPart < latestPart) return false;
-        if (currentPart > latestPart) return true;
-    }
-    
-    return true; // 版本相同
-}
-
-/* ========================================
-   显示更新横幅
-   ======================================== */
-function showUpdateBanner(latestVersion) {
-    // 如果已经有横幅，不重复显示
-    if (document.getElementById('update-banner')) return;
-    
-    const currentVersion = document.getElementById('preview-current-version').textContent.trim();
-    
-    const banner = document.createElement('div');
-    banner.id = 'update-banner';
-    banner.className = 'update-banner';
-    banner.innerHTML = \`
-        <div class="update-banner-header">
-            <div class="update-banner-title">
-                <span class="update-banner-icon">🎉</span>
-                <span>发现新版本</span>
-            </div>
-            <button class="update-banner-close" onclick="closeUpdateBanner()">×</button>
-        </div>
-        <div class="update-banner-content">
-            有新版本可用！建议更新以获得最新功能和修复。
-            <div class="update-banner-versions">
-                <span class="update-version-item">\${currentVersion}</span>
-                <span class="update-banner-arrow">→</span>
-                <span class="update-version-item">\${latestVersion}</span>
-            </div>
-        </div>
-        <div class="update-banner-actions">
-            <button class="update-banner-btn update-banner-btn-primary" onclick="goToUpdatePage()">
-                查看更新
-            </button>
-            <button class="update-banner-btn update-banner-btn-secondary" onclick="closeUpdateBanner()">
-                稍后提醒
-            </button>
-        </div>
-    \`;
-    
-    document.body.appendChild(banner);
-    
-    // 10秒后自动关闭
-    setTimeout(() => {
-        closeUpdateBanner();
-    }, 10000);
-}
-
-/* ========================================
-   关闭更新横幅
-   ======================================== */
-function closeUpdateBanner() {
-    const banner = document.getElementById('update-banner');
-    if (banner) {
-        banner.style.animation = 'slideOutRight 0.4s ease-out';
-        setTimeout(() => {
-            banner.remove();
-        }, 400);
-    }
-}
-
-/* ========================================
-   跳转到更新页面
-   ======================================== */
-function goToUpdatePage() {
-    window.open('https://github.com/huangxd-/danmu_api/releases', '_blank');
-    closeUpdateBanner();
-    addLog('🔗 已打开更新页面', 'info');
 }
 
 /* ========================================
