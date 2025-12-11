@@ -359,12 +359,10 @@ function loadEnvVariables() {
             originalToken = config.originalEnvVars?.TOKEN || '87654321';
             
             const originalEnvVars = config.originalEnvVars || {};
-            const envVarConfig = config.envVarConfig || {};
             envVariables = {};
             
-            // 只遍历 envVarConfig 中定义的环境变量，过滤掉系统状态字段
-            Object.keys(envVarConfig).forEach(key => {
-                const varConfig = envVarConfig[key];
+            Object.keys(originalEnvVars).forEach(key => {
+                const varConfig = config.envVarConfig?.[key] || { category: 'system', type: 'text', description: '未分类配置项' };
                 const category = varConfig.category || 'system';
                 
                 if (!envVariables[category]) {
@@ -373,7 +371,7 @@ function loadEnvVariables() {
                 
                 envVariables[category].push({
                     key: key,
-                    value: originalEnvVars[key] !== undefined ? originalEnvVars[key] : '',
+                    value: originalEnvVars[key],
                     description: varConfig.description || '',
                     type: varConfig.type || 'text',
                     min: varConfig.min,
