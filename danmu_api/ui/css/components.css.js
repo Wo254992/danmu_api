@@ -574,98 +574,91 @@ export const componentsCssContent = /* css */ `
 
 .env-grid {
     display: grid;
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
 }
 
 .env-item {
     background: var(--bg-card);
     backdrop-filter: var(--blur-md);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    box-shadow: var(--shadow);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-md);
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: var(--spacing-lg);
+    align-items: flex-start;
+    gap: var(--spacing-xl);
     transition: all var(--transition-base);
-    border: 1px solid var(--border-color);
-    border-left: 3px solid var(--primary-color);
+    border: 2px solid var(--border-color);
 }
 
 .env-item:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateX(4px);
-    border-left-color: var(--primary-light);
-    background: var(--bg-hover);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+    border-color: var(--primary-color);
 }
 
 .env-info {
     flex: 1;
     min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-lg);
 }
 
 .env-key {
     font-weight: 700;
     color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    font-size: 0.9375rem;
-    min-width: 180px;
-    flex-shrink: 0;
+    flex-wrap: wrap;
+    word-break: break-word;
+    font-size: 1.0625rem;
 }
 
 .value-type-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 8px;
-    background: var(--primary-color);
+    display: inline-block;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     color: white;
-    border-radius: 4px;
-    font-size: 0.65rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
     font-weight: 700;
     flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
     letter-spacing: 0.5px;
-    text-transform: uppercase;
 }
 
 .value-type-badge.multi {
-    background: var(--danger-color);
+    background: linear-gradient(135deg, var(--danger-color), #f87171);
 }
 
 .env-value {
-    flex: 1;
+    display: block;
     color: var(--text-secondary);
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
+    background: var(--bg-secondary);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-sm);
     word-break: break-all;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 400px;
+    margin: var(--spacing-md) 0;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    border: 1px solid var(--border-color);
 }
 
 .env-desc {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     color: var(--text-tertiary);
-    margin-left: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+    word-break: break-word;
     font-style: italic;
-    line-height: 1.4;
-    opacity: 0.8;
+    line-height: 1.6;
 }
 
 .env-actions {
     display: flex;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-sm);
     flex-shrink: 0;
-}
-
-.env-actions .btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8125rem;
 }
 
 /* ========================================
