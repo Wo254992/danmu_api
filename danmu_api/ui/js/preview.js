@@ -1,3 +1,5 @@
+// language=JavaScript
+export const previewJsContent = /* javascript */ `
 /* ========================================
    渲染配置预览 - 优化版
    ======================================== */
@@ -34,7 +36,52 @@ function renderPreview() {
                             </h3>
                         </div>
                         <div class="preview-items">
-                            ${items.map((item, itemIndex) => `
+                            ${items.map((item, itemIndex) => {
+                                const isSensitive = /token|key|secret|password|credential/i.test(item.key);
+                                const value = String(item.value);
+                                
+                                let valueHTML = '';
+                                if (isSensitive && value && value.length > 0) {
+                                    const visiblePart = value.substring(0, 4);
+                                    const maskedPart = '*'.repeat(Math.min(value.length - 4, 16));
+                                    const displayValue = value.length > 4 ? `${visiblePart}${maskedPart}` : '****';
+                                    
+                                    valueHTML = `
+                                        <div class="preview-value-container">
+                                            <div class="preview-value-masked">
+                                                <code class="preview-value sensitive">
+                                                    <span class="sensitive-icon">🔒</span>
+                                                    ${displayValue}
+                                                </code>
+                                                <button class="preview-toggle-btn" onclick="toggleSensitiveValue(this, '${escapeHtml(value).replace(/'/g, "\\'")}')">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+                                } else {
+                                    const formattedValue = value.length > 200 ? value.substring(0, 200) + '...' : value;
+                                    const needsCopy = value.length > 20;
+                                    
+                                    valueHTML = `
+                                        <div class="preview-value-container">
+                                            <code class="preview-value">${escapeHtml(formattedValue)}</code>
+                                            ${needsCopy ? `
+                                                <button class="preview-copy-btn" onclick="copyPreviewValue('${escapeHtml(value).replace(/'/g, "\\'")}', this)" title="复制值">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                                    </svg>
+                                                </button>
+                                            ` : ''}
+                                        </div>
+                                    `;
+                                }
+                                
+                                return `
                                 <div class="preview-item" style="animation: fadeInUp 0.3s ease-out ${(index * 0.1) + (itemIndex * 0.05)}s backwards;">
                                     <div class="preview-item-header">
                                         <strong class="preview-key">
@@ -43,7 +90,7 @@ function renderPreview() {
                                         </strong>
                                         <span class="preview-type-badge">${getTypeBadge(item.type || 'text')}</span>
                                     </div>
-                                    ${renderPreviewValue(item)}
+                                    ${valueHTML}
                                     ${item.description ? `
                                         <div class="preview-desc">
                                             <span class="desc-icon">💡</span>
@@ -51,7 +98,8 @@ function renderPreview() {
                                         </div>
                                     ` : ''}
                                 </div>
-                            `).join('')}
+                            `;
+                            }).join('')}
                         </div>
                     </div>
                 `;
@@ -88,58 +136,6 @@ function renderPreview() {
             `;
             addLog('❌ 配置预览加载失败: ' + error.message, 'error');
         });
-}
-
-/* ========================================
-   渲染预览值 - 新增优化函数
-   ======================================== */
-function renderPreviewValue(item) {
-    const value = String(item.value);
-    
-    // 检查是否为敏感信息（包含token、key、secret、password等关键词）
-    const isSensitive = /token|key|secret|password|credential/i.test(item.key);
-    
-    // 如果是敏感信息，显示遮罩
-    if (isSensitive && value && value.length > 0) {
-        const visiblePart = value.substring(0, 4);
-        const maskedPart = '*'.repeat(Math.min(value.length - 4, 16));
-        const displayValue = value.length > 4 ? `${visiblePart}${maskedPart}` : '****';
-        
-        return `
-            <div class="preview-value-container">
-                <div class="preview-value-masked">
-                    <code class="preview-value sensitive">
-                        <span class="sensitive-icon">🔒</span>
-                        ${displayValue}
-                    </code>
-                    <button class="preview-toggle-btn" onclick="toggleSensitiveValue(this, '${escapeHtml(value).replace(/'/g, "\\'")}')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        `;
-    }
-    
-    // 普通值显示
-    const formattedValue = formatValue(value);
-    const needsCopy = value.length > 20;
-    
-    return `
-        <div class="preview-value-container">
-            <code class="preview-value">${escapeHtml(formattedValue)}</code>
-            ${needsCopy ? `
-                <button class="preview-copy-btn" onclick="copyPreviewValue('${escapeHtml(value).replace(/'/g, "\\'")}', this)" title="复制值">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                </button>
-            ` : ''}
-        </div>
-    `;
 }
 
 /* ========================================
@@ -293,3 +289,4 @@ function escapeHtml(text) {
     };
     return String(text).replace(/[&<>"']/g, m => map[m]);
 }
+`;
