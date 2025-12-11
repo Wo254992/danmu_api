@@ -572,41 +572,44 @@ export const componentsCssContent = /* css */ `
 }
 
 .env-item {
-    background: var(--bg-primary);
+    background: var(--bg-card);
+    backdrop-filter: var(--blur-md);
     border-radius: var(--border-radius);
     padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: var(--spacing-lg);
-    transition: all var(--transition-fast);
-    border-left: 3px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
+    transition: all var(--transition-base);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--primary-color);
 }
 
 .env-item:hover {
-    border-left-color: var(--primary-color);
-    background: var(--bg-secondary);
+    box-shadow: var(--shadow-md);
     transform: translateX(4px);
+    border-left-color: var(--primary-light);
+    background: var(--bg-hover);
 }
 
 .env-info {
     flex: 1;
     min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
 }
 
 .env-key {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: var(--spacing-xs);
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
-    flex-wrap: wrap;
-    word-break: break-word;
+    gap: var(--spacing-sm);
     font-size: 0.9375rem;
+    min-width: 180px;
+    flex-shrink: 0;
 }
 
 .value-type-badge {
@@ -628,27 +631,24 @@ export const componentsCssContent = /* css */ `
 }
 
 .env-value {
-    display: block;
+    flex: 1;
     color: var(--text-secondary);
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
     font-size: 0.8125rem;
     word-break: break-all;
-    overflow-wrap: break-word;
-    max-width: 100%;
-    line-height: 1.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 400px;
 }
 
 .env-desc {
     font-size: 0.75rem;
     color: var(--text-tertiary);
-    margin-top: var(--spacing-xs);
-    word-break: break-word;
-    line-height: 1.5;
-    display: none;
-}
-
-.env-item:hover .env-desc {
-    display: block;
+    margin-top: var(--spacing-sm);
+    font-style: italic;
+    line-height: 1.4;
+    opacity: 0.8;
 }
 
 .env-actions {
