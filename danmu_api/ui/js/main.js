@@ -471,22 +471,27 @@ function updateApiEndpoint() {
         });
 }
 
+/* ========================================
+   获取Docker版本
+   ======================================== */
 function getDockerVersion() {
     const url = "https://img.shields.io/docker/v/logvar/danmu-api?sort=semver";
-
     fetch(url)
         .then(response => response.text())
         .then(svgContent => {
-            const versionMatch = svgContent.match(/version<\/text><text.*?>(v[\d\.]+)/);
-
+            const versionMatch = svgContent.match(/version<\\/text><text.*?>(v[\\d\\.]+)/);
             if (versionMatch && versionMatch[1]) {
+                const latestVersion = versionMatch[1];
                 const latestVersionElement = document.getElementById('latest-version');
                 if (latestVersionElement) {
-                    latestVersionElement.textContent = versionMatch[1];
+                    latestVersionElement.textContent = latestVersion;
                     
                     // 添加版本号动画
                     latestVersionElement.style.animation = 'pulse 0.6s ease-out';
                 }
+                
+                // 检查是否有新版本
+                checkVersionUpdate(latestVersion);
             }
         })
         .catch(error => {
@@ -496,6 +501,55 @@ function getDockerVersion() {
                 latestVersionElement.textContent = '获取失败';
             }
         });
+}
+
+function checkVersionUpdate(latestVersion) {
+    const currentVersionElement = document.getElementById('current-version');
+    if (!currentVersionElement) return;
+    
+    const currentVersion = currentVersionElement.textContent;
+    
+    if (compareVersions(latestVersion, currentVersion) > 0) {
+        showUpdateNotice(latestVersion);
+        
+        const latestVersionElement = document.getElementById('latest-version');
+        if (latestVersionElement) {
+            latestVersionElement.classList.add('has-update');
+        }
+        
+        addLog(\`🎉 发现新版本 \${latestVersion}，当前版本 \${currentVersion}\`, 'info');
+    } else {
+        addLog(\`✅ 当前已是最新版本 \${currentVersion}\`, 'success');
+    }
+}
+
+function compareVersions(v1, v2) {
+    const cleanV1 = v1.replace(/^v/, '');
+    const cleanV2 = v2.replace(/^v/, '');
+    
+    const parts1 = cleanV1.split('.').map(Number);
+    const parts2 = cleanV2.split('.').map(Number);
+    
+    for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+        const part1 = parts1[i] || 0;
+        const part2 = parts2[i] || 0;
+        
+        if (part1 > part2) return 1;
+        if (part1 < part2) return -1;
+    }
+    
+    return 0;
+}
+
+function showUpdateNotice(newVersion) {
+    const updateNotice = document.getElementById('version-update-notice');
+    if (updateNotice) {
+        updateNotice.style.display = 'flex';
+        
+        setTimeout(() => {
+            updateNotice.style.animation = 'slideInFromTop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        }, 100);
+    }
 }
 
 /* ========================================
