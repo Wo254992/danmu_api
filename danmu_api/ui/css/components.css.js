@@ -526,11 +526,11 @@ export const componentsCssContent = /* css */ `
 }
 
 /* ========================================
-   环境变量配置 - 简洁优化版
+   环境变量配置
    ======================================== */
 .category-tabs {
     display: flex;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-sm);
     margin-bottom: var(--spacing-xl);
     overflow-x: auto;
     padding-bottom: var(--spacing-sm);
@@ -538,32 +538,38 @@ export const componentsCssContent = /* css */ `
 }
 
 .category-tabs::-webkit-scrollbar {
-    height: 4px;
+    height: 6px;
 }
 
 .tab-btn {
-    padding: 0.625rem 1.25rem;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    border-radius: 0;
-    font-size: 0.875rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--bg-card);
+    backdrop-filter: var(--blur-md);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 0.9375rem;
     font-weight: 600;
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all var(--transition-fast);
     white-space: nowrap;
+    box-shadow: var(--shadow-sm);
     flex-shrink: 0;
 }
 
 .tab-btn:hover {
+    background: var(--bg-tertiary);
     color: var(--text-primary);
-    border-bottom-color: var(--border-color-hover);
+    border-color: var(--border-color-hover);
+    transform: translateY(-2px);
 }
 
 .tab-btn.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+    border-color: transparent;
+    box-shadow: var(--shadow-colored);
+    transform: translateY(-2px);
 }
 
 .env-grid {
@@ -613,21 +619,21 @@ export const componentsCssContent = /* css */ `
 }
 
 .value-type-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     padding: 2px 8px;
-    background: var(--gray-200);
-    color: var(--text-secondary);
+    background: var(--primary-color);
+    color: white;
     border-radius: 4px;
-    font-size: 0.6875rem;
-    font-weight: 600;
+    font-size: 0.65rem;
+    font-weight: 700;
     flex-shrink: 0;
-    text-transform: uppercase;
     letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .value-type-badge.multi {
-    background: var(--warning-light);
-    color: var(--warning-color);
+    background: var(--danger-color);
 }
 
 .env-value {
@@ -645,7 +651,7 @@ export const componentsCssContent = /* css */ `
 .env-desc {
     font-size: 0.75rem;
     color: var(--text-tertiary);
-    margin-top: var(--spacing-sm);
+    margin-left: var(--spacing-sm);
     font-style: italic;
     line-height: 1.4;
     opacity: 0.8;
@@ -660,11 +666,6 @@ export const componentsCssContent = /* css */ `
 .env-actions .btn {
     padding: 0.5rem 0.75rem;
     font-size: 0.8125rem;
-}
-
-.env-actions .btn-icon {
-    width: 14px;
-    height: 14px;
 }
 
 /* ========================================
