@@ -24,8 +24,13 @@ function renderPreview() {
             const totalConfigs = sortedCategories.reduce((sum, cat) => sum + categorizedVars[cat].length, 0);
             const totalCategories = sortedCategories.length;
             
+            // 计算已手动配置的数量（originalEnvVars中值不为空字符串的项）
+            const originalEnvVars = config.originalEnvVars || {};
+            const manualConfigs = Object.values(originalEnvVars).filter(value => value !== '' && value !== null && value !== undefined).length;
+            
             const totalConfigsEl = document.getElementById('total-configs');
             const totalCategoriesEl = document.getElementById('total-categories');
+            const manualConfigsEl = document.getElementById('manual-configs');
             
             if (totalConfigsEl) {
                 animateNumber('total-configs', 0, totalConfigs, 800);
@@ -33,6 +38,10 @@ function renderPreview() {
             
             if (totalCategoriesEl) {
                 animateNumber('total-categories', 0, totalCategories, 600);
+            }
+            
+            if (manualConfigsEl) {
+                animateNumber('manual-configs', 0, manualConfigs, 700);
             }
             
             sortedCategories.forEach((category, index) => {
