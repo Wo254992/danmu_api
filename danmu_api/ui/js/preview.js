@@ -28,12 +28,10 @@ function renderPreview() {
             const totalCategoriesEl = document.getElementById('total-categories');
             
             if (totalConfigsEl) {
-                totalConfigsEl.textContent = totalConfigs;
                 animateNumber('total-configs', 0, totalConfigs, 800);
             }
             
             if (totalCategoriesEl) {
-                totalCategoriesEl.textContent = totalCategories;
                 animateNumber('total-categories', 0, totalCategories, 600);
             }
             
