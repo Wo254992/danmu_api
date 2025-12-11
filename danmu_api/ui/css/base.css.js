@@ -40,7 +40,7 @@ export const baseCssContent = /* css */ `
     --bg-secondary: #f9fafb;
     --bg-tertiary: #f3f4f6;
     --bg-hover: #f3f4f6;
-    --bg-body: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --bg-body: #f9fafb;
     --bg-card: rgba(255, 255, 255, 0.95);
     --blur-md: blur(10px);
     --blur-lg: blur(20px);
@@ -128,7 +128,7 @@ export const baseCssContent = /* css */ `
     --bg-secondary: #181825;
     --bg-tertiary: #27273a;
     --bg-hover: #2a2a3e;
-    --bg-body: linear-gradient(135deg, #1e1e2e 0%, #2d1b4e 100%);
+    --bg-body: #181825;
     --bg-card: rgba(30, 30, 46, 0.95);
     
     /* 文字颜色 - 深色模式 */
