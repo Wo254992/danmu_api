@@ -45,32 +45,29 @@ export const HTML_TEMPLATE = /* html */ `
             </div>
 
             <div class="version-card">
-                <div class="version-item">
-                    <span class="version-label">当前版本</span>
-                    <span class="version-value" id="current-version">v${globals.version}</span>
-                </div>
-                <div class="version-item">
-                    <span class="version-label">最新版本</span>
-                    <span class="version-value version-latest" id="latest-version">检查中...</span>
-                </div>
-                <div class="version-update-notice" id="version-update-notice" style="display: none;">
-                    <div class="update-notice-content">
-                        <span class="update-icon">🎉</span>
-                        <span class="update-text">发现新版本</span>
+                <div class="version-row">
+                    <div class="version-item">
+                        <span class="version-label">当前版本</span>
+                        <span class="version-value" id="current-version">v${globals.version}</span>
                     </div>
-                    <a href="https://github.com/huangxd-/danmu_api/releases" target="_blank" class="update-btn" title="查看更新">
-                        <span>立即更新</span>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M7 17L17 7M17 7H7M17 7V17"/>
-                        </svg>
-                    </a>
+                    <div class="version-separator"></div>
+                    <div class="version-item">
+                        <span class="version-label">最新版本</span>
+                        <span class="version-value version-latest" id="latest-version">
+                            <span class="loading-dots">...</span>
+                        </span>
+                    </div>
+                </div>
+                <div id="update-alert" class="update-alert" style="display: none;">
+                    <span class="update-icon">🚀</span> 有新版本可用
+                    <a href="https://github.com/huangxd-/danmu_api" target="_blank" class="update-link">去更新</a>
                 </div>
                 <div class="api-endpoint-card" onclick="copyApiEndpoint()">
-                    <span class="endpoint-label">API端点</span>
+                    <span class="endpoint-label">API端点 (点击复制)</span>
                     <span class="endpoint-value" id="api-endpoint">加载中...</span>
-                    <span class="copy-hint">点击复制</span>
                 </div>
             </div>
+
             <nav class="nav-menu">
                 <a href="#preview" class="nav-item active" data-section="preview" onclick="switchSection('preview'); return false;">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
