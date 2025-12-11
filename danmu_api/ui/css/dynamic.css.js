@@ -1209,4 +1209,38 @@ export const dynamicCssContent = /* css */ `
         font-size: 1.125rem;
     }
 }
+/* ========================================
+   复制按钮对齐修复补丁
+   ======================================== */
+
+/* 预览项头部居中对齐 */
+.preview-item-header {
+    align-items: center;
+}
+
+/* 复制按钮垂直居中 */
+.preview-value-container .preview-copy-btn,
+.preview-copy-btn {
+    align-self: center;
+    margin-top: 2px;
+}
+
+/* 类型徽章对齐优化 */
+.preview-type-badge {
+    line-height: 1.2;
+    vertical-align: middle;
+}
+
+/* 描述图标对齐 */
+.preview-desc .desc-icon {
+    margin-top: 0;
+    line-height: 1;
+}
+
+/* 键图标对齐 */
+.preview-key .key-icon {
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+}
 `;
