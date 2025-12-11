@@ -588,32 +588,32 @@ body {
     .footer-text {
         font-size: 0.75rem;
         line-height: 1.6;
+        margin-bottom: var(--spacing-md);
     }
 
     .footer-links {
-        flex-direction: column;
+        flex-direction: row;
         gap: var(--spacing-xs);
-        padding: var(--spacing-md);
-        width: auto;
-        max-width: 90%;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .footer-link {
-        font-size: 0.8125rem;
-        width: 100%;
-        padding: var(--spacing-sm) var(--spacing-md);
+        padding: var(--spacing-xs);
+        max-width: 100%;
+        flex-wrap: wrap;
         justify-content: center;
     }
 
+    .footer-link {
+        font-size: 0.75rem;
+        padding: var(--spacing-sm) var(--spacing-sm);
+        gap: 4px;
+    }
+
     .footer-icon {
-        width: 13px;
-        height: 13px;
+        width: 14px;
+        height: 14px;
     }
 
     .footer-note {
         font-size: 0.7rem;
+        margin-top: var(--spacing-md);
     }
 
     /* 预览网格移动端优化 */
