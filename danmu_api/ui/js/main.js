@@ -472,7 +472,7 @@ function updateApiEndpoint() {
 }
 
 /* ========================================
-   获取Docker版本及检查更新
+   获取Docker版本
    ======================================== */
 function getDockerVersion() {
     const url = "https://img.shields.io/docker/v/logvar/danmu-api?sort=semver";
@@ -480,39 +480,15 @@ function getDockerVersion() {
     fetch(url)
         .then(response => response.text())
         .then(svgContent => {
-            // 解析 SVG 获取版本号
             const versionMatch = svgContent.match(/version<\\/text><text.*?>(v[\\d\\.]+)/);
 
             if (versionMatch && versionMatch[1]) {
-                const remoteVersionStr = versionMatch[1]; // 例如 v4.5.1
                 const latestVersionElement = document.getElementById('latest-version');
-                const updateAlert = document.getElementById('update-alert');
-                
-                // 获取当前版本
-                const currentVersionEl = document.getElementById('current-version');
-                const currentVersionStr = currentVersionEl ? currentVersionEl.textContent.trim() : '';
-                
                 if (latestVersionElement) {
-                    latestVersionElement.textContent = remoteVersionStr;
-                    latestVersionElement.style.animation = 'pulse 0.6s ease-out';
+                    latestVersionElement.textContent = versionMatch[1];
                     
-                    // 简单的版本对比逻辑
-                    try {
-                        // 去除 'v' 前缀进行对比
-                        const v1 = currentVersionStr.replace(/^v/, '');
-                        const v2 = remoteVersionStr.replace(/^v/, '');
-                        
-                        if (v1 && v2 && compareVersions(v1, v2) < 0) {
-                            // 有新版本
-                            latestVersionElement.classList.add('has-update');
-                            if (updateAlert) {
-                                updateAlert.style.display = 'flex';
-                            }
-                            addLog(\`🚀 发现新版本: \${remoteVersionStr} (当前: \${currentVersionStr})\`, 'info');
-                        }
-                    } catch (e) {
-                        console.error('版本对比出错:', e);
-                    }
+                    // 添加版本号动画
+                    latestVersionElement.style.animation = 'pulse 0.6s ease-out';
                 }
             }
         })
@@ -520,25 +496,9 @@ function getDockerVersion() {
             console.error("Error fetching the SVG:", error);
             const latestVersionElement = document.getElementById('latest-version');
             if (latestVersionElement) {
-                latestVersionElement.textContent = '未知';
-                latestVersionElement.style.color = 'var(--text-tertiary)';
-                latestVersionElement.style.fontSize = '0.8rem';
+                latestVersionElement.textContent = '获取失败';
             }
         });
-}
-
-// 辅助函数：版本号对比 (1: v1 > v2, -1: v1 < v2, 0: equal)
-function compareVersions(v1, v2) {
-    const parts1 = v1.split('.').map(Number);
-    const parts2 = v2.split('.').map(Number);
-    
-    for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
-        const val1 = parts1[i] || 0;
-        const val2 = parts2[i] || 0;
-        if (val1 > val2) return 1;
-        if (val1 < val2) return -1;
-    }
-    return 0;
 }
 
 /* ========================================
