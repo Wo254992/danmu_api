@@ -5,7 +5,16 @@ export const previewJsContent = /* javascript */ `
    ======================================== */
 function renderPreview() {
     const preview = document.getElementById('preview-area');
-    
+    // 更新统计信息
+        const totalConfigs = sortedCategories.reduce((sum, cat) => sum + categorizedVars[cat].length, 0);
+        const totalCategories = sortedCategories.length;
+        
+        document.getElementById('total-configs').textContent = totalConfigs;
+        document.getElementById('total-categories').textContent = totalCategories;
+        
+        // 添加数字动画
+        animateNumber('total-configs', 0, totalConfigs, 800);
+        animateNumber('total-categories', 0, totalCategories, 600);
     // 显示加载状态
     showLoadingIndicator('preview-area');
     
