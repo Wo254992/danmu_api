@@ -730,9 +730,9 @@ body {
    页脚
    ======================================== */
 .footer {
-    margin-top: var(--spacing-3xl);
-    padding: var(--spacing-2xl) var(--spacing-lg);
-    background: var(--bg-primary);
+    margin-top: 0;
+    padding: var(--spacing-3xl) var(--spacing-lg) var(--spacing-2xl);
+    background: var(--bg-secondary);
     text-align: center;
     border-top: 1px solid var(--border-color);
 }
