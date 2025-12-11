@@ -472,7 +472,7 @@ function updateApiEndpoint() {
 }
 
 /* ========================================
-   获取Docker版本
+   获取Docker版本并检查更新
    ======================================== */
 function getDockerVersion() {
     const url = "https://img.shields.io/docker/v/logvar/danmu-api?sort=semver";
@@ -483,13 +483,18 @@ function getDockerVersion() {
             const versionMatch = svgContent.match(/version<\\/text><text.*?>(v[\\d\\.]+)/);
 
             if (versionMatch && versionMatch[1]) {
+                const latestVersion = versionMatch[1];
                 const latestVersionElement = document.getElementById('latest-version');
+                
                 if (latestVersionElement) {
-                    latestVersionElement.textContent = versionMatch[1];
+                    latestVersionElement.textContent = latestVersion;
                     
                     // 添加版本号动画
                     latestVersionElement.style.animation = 'pulse 0.6s ease-out';
                 }
+                
+                // 检查是否有新版本
+                checkForUpdate(latestVersion);
             }
         })
         .catch(error => {
@@ -499,6 +504,90 @@ function getDockerVersion() {
                 latestVersionElement.textContent = '获取失败';
             }
         });
+}
+
+/* ========================================
+   检查版本更新
+   ======================================== */
+function checkForUpdate(latestVersion) {
+    const currentVersionElement = document.getElementById('current-version');
+    if (!currentVersionElement) return;
+    
+    const currentVersion = currentVersionElement.textContent.trim();
+    
+    // 比较版本号
+    if (compareVersions(latestVersion, currentVersion) > 0) {
+        showUpdateNotice(currentVersion, latestVersion);
+        addLog(\`🎉 发现新版本: \${latestVersion} (当前: \${currentVersion})\`, 'info');
+    } else {
+        addLog(\`✅ 当前已是最新版本: \${currentVersion}\`, 'success');
+    }
+}
+
+/* ========================================
+   版本号比较函数
+   ======================================== */
+function compareVersions(v1, v2) {
+    // 移除 'v' 前缀
+    const cleanV1 = v1.replace(/^v/, '');
+    const cleanV2 = v2.replace(/^v/, '');
+    
+    const parts1 = cleanV1.split('.').map(Number);
+    const parts2 = cleanV2.split('.').map(Number);
+    
+    for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+        const part1 = parts1[i] || 0;
+        const part2 = parts2[i] || 0;
+        
+        if (part1 > part2) return 1;
+        if (part1 < part2) return -1;
+    }
+    
+    return 0;
+}
+
+/* ========================================
+   显示更新提示
+   ======================================== */
+function showUpdateNotice(currentVersion, latestVersion) {
+    const updateNotice = document.getElementById('version-update-notice');
+    const updateDesc = document.getElementById('update-desc');
+    
+    if (updateNotice && updateDesc) {
+        updateDesc.textContent = \`\${currentVersion} → \${latestVersion}\`;
+        updateNotice.style.display = 'flex';
+    }
+}
+
+/* ========================================
+   显示更新指南
+   ======================================== */
+function showUpdateGuide() {
+    const currentVersion = document.getElementById('current-version').textContent.trim();
+    const latestVersion = document.getElementById('latest-version').textContent.trim();
+    
+    const guideMessage = \`
+📦 版本更新提示
+
+当前版本: \${currentVersion}
+最新版本: \${latestVersion}
+
+更新方法：
+
+🐳 Docker 部署：
+1. 停止当前容器: docker stop danmu-api
+2. 拉取最新镜像: docker pull logvar/danmu-api:latest
+3. 重新启动容器
+
+☁️ 云平台部署 (Vercel/Netlify/Cloudflare)：
+1. 进入项目仓库
+2. 拉取最新代码: git pull origin main
+3. 推送到部署分支触发自动部署
+
+💡 提示：更新前请备份重要配置！
+    \`.trim();
+    
+    customAlert(guideMessage, '🔄 更新指南');
 }
 
 /* ========================================
