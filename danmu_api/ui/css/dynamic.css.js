@@ -1112,6 +1112,11 @@ export const dynamicCssContent = /* css */ `
     color: var(--info-color);
 }
 
+.stat-icon-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
 .stat-icon-wrapper svg {
     width: 20px;
     height: 20px;
