@@ -109,9 +109,62 @@ export const HTML_TEMPLATE = /* html */ `
 
             <!-- 配置预览 -->
             <section class="content-section active" id="preview-section">
-                <div class="section-header">
-                    <h2 class="section-title">配置预览</h2>
-                    <p class="section-desc">当前生效的环境变量配置</p>
+                <div class="preview-hero-card">
+                    <div class="preview-hero-background">
+                        <div class="hero-gradient-orb hero-orb-1"></div>
+                        <div class="hero-gradient-orb hero-orb-2"></div>
+                        <div class="hero-gradient-orb hero-orb-3"></div>
+                    </div>
+                    <div class="preview-hero-content">
+                        <div class="preview-hero-header">
+                            <div class="preview-hero-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                    <path d="M9 12h6m-6 4h6"/>
+                                </svg>
+                            </div>
+                            <div class="preview-hero-titles">
+                                <h2 class="preview-hero-title">环境配置总览</h2>
+                                <p class="preview-hero-subtitle">实时生效的系统环境变量配置</p>
+                            </div>
+                        </div>
+                        <div class="preview-stats-grid" id="preview-stats-grid">
+                            <div class="preview-stat-card">
+                                <div class="stat-icon-wrapper stat-icon-primary">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="total-configs">-</div>
+                                    <div class="stat-label">配置项</div>
+                                </div>
+                            </div>
+                            <div class="preview-stat-card">
+                                <div class="stat-icon-wrapper stat-icon-success">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="total-categories">-</div>
+                                    <div class="stat-label">配置类别</div>
+                                </div>
+                            </div>
+                            <div class="preview-stat-card">
+                                <div class="stat-icon-wrapper stat-icon-info">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 16v-4m0-4h.01"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="last-updated">刚刚</div>
+                                    <div class="stat-label">最后更新</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="preview-grid" id="preview-area"></div>
             </section>
