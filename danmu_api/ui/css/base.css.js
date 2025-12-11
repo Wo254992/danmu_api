@@ -731,8 +731,8 @@ body {
    ======================================== */
 .footer {
     margin-top: var(--spacing-3xl);
-    padding: var(--spacing-2xl) var(--spacing-lg);
-    background: transparent;
+    padding: var(--spacing-2xl) var(--spacing-lg) var(--spacing-xl);
+    background: var(--bg-primary);
     text-align: center;
     border-top: 1px solid var(--border-color);
 }
@@ -740,22 +740,20 @@ body {
 .footer-text {
     font-size: 0.8125rem;
     color: var(--text-tertiary);
-    margin: 0 0 var(--spacing-lg) 0;
+    margin: 0 auto var(--spacing-md);
     line-height: 1.6;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+    max-width: 700px;
 }
 
 .footer-links {
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    gap: var(--spacing-xs);
-    margin: var(--spacing-md) 0;
+    gap: var(--spacing-sm);
+    margin: var(--spacing-lg) auto;
     flex-wrap: wrap;
+    padding: var(--spacing-xs);
     background: var(--bg-secondary);
-    padding: var(--spacing-sm) var(--spacing-md);
     border-radius: 50px;
     border: 1px solid var(--border-color);
 }
@@ -765,33 +763,32 @@ body {
     align-items: center;
     justify-content: center;
     gap: var(--spacing-xs);
-    color: var(--text-secondary);
+    color: var(--text-primary);
     text-decoration: none;
     font-weight: 500;
     font-size: 0.8125rem;
     transition: all var(--transition-fast);
-    padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: 20px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: 25px;
     white-space: nowrap;
 }
 
 .footer-link:hover {
     color: var(--primary-color);
-    background: var(--bg-hover);
-    transform: translateY(-2px);
+    background: var(--bg-primary);
 }
 
 .footer-icon {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
     flex-shrink: 0;
 }
 
 .footer-note {
     font-size: 0.75rem;
     color: var(--text-tertiary);
-    margin: var(--spacing-lg) 0 0 0;
-    opacity: 0.7;
+    margin: var(--spacing-md) 0 0 0;
+    opacity: 0.8;
 }
 
 /* ========================================
