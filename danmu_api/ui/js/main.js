@@ -480,7 +480,7 @@ function getDockerVersion() {
     fetch(url)
         .then(response => response.text())
         .then(svgContent => {
-            const versionMatch = svgContent.match(/version<\/text><text.*?>(v[\d\.]+)/);
+            const versionMatch = svgContent.match(/version<\\/text><text.*?>(v[\\d\\.]+)/);
 
             if (versionMatch && versionMatch[1]) {
                 const latestVersion = versionMatch[1];
@@ -533,7 +533,7 @@ function updateVersionStatus(latestVersion) {
         addLog('✅ 当前版本是最新版本', 'success');
     } else {
         // 有新版本可用
-        statusElement.innerHTML = \`<span class="status-update" onclick="showUpdateBanner('\${latestVersion}')">🔄 有更新</span>\`;
+        statusElement.innerHTML = '<span class="status-update" onclick="showUpdateBanner(\\'+ latestVersion + '\\')">🔄 有更新</span>';
         addLog(\`📢 发现新版本 \${latestVersion}，当前版本 \${currentVersion}\`, 'info');
         
         // 自动显示更新横幅（延迟1秒显示，让用户有时间看到页面）
