@@ -146,6 +146,22 @@ export const HTML_TEMPLATE = /* html */ `
                                     <div class="stat-label">配置类别</div>
                                 </div>
                             </div>
+                            <div class="preview-stat-card version-stat-card">
+                                <div class="stat-icon-wrapper stat-icon-info">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value version-display" id="preview-current-version">v${globals.version}</div>
+                                    <div class="stat-label">
+                                        <span>当前版本</span>
+                                        <span class="version-status" id="preview-version-status">
+                                            <span class="status-checking">检查中...</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
