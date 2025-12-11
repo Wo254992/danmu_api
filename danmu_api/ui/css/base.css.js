@@ -422,10 +422,10 @@ body {
     bottom: -6px;
 }
 
-/* ==================== 版本卡片 - 与侧边栏风格统一 ==================== */
+/* ==================== 版本卡片 - 优化排版 ==================== */
 
 .version-card {
-    margin: var(--spacing-md);
+    margin: var(--spacing-lg);
     padding: 0;
     background: var(--bg-primary);
     border-radius: var(--border-radius-lg);
@@ -436,38 +436,38 @@ body {
 
 .version-card:hover {
     border-color: var(--primary-light);
-    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.08);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
 }
 
 /* 版本卡片头部 */
 .version-header {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     margin: 0;
 }
 
 .version-icon {
-    font-size: 1.125rem;
+    font-size: 1.5rem;
     line-height: 1;
 }
 
 .version-title {
-    font-size: 0.8125rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 700;
     color: var(--text-primary);
     letter-spacing: 0.2px;
 }
 
 /* 版本内容区域 */
 .version-content {
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg);
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-md);
     background: var(--bg-primary);
 }
 
@@ -475,23 +475,29 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-xs) 0;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.version-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
 }
 
 .version-label {
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
     color: var(--text-secondary);
     font-weight: 500;
 }
 
 .version-value {
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--text-primary);
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
     background: var(--bg-secondary);
-    padding: 2px 10px;
-    border-radius: var(--border-radius-sm);
+    padding: 6px 14px;
+    border-radius: var(--border-radius);
 }
 
 .version-latest {
@@ -501,10 +507,10 @@ body {
 
 /* API端点卡片 */
 .api-endpoint-card {
-    margin: 0 var(--spacing-md) var(--spacing-md);
-    padding: var(--spacing-md);
+    margin: 0 var(--spacing-lg) var(--spacing-lg);
+    padding: var(--spacing-lg);
     background: var(--bg-secondary);
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius-lg);
     cursor: pointer;
     transition: all var(--transition-fast);
     border: 1px solid transparent;
@@ -522,10 +528,10 @@ body {
 .endpoint-label {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
-    font-size: 0.75rem;
+    gap: var(--spacing-sm);
+    font-size: 0.875rem;
     color: var(--text-tertiary);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -533,50 +539,50 @@ body {
 
 .endpoint-label::before {
     content: '🔗';
-    font-size: 0.875rem;
+    font-size: 1rem;
 }
 
 .endpoint-value {
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 1rem;
     word-break: break-all;
     color: var(--text-primary);
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-    line-height: 1.4;
-    padding: var(--spacing-xs) 0;
+    line-height: 1.5;
+    padding: var(--spacing-sm) 0;
 }
 
 .copy-hint {
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 0.6875rem;
+    gap: 6px;
+    font-size: 0.8125rem;
     color: var(--text-tertiary);
-    margin-top: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
 }
 
 .copy-hint::before {
     content: '📋';
-    font-size: 0.75rem;
+    font-size: 0.875rem;
 }
 
 /* 版本更新通知 */
 .version-update-notice {
-    margin: 0 var(--spacing-md) var(--spacing-md);
-    padding: var(--spacing-md);
+    margin: 0 var(--spacing-lg) var(--spacing-lg);
+    padding: var(--spacing-lg);
     background: linear-gradient(135deg, 
         rgba(16, 185, 129, 0.08) 0%, 
         rgba(5, 150, 105, 0.12) 100%
     );
     border: 1px solid rgba(16, 185, 129, 0.3);
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius-lg);
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-md);
 }
 
 .update-icon {
-    font-size: 1.5rem;
+    font-size: 2rem;
     flex-shrink: 0;
     line-height: 1;
     animation: gentlePulse 2s ease-in-out infinite;
@@ -599,28 +605,28 @@ body {
 }
 
 .update-title {
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--success-color);
-    margin-bottom: 2px;
-    line-height: 1.3;
+    margin-bottom: 4px;
+    line-height: 1.4;
 }
 
 .update-desc {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     color: var(--text-secondary);
     font-weight: 500;
-    line-height: 1.3;
+    line-height: 1.4;
 }
 
 .update-btn {
     flex-shrink: 0;
-    padding: 8px 16px;
+    padding: 10px 20px;
     background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
     color: white;
     border: none;
     border-radius: var(--border-radius);
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -628,8 +634,8 @@ body {
 }
 
 .update-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
 }
 
 .update-btn:active {
