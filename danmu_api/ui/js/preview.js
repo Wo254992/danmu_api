@@ -5,16 +5,7 @@ export const previewJsContent = /* javascript */ `
    ======================================== */
 function renderPreview() {
     const preview = document.getElementById('preview-area');
-    // 更新统计信息
-        const totalConfigs = sortedCategories.reduce((sum, cat) => sum + categorizedVars[cat].length, 0);
-        const totalCategories = sortedCategories.length;
-        
-        document.getElementById('total-configs').textContent = totalConfigs;
-        document.getElementById('total-categories').textContent = totalCategories;
-        
-        // 添加数字动画
-        animateNumber('total-configs', 0, totalConfigs, 800);
-        animateNumber('total-categories', 0, totalCategories, 600);
+    
     // 显示加载状态
     showLoadingIndicator('preview-area');
     
@@ -28,6 +19,23 @@ function renderPreview() {
             // 按类别顺序排列
             const categoryOrder = ['api', 'source', 'match', 'danmu', 'cache', 'system'];
             const sortedCategories = categoryOrder.filter(cat => categorizedVars[cat] && categorizedVars[cat].length > 0);
+            
+            // 更新统计信息（在这里，数据已经获取到了）
+            const totalConfigs = sortedCategories.reduce((sum, cat) => sum + categorizedVars[cat].length, 0);
+            const totalCategories = sortedCategories.length;
+            
+            const totalConfigsEl = document.getElementById('total-configs');
+            const totalCategoriesEl = document.getElementById('total-categories');
+            
+            if (totalConfigsEl) {
+                totalConfigsEl.textContent = totalConfigs;
+                animateNumber('total-configs', 0, totalConfigs, 800);
+            }
+            
+            if (totalCategoriesEl) {
+                totalCategoriesEl.textContent = totalCategories;
+                animateNumber('total-categories', 0, totalCategories, 600);
+            }
             
             sortedCategories.forEach((category, index) => {
                 const items = categorizedVars[category];
