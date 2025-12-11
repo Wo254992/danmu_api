@@ -600,23 +600,6 @@ function checkAndHandleAdminToken() {
         const envNavBtn = document.getElementById('env-nav-btn');
         if (envNavBtn) {
             envNavBtn.title = '🔒 请先配置ADMIN_TOKEN并使用正确的admin token访问以启用系统管理功能';
-            
-            // 添加视觉提示
-            envNavBtn.style.position = 'relative';
-            const lockIcon = document.createElement('span');
-            lockIcon.className = 'nav-lock-icon';
-            lockIcon.textContent = '🔒';
-            lockIcon.style.cssText = \`
-                position: absolute;
-                top: -5px;
-                right: -5px;
-                font-size: 0.75rem;
-                background: var(--warning-color);
-                padding: 2px 4px;
-                border-radius: 50%;
-                box-shadow: var(--shadow-sm);
-            \`;
-            envNavBtn.appendChild(lockIcon);
         }
     }
 }
