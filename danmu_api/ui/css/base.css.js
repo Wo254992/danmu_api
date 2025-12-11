@@ -979,4 +979,30 @@ body {
 .mb-3 { margin-bottom: var(--spacing-md); }
 .mb-4 { margin-bottom: var(--spacing-lg); }
 .mb-5 { margin-bottom: var(--spacing-xl); }
+/* ========================================
+   图标对齐修复补丁
+   ======================================== */
+
+/* 导航菜单溢出隐藏 - 防止蓝色阴影漏出 */
+.nav-menu {
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+/* 激活导航项阴影优化 */
+.nav-item.active {
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+    position: relative;
+    z-index: 1;
+}
+
+/* 导航项内图标垂直对齐 */
+.nav-item .nav-icon,
+.nav-item svg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+}
 `;
