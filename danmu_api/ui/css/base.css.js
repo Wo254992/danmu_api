@@ -731,12 +731,10 @@ body {
    ======================================== */
 .footer {
     margin-top: var(--spacing-2xl);
-    padding: var(--spacing-2xl) var(--spacing-lg);
-    background: var(--bg-card);
-    backdrop-filter: var(--blur-md);
-    border-radius: var(--border-radius);
+    padding: var(--spacing-xl) var(--spacing-lg);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius-lg);
     text-align: center;
-    box-shadow: var(--shadow);
     border: 1px solid var(--border-color);
 }
 
@@ -744,14 +742,14 @@ body {
     font-size: 0.875rem;
     color: var(--text-secondary);
     margin: var(--spacing-sm) 0;
-    line-height: 1.6;
+    line-height: 1.7;
 }
 
 .footer-links {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: var(--spacing-lg);
+    gap: var(--spacing-md);
     margin: var(--spacing-lg) 0;
     flex-wrap: wrap;
 }
@@ -764,11 +762,14 @@ body {
     text-decoration: none;
     font-weight: 500;
     font-size: 0.875rem;
-    transition: color var(--transition-fast);
+    transition: all var(--transition-fast);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
 }
 
 .footer-link:hover {
     color: var(--primary-hover);
+    background: var(--bg-hover);
 }
 
 .footer-icon {
