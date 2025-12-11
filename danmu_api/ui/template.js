@@ -45,13 +45,27 @@ export const HTML_TEMPLATE = /* html */ `
             </div>
 
             <div class="version-card">
-                <div class="version-item">
-                    <span class="version-label">当前版本</span>
-                    <span class="version-value" id="current-version">v${globals.version}</span>
+                <div class="version-header">
+                    <div class="version-icon">📦</div>
+                    <div class="version-title">版本信息</div>
                 </div>
-                <div class="version-item">
-                    <span class="version-label">最新版本</span>
-                    <span class="version-value version-latest" id="latest-version">检查中...</span>
+                <div class="version-content">
+                    <div class="version-item">
+                        <span class="version-label">当前版本</span>
+                        <span class="version-value" id="current-version">v${globals.version}</span>
+                    </div>
+                    <div class="version-item">
+                        <span class="version-label">最新版本</span>
+                        <span class="version-value version-latest" id="latest-version">检查中...</span>
+                    </div>
+                    <div class="version-update-notice" id="version-update-notice" style="display: none;">
+                        <div class="update-icon">🎉</div>
+                        <div class="update-text">
+                            <div class="update-title">发现新版本</div>
+                            <div class="update-desc" id="update-desc">有可用更新</div>
+                        </div>
+                        <button class="update-btn" onclick="showUpdateGuide()">查看</button>
+                    </div>
                 </div>
                 <div class="api-endpoint-card" onclick="copyApiEndpoint()">
                     <span class="endpoint-label">API端点</span>
@@ -59,7 +73,6 @@ export const HTML_TEMPLATE = /* html */ `
                     <span class="copy-hint">点击复制</span>
                 </div>
             </div>
-
             <nav class="nav-menu">
                 <a href="#preview" class="nav-item active" data-section="preview" onclick="switchSection('preview'); return false;">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
