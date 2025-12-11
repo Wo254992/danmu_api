@@ -110,11 +110,6 @@ export const HTML_TEMPLATE = /* html */ `
             <!-- 配置预览 -->
             <section class="content-section active" id="preview-section">
                 <div class="preview-hero-card">
-                    <div class="preview-hero-background">
-                        <div class="hero-gradient-orb hero-orb-1"></div>
-                        <div class="hero-gradient-orb hero-orb-2"></div>
-                        <div class="hero-gradient-orb hero-orb-3"></div>
-                    </div>
                     <div class="preview-hero-content">
                         <div class="preview-hero-header">
                             <div class="preview-hero-icon">
@@ -149,18 +144,6 @@ export const HTML_TEMPLATE = /* html */ `
                                 <div class="stat-content">
                                     <div class="stat-value" id="total-categories">-</div>
                                     <div class="stat-label">配置类别</div>
-                                </div>
-                            </div>
-                            <div class="preview-stat-card">
-                                <div class="stat-icon-wrapper stat-icon-info">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <path d="M12 16v-4m0-4h.01"/>
-                                    </svg>
-                                </div>
-                                <div class="stat-content">
-                                    <div class="stat-value" id="last-updated">刚刚</div>
-                                    <div class="stat-label">最后更新</div>
                                 </div>
                             </div>
                         </div>
