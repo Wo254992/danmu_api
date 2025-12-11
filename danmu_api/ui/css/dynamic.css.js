@@ -1236,11 +1236,4 @@ export const dynamicCssContent = /* css */ `
     margin-top: 0;
     line-height: 1;
 }
-
-/* 键图标对齐 */
-.preview-key .key-icon {
-    vertical-align: middle;
-    position: relative;
-    top: -1px;
-}
 `;
