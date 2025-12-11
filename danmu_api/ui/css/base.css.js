@@ -422,13 +422,13 @@ body {
     bottom: -6px;
 }
 
-/* ==================== 版本卡片 - 优化排版 ==================== */
+/* ==================== 版本卡片 - 大尺寸优化 ==================== */
 
 .version-card {
-    margin: var(--spacing-lg);
+    margin: var(--spacing-xl);
     padding: 0;
     background: var(--bg-primary);
-    border-radius: var(--border-radius-lg);
+    border-radius: var(--border-radius-xl);
     border: 1px solid var(--border-color);
     overflow: hidden;
     transition: all var(--transition-base);
@@ -436,38 +436,38 @@ body {
 
 .version-card:hover {
     border-color: var(--primary-light);
-    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 6px 24px rgba(99, 102, 241, 0.12);
 }
 
 /* 版本卡片头部 */
 .version-header {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-lg);
+    gap: var(--spacing-lg);
+    padding: var(--spacing-xl);
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     margin: 0;
 }
 
 .version-icon {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     line-height: 1;
 }
 
 .version-title {
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 700;
     color: var(--text-primary);
-    letter-spacing: 0.2px;
+    letter-spacing: 0.3px;
 }
 
 /* 版本内容区域 */
 .version-content {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-xl);
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
     background: var(--bg-primary);
 }
 
@@ -475,7 +475,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-sm) 0;
+    padding: var(--spacing-md) 0;
     border-bottom: 1px dashed var(--border-color);
 }
 
@@ -485,18 +485,18 @@ body {
 }
 
 .version-label {
-    font-size: 0.9375rem;
+    font-size: 1.0625rem;
     color: var(--text-secondary);
     font-weight: 500;
 }
 
 .version-value {
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 700;
     color: var(--text-primary);
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
     background: var(--bg-secondary);
-    padding: 6px 14px;
+    padding: 8px 18px;
     border-radius: var(--border-radius);
 }
 
@@ -507,8 +507,8 @@ body {
 
 /* API端点卡片 */
 .api-endpoint-card {
-    margin: 0 var(--spacing-lg) var(--spacing-lg);
-    padding: var(--spacing-lg);
+    margin: 0 var(--spacing-xl) var(--spacing-xl);
+    padding: var(--spacing-xl);
     background: var(--bg-secondary);
     border-radius: var(--border-radius-lg);
     cursor: pointer;
@@ -529,9 +529,9 @@ body {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: var(--text-tertiary);
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -539,37 +539,37 @@ body {
 
 .endpoint-label::before {
     content: '🔗';
-    font-size: 1rem;
+    font-size: 1.125rem;
 }
 
 .endpoint-value {
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 1.125rem;
     word-break: break-all;
     color: var(--text-primary);
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-    line-height: 1.5;
+    line-height: 1.6;
     padding: var(--spacing-sm) 0;
 }
 
 .copy-hint {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.8125rem;
+    gap: 8px;
+    font-size: 0.9375rem;
     color: var(--text-tertiary);
-    margin-top: var(--spacing-sm);
+    margin-top: var(--spacing-md);
 }
 
 .copy-hint::before {
     content: '📋';
-    font-size: 0.875rem;
+    font-size: 1rem;
 }
 
 /* 版本更新通知 */
 .version-update-notice {
-    margin: 0 var(--spacing-lg) var(--spacing-lg);
-    padding: var(--spacing-lg);
+    margin: 0 var(--spacing-xl) var(--spacing-xl);
+    padding: var(--spacing-xl);
     background: linear-gradient(135deg, 
         rgba(16, 185, 129, 0.08) 0%, 
         rgba(5, 150, 105, 0.12) 100%
@@ -578,11 +578,11 @@ body {
     border-radius: var(--border-radius-lg);
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
 }
 
 .update-icon {
-    font-size: 2rem;
+    font-size: 2.5rem;
     flex-shrink: 0;
     line-height: 1;
     animation: gentlePulse 2s ease-in-out infinite;
@@ -605,42 +605,42 @@ body {
 }
 
 .update-title {
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 700;
     color: var(--success-color);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     line-height: 1.4;
 }
 
 .update-desc {
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: var(--text-secondary);
     font-weight: 500;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 .update-btn {
     flex-shrink: 0;
-    padding: 10px 20px;
+    padding: 12px 24px;
     background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
     color: white;
     border: none;
-    border-radius: var(--border-radius);
-    font-size: 0.9375rem;
+    border-radius: var(--border-radius-lg);
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
 .update-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
 }
 
 .update-btn:active {
     transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
 }
 
 /* 导航菜单 - 优化版 */
