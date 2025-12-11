@@ -480,43 +480,12 @@ function getDockerVersion() {
             const versionMatch = svgContent.match(/version<\/text><text.*?>(v[\d\.]+)/);
 
             if (versionMatch && versionMatch[1]) {
-                const latestVersion = versionMatch[1];
-                
                 const latestVersionElement = document.getElementById('latest-version');
                 if (latestVersionElement) {
-                    latestVersionElement.textContent = latestVersion;
+                    latestVersionElement.textContent = versionMatch[1];
+                    
+                    // 添加版本号动画
                     latestVersionElement.style.animation = 'pulse 0.6s ease-out';
-                }
-                
-                // 更新预览卡片版本状态
-                const statusElement = document.getElementById('preview-version-status');
-                const currentVersionElement = document.getElementById('preview-current-version');
-                if (statusElement && currentVersionElement) {
-                    const currentVersion = currentVersionElement.textContent.trim();
-                    const cleanCurrent = currentVersion.replace(/^v/, '');
-                    const cleanLatest = latestVersion.replace(/^v/, '');
-                    const currentParts = cleanCurrent.split('.').map(Number);
-                    const latestParts = cleanLatest.split('.').map(Number);
-                    
-                    let isLatest = true;
-                    for (let i = 0; i < Math.max(currentParts.length, latestParts.length); i++) {
-                        const currentPart = currentParts[i] || 0;
-                        const latestPart = latestParts[i] || 0;
-                        if (currentPart < latestPart) {
-                            isLatest = false;
-                            break;
-                        }
-                        if (currentPart > latestPart) break;
-                    }
-                    
-                    if (isLatest) {
-                        statusElement.innerHTML = '<span class="status-latest">✓ 最新</span>';
-                    } else {
-                        statusElement.innerHTML = '<span class="status-update">🔄 有更新</span>';
-                        statusElement.querySelector('.status-update').addEventListener('click', function() {
-                            window.open('https://github.com/huangxd-/danmu_api/releases', '_blank');
-                        });
-                    }
                 }
             }
         })
@@ -525,10 +494,6 @@ function getDockerVersion() {
             const latestVersionElement = document.getElementById('latest-version');
             if (latestVersionElement) {
                 latestVersionElement.textContent = '获取失败';
-            }
-            const statusElement = document.getElementById('preview-version-status');
-            if (statusElement) {
-                statusElement.innerHTML = '<span class="status-checking">检查失败</span>';
             }
         });
 }
