@@ -183,19 +183,6 @@ body {
         display: none;
     }
 
-    .category-tabs::after {
-        content: '→';
-        position: sticky;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        background: linear-gradient(to right, transparent, var(--bg-secondary) 30%);
-        padding: 0.5rem 1.5rem 0.5rem 3rem;
-        pointer-events: none;
-        font-size: 1.25rem;
-        color: var(--text-tertiary);
-    }
-
     .tab-btn {
         padding: 0.75rem 1.25rem;
         font-size: 0.875rem;
