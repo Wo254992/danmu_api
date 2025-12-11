@@ -45,26 +45,18 @@ export const HTML_TEMPLATE = /* html */ `
             </div>
 
             <div class="version-card">
-                <div class="version-row">
-                    <div class="version-item">
-                        <span class="version-label">当前版本</span>
-                        <span class="version-value" id="current-version">v${globals.version}</span>
-                    </div>
-                    <div class="version-separator"></div>
-                    <div class="version-item">
-                        <span class="version-label">最新版本</span>
-                        <span class="version-value version-latest" id="latest-version">
-                            <span class="loading-dots">...</span>
-                        </span>
-                    </div>
+                <div class="version-item">
+                    <span class="version-label">当前版本</span>
+                    <span class="version-value" id="current-version">v${globals.version}</span>
                 </div>
-                <div id="update-alert" class="update-alert" style="display: none;">
-                    <span class="update-icon">🚀</span> 有新版本可用
-                    <a href="https://github.com/huangxd-/danmu_api" target="_blank" class="update-link">去更新</a>
+                <div class="version-item">
+                    <span class="version-label">最新版本</span>
+                    <span class="version-value version-latest" id="latest-version">检查中...</span>
                 </div>
                 <div class="api-endpoint-card" onclick="copyApiEndpoint()">
-                    <span class="endpoint-label">API端点 (点击复制)</span>
+                    <span class="endpoint-label">API端点</span>
                     <span class="endpoint-value" id="api-endpoint">加载中...</span>
+                    <span class="copy-hint">点击复制</span>
                 </div>
             </div>
 
