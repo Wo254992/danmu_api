@@ -730,57 +730,68 @@ body {
    页脚
    ======================================== */
 .footer {
-    margin-top: var(--spacing-2xl);
-    padding: var(--spacing-xl) var(--spacing-lg);
-    background: var(--bg-secondary);
-    border-radius: var(--border-radius-lg);
+    margin-top: var(--spacing-3xl);
+    padding: var(--spacing-2xl) var(--spacing-lg);
+    background: transparent;
     text-align: center;
-    border: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
 }
 
 .footer-text {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin: var(--spacing-sm) 0;
-    line-height: 1.7;
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    margin: 0 0 var(--spacing-lg) 0;
+    line-height: 1.6;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .footer-links {
-    display: flex;
+    display: inline-flex;
     justify-content: center;
     align-items: center;
-    gap: var(--spacing-md);
-    margin: var(--spacing-lg) 0;
+    gap: var(--spacing-xs);
+    margin: var(--spacing-md) 0;
     flex-wrap: wrap;
+    background: var(--bg-secondary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: 50px;
+    border: 1px solid var(--border-color);
 }
 
 .footer-link {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: var(--spacing-xs);
-    color: var(--primary-color);
+    color: var(--text-secondary);
     text-decoration: none;
     font-weight: 500;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     transition: all var(--transition-fast);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: 20px;
+    white-space: nowrap;
 }
 
 .footer-link:hover {
-    color: var(--primary-hover);
+    color: var(--primary-color);
     background: var(--bg-hover);
+    transform: translateY(-2px);
 }
 
 .footer-icon {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
 }
 
 .footer-note {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
-    margin: var(--spacing-sm) 0 0 0;
+    margin: var(--spacing-lg) 0 0 0;
+    opacity: 0.7;
 }
 
 /* ========================================
