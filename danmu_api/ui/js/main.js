@@ -591,4 +591,24 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+/* ========================================
+   数字动画函数
+   ======================================== */
+function animateNumber(elementId, start, end, duration) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    
+    const range = end - start;
+    const increment = range / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+            current = end;
+            clearInterval(timer);
+        }
+        element.textContent = Math.round(current);
+    }, 16);
+}
 `;
