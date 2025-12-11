@@ -422,13 +422,12 @@ body {
     bottom: -6px;
 }
 
-/* 版本卡片 - 现代卡片风格 */
+/* 版本卡片 - 简洁紧凑风格 */
 .version-card {
-    padding: var(--spacing-lg);
-    margin: var(--spacing-lg);
-    background: var(--bg-card);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-md);
+    padding: var(--spacing-md);
+    margin: var(--spacing-md);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
     position: relative;
     overflow: hidden;
     border: 1px solid var(--border-color);
@@ -436,52 +435,53 @@ body {
 }
 
 .version-card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
+    border-color: var(--border-color-hover);
+    background: var(--bg-tertiary);
 }
 
 .version-header {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-xs);
     border-bottom: 1px solid var(--border-color);
 }
 
 .version-icon {
-    font-size: 1.25rem;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    font-size: 1rem;
+    line-height: 1;
 }
 
 .version-title {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--text-secondary);
     letter-spacing: 0.3px;
+    text-transform: uppercase;
 }
 
 .version-content {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
 }
 
 .version-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-xs) 0;
+    padding: 2px 0;
 }
 
 .version-label {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
     font-weight: 500;
 }
 
 .version-value {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--text-primary);
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
@@ -493,45 +493,29 @@ body {
 
 .version-update-notice {
     margin-top: var(--spacing-sm);
-    padding: var(--spacing-md);
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
-    border: 2px solid var(--success-color);
-    border-radius: var(--border-radius);
+    padding: var(--spacing-sm);
+    background: var(--success-light);
+    border: 1px solid var(--success-color);
+    border-radius: var(--border-radius-sm);
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    animation: slideInDown 0.5s ease-out, versionPulse 2s ease-in-out 0.5s infinite;
+    gap: var(--spacing-xs);
+    animation: fadeIn 0.3s ease-out;
 }
 
-@keyframes slideInDown {
+@keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(-10px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes versionPulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.02);
     }
 }
 
 .update-icon {
-    font-size: 1.5rem;
+    font-size: 1rem;
     flex-shrink: 0;
-    animation: versionBounce 1s ease-in-out infinite;
-}
-
-@keyframes versionBounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+    line-height: 1;
 }
 
 .update-text {
@@ -540,47 +524,46 @@ body {
 }
 
 .update-title {
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     color: var(--success-color);
-    margin-bottom: 2px;
+    margin-bottom: 1px;
+    line-height: 1.2;
 }
 
 .update-desc {
-    font-size: 0.7rem;
+    font-size: 0.625rem;
     color: var(--text-secondary);
     font-weight: 500;
+    line-height: 1.2;
 }
 
 .update-btn {
     flex-shrink: 0;
-    padding: 4px 12px;
+    padding: 3px 8px;
     background: var(--success-color);
     color: white;
     border: none;
-    border-radius: 12px;
-    font-size: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.625rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    transition: all 0.2s ease;
 }
 
 .update-btn:hover {
     background: var(--success-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
 }
 
 .update-btn:active {
-    transform: translateY(0);
+    transform: scale(0.95);
 }
 
 .api-endpoint-card {
-    margin-top: var(--spacing-md);
-    padding: var(--spacing-md);
-    background: var(--bg-secondary);
-    border-radius: var(--border-radius);
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
     position: relative;
@@ -588,33 +571,35 @@ body {
 }
 
 .api-endpoint-card:hover {
-    background: var(--bg-tertiary);
+    background: var(--bg-hover);
     border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
 }
 
 .endpoint-label {
     display: block;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin-bottom: 4px;
+    font-size: 0.625rem;
+    color: var(--text-tertiary);
+    margin-bottom: 2px;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .endpoint-value {
     display: block;
-    font-weight: 700;
-    font-size: 0.875rem;
+    font-weight: 600;
+    font-size: 0.75rem;
     word-break: break-all;
     color: var(--text-primary);
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    line-height: 1.3;
 }
 
 .copy-hint {
     display: block;
-    font-size: 0.7rem;
+    font-size: 0.5625rem;
     color: var(--text-tertiary);
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 /* 导航菜单 - 优化版 */
