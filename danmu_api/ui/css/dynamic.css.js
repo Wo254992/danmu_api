@@ -432,6 +432,48 @@ export const dynamicCssContent = /* css */ `
     to { opacity: 1; transform: scale(1); }
 }
 
+.push-history {
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.push-history-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-md) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.push-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.push-history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.push-history-time {
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
 .loading-state {
     text-align: center;
     padding: var(--spacing-3xl);
@@ -463,7 +505,7 @@ export const dynamicCssContent = /* css */ `
 }
 
 /* ========================================
-   预览相关样式 - 优化版
+   预览相关动画样式
    ======================================== */
 @keyframes fadeInUp {
     from {
@@ -574,69 +616,6 @@ export const dynamicCssContent = /* css */ `
     word-break: break-all;
     overflow-wrap: break-word;
     max-width: 100%;
-}
-
-/* 敏感值相关样式 - 新增 */
-.preview-value-masked {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    flex: 1;
-}
-
-.preview-value.sensitive {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(245, 158, 11, 0.1));
-    border: 2px solid var(--warning-color);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius-sm);
-    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-    font-size: 0.875rem;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    transition: all var(--transition-base);
-}
-
-.preview-value.sensitive.revealed {
-    background: var(--bg-primary);
-    border-color: var(--success-color);
-}
-
-.sensitive-icon {
-    font-size: 1rem;
-    flex-shrink: 0;
-}
-
-.preview-toggle-btn {
-    width: 36px;
-    height: 36px;
-    background: var(--bg-tertiary);
-    border: 2px solid var(--border-color);
-    border-radius: var(--border-radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    flex-shrink: 0;
-}
-
-.preview-toggle-btn:hover {
-    background: var(--warning-color);
-    border-color: var(--warning-color);
-    transform: scale(1.1);
-}
-
-.preview-toggle-btn:hover svg {
-    stroke: white;
-}
-
-.preview-toggle-btn svg {
-    width: 18px;
-    height: 18px;
-    stroke: var(--text-secondary);
-    transition: stroke var(--transition-fast);
 }
 
 .preview-copy-btn {
@@ -781,6 +760,87 @@ export const dynamicCssContent = /* css */ `
     font-size: 1rem;
 }
 
+.success-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: successFadeIn 0.3s ease-out;
+}
+
+@keyframes successFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes successFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.success-content {
+    text-align: center;
+    animation: successBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes successBounce {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(100px);
+    }
+    50% {
+        transform: scale(1.1) translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.success-icon {
+    font-size: 8rem;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 30px rgba(16, 185, 129, 0.6));
+    animation: successPulse 1s ease-in-out infinite;
+}
+
+@keyframes successPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.success-message {
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* ========================================
+   主程序动画样式
+   ======================================== */
+@keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes overlayFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
 /* ========================================
    移动端响应式优化
    ======================================== */
@@ -884,17 +944,15 @@ export const dynamicCssContent = /* css */ `
         padding: var(--spacing-sm);
     }
     
-    .preview-copy-btn,
-    .preview-toggle-btn {
-        width: 32px;
-        height: 32px;
+    .preview-copy-btn {
+        width: 28px;
+        height: 28px;
         opacity: 1;
     }
     
-    .preview-copy-btn svg,
-    .preview-toggle-btn svg {
-        width: 16px;
-        height: 16px;
+    .preview-copy-btn svg {
+        width: 14px;
+        height: 14px;
     }
     
     .preview-desc {
@@ -924,12 +982,6 @@ export const dynamicCssContent = /* css */ `
     
     .preview-value {
         font-size: 0.75rem;
-    }
-    
-    .preview-toggle-btn,
-    .preview-copy-btn {
-        width: 28px;
-        height: 28px;
     }
 }
 `;
