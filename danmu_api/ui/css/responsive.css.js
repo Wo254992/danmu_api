@@ -580,29 +580,40 @@ body {
     /* 页脚 */
     .footer {
         padding: var(--spacing-xl) var(--spacing-md);
-        margin: var(--spacing-lg) 0 0 0;
-        border-radius: var(--border-radius-lg);
+        margin: var(--spacing-xl) 0 0 0;
         width: 100%;
         box-sizing: border-box;
     }
 
-    .footer-links {
-        flex-direction: column;
-        gap: var(--spacing-md);
-        align-items: center;
-    }
-
     .footer-text {
-        font-size: 0.8125rem;
+        font-size: 0.75rem;
         line-height: 1.6;
     }
 
+    .footer-links {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+        padding: var(--spacing-md);
+        width: auto;
+        max-width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
     .footer-link {
-        font-size: 0.9375rem;
+        font-size: 0.8125rem;
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        justify-content: center;
+    }
+
+    .footer-icon {
+        width: 13px;
+        height: 13px;
     }
 
     .footer-note {
-        font-size: 0.8125rem;
+        font-size: 0.7rem;
     }
 
     /* 预览网格移动端优化 */
