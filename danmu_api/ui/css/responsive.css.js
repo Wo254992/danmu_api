@@ -533,22 +533,87 @@ body {
         box-sizing: border-box;
     }
 
-    /* 版本卡片 */
+    /* 版本卡片 - 移动端优化 */
     .version-card {
-        margin: 0 0 var(--spacing-lg) 0;
-        padding: var(--spacing-lg);
-        width: 100%;
+        margin: var(--spacing-sm);
+        padding: var(--spacing-sm);
+        width: calc(100% - var(--spacing-md));
         box-sizing: border-box;
+        border-radius: var(--border-radius-sm);
     }
 
-    .version-label,
-    .version-value {
+    .version-header {
+        margin-bottom: var(--spacing-xs);
+        padding-bottom: var(--spacing-xs);
+    }
+
+    .version-icon {
         font-size: 0.875rem;
+    }
+
+    .version-title {
+        font-size: 0.6875rem;
+    }
+
+    .version-content {
+        gap: 2px;
+    }
+
+    .version-item {
+        padding: 1px 0;
+    }
+
+    .version-label {
+        font-size: 0.625rem;
+    }
+
+    .version-value {
+        font-size: 0.6875rem;
+    }
+
+    .version-update-notice {
+        margin-top: var(--spacing-xs);
+        padding: var(--spacing-xs);
+        gap: var(--spacing-xs);
+        flex-wrap: nowrap;
+    }
+
+    .update-icon {
+        font-size: 0.875rem;
+    }
+
+    .update-title {
+        font-size: 0.625rem;
+    }
+
+    .update-desc {
+        font-size: 0.5625rem;
+    }
+
+    .update-btn {
+        padding: 2px 6px;
+        font-size: 0.5625rem;
+        border-radius: 6px;
+    }
+
+    .api-endpoint-card {
+        margin-top: var(--spacing-xs);
+        padding: var(--spacing-xs);
+    }
+
+    .endpoint-label {
+        font-size: 0.5625rem;
+        margin-bottom: 1px;
     }
 
     .endpoint-value {
-        font-size: 0.875rem;
+        font-size: 0.6875rem;
         word-break: break-all;
+    }
+
+    .copy-hint {
+        font-size: 0.5rem;
+        margin-top: 1px;
     }
 
     /* 表单行 */
@@ -877,17 +942,85 @@ body {
         width: 14px;
         height: 14px;
     }
-    /* 版本信息 */
-    .version-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-xs);
-        padding: var(--spacing-sm) 0;
+    /* 版本信息 - 超小屏幕 */
+    .version-card {
+        margin: var(--spacing-xs);
+        padding: var(--spacing-xs);
+        width: calc(100% - var(--spacing-sm));
     }
 
-    .version-label,
+    .version-header {
+        gap: 4px;
+    }
+
+    .version-icon {
+        font-size: 0.75rem;
+    }
+
+    .version-title {
+        font-size: 0.625rem;
+    }
+
+    .version-item {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1px 0;
+    }
+
+    .version-label {
+        font-size: 0.5625rem;
+    }
+
     .version-value {
-        font-size: 0.8125rem;
+        font-size: 0.625rem;
+    }
+
+    .version-update-notice {
+        padding: 4px 6px;
+    }
+
+    .update-icon {
+        font-size: 0.75rem;
+    }
+
+    .update-text {
+        overflow: hidden;
+    }
+
+    .update-title {
+        font-size: 0.5625rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .update-desc {
+        font-size: 0.5rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .update-btn {
+        padding: 2px 5px;
+        font-size: 0.5rem;
+    }
+
+    .api-endpoint-card {
+        padding: 4px 6px;
+    }
+
+    .endpoint-label {
+        font-size: 0.5rem;
+    }
+
+    .endpoint-value {
+        font-size: 0.625rem;
+    }
+
+    .copy-hint {
+        display: none;
     }
 
     /* 加载遮罩 */
@@ -1032,8 +1165,40 @@ body {
     .modal-body {
         max-height: calc(96vh - 140px);
     }
-}
+        .version-card {
+        margin: var(--spacing-xs);
+        padding: var(--spacing-xs);
+    }
 
+    .version-header {
+        margin-bottom: 4px;
+        padding-bottom: 4px;
+    }
+
+    .version-icon {
+        font-size: 0.75rem;
+    }
+
+    .version-title {
+        font-size: 0.625rem;
+    }
+
+    .version-label {
+        font-size: 0.5625rem;
+    }
+
+    .version-value {
+        font-size: 0.625rem;
+    }
+
+    .version-update-notice {
+        padding: 4px;
+    }
+
+    .api-endpoint-card {
+        padding: 4px 6px;
+    }
+}
 /* ========================================
    大屏幕优化 (≥1440px)
    ======================================== */
