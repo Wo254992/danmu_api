@@ -731,31 +731,32 @@ body {
    ======================================== */
 .footer {
     margin-top: var(--spacing-3xl);
-    padding: var(--spacing-2xl) var(--spacing-lg) var(--spacing-xl);
+    padding: var(--spacing-2xl) var(--spacing-lg);
     background: var(--bg-primary);
     text-align: center;
     border-top: 1px solid var(--border-color);
 }
 
+.footer-description {
+    max-width: 680px;
+    margin: 0 auto var(--spacing-xl);
+}
+
 .footer-text {
     font-size: 0.8125rem;
     color: var(--text-tertiary);
-    margin: 0 auto var(--spacing-md);
-    line-height: 1.6;
-    max-width: 700px;
+    margin: var(--spacing-xs) 0;
+    line-height: 1.7;
 }
 
 .footer-links {
-    display: inline-flex;
+    display: flex;
     justify-content: center;
     align-items: center;
-    gap: var(--spacing-sm);
-    margin: var(--spacing-lg) auto;
+    gap: var(--spacing-md);
+    margin: var(--spacing-xl) auto;
     flex-wrap: wrap;
-    padding: var(--spacing-xs);
-    background: var(--bg-secondary);
-    border-radius: 50px;
-    border: 1px solid var(--border-color);
+    max-width: 600px;
 }
 
 .footer-link {
@@ -766,29 +767,44 @@ body {
     color: var(--text-primary);
     text-decoration: none;
     font-weight: 500;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     transition: all var(--transition-fast);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: 25px;
-    white-space: nowrap;
+    min-width: 120px;
 }
 
 .footer-link:hover {
     color: var(--primary-color);
-    background: var(--bg-primary);
+    background: var(--bg-hover);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.footer-link-icon {
+    font-size: 1.125rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer-link-text {
+    font-size: 0.875rem;
 }
 
 .footer-icon {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
 }
 
 .footer-note {
     font-size: 0.75rem;
     color: var(--text-tertiary);
-    margin: var(--spacing-md) 0 0 0;
-    opacity: 0.8;
+    margin: var(--spacing-lg) 0 0 0;
+    opacity: 0.7;
 }
 
 /* ========================================
