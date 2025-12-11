@@ -640,11 +640,14 @@ function renderEnvList() {
     }
 
     list.innerHTML = items.map((item, index) => {
-        const typeLabel = item.type === 'boolean' ? '布尔' :
-                         item.type === 'number' ? '数字' :
-                         item.type === 'select' ? '单选' :
-                         item.type === 'multi-select' ? '多选' : '文本';
+        const typeLabel = item.type === 'boolean' ? 'bool' :
+                         item.type === 'number' ? 'num' :
+                         item.type === 'select' ? 'sel' :
+                         item.type === 'multi-select' ? 'multi' : 'text';
         const badgeClass = item.type === 'multi-select' ? 'multi' : '';
+        const displayValue = String(item.value || '').length > 60 ? 
+                           String(item.value).substring(0, 60) + '...' : 
+                           String(item.value);
 
         return \`
             <div class="env-item" style="animation: fadeInUp 0.3s ease-out \${index * 0.05}s backwards;">
@@ -653,8 +656,8 @@ function renderEnvList() {
                         <strong>\${item.key}</strong>
                         <span class="value-type-badge \${badgeClass}">\${typeLabel}</span>
                     </div>
-                    <code class="env-value">\${escapeHtml(item.value)}</code>
-                    <span class="env-desc">\${item.description || '无描述'}</span>
+                    <code class="env-value" title="\${escapeHtml(String(item.value))}">\${escapeHtml(displayValue)}</code>
+                    \${item.description && item.description !== '无描述' ? \`<span class="env-desc" title="\${escapeHtml(item.description)}">\${escapeHtml(item.description.length > 30 ? item.description.substring(0, 30) + '...' : item.description)}</span>\` : ''}
                 </div>
                 <div class="env-actions">
                     <button class="btn btn-primary btn-sm" onclick="editEnv(\${index})" title="编辑配置">
@@ -662,13 +665,13 @@ function renderEnvList() {
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                         </svg>
-                        <span>编辑</span>
+                        编辑
                     </button>
                     <button class="btn btn-danger btn-sm" onclick="deleteEnv(\${index})" title="删除配置">
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                         </svg>
-                        <span>删除</span>
+                        删除
                     </button>
                 </div>
             </div>
