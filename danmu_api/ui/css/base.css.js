@@ -650,6 +650,9 @@ body {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
+    overflow: hidden; /* 防止激活项阴影溢出 */
+    position: relative;
+    z-index: 1;
 }
 
 .nav-item {
@@ -694,8 +697,10 @@ body {
 .nav-item.active {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     color: white;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
     font-weight: 600;
+    position: relative;
+    z-index: 1;
 }
 
 .nav-item.active::before {
