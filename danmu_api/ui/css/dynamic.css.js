@@ -1061,9 +1061,10 @@ export const dynamicCssContent = /* css */ `
 
 .preview-stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
 }
+
 
 .preview-stat-card {
     background: var(--bg-secondary);
