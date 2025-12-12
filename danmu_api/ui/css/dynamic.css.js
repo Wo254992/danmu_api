@@ -1266,6 +1266,38 @@ export const dynamicCssContent = /* css */ `
 .deploy-badge-docker {
     color: #2496ed;
 }
+
+/* 运行时间图标样式 */
+.stat-icon-uptime {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+[data-theme="dark"] .stat-icon-uptime {
+    background: rgba(96, 165, 250, 0.15);
+    color: #60a5fa;
+}
+
+/* 运行时间卡片动画 */
+#uptime-card .stat-icon-wrapper svg {
+    animation: uptimePulse 3s ease-in-out infinite;
+}
+
+@keyframes uptimePulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* 运行时间值特殊样式 */
+#uptime-value {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
 /* 移动端适配 */
 @media (max-width: 768px) {
     .preview-hero-card {
@@ -1300,7 +1332,7 @@ export const dynamicCssContent = /* css */ `
     }
     
     .preview-stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: var(--spacing-sm);
     }
     
