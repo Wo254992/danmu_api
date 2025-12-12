@@ -422,9 +422,11 @@ body {
     bottom: -6px;
 }
 
-/* 版本卡片 - 简洁大方风格 */
+/* ========================================
+   版本卡片 - 简洁美观风格
+   ======================================== */
 .version-card {
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg);
     margin: var(--spacing-lg);
     background: var(--bg-primary);
     border-radius: var(--border-radius-lg);
@@ -444,60 +446,60 @@ body {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-md);
-    border-bottom: 2px solid var(--border-color);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .version-icon {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     line-height: 1;
 }
 
 .version-title {
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-weight: 700;
     color: var(--text-primary);
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
 }
 
 .version-content {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
 }
 
 .version-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-sm) 0;
+    padding: var(--spacing-xs) 0;
 }
 
 .version-label {
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     color: var(--text-secondary);
     font-weight: 500;
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-sm);
 }
 
 .version-label::before {
     content: '';
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     background: var(--primary-color);
     border-radius: 50%;
-    opacity: 0.7;
+    flex-shrink: 0;
 }
 
 .version-value {
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 0.875rem;
+    font-weight: 600;
     color: var(--text-primary);
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-    padding: 6px 14px;
+    padding: 4px 12px;
     background: var(--bg-secondary);
     border-radius: var(--border-radius-sm);
     border: 1px solid var(--border-color);
@@ -506,25 +508,26 @@ body {
 .version-latest {
     color: var(--primary-color);
     background: rgba(99, 102, 241, 0.08);
-    border-color: var(--primary-color);
+    border-color: rgba(99, 102, 241, 0.3);
 }
 
+/* 更新提示 */
 .version-update-notice {
-    margin-top: var(--spacing-lg);
-    padding: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
     background: var(--success-light);
-    border: 2px solid var(--success-color);
+    border: 1px solid var(--success-color);
     border-radius: var(--border-radius);
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
     animation: fadeIn 0.3s ease-out;
 }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(-8px);
+        transform: translateY(-6px);
     }
     to {
         opacity: 1;
@@ -533,7 +536,7 @@ body {
 }
 
 .update-icon {
-    font-size: 1.75rem;
+    font-size: 1.375rem;
     flex-shrink: 0;
     line-height: 1;
 }
@@ -544,15 +547,15 @@ body {
 }
 
 .update-title {
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 700;
     color: var(--success-color);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     line-height: 1.3;
 }
 
 .update-desc {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
     font-weight: 500;
     line-height: 1.4;
@@ -560,13 +563,13 @@ body {
 
 .update-btn {
     flex-shrink: 0;
-    padding: 10px 20px;
+    padding: 8px 16px;
     background: var(--success-color);
     color: white;
     border: none;
     border-radius: var(--border-radius-sm);
-    font-size: 0.9375rem;
-    font-weight: 700;
+    font-size: 0.8125rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
 }
@@ -580,17 +583,13 @@ body {
     transform: scale(0.98);
 }
 
+/* API端点卡片 - 与版本项统一风格 */
 .api-endpoint-card {
-    margin-top: var(--spacing-md);
-    padding: 0;
-    background: transparent;
-    border-radius: 0;
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
     position: relative;
-    border: none;
-    border-top: 1px dashed var(--border-color);
-    padding-top: var(--spacing-md);
 }
 
 .api-endpoint-card:hover .endpoint-value {
@@ -598,31 +597,29 @@ body {
     background: rgba(99, 102, 241, 0.04);
 }
 
-.api-endpoint-card:hover .copy-hint {
-    color: var(--primary-color);
-}
-
 .endpoint-label {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    font-size: 0.9375rem;
+    gap: var(--spacing-sm);
+    font-size: 0.875rem;
     color: var(--text-secondary);
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
     font-weight: 500;
 }
 
 .endpoint-label::before {
-    content: '•';
-    color: var(--primary-color);
-    margin-right: var(--spacing-xs);
-    font-weight: 700;
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--info-color);
+    border-radius: 50%;
+    flex-shrink: 0;
 }
 
 .endpoint-value {
     display: block;
     font-weight: 600;
-    font-size: 0.9375rem;
+    font-size: 0.8125rem;
     word-break: break-all;
     color: var(--primary-color);
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
@@ -636,11 +633,15 @@ body {
 
 .copy-hint {
     display: block;
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     color: var(--text-tertiary);
-    margin-top: var(--spacing-xs);
+    margin-top: 6px;
     text-align: right;
     transition: color var(--transition-fast);
+}
+
+.api-endpoint-card:hover .copy-hint {
+    color: var(--primary-color);
 }
 
 /* 导航菜单 - 优化版 */
