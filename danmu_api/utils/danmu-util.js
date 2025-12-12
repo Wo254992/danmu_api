@@ -172,7 +172,7 @@ export function convertToDanmakuJson(contents, platform) {
         // 其他格式，尝试从第3或第4位获取颜色
         color = pValues[3] || pValues[2] || 16777215;
       }
-      m = item.m;
+      m = item.m.replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)));
     }
 
     attributes = [
