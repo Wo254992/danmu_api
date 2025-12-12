@@ -548,7 +548,7 @@ body {
     }
 
     .version-title {
-        font-size: 1rem;
+        font-size: 1.0625rem;
     }
 
     .version-content {
@@ -556,12 +556,12 @@ body {
     }
 
     .version-label {
-        font-size: 0.875rem;
+        font-size: 0.9375rem;
     }
 
     .version-value {
-        font-size: 0.875rem;
-        padding: 5px 12px;
+        font-size: 0.9375rem;
+        padding: 6px 12px;
     }
 
     .api-endpoint-card {
@@ -570,16 +570,18 @@ body {
     }
 
     .endpoint-label {
-        font-size: 0.875rem;
+        font-size: 0.9375rem;
+        margin-bottom: var(--spacing-sm);
     }
 
     .endpoint-value {
-        font-size: 0.8125rem;
-        padding: var(--spacing-sm);
+        font-size: 0.875rem;
+        padding: var(--spacing-md);
     }
 
     .copy-hint {
-        font-size: 0.6875rem;
+        font-size: 0.75rem;
+        margin-top: var(--spacing-sm);
     }
 
     .version-update-notice {
@@ -593,16 +595,16 @@ body {
     }
 
     .update-title {
-        font-size: 0.875rem;
+        font-size: 0.9375rem;
     }
 
     .update-desc {
-        font-size: 0.75rem;
+        font-size: 0.8125rem;
     }
 
     .update-btn {
-        padding: 8px 16px;
-        font-size: 0.8125rem;
+        padding: 10px 18px;
+        font-size: 0.875rem;
     }
 
     /* 表单行 */
@@ -934,11 +936,11 @@ body {
     /* 版本卡片 */
     .version-card {
         margin: var(--spacing-sm);
-        padding: var(--spacing-md);
+        padding: var(--spacing-lg);
     }
 
     .version-header {
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
     }
 
     .version-icon {
@@ -946,11 +948,11 @@ body {
     }
 
     .version-title {
-        font-size: 0.9375rem;
+        font-size: 1rem;
     }
 
     .version-content {
-        gap: var(--spacing-xs);
+        gap: var(--spacing-sm);
     }
 
     .version-item {
@@ -959,38 +961,40 @@ body {
     }
 
     .version-label {
-        font-size: 0.8125rem;
+        font-size: 0.875rem;
         flex: 1;
         min-width: 80px;
     }
 
     .version-value {
-        font-size: 0.8125rem;
-        padding: 4px 10px;
+        font-size: 0.875rem;
+        padding: 5px 12px;
     }
 
     .api-endpoint-card {
-        margin-top: var(--spacing-sm);
-        padding-top: var(--spacing-sm);
+        margin-top: var(--spacing-md);
+        padding-top: var(--spacing-md);
     }
 
     .endpoint-label {
-        font-size: 0.8125rem;
+        font-size: 0.875rem;
+        margin-bottom: var(--spacing-sm);
     }
 
     .endpoint-value {
-        font-size: 0.75rem;
-        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.8125rem;
+        padding: var(--spacing-sm) var(--spacing-md);
     }
 
     .copy-hint {
-        font-size: 0.625rem;
+        font-size: 0.6875rem;
+        margin-top: var(--spacing-xs);
     }
 
     .version-update-notice {
-        margin-top: var(--spacing-sm);
-        padding: var(--spacing-sm);
-        gap: var(--spacing-xs);
+        margin-top: var(--spacing-md);
+        padding: var(--spacing-md);
+        gap: var(--spacing-sm);
         flex-wrap: wrap;
     }
 
@@ -1004,18 +1008,18 @@ body {
     }
 
     .update-title {
-        font-size: 0.8125rem;
+        font-size: 0.875rem;
     }
 
     .update-desc {
-        font-size: 0.6875rem;
+        font-size: 0.75rem;
     }
 
     .update-btn {
-        padding: 8px 14px;
-        font-size: 0.75rem;
+        padding: 10px 16px;
+        font-size: 0.8125rem;
         width: 100%;
-        margin-top: var(--spacing-xs);
+        margin-top: var(--spacing-sm);
     }
 
     /* 加载遮罩 */
@@ -1175,7 +1179,7 @@ body {
     }
 
     .version-title {
-        font-size: 0.875rem;
+        font-size: 0.9375rem;
     }
 
     .version-content {
@@ -1183,11 +1187,11 @@ body {
     }
 
     .version-label {
-        font-size: 0.8125rem;
+        font-size: 0.875rem;
     }
 
     .version-value {
-        font-size: 0.8125rem;
+        font-size: 0.875rem;
         padding: 4px 10px;
     }
 
@@ -1197,16 +1201,18 @@ body {
     }
 
     .endpoint-label {
-        font-size: 0.8125rem;
+        font-size: 0.875rem;
+        margin-bottom: var(--spacing-xs);
     }
 
     .endpoint-value {
-        font-size: 0.75rem;
-        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.8125rem;
+        padding: var(--spacing-sm);
     }
 
     .copy-hint {
         font-size: 0.625rem;
+        margin-top: var(--spacing-xs);
     }
 
     .version-update-notice {
@@ -1225,11 +1231,11 @@ body {
     }
 
     .update-desc {
-        font-size: 0.6875rem;
+        font-size: 0.75rem;
     }
 
     .update-btn {
-        padding: 6px 12px;
+        padding: 8px 14px;
         font-size: 0.75rem;
         width: 100%;
         margin-top: var(--spacing-xs);
