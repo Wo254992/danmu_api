@@ -68,7 +68,6 @@ export function handleConfig(hasPermission = false) {
   return jsonResponse({
     message: "Welcome to the LogVar Danmu API server",
     version: globals.VERSION,
-    serverStartTime: globals.SERVER_START_TIME, // 服务启动时间
     envs: previewEnvVars, // 配置预览使用
     categorizedEnvVars: categorizedVars,
     envVarConfig: envVarConfig,
