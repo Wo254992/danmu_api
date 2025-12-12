@@ -1333,8 +1333,8 @@ export const dynamicCssContent = /* css */ `
     }
     
     .preview-stats-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--spacing-sm);
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-xs);
     }
     
     .preview-stat-card {
