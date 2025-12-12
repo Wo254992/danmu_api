@@ -536,88 +536,93 @@ body {
     /* ==================== 版本卡片 - 移动端 ==================== */
     .version-card {
         margin: var(--spacing-md);
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md);
         border-radius: var(--border-radius);
     }
 
     .version-header {
-        margin-bottom: var(--spacing-md);
-        padding-bottom: var(--spacing-sm);
-        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-sm);
+        padding-bottom: var(--spacing-xs);
+        gap: var(--spacing-xs);
     }
 
     .version-icon {
-        font-size: 1.375rem;
+        font-size: 1.125rem;
     }
 
     .version-title {
-        font-size: 0.9375rem;
+        font-size: 0.875rem;
     }
 
     .version-content {
-        gap: var(--spacing-sm);
+        gap: var(--spacing-xs);
     }
 
     .version-item {
-        padding: var(--spacing-xs) 0;
+        padding: 4px 0;
     }
 
     .version-label {
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
     }
 
     .version-label::before {
-        width: 6px;
-        height: 6px;
+        width: 5px;
+        height: 5px;
     }
 
     .version-value {
-        font-size: 0.9375rem;
-        padding: 5px 12px;
+        font-size: 0.8125rem;
+        padding: 3px 10px;
     }
 
     .api-endpoint-card {
-        margin-top: var(--spacing-sm);
-        padding-top: var(--spacing-sm);
+        margin-top: var(--spacing-xs);
+        padding-top: var(--spacing-xs);
     }
 
     .endpoint-label {
-        font-size: 0.875rem;
-        margin-bottom: var(--spacing-xs);
+        font-size: 0.8125rem;
+        margin-bottom: 4px;
+    }
+
+    .endpoint-label::before {
+        width: 5px;
+        height: 5px;
     }
 
     .endpoint-value {
-        font-size: 0.875rem;
-        padding: var(--spacing-sm);
+        font-size: 0.75rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
     }
 
     .copy-hint {
-        font-size: 0.75rem;
-        margin-top: var(--spacing-xs);
+        font-size: 0.625rem;
+        margin-top: 4px;
     }
 
     .version-update-notice {
-        margin-top: var(--spacing-md);
-        padding: var(--spacing-md);
-        gap: var(--spacing-sm);
+        margin-top: var(--spacing-sm);
+        padding: var(--spacing-sm);
+        gap: var(--spacing-xs);
     }
 
     .update-icon {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
     }
 
     .update-title {
-        font-size: 0.9375rem;
+        font-size: 0.8125rem;
         margin-bottom: 2px;
     }
 
     .update-desc {
-        font-size: 0.8125rem;
+        font-size: 0.6875rem;
     }
 
     .update-btn {
-        padding: 8px 16px;
-        font-size: 0.875rem;
+        padding: 6px 12px;
+        font-size: 0.75rem;
     }
 
     /* 表单行 */
@@ -949,98 +954,103 @@ body {
     /* 版本信息 - 超小屏幕 */
     .version-card {
         margin: var(--spacing-sm);
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
         width: calc(100% - var(--spacing-md));
     }
 
     .version-header {
         gap: var(--spacing-xs);
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: var(--spacing-xs);
         padding-bottom: var(--spacing-xs);
     }
 
     .version-icon {
-        font-size: 1.125rem;
+        font-size: 1rem;
     }
 
     .version-title {
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
     }
 
     .version-content {
-        gap: var(--spacing-xs);
+        gap: 4px;
     }
 
     .version-item {
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        padding: var(--spacing-xs) 0;
+        padding: 3px 0;
     }
 
     .version-label {
-        font-size: 0.8125rem;
+        font-size: 0.75rem;
     }
 
     .version-label::before {
-        width: 5px;
-        height: 5px;
+        width: 4px;
+        height: 4px;
     }
 
     .version-value {
-        font-size: 0.8125rem;
-        padding: 4px 10px;
+        font-size: 0.75rem;
+        padding: 2px 8px;
     }
 
     .version-update-notice {
-        margin-top: var(--spacing-sm);
-        padding: var(--spacing-sm);
-        gap: var(--spacing-sm);
+        margin-top: var(--spacing-xs);
+        padding: var(--spacing-xs);
+        gap: var(--spacing-xs);
         flex-wrap: wrap;
     }
 
     .update-icon {
-        font-size: 1.25rem;
+        font-size: 1rem;
     }
 
     .update-text {
         flex: 1;
-        min-width: 120px;
+        min-width: 100px;
     }
 
     .update-title {
-        font-size: 0.8125rem;
-    }
-
-    .update-desc {
         font-size: 0.75rem;
     }
 
+    .update-desc {
+        font-size: 0.625rem;
+    }
+
     .update-btn {
-        padding: 6px 12px;
-        font-size: 0.8125rem;
+        padding: 5px 10px;
+        font-size: 0.75rem;
         width: 100%;
         margin-top: var(--spacing-xs);
     }
 
     .api-endpoint-card {
-        margin-top: var(--spacing-sm);
-        padding-top: var(--spacing-sm);
+        margin-top: var(--spacing-xs);
+        padding-top: var(--spacing-xs);
     }
 
     .endpoint-label {
-        font-size: 0.8125rem;
-        margin-bottom: var(--spacing-xs);
+        font-size: 0.75rem;
+        margin-bottom: 3px;
+    }
+
+    .endpoint-label::before {
+        width: 4px;
+        height: 4px;
     }
 
     .endpoint-value {
-        font-size: 0.8125rem;
-        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.6875rem;
+        padding: 6px var(--spacing-sm);
     }
 
     .copy-hint {
-        font-size: 0.6875rem;
-        margin-top: var(--spacing-xs);
+        font-size: 0.5625rem;
+        margin-top: 3px;
     }
 
     /* 加载遮罩 */
@@ -1187,89 +1197,94 @@ body {
     }
     /* ==================== 版本卡片 - 横屏模式 ==================== */
     .version-card {
-        margin: var(--spacing-sm);
-        padding: var(--spacing-md);
+        margin: var(--spacing-xs);
+        padding: var(--spacing-sm);
         border-radius: var(--border-radius-sm);
     }
 
     .version-header {
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: var(--spacing-xs);
         padding-bottom: var(--spacing-xs);
         gap: var(--spacing-xs);
     }
 
     .version-icon {
-        font-size: 1.125rem;
+        font-size: 1rem;
     }
 
     .version-title {
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
     }
 
     .version-content {
-        gap: var(--spacing-xs);
+        gap: 4px;
     }
 
     .version-item {
-        padding: var(--spacing-xs) 0;
+        padding: 3px 0;
     }
 
     .version-label {
-        font-size: 0.8125rem;
+        font-size: 0.75rem;
     }
 
     .version-label::before {
-        width: 5px;
-        height: 5px;
+        width: 4px;
+        height: 4px;
     }
 
     .version-value {
-        font-size: 0.8125rem;
-        padding: 3px 8px;
+        font-size: 0.75rem;
+        padding: 2px 8px;
     }
 
     .api-endpoint-card {
-        margin-top: var(--spacing-sm);
-        padding-top: var(--spacing-sm);
+        margin-top: var(--spacing-xs);
+        padding-top: var(--spacing-xs);
     }
 
     .endpoint-label {
-        font-size: 0.8125rem;
-        margin-bottom: var(--spacing-xs);
+        font-size: 0.75rem;
+        margin-bottom: 3px;
+    }
+
+    .endpoint-label::before {
+        width: 4px;
+        height: 4px;
     }
 
     .endpoint-value {
-        font-size: 0.8125rem;
-        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.6875rem;
+        padding: 5px var(--spacing-sm);
     }
 
     .copy-hint {
-        font-size: 0.6875rem;
-        margin-top: var(--spacing-xs);
+        font-size: 0.5625rem;
+        margin-top: 3px;
     }
 
     .version-update-notice {
-        margin-top: var(--spacing-sm);
-        padding: var(--spacing-sm);
+        margin-top: var(--spacing-xs);
+        padding: var(--spacing-xs);
         flex-wrap: wrap;
         gap: var(--spacing-xs);
     }
 
     .update-icon {
-        font-size: 1.25rem;
+        font-size: 1rem;
     }
 
     .update-title {
-        font-size: 0.8125rem;
+        font-size: 0.75rem;
     }
 
     .update-desc {
-        font-size: 0.75rem;
+        font-size: 0.625rem;
     }
 
     .update-btn {
-        padding: 6px 12px;
-        font-size: 0.75rem;
+        padding: 5px 10px;
+        font-size: 0.6875rem;
         width: 100%;
         margin-top: var(--spacing-xs);
         text-align: center;
