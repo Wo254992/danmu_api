@@ -558,7 +558,7 @@ body {
     transform: scale(0.98);
 }
 
-/* API端点 */
+/* API端点 - 独立区块布局 */
 .api-endpoint-card {
     margin-top: var(--spacing-lg);
     padding-top: var(--spacing-lg);
@@ -567,12 +567,8 @@ body {
     transition: all var(--transition-fast);
 }
 
-.api-endpoint-card:hover .endpoint-value {
-    border-color: var(--primary-color);
-    background: rgba(99, 102, 241, 0.04);
-}
-
 .endpoint-label {
+    display: block;
     font-size: 0.9375rem;
     color: var(--text-secondary);
     font-weight: 500;
@@ -580,24 +576,33 @@ body {
 }
 
 .endpoint-value {
-    font-size: 0.875rem;
+    display: block;
+    width: 100%;
     font-weight: 600;
+    font-size: 0.875rem;
     color: var(--primary-color);
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-md);
     background: var(--bg-secondary);
     border-radius: var(--border-radius-sm);
     border: 1px solid var(--border-color);
     word-break: break-all;
-    line-height: 1.5;
+    line-height: 1.6;
     transition: all var(--transition-fast);
 }
 
+.api-endpoint-card:hover .endpoint-value {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.04);
+}
+
 .copy-hint {
+    display: block;
     font-size: 0.75rem;
     color: var(--text-tertiary);
-    margin-top: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
     text-align: right;
+    transition: color var(--transition-fast);
 }
 
 .api-endpoint-card:hover .copy-hint {
