@@ -265,12 +265,10 @@ body {
 
     .env-actions .btn {
         flex: 1;
-        min-width: 0;
+        min-width: 80px;
         padding: 0.75rem 0.625rem;
         font-size: 0.8125rem;
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
 
     .env-actions .btn-icon {
