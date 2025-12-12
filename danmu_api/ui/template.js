@@ -193,16 +193,15 @@ export const HTML_TEMPLATE = /* html */ `
                                     <div class="stat-label">系统状态</div>
                                 </div>
                             </div>
-                            <div class="preview-stat-card stat-card-compact" id="uptime-card">
-                                <div class="stat-icon-wrapper stat-icon-uptime">
+                            <div class="preview-stat-card stat-card-compact" id="version-card">
+                                <div class="stat-icon-wrapper stat-icon-version">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <polyline points="12 6 12 12 16 14"/>
+                                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                                     </svg>
                                 </div>
                                 <div class="stat-content">
-                                    <div class="stat-value stat-value-text" id="uptime-value">计算中...</div>
-                                    <div class="stat-label">运行时间</div>
+                                    <div class="stat-value stat-value-text" id="version-value">v${globals.version}</div>
+                                    <div class="stat-label">当前版本</div>
                                 </div>
                             </div>
                         </div>
