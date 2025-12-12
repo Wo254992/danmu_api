@@ -1263,35 +1263,15 @@ export const dynamicCssContent = /* css */ `
     color: #2496ed;
 }
 
-/* 运行时间图标样式 */
-.stat-icon-uptime {
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
+/* 版本图标样式 */
+.stat-icon-version {
+    background: rgba(236, 72, 153, 0.1);
+    color: #ec4899;
 }
 
-[data-theme="dark"] .stat-icon-uptime {
-    background: rgba(96, 165, 250, 0.15);
-    color: #60a5fa;
-}
-
-/* 运行时间卡片动画 */
-#uptime-card .stat-icon-wrapper svg {
-    animation: uptimePulse 3s ease-in-out infinite;
-}
-
-@keyframes uptimePulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.6;
-    }
-}
-
-/* 运行时间值特殊样式 */
-#uptime-value {
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.02em;
+[data-theme="dark"] .stat-icon-version {
+    background: rgba(244, 114, 182, 0.15);
+    color: #f472b6;
 }
 
 /* 移动端适配 */
