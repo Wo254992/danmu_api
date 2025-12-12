@@ -473,17 +473,17 @@ body {
 }
 
 .version-label {
-    font-size: 0.9375rem;
+    font-size: 0.8125rem;
     color: var(--text-secondary);
     font-weight: 500;
 }
 
 .version-value {
-    font-size: 0.9375rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     color: var(--text-primary);
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-    padding: 6px 14px;
+    padding: 4px 10px;
     background: var(--bg-secondary);
     border-radius: var(--border-radius-sm);
     border: 1px solid var(--border-color);
