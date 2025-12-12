@@ -577,17 +577,17 @@ body {
     }
 
     .api-endpoint-card {
-        margin-top: var(--spacing-md);
-        padding: var(--spacing-md);
+        margin-top: var(--spacing-sm);
+        padding-top: var(--spacing-sm);
     }
 
     .endpoint-label {
-        font-size: 0.8125rem;
+        font-size: 0.875rem;
         margin-bottom: var(--spacing-xs);
     }
 
     .endpoint-value {
-        font-size: 0.9375rem;
+        font-size: 0.875rem;
         padding: var(--spacing-sm);
     }
 
@@ -1025,17 +1025,17 @@ body {
 
     .api-endpoint-card {
         margin-top: var(--spacing-sm);
-        padding: var(--spacing-sm);
+        padding-top: var(--spacing-sm);
     }
 
     .endpoint-label {
-        font-size: 0.75rem;
+        font-size: 0.8125rem;
         margin-bottom: var(--spacing-xs);
     }
 
     .endpoint-value {
         font-size: 0.8125rem;
-        padding: var(--spacing-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
     }
 
     .copy-hint {
@@ -1230,17 +1230,17 @@ body {
 
     .api-endpoint-card {
         margin-top: var(--spacing-sm);
-        padding: var(--spacing-sm);
+        padding-top: var(--spacing-sm);
     }
 
     .endpoint-label {
-        font-size: 0.75rem;
+        font-size: 0.8125rem;
         margin-bottom: var(--spacing-xs);
     }
 
     .endpoint-value {
         font-size: 0.8125rem;
-        padding: var(--spacing-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
     }
 
     .copy-hint {
