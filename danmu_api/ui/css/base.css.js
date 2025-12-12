@@ -422,181 +422,100 @@ body {
     bottom: -6px;
 }
 
-/* ==================== 版本卡片 - 大尺寸优化 ==================== */
-
+/* 版本卡片 - 简洁紧凑风格 */
 .version-card {
-    margin: var(--spacing-xl);
-    padding: 0;
-    background: var(--bg-primary);
-    border-radius: var(--border-radius-xl);
-    border: 1px solid var(--border-color);
+    padding: var(--spacing-md);
+    margin: var(--spacing-md);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    position: relative;
     overflow: hidden;
+    border: 1px solid var(--border-color);
     transition: all var(--transition-base);
 }
 
 .version-card:hover {
-    border-color: var(--primary-light);
-    box-shadow: 0 6px 24px rgba(99, 102, 241, 0.12);
+    border-color: var(--border-color-hover);
+    background: var(--bg-tertiary);
 }
 
-/* 版本卡片头部 */
 .version-header {
     display: flex;
     align-items: center;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-xl);
-    background: var(--bg-secondary);
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-xs);
     border-bottom: 1px solid var(--border-color);
-    margin: 0;
 }
 
 .version-icon {
-    font-size: 1.75rem;
+    font-size: 1rem;
     line-height: 1;
 }
 
 .version-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
     letter-spacing: 0.3px;
+    text-transform: uppercase;
 }
 
-/* 版本内容区域 */
 .version-content {
-    padding: var(--spacing-xl);
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
-    background: var(--bg-primary);
+    gap: var(--spacing-xs);
 }
 
 .version-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-md) 0;
-    border-bottom: 1px dashed var(--border-color);
-}
-
-.version-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+    padding: 2px 0;
 }
 
 .version-label {
-    font-size: 1.0625rem;
-    color: var(--text-secondary);
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
     font-weight: 500;
 }
 
 .version-value {
-    font-size: 1.125rem;
-    font-weight: 700;
+    font-size: 0.75rem;
+    font-weight: 600;
     color: var(--text-primary);
-    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-    background: var(--bg-secondary);
-    padding: 8px 18px;
-    border-radius: var(--border-radius);
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
 }
 
 .version-latest {
     color: var(--primary-color);
-    background: rgba(99, 102, 241, 0.1);
 }
 
-/* API端点卡片 */
-.api-endpoint-card {
-    margin: 0 var(--spacing-xl) var(--spacing-xl);
-    padding: var(--spacing-xl);
-    background: var(--bg-secondary);
-    border-radius: var(--border-radius-lg);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    border: 1px solid transparent;
-}
-
-.api-endpoint-card:hover {
-    background: var(--bg-tertiary);
-    border-color: var(--primary-light);
-}
-
-.api-endpoint-card:active {
-    transform: scale(0.99);
-}
-
-.endpoint-label {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    font-size: 1rem;
-    color: var(--text-tertiary);
-    margin-bottom: var(--spacing-md);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.endpoint-label::before {
-    content: '🔗';
-    font-size: 1.125rem;
-}
-
-.endpoint-value {
-    font-weight: 600;
-    font-size: 1.125rem;
-    word-break: break-all;
-    color: var(--text-primary);
-    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-    line-height: 1.6;
-    padding: var(--spacing-sm) 0;
-}
-
-.copy-hint {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9375rem;
-    color: var(--text-tertiary);
-    margin-top: var(--spacing-md);
-}
-
-.copy-hint::before {
-    content: '📋';
-    font-size: 1rem;
-}
-
-/* 版本更新通知 */
 .version-update-notice {
-    margin: 0 var(--spacing-xl) var(--spacing-xl);
-    padding: var(--spacing-xl);
-    background: linear-gradient(135deg, 
-        rgba(16, 185, 129, 0.08) 0%, 
-        rgba(5, 150, 105, 0.12) 100%
-    );
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    border-radius: var(--border-radius-lg);
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background: var(--success-light);
+    border: 1px solid var(--success-color);
+    border-radius: var(--border-radius-sm);
     display: flex;
     align-items: center;
-    gap: var(--spacing-lg);
+    gap: var(--spacing-xs);
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .update-icon {
-    font-size: 2.5rem;
+    font-size: 1rem;
     flex-shrink: 0;
     line-height: 1;
-    animation: gentlePulse 2s ease-in-out infinite;
-}
-
-@keyframes gentlePulse {
-    0%, 100% { 
-        opacity: 1;
-        transform: scale(1);
-    }
-    50% { 
-        opacity: 0.8;
-        transform: scale(1.05);
-    }
 }
 
 .update-text {
@@ -605,42 +524,82 @@ body {
 }
 
 .update-title {
-    font-size: 1.125rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     color: var(--success-color);
-    margin-bottom: 6px;
-    line-height: 1.4;
+    margin-bottom: 1px;
+    line-height: 1.2;
 }
 
 .update-desc {
-    font-size: 1rem;
+    font-size: 0.625rem;
     color: var(--text-secondary);
     font-weight: 500;
-    line-height: 1.5;
+    line-height: 1.2;
 }
 
 .update-btn {
     flex-shrink: 0;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+    padding: 3px 8px;
+    background: var(--success-color);
     color: white;
     border: none;
-    border-radius: var(--border-radius-lg);
-    font-size: 1rem;
+    border-radius: 8px;
+    font-size: 0.625rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
 .update-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+    background: var(--success-hover);
 }
 
 .update-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+    transform: scale(0.95);
+}
+
+.api-endpoint-card {
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
+.api-endpoint-card:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary-color);
+}
+
+.endpoint-label {
+    display: block;
+    font-size: 0.625rem;
+    color: var(--text-tertiary);
+    margin-bottom: 2px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.endpoint-value {
+    display: block;
+    font-weight: 600;
+    font-size: 0.75rem;
+    word-break: break-all;
+    color: var(--text-primary);
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    line-height: 1.3;
+}
+
+.copy-hint {
+    display: block;
+    font-size: 0.5625rem;
+    color: var(--text-tertiary);
+    margin-top: 2px;
 }
 
 /* 导航菜单 - 优化版 */
@@ -650,9 +609,6 @@ body {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
-    overflow: hidden; /* 防止激活项阴影溢出 */
-    position: relative;
-    z-index: 1;
 }
 
 .nav-item {
@@ -697,10 +653,8 @@ body {
 .nav-item.active {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     color: white;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
     font-weight: 600;
-    position: relative;
-    z-index: 1;
 }
 
 .nav-item.active::before {
@@ -984,30 +938,4 @@ body {
 .mb-3 { margin-bottom: var(--spacing-md); }
 .mb-4 { margin-bottom: var(--spacing-lg); }
 .mb-5 { margin-bottom: var(--spacing-xl); }
-/* ========================================
-   图标对齐修复补丁
-   ======================================== */
-
-/* 导航菜单溢出隐藏 - 防止蓝色阴影漏出 */
-.nav-menu {
-    overflow: hidden;
-    position: relative;
-    z-index: 1;
-}
-
-/* 激活导航项阴影优化 */
-.nav-item.active {
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
-    position: relative;
-    z-index: 1;
-}
-
-/* 导航项内图标垂直对齐 */
-.nav-item .nav-icon,
-.nav-item svg {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    vertical-align: middle;
-}
 `;
