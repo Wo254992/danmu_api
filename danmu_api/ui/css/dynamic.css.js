@@ -1221,12 +1221,7 @@ export const dynamicCssContent = /* css */ `
 }
 
 /* 系统状态卡片动画 */
-#system-status-card.status-running {
-    border-color: rgba(16, 185, 129, 0.3);
-}
-
 #system-status-card.status-error {
-    border-color: rgba(239, 68, 68, 0.3);
     animation: statusPulse 2s ease-in-out infinite;
 }
 
