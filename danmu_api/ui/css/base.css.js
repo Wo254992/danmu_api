@@ -581,53 +581,66 @@ body {
 }
 
 .api-endpoint-card {
-    margin-top: var(--spacing-lg);
-    padding: var(--spacing-lg);
-    background: var(--bg-secondary);
-    border-radius: var(--border-radius);
+    margin-top: var(--spacing-md);
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
     cursor: pointer;
     transition: all var(--transition-fast);
     position: relative;
-    border: 1px solid var(--border-color);
+    border: none;
+    border-top: 1px dashed var(--border-color);
+    padding-top: var(--spacing-md);
 }
 
-.api-endpoint-card:hover {
-    background: var(--bg-hover);
+.api-endpoint-card:hover .endpoint-value {
     border-color: var(--primary-color);
-    box-shadow: var(--shadow-sm);
+    background: rgba(99, 102, 241, 0.04);
+}
+
+.api-endpoint-card:hover .copy-hint {
+    color: var(--primary-color);
 }
 
 .endpoint-label {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
-    font-size: 0.875rem;
+    justify-content: space-between;
+    font-size: 0.9375rem;
     color: var(--text-secondary);
     margin-bottom: var(--spacing-sm);
-    font-weight: 600;
+    font-weight: 500;
+}
+
+.endpoint-label::before {
+    content: '•';
+    color: var(--primary-color);
+    margin-right: var(--spacing-xs);
+    font-weight: 700;
 }
 
 .endpoint-value {
     display: block;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.9375rem;
     word-break: break-all;
     color: var(--primary-color);
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
     line-height: 1.5;
-    padding: var(--spacing-md);
-    background: var(--bg-primary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-secondary);
     border-radius: var(--border-radius-sm);
     border: 1px solid var(--border-color);
+    transition: all var(--transition-fast);
 }
 
 .copy-hint {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
+    display: block;
     font-size: 0.8125rem;
     color: var(--text-tertiary);
-    margin-top: var(--spacing-sm);
+    margin-top: var(--spacing-xs);
+    text-align: right;
+    transition: color var(--transition-fast);
 }
 
 /* 导航菜单 - 优化版 */
