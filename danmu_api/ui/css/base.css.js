@@ -334,7 +334,7 @@ body {
     height: 2px;
     background: linear-gradient(90deg, 
         transparent 0%, 
-        var(--primary-color) 50%, 
+        var(--border-color) 50%, 
         transparent 100%);
     pointer-events: none;
 }
