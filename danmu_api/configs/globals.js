@@ -16,6 +16,7 @@ export const Globals = {
   VERSION: '1.9.3',
   MAX_LOGS: 500, // 日志存储，最多保存 500 行
   MAX_ANIMES: 100,
+  SERVER_START_TIME: Date.now(), // 服务启动时间
 
   // 运行时状态
   animes: [],
