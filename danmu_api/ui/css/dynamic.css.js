@@ -1143,7 +1143,129 @@ export const dynamicCssContent = /* css */ `
     font-weight: 500;
     letter-spacing: 0.3px;
 }
+/* ========================================
+   紧凑型统计卡片样式
+   ======================================== */
+.stat-card-compact {
+    padding: var(--spacing-md) !important;
+}
 
+.stat-card-compact .stat-icon-wrapper {
+    width: 36px;
+    height: 36px;
+}
+
+.stat-card-compact .stat-icon-wrapper svg {
+    width: 18px;
+    height: 18px;
+}
+
+.stat-card-compact .stat-value {
+    font-size: 1.25rem;
+}
+
+.stat-card-compact .stat-label {
+    font-size: 0.7rem;
+}
+
+/* 部署平台图标样式 */
+.stat-icon-deploy {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+[data-theme="dark"] .stat-icon-deploy {
+    background: rgba(167, 139, 250, 0.15);
+    color: #a78bfa;
+}
+
+/* 系统状态图标样式 */
+.stat-icon-status {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+    transition: all var(--transition-base);
+}
+
+.stat-icon-status.status-error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.stat-icon-status.status-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+/* 状态值文本样式 */
+.stat-value-text {
+    font-size: 1rem !important;
+    text-transform: capitalize;
+}
+
+.stat-value-status {
+    font-size: 0.9rem !important;
+    font-weight: 600;
+}
+
+.stat-value-status.status-running {
+    color: var(--success-color);
+}
+
+.stat-value-status.status-error {
+    color: var(--danger-color);
+}
+
+.stat-value-status.status-warning {
+    color: var(--warning-color);
+}
+
+/* 系统状态卡片动画 */
+#system-status-card.status-running {
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+#system-status-card.status-error {
+    border-color: rgba(239, 68, 68, 0.3);
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+}
+
+/* 部署平台徽章颜色 */
+.deploy-badge-node {
+    color: #68a063;
+}
+
+.deploy-badge-vercel {
+    color: #000000;
+}
+
+[data-theme="dark"] .deploy-badge-vercel {
+    color: #ffffff;
+}
+
+.deploy-badge-netlify {
+    color: #00c7b7;
+}
+
+.deploy-badge-cloudflare {
+    color: #f38020;
+}
+
+.deploy-badge-edgeone {
+    color: #0052d9;
+}
+
+.deploy-badge-docker {
+    color: #2496ed;
+}
 /* 移动端适配 */
 @media (max-width: 768px) {
     .preview-hero-card {
@@ -1178,30 +1300,46 @@ export const dynamicCssContent = /* css */ `
     }
     
     .preview-stats-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-md);
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
     }
     
     .preview-stat-card {
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm) !important;
     }
     
+    .stat-card-compact {
+        padding: var(--spacing-sm) !important;
+    }
+    
+    .stat-card-compact .stat-icon-wrapper,
     .stat-icon-wrapper {
-        width: 36px;
-        height: 36px;
+        width: 32px;
+        height: 32px;
     }
     
+    .stat-card-compact .stat-icon-wrapper svg,
     .stat-icon-wrapper svg {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
     }
     
+    .stat-card-compact .stat-value,
     .stat-value {
-        font-size: 1.25rem;
+        font-size: 1.125rem;
     }
     
+    .stat-card-compact .stat-label,
     .stat-label {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
+    }
+    
+    .stat-value-text {
+        font-size: 0.875rem !important;
+    }
+    
+    .stat-value-status {
+        font-size: 0.8rem !important;
     }
 }
 
