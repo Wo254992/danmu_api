@@ -556,13 +556,14 @@ body {
     }
 
     .version-label {
-        font-size: 0.9375rem;
+        font-size: 0.8125rem;
     }
 
     .version-value {
-        font-size: 0.9375rem;
-        padding: 6px 12px;
+        font-size: 0.8125rem;
+        padding: 4px 10px;
     }
+
 
     .api-endpoint-card {
         margin-top: var(--spacing-md);
@@ -961,14 +962,12 @@ body {
     }
 
     .version-label {
-        font-size: 0.875rem;
-        flex: 1;
-        min-width: 80px;
+        font-size: 0.75rem;
     }
 
     .version-value {
-        font-size: 0.875rem;
-        padding: 5px 12px;
+        font-size: 0.75rem;
+        padding: 3px 8px;
     }
 
     .api-endpoint-card {
@@ -1187,13 +1186,14 @@ body {
     }
 
     .version-label {
-        font-size: 0.875rem;
+        font-size: 0.75rem;
     }
 
     .version-value {
-        font-size: 0.875rem;
-        padding: 4px 10px;
+        font-size: 0.75rem;
+        padding: 3px 8px;
     }
+
 
     .api-endpoint-card {
         margin-top: var(--spacing-sm);
