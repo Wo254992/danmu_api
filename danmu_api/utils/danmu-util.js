@@ -2,22 +2,6 @@ import { globals } from '../configs/globals.js';
 import { log } from './log-util.js'
 import { jsonResponse, xmlResponse } from "./http-util.js";
 
-
-function decodeHtmlEntities(text) {
-  if (!text || typeof text !== 'string') return text;
-  
-  // 匹配 &#数字; 格式的字符实体
-  return text.replace(/&#(\d+);/g, (match, dec) => {
-    try {
-      // 将十进制数字转换为对应的 Unicode 字符
-      const codePoint = parseInt(dec, 10);
-      return String.fromCodePoint(codePoint);
-    } catch (e) {
-      log("warn", `Failed to decode entity: ${match}`, e);
-      return match; // 转换失败时保留原文
-    }
-  });
-}
 // =====================
 // danmu处理相关函数
 // =====================
@@ -152,19 +136,19 @@ export function convertToDanmakuJson(contents, platform) {
     let attributes, m;
     let time, mode, color;
 
-    // 新增:处理新格式的弹幕数据
+    // 新增：处理新格式的弹幕数据
     if ("progress" in item && "mode" in item && "content" in item) {
       // 处理新格式的弹幕对象
       time = (item.progress / 1000).toFixed(2);
       mode = item.mode || 1;
       color = item.color || 16777215;
-      m = decodeHtmlEntities(item.content); // 🔥 转换表情
+      m = item.content.replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)));
     } else if ("timepoint" in item) {
       // 处理对象数组输入
       time = parseFloat(item.timepoint).toFixed(2);
       mode = item.ct || 0;
       color = item.color || 16777215;
-      m = decodeHtmlEntities(item.content); // 🔥 转换表情
+      m = item.content.replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)));
     } else {
       if (!("p" in item)) {
         continue;
@@ -175,20 +159,20 @@ export function convertToDanmakuJson(contents, platform) {
       mode = pValues[1] || 0;
 
       // 支持多种格式的 p 属性
-      // 旧格式(4字段):时间,类型,颜色,来源
-      // 标准格式(8字段):时间,类型,字体,颜色,时间戳,弹幕池,用户Hash,弹幕ID
-      // Bilibili格式(9字段):时间,类型,字体,颜色,时间戳,弹幕池,用户Hash,弹幕ID,权重
+      // 旧格式（4字段）：时间,类型,颜色,来源
+      // 标准格式（8字段）：时间,类型,字体,颜色,时间戳,弹幕池,用户Hash,弹幕ID
+      // Bilibili格式（9字段）：时间,类型,字体,颜色,时间戳,弹幕池,用户Hash,弹幕ID,权重
       if (pValues.length === 4) {
         // 旧格式
         color = pValues[2] || 16777215;
       } else if (pValues.length >= 8) {
-        // 新标准格式(8字段或9字段)
+        // 新标准格式（8字段或9字段）
         color = pValues[3] || 16777215;
       } else {
-        // 其他格式,尝试从第3或第4位获取颜色
+        // 其他格式，尝试从第3或第4位获取颜色
         color = pValues[3] || pValues[2] || 16777215;
       }
-      m = decodeHtmlEntities(item.m); // 🔥 转换表情
+      m = item.m;
     }
 
     attributes = [
@@ -372,9 +356,8 @@ function escapeXmlAttr(str) {
 // 转义 XML 文本内容
 function escapeXmlText(str) {
   if (!str) return '';
-  // 🔥 先转换数字字符实体为真实 emoji,再进行 XML 转义
-  const decoded = decodeHtmlEntities(str);
-  return String(decoded)
+  return String(str)
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)))
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
