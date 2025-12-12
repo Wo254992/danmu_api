@@ -44,6 +44,13 @@ function renderPreview() {
                 animateNumber('manual-configs', 0, manualConfigs, 700);
             }
             
+            // 更新部署平台信息
+            const deployPlatform = config.envs?.deployPlatform || 'node';
+            updateDeployPlatformDisplay(deployPlatform);
+            
+            // 检测系统状态
+            checkSystemStatus();
+            
             sortedCategories.forEach((category, index) => {
                 const items = categorizedVars[category];
                 const categoryIcon = getCategoryIcon(category);
@@ -241,5 +248,122 @@ function escapeHtml(text) {
         "'": '&#039;'
     };
     return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+/* ========================================
+   更新部署平台显示
+   ======================================== */
+function updateDeployPlatformDisplay(platform) {
+    const deployPlatformEl = document.getElementById('deploy-platform');
+    const deployIconWrapper = document.getElementById('deploy-icon-wrapper');
+    
+    if (!deployPlatformEl) return;
+    
+    // 平台名称映射
+    const platformNames = {
+        'node': 'Node.js',
+        'vercel': 'Vercel',
+        'netlify': 'Netlify',
+        'cloudflare': 'Cloudflare',
+        'edgeone': 'EdgeOne',
+        'docker': 'Docker'
+    };
+    
+    // 平台图标映射
+    const platformIcons = {
+        'node': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
+        'vercel': '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 22.525H0l12-21.05 12 21.05z"/></svg>',
+        'netlify': '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.934 8.519a1.044 1.044 0 0 1 .303.23l2.349-1.045-2.192-2.171-.491 2.954zM12.06 6.546a1.305 1.305 0 0 1 .209.574l3.497 1.482a1.044 1.044 0 0 1 .355-.177l.574-3.55-4.635 1.671zM11.933 7.972a1.321 1.321 0 0 1-.762-.241l-3.895 2.323a1.168 1.168 0 0 1 .063.312l3.852.958a1.305 1.305 0 0 1 .742-.343V7.972z"/></svg>',
+        'cloudflare': '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 13.5c-.4 0-.7.1-1 .3l-.1-.3-1.5-4.4c-.1-.3-.3-.6-.5-.8-.3-.3-.7-.4-1.1-.4H6.8c-.2 0-.3.1-.3.3v.3l.5 1.5c.1.2.2.3.4.3h4.4l2.3 6.7c.1.2.2.3.4.3h2c.2 0 .3-.1.4-.3l.4-1.2c.2-.5.6-.9 1.1-1.1.5-.2 1-.1 1.4.2l.5-1.5c.1-.2 0-.5-.2-.6-.4-.3-1-.5-1.6-.5z"/></svg>',
+        'edgeone': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+        'docker': '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.983 11.078h2.119a.186.186 0 0 0 .186-.185V9.006a.186.186 0 0 0-.186-.186h-2.119a.185.185 0 0 0-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 0 0 .186-.186V3.574a.186.186 0 0 0-.186-.185h-2.118a.185.185 0 0 0-.185.185v1.888c0 .102.082.185.185.186m0 2.716h2.118a.187.187 0 0 0 .186-.186V6.29a.186.186 0 0 0-.186-.185h-2.118a.185.185 0 0 0-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 0 0 .184-.186V6.29a.185.185 0 0 0-.185-.185H8.1a.185.185 0 0 0-.185.185v1.887c0 .102.083.185.185.186"/></svg>'
+    };
+    
+    const platformKey = platform.toLowerCase();
+    const displayName = platformNames[platformKey] || platform;
+    
+    deployPlatformEl.textContent = displayName;
+    deployPlatformEl.className = 'stat-value stat-value-text deploy-badge-' + platformKey;
+    
+    // 更新图标
+    if (deployIconWrapper && platformIcons[platformKey]) {
+        deployIconWrapper.innerHTML = platformIcons[platformKey];
+    }
+    
+    addLog(\`📦 部署平台: \${displayName}\`, 'info');
+}
+
+/* ========================================
+   检测系统状态
+   ======================================== */
+function checkSystemStatus() {
+    const statusEl = document.getElementById('system-status');
+    const statusIconWrapper = document.getElementById('status-icon-wrapper');
+    const statusCard = document.getElementById('system-status-card');
+    
+    if (!statusEl) return;
+    
+    // 设置检测中状态
+    statusEl.textContent = '检测中...';
+    statusEl.className = 'stat-value stat-value-status';
+    
+    // 检测API是否正常
+    fetch('/api/config', { method: 'GET' })
+        .then(response => {
+            if (response.ok) {
+                updateSystemStatusUI('running', '运行正常');
+            } else {
+                updateSystemStatusUI('warning', '部分异常');
+            }
+        })
+        .catch(error => {
+            updateSystemStatusUI('error', '连接失败');
+            console.error('System status check failed:', error);
+        });
+}
+
+/* ========================================
+   更新系统状态UI
+   ======================================== */
+function updateSystemStatusUI(status, text) {
+    const statusEl = document.getElementById('system-status');
+    const statusIconWrapper = document.getElementById('status-icon-wrapper');
+    const statusCard = document.getElementById('system-status-card');
+    
+    if (!statusEl) return;
+    
+    // 更新文本
+    statusEl.textContent = text;
+    
+    // 更新状态类名
+    statusEl.className = 'stat-value stat-value-status status-' + status;
+    
+    if (statusIconWrapper) {
+        statusIconWrapper.className = 'stat-icon-wrapper stat-icon-status status-' + status;
+        
+        // 更新图标
+        const icons = {
+            'running': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+            'warning': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+            'error': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
+        };
+        
+        if (icons[status]) {
+            statusIconWrapper.innerHTML = icons[status];
+        }
+    }
+    
+    if (statusCard) {
+        statusCard.className = 'preview-stat-card stat-card-compact status-' + status;
+    }
+    
+    // 记录日志
+    const logTypes = {
+        'running': 'success',
+        'warning': 'warning',
+        'error': 'error'
+    };
+    
+    addLog('🔍 系统状态: ' + text, logTypes[status] || 'info');
 }
 `;
