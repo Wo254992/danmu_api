@@ -51,11 +51,6 @@ function renderPreview() {
             // 检测系统状态
             checkSystemStatus();
             
-            // 初始化运行时间显示
-            if (config.serverStartTime) {
-                initUptime(config.serverStartTime);
-            }
-            
             sortedCategories.forEach((category, index) => {
                 const items = categorizedVars[category];
                 const categoryIcon = getCategoryIcon(category);
@@ -372,67 +367,4 @@ function updateSystemStatusUI(status, text) {
     addLog('🔍 系统状态: ' + text, logTypes[status] || 'info');
 }
 
-/* ========================================
-   运行时间相关变量
-   ======================================== */
-let serverStartTime = null;
-let uptimeInterval = null;
-
-/* ========================================
-   初始化运行时间显示
-   ======================================== */
-function initUptime(startTime) {
-    serverStartTime = startTime;
-    
-    // 立即更新一次
-    updateUptimeDisplay();
-    
-    // 清除旧的定时器
-    if (uptimeInterval) {
-        clearInterval(uptimeInterval);
-    }
-    
-    // 每秒更新一次
-    uptimeInterval = setInterval(updateUptimeDisplay, 1000);
-    
-    addLog('⏱️ 运行时间监控已启动', 'info');
-}
-
-/* ========================================
-   更新运行时间显示
-   ======================================== */
-function updateUptimeDisplay() {
-    if (!serverStartTime) return;
-    
-    const uptimeEl = document.getElementById('uptime-value');
-    if (!uptimeEl) return;
-    
-    const now = Date.now();
-    const uptime = now - serverStartTime;
-    
-    uptimeEl.textContent = formatUptime(uptime);
-}
-
-/* ========================================
-   格式化运行时间
-   ======================================== */
-function formatUptime(ms) {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-    
-    if (days > 0) {
-        const remainingHours = hours % 24;
-        return days + '天' + remainingHours + '时';
-    } else if (hours > 0) {
-        const remainingMinutes = minutes % 60;
-        return hours + '时' + remainingMinutes + '分';
-    } else if (minutes > 0) {
-        const remainingSeconds = seconds % 60;
-        return minutes + '分' + remainingSeconds + '秒';
-    } else {
-        return seconds + '秒';
-    }
-}
 `;
