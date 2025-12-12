@@ -423,18 +423,16 @@ body {
 }
 
 /* ========================================
-   版本卡片 - 简洁美观风格
+   版本卡片 - 简洁大方
    ======================================== */
 .version-card {
-    padding: var(--spacing-lg);
     margin: var(--spacing-lg);
+    padding: var(--spacing-xl);
     background: var(--bg-primary);
     border-radius: var(--border-radius-lg);
-    position: relative;
-    overflow: hidden;
     border: 1px solid var(--border-color);
-    transition: all var(--transition-base);
     box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
 }
 
 .version-card:hover {
@@ -442,64 +440,50 @@ body {
     box-shadow: var(--shadow);
 }
 
+/* 卡片头部 */
 .version-header {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-lg);
 }
 
 .version-icon {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     line-height: 1;
 }
 
 .version-title {
-    font-size: 0.9375rem;
+    font-size: 1.125rem;
     font-weight: 700;
     color: var(--text-primary);
-    letter-spacing: 0.2px;
 }
 
+/* 版本内容 */
 .version-content {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-md);
 }
 
 .version-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-xs) 0;
 }
 
 .version-label {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     color: var(--text-secondary);
     font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.version-label::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: var(--primary-color);
-    border-radius: 50%;
-    flex-shrink: 0;
 }
 
 .version-value {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     color: var(--text-primary);
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-    padding: 4px 12px;
+    padding: 6px 14px;
     background: var(--bg-secondary);
     border-radius: var(--border-radius-sm);
     border: 1px solid var(--border-color);
@@ -508,35 +492,29 @@ body {
 .version-latest {
     color: var(--primary-color);
     background: rgba(99, 102, 241, 0.08);
-    border-color: rgba(99, 102, 241, 0.3);
+    border-color: rgba(99, 102, 241, 0.25);
 }
 
 /* 更新提示 */
 .version-update-notice {
-    margin-top: var(--spacing-md);
-    padding: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-lg);
     background: var(--success-light);
     border: 1px solid var(--success-color);
     border-radius: var(--border-radius);
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-md);
     animation: fadeIn 0.3s ease-out;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-6px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .update-icon {
-    font-size: 1.375rem;
+    font-size: 1.5rem;
     flex-shrink: 0;
     line-height: 1;
 }
@@ -547,28 +525,25 @@ body {
 }
 
 .update-title {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 700;
     color: var(--success-color);
-    margin-bottom: 2px;
-    line-height: 1.3;
+    margin-bottom: 4px;
 }
 
 .update-desc {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     color: var(--text-secondary);
-    font-weight: 500;
-    line-height: 1.4;
 }
 
 .update-btn {
     flex-shrink: 0;
-    padding: 8px 16px;
+    padding: 10px 20px;
     background: var(--success-color);
     color: white;
     border: none;
     border-radius: var(--border-radius-sm);
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -583,13 +558,13 @@ body {
     transform: scale(0.98);
 }
 
-/* API端点卡片 - 与版本项统一风格 */
+/* API端点 */
 .api-endpoint-card {
-    margin-top: var(--spacing-sm);
-    padding-top: var(--spacing-sm);
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
     cursor: pointer;
     transition: all var(--transition-fast);
-    position: relative;
 }
 
 .api-endpoint-card:hover .endpoint-value {
@@ -598,46 +573,31 @@ body {
 }
 
 .endpoint-label {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     color: var(--text-secondary);
-    margin-bottom: var(--spacing-xs);
     font-weight: 500;
-}
-
-.endpoint-label::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: var(--info-color);
-    border-radius: 50%;
-    flex-shrink: 0;
+    margin-bottom: var(--spacing-sm);
 }
 
 .endpoint-value {
-    display: block;
+    font-size: 0.875rem;
     font-weight: 600;
-    font-size: 0.8125rem;
-    word-break: break-all;
     color: var(--primary-color);
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-    line-height: 1.5;
     padding: var(--spacing-sm) var(--spacing-md);
     background: var(--bg-secondary);
     border-radius: var(--border-radius-sm);
     border: 1px solid var(--border-color);
+    word-break: break-all;
+    line-height: 1.5;
     transition: all var(--transition-fast);
 }
 
 .copy-hint {
-    display: block;
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
-    margin-top: 6px;
+    margin-top: var(--spacing-xs);
     text-align: right;
-    transition: color var(--transition-fast);
 }
 
 .api-endpoint-card:hover .copy-hint {
