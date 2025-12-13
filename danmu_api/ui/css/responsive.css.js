@@ -628,10 +628,25 @@ body {
 
     .lan-scan-controls {
         flex-direction: column;
+        align-items: stretch;
+    }
+
+    .lan-input-group {
+        max-width: 100%;
+        width: 100%;
     }
 
     .lan-subnet-input {
-        max-width: 100%;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .lan-port-input {
+        width: 65px !important;
+    }
+
+    .lan-input-separator {
+        font-size: 0.9rem;
     }
 
     .lan-device-card {
