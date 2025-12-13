@@ -154,7 +154,7 @@ body {
     /* 顶栏模式徽章移动端适配 */
     .top-mode-badge {
         top: 26px;
-        right: 26px;
+        right: 25px;
         padding: var(--spacing-sm) var(--spacing-lg);
         font-size: 0.875rem;
         border-width: 1px;
@@ -926,7 +926,7 @@ body {
     /* 顶栏模式徽章超小屏幕优化 */
     .top-mode-badge {
         top: 26px;
-        right: 26px;
+        right: 25px;
         padding: 6px 12px;
         font-size: 0.75rem;
         gap: 4px;
