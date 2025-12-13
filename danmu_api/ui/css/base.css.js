@@ -788,7 +788,7 @@ body {
     flex: 1;
     margin-left: var(--sidebar-width);
     padding: var(--spacing-2xl);
-    padding-top: calc(var(--spacing-2xl) + 60px); /* 为顶栏徽章预留空间 */
+    position: relative; /* 新增：建立定位上下文 */
     background: var(--bg-secondary);
     min-height: 100vh;
     transition: margin-left var(--transition-base);
@@ -798,9 +798,9 @@ body {
    顶栏模式徽章
    ======================================== */
 .top-mode-badge {
-    position: fixed;
-    top: var(--spacing-xl);
-    right: var(--spacing-xl);
+    position: absolute; /* 修改：跟随内容滚动，不再悬浮在窗口顶端 */
+    top: var(--spacing-2xl); /* 修改：与主内容Padding一致，实现顶部平齐 */
+    right: var(--spacing-2xl);
     z-index: 500; /* 提高层级，但低于侧边栏和模态框 */
     display: inline-flex;
     align-items: center;
