@@ -93,6 +93,7 @@ body {
     .main-content {
         margin-left: 0;
         padding: var(--spacing-md);
+        padding-top: calc(var(--spacing-md) + 50px); /* 移动端为徽章预留空间 */
         background: var(--bg-secondary);
     }
 
@@ -153,11 +154,12 @@ body {
 
     /* 顶栏模式徽章移动端适配 */
     .top-mode-badge {
-        top: var(--spacing-sm);
-        right: var(--spacing-sm);
+        top: var(--spacing-md);
+        right: var(--spacing-md);
         padding: var(--spacing-sm) var(--spacing-lg);
         font-size: 0.875rem;
         border-width: 1px;
+        box-shadow: var(--shadow-lg);
     }
     
     .top-mode-badge-dot {
@@ -793,6 +795,7 @@ body {
     /* 主内容区增加内边距 */
     .main-content {
         padding: var(--spacing-sm);
+        padding-top: calc(var(--spacing-sm) + 45px); /* 小屏幕为徽章预留空间 */
     }
 
     /* Logo调整 */
@@ -924,11 +927,12 @@ body {
     }
 /* 顶栏模式徽章超小屏幕优化 */
     .top-mode-badge {
-        top: 4px;
-        right: 4px;
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
         padding: 6px 12px;
         font-size: 0.75rem;
         gap: 4px;
+        box-shadow: var(--shadow-md);
     }
     
     .top-mode-badge-dot {
