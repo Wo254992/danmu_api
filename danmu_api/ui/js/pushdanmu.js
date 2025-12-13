@@ -6,6 +6,259 @@ export const pushDanmuJsContent = /* javascript */ `
 let selectedAnime = null;
 let currentEpisodes = [];
 let pushHistory = [];
+let scanAbortController = null;
+
+/* ========================================
+   推送预设配置
+   ======================================== */
+const pushPresets = {
+    okvideo: {
+        name: 'OK影视',
+        port: 9978,
+        path: '/action?do=refresh&type=danmaku&path='
+    },
+    kodi: {
+        name: 'Kodi',
+        port: 8080,
+        path: '/jsonrpc?request='
+    },
+    potplayer: {
+        name: 'PotPlayer',
+        port: 10800,
+        path: '/danmaku?url='
+    }
+};
+
+/* ========================================
+   应用推送预设
+   ======================================== */
+function applyPushPreset(presetKey) {
+    const preset = pushPresets[presetKey];
+    if (!preset) return;
+    
+    const pushUrlInput = document.getElementById('push-url');
+    const subnetInput = document.getElementById('lanSubnet');
+    const subnet = subnetInput ? subnetInput.value.trim() : '192.168.1';
+    
+    // 使用网段的前缀加上占位符
+    const url = \`http://\${subnet}.x:\${preset.port}\${preset.path}\`;
+    pushUrlInput.value = url;
+    
+    // 添加动画效果
+    pushUrlInput.style.animation = 'pulse 0.4s ease-out';
+    setTimeout(() => {
+        pushUrlInput.style.animation = '';
+    }, 400);
+    
+    addLog(\`📋 已应用预设: \${preset.name}\`, 'success');
+    customAlert(\`已应用 \${preset.name} 预设\\n\\n请将地址中的 "x" 替换为实际设备IP，或使用下方的局域网扫描功能自动发现设备。\`, '✅ 预设已应用');
+}
+
+/* ========================================
+   扫描局域网设备
+   ======================================== */
+async function scanLanDevices() {
+    const subnetInput = document.getElementById('lanSubnet');
+    const scanBtn = document.getElementById('scanLanBtn');
+    const devicesList = document.getElementById('lanDevicesList');
+    const subnet = subnetInput.value.trim();
+    
+    if (!subnet) {
+        customAlert('请输入网段，例如: 192.168.1', '⚠️ 提示');
+        subnetInput.focus();
+        return;
+    }
+    
+    // 验证网段格式
+    const subnetPattern = /^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$/;
+    if (!subnetPattern.test(subnet)) {
+        customAlert('网段格式不正确，请输入如: 192.168.1', '⚠️ 格式错误');
+        subnetInput.focus();
+        return;
+    }
+    
+    // 保存原始按钮状态
+    const originalHTML = scanBtn.innerHTML;
+    scanBtn.innerHTML = '<span class="loading-spinner-small"></span> 扫描中...';
+    scanBtn.disabled = true;
+    
+    // 显示扫描进度
+    devicesList.innerHTML = \`
+        <div class="lan-scan-progress">
+            <div class="scan-progress-bar">
+                <div class="scan-progress-fill" id="scanProgressFill"></div>
+            </div>
+            <div class="scan-progress-text" id="scanProgressText">正在扫描 \${subnet}.1 - \${subnet}.254 ...</div>
+        </div>
+    \`;
+    
+    addLog(\`🔍 开始扫描局域网: \${subnet}.1 - \${subnet}.254\`, 'info');
+    
+    // 要扫描的端口列表
+    const portsToScan = [9978, 8080, 10800, 80, 8888];
+    const foundDevices = [];
+    let scannedCount = 0;
+    const totalScans = 254;
+    
+    // 创建中止控制器
+    scanAbortController = new AbortController();
+    
+    // 并发扫描函数
+    const scanIP = async (ip) => {
+        for (const port of portsToScan) {
+            if (scanAbortController.signal.aborted) return;
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 800);
+                
+                const response = await fetch(\`http://\${ip}:\${port}/\`, {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    signal: controller.signal
+                }).catch(() => null);
+                
+                clearTimeout(timeoutId);
+                
+                if (response !== null) {
+                    // 检测设备类型
+                    let deviceType = '未知设备';
+                    let deviceIcon = '📱';
+                    
+                    if (port === 9978) {
+                        deviceType = 'OK影视';
+                        deviceIcon = '📺';
+                    } else if (port === 8080) {
+                        deviceType = 'Kodi / Web服务';
+                        deviceIcon = '🎬';
+                    } else if (port === 10800) {
+                        deviceType = 'PotPlayer';
+                        deviceIcon = '🎵';
+                    } else if (port === 80) {
+                        deviceType = 'Web服务';
+                        deviceIcon = '🌐';
+                    } else if (port === 8888) {
+                        deviceType = '媒体服务';
+                        deviceIcon = '📡';
+                    }
+                    
+                    foundDevices.push({
+                        ip: ip,
+                        port: port,
+                        type: deviceType,
+                        icon: deviceIcon
+                    });
+                }
+            } catch (e) {
+                // 忽略错误
+            }
+        }
+        
+        scannedCount++;
+        const progress = Math.round((scannedCount / totalScans) * 100);
+        const progressFill = document.getElementById('scanProgressFill');
+        const progressText = document.getElementById('scanProgressText');
+        if (progressFill) progressFill.style.width = progress + '%';
+        if (progressText) progressText.textContent = \`扫描进度: \${progress}% (\${scannedCount}/\${totalScans})\`;
+    };
+    
+    // 批量并发扫描
+    const batchSize = 20;
+    const ips = [];
+    for (let i = 1; i <= 254; i++) {
+        ips.push(\`\${subnet}.\${i}\`);
+    }
+    
+    try {
+        for (let i = 0; i < ips.length; i += batchSize) {
+            if (scanAbortController.signal.aborted) break;
+            const batch = ips.slice(i, i + batchSize);
+            await Promise.all(batch.map(ip => scanIP(ip)));
+        }
+    } catch (e) {
+        console.error('扫描错误:', e);
+    }
+    
+    // 恢复按钮状态
+    scanBtn.innerHTML = originalHTML;
+    scanBtn.disabled = false;
+    
+    // 显示扫描结果
+    if (foundDevices.length > 0) {
+        devicesList.innerHTML = \`
+            <div class="lan-devices-header">
+                <span class="devices-count">发现 \${foundDevices.length} 个设备</span>
+                <button class="btn btn-secondary btn-sm" onclick="scanLanDevices()">重新扫描</button>
+            </div>
+            <div class="lan-devices-grid">
+                \${foundDevices.map((device, index) => \`
+                    <div class="lan-device-card" onclick="selectLanDevice('\${device.ip}', \${device.port})" style="animation: fadeInUp 0.3s ease-out \${index * 0.05}s backwards;">
+                        <div class="device-icon">\${device.icon}</div>
+                        <div class="device-info">
+                            <div class="device-ip">\${device.ip}:\${device.port}</div>
+                            <div class="device-type">\${device.type}</div>
+                        </div>
+                        <div class="device-select-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">
+                                <path d="M9 18l6-6-6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                \`).join('')}
+            </div>
+        \`;
+        addLog(\`✅ 扫描完成，发现 \${foundDevices.length} 个设备\`, 'success');
+    } else {
+        devicesList.innerHTML = \`
+            <div class="lan-scan-empty">
+                <div class="empty-icon">📡</div>
+                <p>未发现可用设备</p>
+                <span class="empty-hint">请确保设备已开启并在同一网段</span>
+                <button class="btn btn-secondary btn-sm" onclick="scanLanDevices()" style="margin-top: 12px;">重新扫描</button>
+            </div>
+        \`;
+        addLog('⚠️ 扫描完成，未发现可用设备', 'warn');
+    }
+}
+
+/* ========================================
+   选择局域网设备
+   ======================================== */
+function selectLanDevice(ip, port) {
+    const pushUrlInput = document.getElementById('push-url');
+    let currentUrl = pushUrlInput.value.trim();
+    
+    // 根据端口确定路径
+    let path = '/action?do=refresh&type=danmaku&path=';
+    if (port === 8080) {
+        path = '/jsonrpc?request=';
+    } else if (port === 10800) {
+        path = '/danmaku?url=';
+    }
+    
+    // 如果当前有URL，尝试保留路径部分
+    if (currentUrl) {
+        try {
+            const urlObj = new URL(currentUrl);
+            path = urlObj.pathname + urlObj.search;
+        } catch (e) {
+            // 使用默认路径
+        }
+    }
+    
+    const newUrl = \`http://\${ip}:\${port}\${path}\`;
+    pushUrlInput.value = newUrl;
+    
+    // 添加选中动画
+    pushUrlInput.style.animation = 'pulse 0.4s ease-out';
+    pushUrlInput.style.borderColor = 'var(--success-color)';
+    setTimeout(() => {
+        pushUrlInput.style.animation = '';
+        pushUrlInput.style.borderColor = '';
+    }, 1000);
+    
+    addLog(\`✅ 已选择设备: \${ip}:\${port}\`, 'success');
+}
 
 /* ========================================
    获取默认推送地址
