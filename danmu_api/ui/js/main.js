@@ -472,6 +472,51 @@ function updateApiEndpoint() {
 }
 
 /* ========================================
+   更新模式显示
+   ======================================== */
+function updateModeDisplay() {
+    const urlPath = window.location.pathname;
+    const pathParts = urlPath.split('/').filter(part => part !== '');
+    const urlToken = pathParts.length > 0 ? pathParts[0] : '';
+    
+    let mode = 'preview';
+    let modeText = '预览模式';
+    let modeIcon = '👁️';
+    let modeClass = 'mode-badge-preview';
+    
+    if (urlToken) {
+        if (currentAdminToken && urlToken === currentAdminToken) {
+            mode = 'admin';
+            modeText = '管理员模式';
+            modeIcon = '🔑';
+            modeClass = 'mode-badge-admin';
+        } else if (originalToken !== '87654321' && urlToken === originalToken) {
+            mode = 'normal';
+            modeText = '普通模式';
+            modeIcon = '👤';
+            modeClass = 'mode-badge-normal';
+        } else if (originalToken === '87654321') {
+            mode = 'preview';
+            modeText = '预览模式';
+            modeIcon = '👁️';
+            modeClass = 'mode-badge-preview';
+        }
+    }
+    
+    const modeBadgeElement = document.getElementById('current-mode-badge');
+    if (modeBadgeElement) {
+        modeBadgeElement.className = 'mode-badge ' + modeClass;
+        modeBadgeElement.innerHTML = \`
+            <span class="mode-badge-dot"></span>
+            <span class="mode-badge-icon">\${modeIcon}</span>
+            <span class="mode-badge-text">\${modeText}</span>
+        \`;
+    }
+    
+    addLog(\`🎭 当前模式: \${modeText}\`, 'info');
+}
+
+/* ========================================
    获取Docker版本并检查更新
    ======================================== */
 function getDockerVersion() {
@@ -636,6 +681,7 @@ async function init() {
         initTheme();
         
         await updateApiEndpoint();
+        updateModeDisplay();
         getDockerVersion();
         const config = await fetchAndSetConfig();
         setDefaultPushUrl(config);
