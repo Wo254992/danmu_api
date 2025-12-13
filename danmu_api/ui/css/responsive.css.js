@@ -265,10 +265,12 @@ body {
 
     .env-actions .btn {
         flex: 1;
-        min-width: 80px;
+        min-width: 0;
         padding: 0.75rem 0.625rem;
         font-size: 0.8125rem;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .env-actions .btn-icon {
@@ -937,33 +939,7 @@ body {
         margin: var(--spacing-sm);
         padding: var(--spacing-lg);
     }
-    /* 模式徽章移动端适配 */
-    .mode-badge-container {
-        margin: var(--spacing-md);
-        padding: var(--spacing-md);
-    }
-    
-    .mode-badge-icon {
-        font-size: 1.125rem;
-    }
-    
-    .mode-badge-label {
-        font-size: 0.7rem;
-    }
-    
-    .mode-badge {
-        padding: var(--spacing-sm) var(--spacing-md);
-        font-size: 0.875rem;
-    }
-    
-    .mode-badge-dot {
-        width: 6px;
-        height: 6px;
-    }
-    
-    .mode-badge-text {
-        font-size: 0.875rem;
-    }
+
     .version-header {
         margin-bottom: var(--spacing-md);
     }
