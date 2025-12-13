@@ -73,6 +73,20 @@ export const HTML_TEMPLATE = /* html */ `
                     <span class="copy-hint">点击复制</span>
                 </div>
             </div>
+            
+            <!-- 模式徽章 -->
+            <div class="mode-badge-container">
+                <div class="mode-badge-header">
+                    <span class="mode-badge-icon">🎭</span>
+                    <span class="mode-badge-label">当前模式</span>
+                </div>
+                <div class="mode-badge mode-badge-preview" id="current-mode-badge">
+                    <span class="mode-badge-dot"></span>
+                    <span class="mode-badge-icon">👁️</span>
+                    <span class="mode-badge-text">预览模式</span>
+                </div>
+            </div>
+            
             <nav class="nav-menu">
                 <a href="#preview" class="nav-item active" data-section="preview" onclick="switchSection('preview'); return false;">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
