@@ -44,6 +44,15 @@ export const HTML_TEMPLATE = /* html */ `
                 </button>
             </div>
 
+            <!-- 模式指示器 -->
+            <div class="mode-indicator" id="mode-indicator">
+                <div class="mode-icon" id="mode-icon">👁️</div>
+                <div class="mode-info">
+                    <span class="mode-label">当前模式</span>
+                    <span class="mode-value" id="mode-value">预览模式</span>
+                </div>
+            </div>
+
             <div class="version-card">
                 <div class="version-header">
                     <div class="version-icon">📦</div>
