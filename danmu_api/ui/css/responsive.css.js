@@ -533,24 +533,6 @@ body {
         box-sizing: border-box;
     }
 
-    /* ==================== 模式指示器 ==================== */
-    .mode-indicator {
-        margin: var(--spacing-sm) var(--spacing-md);
-        padding: var(--spacing-sm) var(--spacing-md);
-    }
-
-    .mode-icon {
-        font-size: 1.25rem;
-    }
-
-    .mode-label {
-        font-size: 0.625rem;
-    }
-
-    .mode-value {
-        font-size: 0.8125rem;
-    }
-
     /* ==================== 版本卡片 ==================== */
     .version-card {
         margin: var(--spacing-md);
