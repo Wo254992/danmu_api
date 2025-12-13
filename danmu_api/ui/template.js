@@ -193,15 +193,16 @@ export const HTML_TEMPLATE = /* html */ `
                                     <div class="stat-label">系统状态</div>
                                 </div>
                             </div>
-                            <div class="preview-stat-card stat-card-compact" id="version-card">
-                                <div class="stat-icon-wrapper stat-icon-version">
+                            <div class="preview-stat-card stat-card-compact" id="mode-card">
+                                <div class="stat-icon-wrapper stat-icon-mode" id="mode-icon-wrapper">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                        <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                                        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
                                 </div>
                                 <div class="stat-content">
-                                    <div class="stat-value stat-value-text" id="version-value">v${globals.version}</div>
-                                    <div class="stat-label">当前版本</div>
+                                    <div class="stat-value stat-value-text" id="current-mode">检测中...</div>
+                                    <div class="stat-label">当前模式</div>
                                 </div>
                             </div>
                         </div>
