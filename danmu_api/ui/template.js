@@ -275,6 +275,60 @@ export const HTML_TEMPLATE = /* html */ `
                         <label class="form-label">推送地址</label>
                         <input type="text" class="form-input" id="push-url" placeholder="http://127.0.0.1:9978/action?do=refresh&type=danmaku&path=">
                         
+                        <!-- 快速预设 -->
+                        <div class="push-presets-section">
+                            <div class="presets-header">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor">
+                                    <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="2"/>
+                                </svg>
+                                <span>快速预设</span>
+                            </div>
+                            <div class="presets-grid">
+                                <button class="btn btn-secondary preset-btn" onclick="applyPushPreset('okvideo')">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+                                    </svg>
+                                    OK影视
+                                </button>
+                                <button class="btn btn-secondary preset-btn" onclick="applyPushPreset('kodi')">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 6v6l4 2" stroke="white" stroke-width="2" fill="none"/>
+                                    </svg>
+                                    Kodi
+                                </button>
+                                <button class="btn btn-secondary preset-btn" onclick="applyPushPreset('potplayer')">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                        <rect x="4" y="4" width="16" height="16" rx="2"/>
+                                        <path d="M9 8l6 4-6 4V8z" fill="white"/>
+                                    </svg>
+                                    PotPlayer
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 局域网扫描 -->
+                        <div class="lan-scan-section">
+                            <div class="lan-scan-header">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor">
+                                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                                    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke-width="2"/>
+                                </svg>
+                                <span>局域网设备扫描</span>
+                            </div>
+                            <div class="lan-scan-controls">
+                                <input type="text" class="form-input lan-subnet-input" id="lanSubnet" value="192.168.1" placeholder="网段 如: 192.168.1">
+                                <button class="btn btn-primary" id="scanLanBtn" onclick="scanLanDevices()">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" stroke-width="2"/>
+                                        <path d="m21 21-4.35-4.35" stroke-width="2"/>
+                                    </svg>
+                                    扫描
+                                </button>
+                            </div>
+                            <div id="lanDevicesList" class="lan-devices-list"></div>
+                        </div>
+                        
                         <label class="form-label" style="margin-top: 20px;">搜索关键字</label>
                         <div class="input-group">
                             <input type="text" class="form-input" id="push-search-keyword" placeholder="请输入搜索关键字">
