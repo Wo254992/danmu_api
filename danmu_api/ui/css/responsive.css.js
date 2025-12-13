@@ -608,8 +608,48 @@ body {
         font-size: 0.875rem;
     }
 
-    /* 表单行 */
-    .form-row {
+    /* 局域网扫描 - 移动端 */
+    .presets-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-xs);
+    }
+
+    .preset-btn {
+        padding: var(--spacing-sm) var(--spacing-xs) !important;
+        font-size: 0.75rem !important;
+        flex-direction: column;
+        gap: 4px !important;
+    }
+
+    .preset-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .lan-scan-controls {
+        flex-direction: column;
+    }
+
+    .lan-subnet-input {
+        max-width: 100%;
+    }
+
+    .lan-device-card {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .device-icon {
+        font-size: 1.25rem;
+    }
+
+    .device-ip {
+        font-size: 0.8125rem;
+    }
+
+    .device-type {
+        font-size: 0.6875rem;
+    }
+
         grid-template-columns: 1fr;
         width: 100%;
     }
