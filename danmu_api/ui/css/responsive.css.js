@@ -93,7 +93,6 @@ body {
     .main-content {
         margin-left: 0;
         padding: var(--spacing-md);
-        padding-top: calc(var(--spacing-md) + 50px); /* 移动端为徽章预留空间 */
         background: var(--bg-secondary);
     }
 
@@ -795,7 +794,6 @@ body {
     /* 主内容区增加内边距 */
     .main-content {
         padding: var(--spacing-sm);
-        padding-top: calc(var(--spacing-sm) + 45px); /* 小屏幕为徽章预留空间 */
     }
 
     /* Logo调整 */
