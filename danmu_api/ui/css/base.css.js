@@ -609,7 +609,107 @@ body {
     color: var(--primary-color);
 }
 
-/* 导航菜单 - 优化版 */
+/* ========================================
+   模式徽章样式
+   ======================================== */
+.mode-badge-container {
+    margin: var(--spacing-lg);
+    padding: var(--spacing-lg);
+    background: var(--bg-card);
+    backdrop-filter: var(--blur-md);
+    border-radius: var(--border-radius-lg);
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+}
+
+.mode-badge-container:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.mode-badge-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.mode-badge-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.mode-badge-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+    width: 100%;
+    justify-content: center;
+}
+
+.mode-badge:hover {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-md);
+}
+
+.mode-badge-preview {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.mode-badge-normal {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+}
+
+.mode-badge-admin {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    color: white;
+}
+
+.mode-badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: modePulse 2s ease-in-out infinite;
+}
+
+@keyframes modePulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.3);
+    }
+}
+
+.mode-badge-text {
+    font-size: 0.9375rem;
+}
+
+/* ========================================
+   导航菜单 - 优化版
+   ======================================== */
 .nav-menu {
     flex: 1;
     padding: var(--spacing-lg);
