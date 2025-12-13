@@ -482,34 +482,34 @@ function updateModeDisplay() {
     let mode = 'preview';
     let modeText = '预览模式';
     let modeIcon = '👁️';
-    let modeClass = 'mode-badge-preview';
+    let modeClass = 'top-mode-badge-preview';
     
     if (urlToken) {
         if (currentAdminToken && urlToken === currentAdminToken) {
             mode = 'admin';
             modeText = '管理员模式';
             modeIcon = '🔑';
-            modeClass = 'mode-badge-admin';
+            modeClass = 'top-mode-badge-admin';
         } else if (originalToken !== '87654321' && urlToken === originalToken) {
             mode = 'normal';
             modeText = '普通模式';
             modeIcon = '👤';
-            modeClass = 'mode-badge-normal';
+            modeClass = 'top-mode-badge-normal';
         } else if (originalToken === '87654321') {
             mode = 'preview';
             modeText = '预览模式';
             modeIcon = '👁️';
-            modeClass = 'mode-badge-preview';
+            modeClass = 'top-mode-badge-preview';
         }
     }
     
-    const modeBadgeElement = document.getElementById('current-mode-badge');
+    const modeBadgeElement = document.getElementById('top-mode-badge');
     if (modeBadgeElement) {
-        modeBadgeElement.className = 'mode-badge ' + modeClass;
+        modeBadgeElement.className = 'top-mode-badge ' + modeClass;
         modeBadgeElement.innerHTML = \`
-            <span class="mode-badge-dot"></span>
-            <span class="mode-badge-icon">\${modeIcon}</span>
-            <span class="mode-badge-text">\${modeText}</span>
+            <span class="top-mode-badge-dot"></span>
+            <span class="top-mode-badge-icon">\${modeIcon}</span>
+            <span class="top-mode-badge-text">\${modeText}</span>
         \`;
     }
     
