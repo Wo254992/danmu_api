@@ -321,14 +321,14 @@ export const HTML_TEMPLATE = /* html */ `
                                     <input type="text" class="form-input lan-subnet-input" id="lanSubnet" value="192.168.1" placeholder="网段">
                                     <span class="lan-input-separator">:</span>
                                     <input type="number" class="form-input lan-port-input" id="lanPort" value="9978" placeholder="端口" min="1" max="65535">
+                                    <button class="btn btn-primary lan-scan-btn" id="scanLanBtn" onclick="scanLanDevices()">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">
+                                            <circle cx="11" cy="11" r="8" stroke-width="2"/>
+                                            <path d="m21 21-4.35-4.35" stroke-width="2"/>
+                                        </svg>
+                                        <span class="scan-btn-text">扫描</span>
+                                    </button>
                                 </div>
-                                <button class="btn btn-primary" id="scanLanBtn" onclick="scanLanDevices()">
-                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">
-                                        <circle cx="11" cy="11" r="8" stroke-width="2"/>
-                                        <path d="m21 21-4.35-4.35" stroke-width="2"/>
-                                    </svg>
-                                    扫描
-                                </button>
                             </div>
                             <div id="lanDevicesList" class="lan-devices-list"></div>
                         </div>
