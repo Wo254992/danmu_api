@@ -472,57 +472,6 @@ function updateApiEndpoint() {
 }
 
 /* ========================================
-   更新模式指示器
-   ======================================== */
-function updateModeIndicator() {
-    const indicator = document.getElementById('mode-indicator');
-    const modeIcon = document.getElementById('mode-icon');
-    const modeValue = document.getElementById('mode-value');
-    
-    if (!indicator || !modeIcon || !modeValue) return;
-    
-    const urlPath = window.location.pathname;
-    const pathParts = urlPath.split('/').filter(part => part !== '');
-    const urlToken = pathParts.length > 0 ? pathParts[0] : '';
-    
-    // 移除所有模式类
-    indicator.classList.remove('mode-preview', 'mode-user', 'mode-admin');
-    
-    if (!urlToken) {
-        // 预览模式 - 没有token
-        indicator.classList.add('mode-preview');
-        modeIcon.textContent = '👁️';
-        modeValue.textContent = '预览模式';
-        indicator.title = '仅可查看配置预览，需要TOKEN访问更多功能';
-        addLog('🔍 当前为预览模式', 'info');
-    } else if (currentAdminToken && urlToken === currentAdminToken) {
-        // 管理员模式
-        indicator.classList.add('mode-admin');
-        modeIcon.textContent = '🔐';
-        modeValue.textContent = '管理员模式';
-        indicator.title = '拥有完整权限，可修改系统配置';
-        addLog('🔐 当前为管理员模式', 'success');
-    } else if (urlToken === originalToken || originalToken === '87654321') {
-        // 用户模式
-        indicator.classList.add('mode-user');
-        modeIcon.textContent = '👤';
-        modeValue.textContent = '用户模式';
-        indicator.title = '可访问日志、接口调试、推送弹幕等功能';
-        addLog('👤 当前为用户模式', 'info');
-    } else {
-        // 未知token，降级为预览模式
-        indicator.classList.add('mode-preview');
-        modeIcon.textContent = '👁️';
-        modeValue.textContent = '预览模式';
-        indicator.title = 'TOKEN无效，仅可查看配置预览';
-        addLog('⚠️ TOKEN无效，降级为预览模式', 'warn');
-    }
-    
-    // 添加入场动画
-    indicator.style.animation = 'fadeInUp 0.4s ease-out';
-}
-
-/* ========================================
    获取Docker版本并检查更新
    ======================================== */
 function getDockerVersion() {
@@ -687,7 +636,6 @@ async function init() {
         initTheme();
         
         await updateApiEndpoint();
-        updateModeIndicator();
         getDockerVersion();
         const config = await fetchAndSetConfig();
         setDefaultPushUrl(config);
