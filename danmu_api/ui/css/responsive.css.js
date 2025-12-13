@@ -627,26 +627,40 @@ body {
     }
 
     .lan-scan-controls {
-        flex-direction: column;
-        align-items: stretch;
+        width: 100%;
     }
 
     .lan-input-group {
-        max-width: 100%;
         width: 100%;
     }
 
     .lan-subnet-input {
         flex: 1;
         min-width: 0;
+        padding: 0.5rem 0.625rem !important;
     }
 
     .lan-port-input {
-        width: 65px !important;
+        width: 55px !important;
+        padding: 0.5rem 0.375rem !important;
     }
 
     .lan-input-separator {
-        font-size: 0.9rem;
+        font-size: 0.875rem;
+        padding: 0 1px;
+    }
+
+    .lan-scan-btn {
+        padding: 0.5rem 0.75rem !important;
+    }
+
+    .lan-scan-btn .scan-btn-text {
+        display: none;
+    }
+
+    .lan-scan-btn svg {
+        width: 18px;
+        height: 18px;
     }
 
     .lan-device-card {
