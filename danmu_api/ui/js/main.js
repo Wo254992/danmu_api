@@ -636,6 +636,7 @@ async function init() {
         initTheme();
         
         await updateApiEndpoint();
+        updateCurrentModeDisplay();
         getDockerVersion();
         const config = await fetchAndSetConfig();
         setDefaultPushUrl(config);
