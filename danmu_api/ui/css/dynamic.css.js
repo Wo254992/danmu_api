@@ -908,17 +908,14 @@ export const dynamicCssContent = /* css */ `
 
 .lan-scan-controls {
     display: flex;
-    gap: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
-    align-items: center;
 }
 
 .lan-input-group {
     display: flex;
     align-items: center;
     gap: 0;
-    flex: 1;
-    max-width: 240px;
+    width: 100%;
     background: var(--bg-secondary);
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
@@ -949,12 +946,12 @@ export const dynamicCssContent = /* css */ `
 
 .lan-subnet-input {
     flex: 1;
-    min-width: 100px;
+    min-width: 80px;
     max-width: none !important;
 }
 
 .lan-port-input {
-    width: 70px !important;
+    width: 65px !important;
     flex-shrink: 0;
     text-align: center;
     -moz-appearance: textfield;
@@ -973,6 +970,23 @@ export const dynamicCssContent = /* css */ `
     padding: 0 2px;
     flex-shrink: 0;
     user-select: none;
+}
+
+.lan-scan-btn {
+    flex-shrink: 0;
+    border: none !important;
+    border-radius: 0 !important;
+    border-left: 2px solid var(--border-color) !important;
+    padding: 0.625rem 1rem !important;
+    margin: 0 !important;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.lan-scan-btn:hover {
+    border-radius: 0 !important;
 }
 
 .lan-devices-list {
