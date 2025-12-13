@@ -842,8 +842,212 @@ export const dynamicCssContent = /* css */ `
 }
 
 /* ========================================
-   移动端响应式优化
+   局域网扫描相关样式
    ======================================== */
+.push-presets-section {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px dashed var(--border-color);
+}
+
+.presets-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+}
+
+.presets-header svg {
+    stroke: var(--primary-color);
+}
+
+.presets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.preset-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-md) var(--spacing-lg) !important;
+    font-size: 0.8125rem !important;
+    border-radius: var(--border-radius-sm) !important;
+    transition: all var(--transition-fast);
+}
+
+.preset-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.lan-scan-section {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px dashed var(--border-color);
+}
+
+.lan-scan-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+}
+
+.lan-scan-header svg {
+    stroke: var(--primary-color);
+}
+
+.lan-scan-controls {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.lan-subnet-input {
+    flex: 1;
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace !important;
+    max-width: 160px;
+}
+
+.lan-devices-list {
+    min-height: 0;
+}
+
+.lan-scan-progress {
+    padding: var(--spacing-lg);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    text-align: center;
+}
+
+.scan-progress-bar {
+    height: 6px;
+    background: var(--gray-200);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: var(--spacing-sm);
+}
+
+.scan-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.scan-progress-text {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.lan-devices-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.devices-count {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.lan-devices-grid {
+    display: grid;
+    gap: var(--spacing-sm);
+}
+
+.lan-device-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.lan-device-card:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--primary-color);
+    transform: translateX(4px);
+}
+
+.device-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.device-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.device-ip {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+}
+
+.device-type {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+}
+
+.device-select-icon {
+    flex-shrink: 0;
+    color: var(--text-tertiary);
+    transition: all var(--transition-fast);
+}
+
+.lan-device-card:hover .device-select-icon {
+    color: var(--primary-color);
+    transform: translateX(4px);
+}
+
+.lan-scan-empty {
+    text-align: center;
+    padding: var(--spacing-xl);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    border: 2px dashed var(--border-color);
+}
+
+.lan-scan-empty .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--spacing-sm);
+    opacity: 0.6;
+}
+
+.lan-scan-empty p {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.lan-scan-empty .empty-hint {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: var(--spacing-xs);
+}
+
 @media (max-width: 768px) {
     .api-info-header {
         flex-direction: column;
