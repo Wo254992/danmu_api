@@ -649,7 +649,9 @@ body {
     .device-type {
         font-size: 0.6875rem;
     }
-
+    
+    /* 表单行 */
+    .form-row {
         grid-template-columns: 1fr;
         width: 100%;
     }
