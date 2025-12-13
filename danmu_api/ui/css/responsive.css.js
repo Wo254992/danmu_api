@@ -151,29 +151,6 @@ body {
         margin-top: var(--spacing-md);
     }
 
-    /* 顶栏模式徽章移动端适配 */
-    .top-mode-badge {
-        top: 26px;
-        right: 24px;
-        padding: var(--spacing-sm) var(--spacing-lg);
-        font-size: 0.875rem;
-        border-width: 1px;
-        box-shadow: var(--shadow-lg);
-    }
-    
-    .top-mode-badge-dot {
-        width: 6px;
-        height: 6px;
-    }
-    
-    .top-mode-badge-icon {
-        font-size: 1rem;
-    }
-    
-    .top-mode-badge-text {
-        font-size: 0.875rem;
-    }
-
     .header-actions .btn {
         width: 100%;
         justify-content: center;
@@ -923,29 +900,6 @@ body {
         width: 16px;
         height: 16px;
     }
-    /* 顶栏模式徽章超小屏幕优化 */
-    .top-mode-badge {
-        top: 26px;
-        right: 24px;
-        padding: 6px 12px;
-        font-size: 0.75rem;
-        gap: 4px;
-        box-shadow: var(--shadow-md);
-    }
-    
-    .top-mode-badge-dot {
-        width: 5px;
-        height: 5px;
-    }
-    
-    .top-mode-badge-icon {
-        font-size: 0.875rem;
-    }
-    
-    .top-mode-badge-text {
-        font-size: 0.75rem;
-    }
-
 /* 页脚 */
     .footer {
         padding: var(--spacing-lg) var(--spacing-sm);
