@@ -589,12 +589,6 @@ async function checkDeployPlatformConfig() {
 async function fetchAndSetConfig() {
     const config = await fetch(buildApiUrl('/api/config', true)).then(response => response.json());
     currentAdminToken = config.originalEnvVars?.ADMIN_TOKEN || '';
-    
-    // 更新模式指示器
-    if (typeof updateModeIndicator === 'function') {
-        updateModeIndicator();
-    }
-    
     return config;
 }
 
