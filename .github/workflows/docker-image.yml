@@ -1,12 +1,7 @@
 name: Build and Push Docker Image to Docker Hub
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:  # 手动触发
 
 jobs:
   build:
@@ -24,7 +19,7 @@ jobs:
           VERSION=$(grep "VERSION:" danmu_api/configs/globals.js | sed -E "s/.*VERSION: '(.*)'.*/\1/")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      # 设置 Docker 镜像缓存（可选，加速构建）
+      # 设置 Docker 镜像缓存（可选,加速构建）
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -35,8 +30,8 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 构建 Docker 镜像，并指定平台为 amd64 和 arm64，推送到 Docker Hub
-      # 使用单条命令同时指定两个标签，避免重复构建
+      # 构建 Docker 镜像,并指定平台为 amd64 和 arm64,推送到 Docker Hub
+      # 使用单条命令同时指定两个标签,避免重复构建
       - name: Build and Push Docker image with version and latest tag
         run: |
           docker buildx build --platform linux/amd64,linux/arm64 \
