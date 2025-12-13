@@ -910,12 +910,69 @@ export const dynamicCssContent = /* css */ `
     display: flex;
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
+    align-items: center;
+}
+
+.lan-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex: 1;
+    max-width: 240px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: all var(--transition-fast);
+}
+
+.lan-input-group:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.lan-input-group .lan-subnet-input,
+.lan-input-group .lan-port-input {
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace !important;
+    padding: 0.625rem 0.75rem !important;
+}
+
+.lan-input-group .lan-subnet-input:focus,
+.lan-input-group .lan-port-input:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 .lan-subnet-input {
     flex: 1;
-    font-family: 'Monaco', 'Menlo', 'Consolas', monospace !important;
-    max-width: 160px;
+    min-width: 100px;
+    max-width: none !important;
+}
+
+.lan-port-input {
+    width: 70px !important;
+    flex-shrink: 0;
+    text-align: center;
+    -moz-appearance: textfield;
+}
+
+.lan-port-input::-webkit-outer-spin-button,
+.lan-port-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.lan-input-separator {
+    color: var(--text-tertiary);
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0 2px;
+    flex-shrink: 0;
+    user-select: none;
 }
 
 .lan-devices-list {
