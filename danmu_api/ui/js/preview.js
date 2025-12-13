@@ -367,4 +367,42 @@ function updateSystemStatusUI(status, text) {
     addLog('🔍 系统状态: ' + text, logTypes[status] || 'info');
 }
 
+/* ========================================
+   更新当前模式显示
+   ======================================== */
+function updateCurrentModeDisplay() {
+    const modeEl = document.getElementById('current-mode');
+    const modeIconWrapper = document.getElementById('mode-icon-wrapper');
+    
+    if (!modeEl) return;
+    
+    const urlPath = window.location.pathname;
+    const pathParts = urlPath.split('/').filter(part => part !== '');
+    const urlToken = pathParts.length > 0 ? pathParts[0] : '';
+    
+    let modeName = '预览模式';
+    let modeClass = 'mode-preview';
+    
+    if (urlToken) {
+        if (currentAdminToken && currentAdminToken.trim() !== '' && urlToken === currentAdminToken) {
+            modeName = '管理员模式';
+            modeClass = 'mode-admin';
+        } else if (originalToken && originalToken !== '87654321') {
+            modeName = '用户模式';
+            modeClass = 'mode-user';
+        } else if (urlToken) {
+            modeName = '用户模式';
+            modeClass = 'mode-user';
+        }
+    }
+    
+    modeEl.textContent = modeName;
+    
+    if (modeIconWrapper) {
+        modeIconWrapper.className = 'stat-icon-wrapper stat-icon-mode ' + modeClass;
+    }
+    
+    addLog('🔐 当前模式: ' + modeName, 'info');
+}
+
 `;
