@@ -38,7 +38,18 @@ function applyPushPreset(presetKey) {
     
     const pushUrlInput = document.getElementById('push-url');
     const subnetInput = document.getElementById('lanSubnet');
+    const portInput = document.getElementById('lanPort');
     const subnet = subnetInput ? subnetInput.value.trim() : '192.168.1';
+    
+    // 同步更新端口输入框
+    if (portInput) {
+        portInput.value = preset.port;
+        // 添加端口变化动画
+        portInput.style.animation = 'pulse 0.4s ease-out';
+        setTimeout(() => {
+            portInput.style.animation = '';
+        }, 400);
+    }
     
     // 使用网段的前缀加上占位符
     const url = \`http://\${subnet}.x:\${preset.port}\${preset.path}\`;
@@ -50,8 +61,8 @@ function applyPushPreset(presetKey) {
         pushUrlInput.style.animation = '';
     }, 400);
     
-    addLog(\`📋 已应用预设: \${preset.name}\`, 'success');
-    customAlert(\`已应用 \${preset.name} 预设\\n\\n请将地址中的 "x" 替换为实际设备IP，或使用下方的局域网扫描功能自动发现设备。\`, '✅ 预设已应用');
+    addLog(\`📋 已应用预设: \${preset.name} (端口: \${preset.port})\`, 'success');
+    customAlert(\`已应用 \${preset.name} 预设\\n\\n端口已设置为 \${preset.port}\\n请将地址中的 "x" 替换为实际设备IP，或使用下方的局域网扫描功能自动发现设备。\`, '✅ 预设已应用');
 }
 
 /* ========================================
@@ -59,9 +70,11 @@ function applyPushPreset(presetKey) {
    ======================================== */
 async function scanLanDevices() {
     const subnetInput = document.getElementById('lanSubnet');
+    const portInput = document.getElementById('lanPort');
     const scanBtn = document.getElementById('scanLanBtn');
     const devicesList = document.getElementById('lanDevicesList');
     const subnet = subnetInput.value.trim();
+    const port = parseInt(portInput.value.trim()) || 9978;
     
     if (!subnet) {
         customAlert('请输入网段，例如: 192.168.1', '⚠️ 提示');
@@ -77,6 +90,31 @@ async function scanLanDevices() {
         return;
     }
     
+    // 验证端口范围
+    if (port < 1 || port > 65535) {
+        customAlert('端口范围应为 1-65535', '⚠️ 端口错误');
+        portInput.focus();
+        return;
+    }
+    
+    // 根据端口获取设备类型信息
+    const getDeviceInfo = (portNum) => {
+        const portInfoMap = {
+            9978: { type: 'OK影视', icon: '📺' },
+            8080: { type: 'Kodi / Web服务', icon: '🎬' },
+            10800: { type: 'PotPlayer', icon: '🎵' },
+            80: { type: 'Web服务', icon: '🌐' },
+            8888: { type: '媒体服务', icon: '📡' },
+            443: { type: 'HTTPS服务', icon: '🔒' },
+            8096: { type: 'Jellyfin', icon: '🎞️' },
+            8920: { type: 'Emby', icon: '🎥' },
+            32400: { type: 'Plex', icon: '🍿' }
+        };
+        return portInfoMap[portNum] || { type: \`端口 \${portNum}\`, icon: '📱' };
+    };
+    
+    const deviceInfo = getDeviceInfo(port);
+    
     // 保存原始按钮状态
     const originalHTML = scanBtn.innerHTML;
     scanBtn.innerHTML = '<span class="loading-spinner-small"></span> 扫描中...';
@@ -88,14 +126,12 @@ async function scanLanDevices() {
             <div class="scan-progress-bar">
                 <div class="scan-progress-fill" id="scanProgressFill"></div>
             </div>
-            <div class="scan-progress-text" id="scanProgressText">正在扫描 \${subnet}.1 - \${subnet}.254 ...</div>
+            <div class="scan-progress-text" id="scanProgressText">正在扫描 \${subnet}.1:\${port} - \${subnet}.254:\${port} ...</div>
         </div>
     \`;
     
-    addLog(\`🔍 开始扫描局域网: \${subnet}.1 - \${subnet}.254\`, 'info');
+    addLog(\`🔍 开始扫描局域网: \${subnet}.1-254:\${port} (\${deviceInfo.type})\`, 'info');
     
-    // 要扫描的端口列表
-    const portsToScan = [9978, 8080, 10800, 80, 8888];
     const foundDevices = [];
     let scannedCount = 0;
     const totalScans = 254;
@@ -103,55 +139,32 @@ async function scanLanDevices() {
     // 创建中止控制器
     scanAbortController = new AbortController();
     
-    // 并发扫描函数
+    // 并发扫描函数 - 只扫描指定端口
     const scanIP = async (ip) => {
-        for (const port of portsToScan) {
-            if (scanAbortController.signal.aborted) return;
+        if (scanAbortController.signal.aborted) return;
+        
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 600);
             
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 800);
-                
-                const response = await fetch(\`http://\${ip}:\${port}/\`, {
-                    method: 'GET',
-                    mode: 'no-cors',
-                    signal: controller.signal
-                }).catch(() => null);
-                
-                clearTimeout(timeoutId);
-                
-                if (response !== null) {
-                    // 检测设备类型
-                    let deviceType = '未知设备';
-                    let deviceIcon = '📱';
-                    
-                    if (port === 9978) {
-                        deviceType = 'OK影视';
-                        deviceIcon = '📺';
-                    } else if (port === 8080) {
-                        deviceType = 'Kodi / Web服务';
-                        deviceIcon = '🎬';
-                    } else if (port === 10800) {
-                        deviceType = 'PotPlayer';
-                        deviceIcon = '🎵';
-                    } else if (port === 80) {
-                        deviceType = 'Web服务';
-                        deviceIcon = '🌐';
-                    } else if (port === 8888) {
-                        deviceType = '媒体服务';
-                        deviceIcon = '📡';
-                    }
-                    
-                    foundDevices.push({
-                        ip: ip,
-                        port: port,
-                        type: deviceType,
-                        icon: deviceIcon
-                    });
-                }
-            } catch (e) {
-                // 忽略错误
+            const response = await fetch(\`http://\${ip}:\${port}/\`, {
+                method: 'GET',
+                mode: 'no-cors',
+                signal: controller.signal
+            }).catch(() => null);
+            
+            clearTimeout(timeoutId);
+            
+            if (response !== null) {
+                foundDevices.push({
+                    ip: ip,
+                    port: port,
+                    type: deviceInfo.type,
+                    icon: deviceInfo.icon
+                });
             }
+        } catch (e) {
+            // 忽略错误
         }
         
         scannedCount++;
@@ -162,8 +175,8 @@ async function scanLanDevices() {
         if (progressText) progressText.textContent = \`扫描进度: \${progress}% (\${scannedCount}/\${totalScans})\`;
     };
     
-    // 批量并发扫描
-    const batchSize = 20;
+    // 批量并发扫描 - 由于只扫描单个端口，可以增加并发数
+    const batchSize = 30;
     const ips = [];
     for (let i = 1; i <= 254; i++) {
         ips.push(\`\${subnet}.\${i}\`);
@@ -187,7 +200,7 @@ async function scanLanDevices() {
     if (foundDevices.length > 0) {
         devicesList.innerHTML = \`
             <div class="lan-devices-header">
-                <span class="devices-count">发现 \${foundDevices.length} 个设备</span>
+                <span class="devices-count">发现 \${foundDevices.length} 个 \${deviceInfo.type} 设备</span>
                 <button class="btn btn-secondary btn-sm" onclick="scanLanDevices()">重新扫描</button>
             </div>
             <div class="lan-devices-grid">
@@ -207,17 +220,17 @@ async function scanLanDevices() {
                 \`).join('')}
             </div>
         \`;
-        addLog(\`✅ 扫描完成，发现 \${foundDevices.length} 个设备\`, 'success');
+        addLog(\`✅ 扫描完成，发现 \${foundDevices.length} 个 \${deviceInfo.type} 设备\`, 'success');
     } else {
         devicesList.innerHTML = \`
             <div class="lan-scan-empty">
                 <div class="empty-icon">📡</div>
-                <p>未发现可用设备</p>
-                <span class="empty-hint">请确保设备已开启并在同一网段</span>
+                <p>未发现 \${deviceInfo.type} 设备</p>
+                <span class="empty-hint">请确保设备已开启且端口 \${port} 正在监听</span>
                 <button class="btn btn-secondary btn-sm" onclick="scanLanDevices()" style="margin-top: 12px;">重新扫描</button>
             </div>
         \`;
-        addLog('⚠️ 扫描完成，未发现可用设备', 'warn');
+        addLog(\`⚠️ 扫描完成，未发现端口 \${port} 的可用设备\`, 'warn');
     }
 }
 
