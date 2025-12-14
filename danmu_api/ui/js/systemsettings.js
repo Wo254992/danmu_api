@@ -5,7 +5,36 @@ export const systemSettingsJsContent = /* javascript */ `
    ======================================== */
 let deploymentInProgress = false;
 let cacheClearing = false;
-
+/* ========================================
+   颜色数据标准化
+   ======================================== */
+function normalizeColorListItem(item) {
+    // 如果已经有 colors 数组且类型正确，直接返回
+    if (item.type === 'color-list' && item.colors && Array.isArray(item.colors)) {
+        return item;
+    }
+    
+    // 如果有 colors 数组但类型不对
+    if (item.colors && Array.isArray(item.colors)) {
+        item.type = 'color-list';
+        return item;
+    }
+    
+    // 如果值是逗号分隔的数字
+    if (item.value && typeof item.value === 'string') {
+        const numbers = item.value.split(',')
+            .map(v => parseInt(v.trim(), 10))
+            .filter(v => !isNaN(v) && v >= 0 && v <= 16777215);
+        
+        if (numbers.length > 0) {
+            item.type = 'color-list';
+            item.colors = numbers;
+            return item;
+        }
+    }
+    
+    return item;
+}
 /* ========================================
    显示/隐藏清理缓存模态框
    ======================================== */
@@ -589,6 +618,14 @@ async function checkDeployPlatformConfig() {
 async function fetchAndSetConfig() {
     const config = await fetch(buildApiUrl('/api/config', true)).then(response => response.json());
     currentAdminToken = config.originalEnvVars?.ADMIN_TOKEN || '';
+    
+    // 标准化所有颜色列表数据
+    Object.keys(envVariables).forEach(category => {
+        envVariables[category] = envVariables[category].map(item => {
+            return normalizeColorListItem(item);
+        });
+    });
+    
     return config;
 }
 
@@ -623,11 +660,20 @@ function renderEnvList() {
     }
 
     list.innerHTML = items.map((item, index) => {
-        const typeLabel = item.type === 'boolean' ? 'bool' :
-                         item.type === 'number' ? 'num' :
-                         item.type === 'select' ? 'select' :
-                         item.type === 'multi-select' ? 'multi' :
-                         item.type === 'color-list' ? 'color' : 'text';
+        // 智能识别类型
+        let itemType = item.type;
+        
+        // 如果有 colors 数组，自动识别为 color-list
+        if (!itemType && item.colors && Array.isArray(item.colors)) {
+            itemType = 'color-list';
+            item.type = 'color-list';  // 修正类型
+        }
+        
+        const typeLabel = itemType === 'boolean' ? 'bool' :
+                         itemType === 'number' ? 'num' :
+                         itemType === 'select' ? 'select' :
+                         itemType === 'multi-select' ? 'multi' :
+                         itemType === 'color-list' ? 'color' : 'text';
         const badgeClass = item.type === 'multi-select' ? 'multi' : 
                           item.type === 'color-list' ? 'color' : '';
 
@@ -666,6 +712,10 @@ function renderEnvList() {
    ======================================== */
 function editEnv(index) {
     const item = envVariables[currentCategory][index];
+    
+    // 标准化颜色数据
+    normalizeColorListItem(item);
+    
     const editButton = event.target.closest('.btn');
     
     const originalText = editButton.innerHTML;
@@ -678,12 +728,24 @@ function editEnv(index) {
     document.getElementById('env-key').value = item.key;
     document.getElementById('env-description').value = item.description || '';
     
-    // 确保 type 字段正确设置，如果没有 type 则根据内容判断
+    // 智能识别类型
     let itemType = item.type || 'text';
     
-    // 如果没有明确的 type，但有 colors 数组，说明是 color-list
-    if (!item.type && item.colors && Array.isArray(item.colors)) {
+    // 如果有 colors 数组，一定是 color-list
+    if (item.colors && Array.isArray(item.colors)) {
         itemType = 'color-list';
+        // 确保 item.type 被正确设置
+        item.type = 'color-list';
+    }
+    // 如果值是逗号分隔的数字且没有明确类型，也可能是 color-list
+    else if (!item.type && typeof item.value === 'string') {
+        const numbers = item.value.split(',').map(v => parseInt(v.trim(), 10));
+        const allNumbers = numbers.every(n => !isNaN(n) && n >= 0 && n <= 16777215);
+        if (allNumbers && numbers.length > 0) {
+            itemType = 'color-list';
+            item.type = 'color-list';
+            item.colors = numbers;
+        }
     }
     
     document.getElementById('value-type').value = itemType;
@@ -880,8 +942,23 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
         // 从隐藏的 input 中获取颜色值
         value = document.getElementById('text-value').value.trim();
         // 保存当前的颜色数据，用于重新渲染
-        const currentColors = value.split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
-        itemData = { key, value, description, type, colors: currentColors };
+        const currentColors = value.split(',')
+            .map(v => parseInt(v.trim(), 10))
+            .filter(v => !isNaN(v) && v >= 0 && v <= 16777215);
+        
+        // 如果没有有效颜色，使用默认白色
+        if (currentColors.length === 0) {
+            currentColors.push(16777215);
+        }
+        
+        // 重要：确保 type 和 colors 都被保存
+        itemData = { 
+            key, 
+            value, 
+            description, 
+            type: 'color-list',  // 显式设置类型
+            colors: currentColors 
+        };
     } else {
         value = document.getElementById('text-value').value.trim();
         itemData = { key, value, description, type };
@@ -922,7 +999,11 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
             }
 
             if (editingKey !== null) {
-                envVariables[currentCategory][editingKey] = itemData;
+                // 更新时保持完整的数据结构
+                envVariables[currentCategory][editingKey] = {
+                    ...envVariables[currentCategory][editingKey],
+                    ...itemData
+                };
                 addLog(\`✅ 更新配置项: \${key} = \${value}\`, 'success');
             } else {
                 envVariables[category].push(itemData);
