@@ -91,7 +91,7 @@ function renderPreview() {
                                                     }
                                                     return colors.map(c => {
                                                         const hex = '#' + parseInt(c).toString(16).padStart(6, '0');
-                                                        return \\\`<div class="preview-color-dot" style="background-color: \${hex};" title="\${hex}"></div>\\\`;
+                                                        return \\\`<div class="preview-color-dot" style="background-color: \\\${hex};" title="\\\${hex}"></div>\\\`;
                                                     }).join('');
                                                 })()}
                                             </div>
