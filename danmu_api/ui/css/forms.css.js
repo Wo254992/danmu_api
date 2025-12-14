@@ -681,41 +681,77 @@ input:disabled + .slider {
 /* ========================================
    颜色池编辑器样式
    ======================================== */
+.color-pool-hint {
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(99, 102, 241, 0.05);
+    border-left: 3px solid var(--primary-color);
+    border-radius: 4px;
+}
+
 .color-pool-controls {
     display: flex;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
     align-items: center;
     flex-wrap: wrap;
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
 }
 
 .color-picker-wrapper {
     position: relative;
     display: flex;
     align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.color-picker-wrapper:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .color-picker-input {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     padding: 0;
-    border: none;
-    border-radius: var(--border-radius);
-    overflow: hidden;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
     cursor: pointer;
-    background: none;
+    transition: all var(--transition-fast);
+}
+
+.color-picker-input:hover {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+.color-picker-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    user-select: none;
 }
 
 .color-pool-container {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: var(--spacing-md);
     padding: var(--spacing-lg);
     background: var(--bg-secondary);
     border: 2px dashed var(--border-color);
     border-radius: var(--border-radius-lg);
-    min-height: 140px;
-    align-content: flex-start;
+    min-height: 160px;
+    align-content: start;
     transition: all 0.3s ease;
 }
 
@@ -725,94 +761,209 @@ input:disabled + .slider {
 }
 
 .color-pool-container.empty {
+    display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .color-pool-container.empty::before {
-    content: '🎨 暂无颜色，请添加...';
+    content: '🎨 暂无颜色，请点击上方按钮添加';
     color: var(--text-tertiary);
     font-size: 0.9375rem;
+    text-align: center;
+}
+
+@keyframes colorChipFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .color-chip {
-    width: 80px;
-    height: 80px;
-    border-radius: var(--border-radius);
+    width: 100%;
+    aspect-ratio: 1;
+    min-height: 90px;
+    border-radius: var(--border-radius-lg);
     position: relative;
     cursor: move;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
-    border: 3px solid rgba(255,255,255,0.3);
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 3px solid rgba(255,255,255,0.4);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    overflow: visible;
+    animation: colorChipFadeIn 0.4s ease-out backwards;
 }
 
 .color-chip:hover {
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-6px) scale(1.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     z-index: 10;
-    border-color: rgba(255,255,255,0.6);
+    border-color: rgba(255,255,255,0.8);
 }
 
-.color-chip.dragging {
-    opacity: 0.6;
-    transform: scale(0.95) rotate(5deg);
+.color-chip:active {
     cursor: grabbing;
 }
 
+.color-chip.dragging {
+    opacity: 0.7;
+    transform: scale(1.1) rotate(8deg);
+    cursor: grabbing;
+    z-index: 100;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
 .color-hex-label {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
-    font-family: 'Monaco', 'Consolas', monospace;
-    color: rgba(0,0,0,0.7);
-    background: rgba(255,255,255,0.9);
-    padding: 3px 6px;
-    border-radius: 4px;
+    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+    color: rgba(0,0,0,0.8);
+    background: rgba(255,255,255,0.95);
+    padding: 6px 10px;
+    border-radius: 6px;
     text-shadow: none;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     pointer-events: none;
     user-select: none;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(0,0,0,0.1);
 }
 
 .color-chip .remove-chip-btn {
     position: absolute;
-    top: -6px;
-    right: -6px;
-    width: 20px;
-    height: 20px;
+    top: -8px;
+    right: -8px;
+    width: 26px;
+    height: 26px;
     background: var(--danger-color);
     color: white;
     border-radius: 50%;
-    border: 2px solid white;
+    border: 3px solid white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: bold;
+    line-height: 1;
     cursor: pointer;
     opacity: 0;
-    transition: all 0.2s ease;
-    box-shadow: var(--shadow-sm);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 2;
 }
 
 .color-chip:hover .remove-chip-btn {
     opacity: 1;
-    transform: scale(1.1);
+    transform: scale(1);
 }
 
 .color-chip .remove-chip-btn:hover {
     background: #dc2626;
     transform: scale(1.2) rotate(90deg);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.color-chip .remove-chip-btn:active {
+    transform: scale(1.1) rotate(90deg);
+}
+
+.pool-stats {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.pool-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.pool-count-icon {
+    font-size: 1rem;
 }
 
 .btn-icon-text {
     display: flex;
     align-items: center;
     gap: 6px;
+    font-weight: 600;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+    .color-pool-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .color-picker-wrapper {
+        justify-content: center;
+    }
+    
+    .color-pool-controls .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .color-pool-container {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: var(--spacing-sm);
+        padding: var(--spacing-md);
+    }
+    
+    .color-chip {
+        min-height: 70px;
+    }
+    
+    .color-hex-label {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+    
+    .color-chip .remove-chip-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+        top: -6px;
+        right: -6px;
+        opacity: 1;
+    }
+    
+    .pool-count-badge {
+        font-size: 0.8125rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .color-pool-container {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    }
+    
+    .color-chip {
+        min-height: 60px;
+        border-width: 2px;
+    }
+    
+    .color-hex-label {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
 }
 `;
