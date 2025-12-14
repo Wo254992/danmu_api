@@ -76,7 +76,7 @@ export const HTML_TEMPLATE = /* html */ `
 
             <!-- 平台配置状态卡片 -->
             <div class="platform-config-card" id="platform-config-card">
-                <div class="platform-config-header">
+                <div class="platform-config-header" onclick="togglePlatformConfig()">
                     <div class="platform-config-icon-wrapper">
                         <svg class="platform-config-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -86,21 +86,15 @@ export const HTML_TEMPLATE = /* html */ `
                         <div class="platform-config-title">平台配置</div>
                         <div class="platform-config-status" id="platform-config-status">检测中...</div>
                     </div>
+                    <svg class="platform-config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
                 </div>
-                <div class="platform-config-content" id="platform-config-content">
+                <div class="platform-config-content" id="platform-config-content" style="display: none;">
                     <div class="platform-config-loading">
                         <div class="config-loading-spinner"></div>
                         <span>正在检测配置...</span>
                     </div>
-                </div>
-                <div class="platform-config-footer" id="platform-config-footer" style="display: none;">
-                    <button class="platform-config-btn" onclick="switchSection('env'); return false;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        <span>立即配置</span>
-                    </button>
                 </div>
             </div>
 
