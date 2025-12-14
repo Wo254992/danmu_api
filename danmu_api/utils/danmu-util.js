@@ -216,7 +216,37 @@ export function convertToDanmakuJson(contents, platform) {
 
   // 应用弹幕转换规则（在去重和限制弹幕数之后）
   let convertedDanmus = limitDanmusByCount(groupedDanmus, globals.danmuLimit);
-  if (globals.convertTopBottomToScroll || globals.convertColor === 'white' || globals.convertColor === 'color') {
+  
+  // 解析颜色配置
+  let shouldConvertColor = false;
+  let colorList = [];
+  const convertColorValue = globals.convertColor;
+  
+  if (convertColorValue && convertColorValue !== 'default') {
+    shouldConvertColor = true;
+    
+    if (convertColorValue === 'white') {
+      // 向后兼容：转换为白色
+      colorList = [16777215];
+    } else if (convertColorValue === 'color') {
+      // 向后兼容：使用预设的随机颜色列表（白色概率更高）
+      colorList = [16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 
+                   16744319, 16752762, 16774799, 9498256, 8388564, 8900346, 14204888, 16758465];
+    } else {
+      // 新格式：解析十进制颜色值列表
+      colorList = convertColorValue.split(',')
+        .map(v => v.trim())
+        .filter(v => v && !isNaN(v))
+        .map(v => parseInt(v, 10));
+      
+      // 如果解析后列表为空，则不转换
+      if (colorList.length === 0) {
+        shouldConvertColor = false;
+      }
+    }
+  }
+  
+  if (globals.convertTopBottomToScroll || shouldConvertColor) {
     let topBottomCount = 0;
     let colorCount = 0;
 
@@ -236,20 +266,16 @@ export function convertToDanmakuJson(contents, platform) {
       }
 
       // 2. 弹幕转换颜色
-      // 2.1 将彩色弹幕转换为白色
-      if (globals.convertColor === 'white' && color !== 16777215) {
-        colorCount++;
-        color = 16777215;
-        modified = true;
-      }
-      // 2.2 将白色弹幕转换为随机颜色，白、红、橙、黄、绿、青、蓝、紫、粉（模拟真实情况，增加白色出现概率）
-      let colors = [16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 
-                    16744319, 16752762, 16774799, 9498256, 8388564, 8900346, 14204888, 16758465];
-      let randomColor = colors[Math.floor(Math.random() * colors.length)];
-      if (globals.convertColor === 'color' && color === 16777215 && color !== randomColor) {
-        colorCount++;
-        color = randomColor;
-        modified = true;
+      if (shouldConvertColor && colorList.length > 0) {
+        // 从颜色列表中随机选择一个颜色
+        const randomColor = colorList[Math.floor(Math.random() * colorList.length)];
+        
+        // 只有当颜色不同时才转换
+        if (color !== randomColor) {
+          colorCount++;
+          color = randomColor;
+          modified = true;
+        }
       }
 
       if (modified) {
@@ -265,6 +291,9 @@ export function convertToDanmakuJson(contents, platform) {
     }
     if (colorCount > 0) {
       log("info", `[danmu convert] 转换了 ${colorCount} 条弹幕颜色`);
+    }
+    if (shouldConvertColor && colorList.length > 0) {
+      log("info", `[danmu convert] 颜色列表: [${colorList.join(', ')}]`);
     }
   }
 
