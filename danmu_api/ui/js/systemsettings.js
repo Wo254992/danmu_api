@@ -865,6 +865,10 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
         value = selectedTags.join(',');
         const options = Array.from(document.querySelectorAll('.available-tag')).map(el => el.dataset.value);
         itemData = { key, value, description, type, options };
+    } else if (type === 'color-list') {
+        // 从隐藏的 input 中获取颜色值
+        value = document.getElementById('text-value').value.trim();
+        itemData = { key, value, description, type };
     } else {
         value = document.getElementById('text-value').value.trim();
         itemData = { key, value, description, type };
@@ -1092,9 +1096,11 @@ function renderValueInput(item) {
             
             <div class="color-pool-container \${colors.length === 0 ? 'empty' : ''}" id="color-pool-container">
                 \${colors.map(colorInt => {
-                    const hex = '#' + colorInt.toString(16).padStart(6, '0');
+                    const hex = '#' + colorInt.toString(16).padStart(6, '0').toUpperCase();
+                    const hexShort = hex.substring(1); // 去掉 # 号
                     return \`
                         <div class="color-chip" draggable="true" data-value="\${colorInt}" style="background-color: \${hex};" title="\${hex} (\${colorInt})">
+                            <span class="color-hex-label">\${hexShort}</span>
                             <button type="button" class="remove-chip-btn" onclick="removeColorChip(this)">×</button>
                         </div>
                     \`;
@@ -1347,7 +1353,8 @@ function updateColorPoolInput() {
 }
 
 function createColorChip(colorInt) {
-    const hex = '#' + parseInt(colorInt).toString(16).padStart(6, '0');
+    const hex = '#' + parseInt(colorInt).toString(16).padStart(6, '0').toUpperCase();
+    const hexShort = hex.substring(1); // 去掉 # 号
     const chip = document.createElement('div');
     chip.className = 'color-chip';
     chip.draggable = true;
@@ -1355,7 +1362,10 @@ function createColorChip(colorInt) {
     chip.style.backgroundColor = hex;
     chip.title = \`\${hex} (\${colorInt})\`;
     
-    chip.innerHTML = \`<button type="button" class="remove-chip-btn" onclick="removeColorChip(this)">×</button>\`;
+    chip.innerHTML = \`
+        <span class="color-hex-label">\${hexShort}</span>
+        <button type="button" class="remove-chip-btn" onclick="removeColorChip(this)">×</button>
+    \`;
     
     // 绑定拖拽事件
     chip.addEventListener('dragstart', handleColorDragStart);
