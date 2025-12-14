@@ -226,10 +226,14 @@ export function convertToDanmakuJson(contents, platform) {
     shouldConvertColor = true;
     
     if (convertColorValue === 'white') {
-      // 白色模式
+      // 向后兼容：转换为白色
       colorList = [16777215];
+    } else if (convertColorValue === 'color') {
+      // 向后兼容：使用预设的随机颜色列表（白色概率更高）
+      colorList = [16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 
+                   16744319, 16752762, 16774799, 9498256, 8388564, 8900346, 14204888, 16758465];
     } else {
-      // 自定义颜色模式：解析十进制颜色值列表
+      // 新格式：解析十进制颜色值列表
       colorList = convertColorValue.split(',')
         .map(v => v.trim())
         .filter(v => v && !isNaN(v))
@@ -238,7 +242,6 @@ export function convertToDanmakuJson(contents, platform) {
       // 如果解析后列表为空，则不转换
       if (colorList.length === 0) {
         shouldConvertColor = false;
-        log("warn", "[danmu convert] 自定义颜色列表为空，跳过颜色转换");
       }
     }
   }
