@@ -846,7 +846,10 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
 
     let value, itemData;
 
-    if (type === 'boolean') {
+    if (type === 'color-picker') {
+        value = getColorPickerValue();
+        itemData = { key, value, description, type };
+    } else if (type === 'boolean') {
         value = document.getElementById('bool-value').checked ? 'true' : 'false';
         itemData = { key, value, description, type };
     } else if (type === 'number') {
@@ -1054,6 +1057,162 @@ function renderValueInput(item) {
 
         setupDragAndDrop();
 
+    } else if (type === 'multi-select') {
+        const options = item && item.options ? item.options : ['option1', 'option2', 'option3', 'option4'];
+        const stringValue = typeof value === 'string' ? value : String(value || '');
+        const selectedValues = stringValue ? stringValue.split(',').map(v => v.trim()).filter(v => v) : [];
+
+        const optionsInput = item ? '' : \`
+            <div class="form-group">
+                <label class="form-label">可选项 (逗号分隔)</label>
+                <input type="text" class="form-input" id="multi-options" placeholder="例如: auth,payment,analytics"
+                       value="\${options.join(',')}" onchange="updateMultiOptions()">
+            </div>
+        \`;
+
+        container.innerHTML = \`
+            \${optionsInput}
+            <label class="form-label">已选择 (拖动调整顺序)</label>
+            <div class="multi-select-container">
+                <div class="selected-tags \${selectedValues.length === 0 ? 'empty' : ''}" id="selected-tags">
+                    \${selectedValues.map(val => \`
+                        <div class="selected-tag" draggable="true" data-value="\${val}">
+                            <span class="tag-text">\${val}</span>
+                            <button type="button" class="remove-btn" onclick="removeSelectedTag(this)">×</button>
+                        </div>
+                    \`).join('')}
+                </div>
+                <label class="form-label">可选项 (点击添加)</label>
+                <div class="available-tags" id="available-tags">
+                    \${options.map(opt => {
+                        const isSelected = selectedValues.includes(opt);
+                        return \`
+                            <div class="available-tag \${isSelected ? 'disabled' : ''}"
+                                 data-value="\${opt}" onclick="addSelectedTag(this)">
+                                \${opt}
+                            </div>
+                        \`;
+                    }).join('')}
+                </div>
+            </div>
+        \`;
+
+        setupDragAndDrop();
+
+    } else if (type === 'color-picker') {
+        // 解析当前值
+        let currentMode = 'default';
+        let colorList = [];
+        
+        if (value === 'white') {
+            currentMode = 'white';
+        } else if (value === 'color') {
+            currentMode = 'color';
+        } else if (value && value !== 'default') {
+            currentMode = 'custom';
+            try {
+                if (value.startsWith('[') && value.endsWith(']')) {
+                    colorList = JSON.parse(value);
+                } else {
+                    // 兼容旧格式
+                    colorList = value.split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
+                }
+            } catch (e) {
+                console.error('解析颜色列表失败:', e);
+            }
+        }
+        
+        // 初始化全局变量
+        currentColorMode = currentMode;
+        customColors = colorList;
+        
+        container.innerHTML = \`
+            <label class="form-label">弹幕颜色配置</label>
+            <div class="color-picker-container">
+                <div class="color-picker-mode">
+                    <button type="button" class="color-mode-btn \${currentMode === 'default' ? 'active' : ''}" 
+                            data-mode="default" onclick="switchColorMode('default')">
+                        🚫 不转换
+                    </button>
+                    <button type="button" class="color-mode-btn \${currentMode === 'white' ? 'active' : ''}" 
+                            data-mode="white" onclick="switchColorMode('white')">
+                        ⚪ 白色
+                    </button>
+                    <button type="button" class="color-mode-btn \${currentMode === 'color' ? 'active' : ''}" 
+                            data-mode="color" onclick="switchColorMode('color')">
+                        🎨 预设随机
+                    </button>
+                    <button type="button" class="color-mode-btn \${currentMode === 'custom' ? 'active' : ''}" 
+                            data-mode="custom" onclick="switchColorMode('custom')">
+                        🎯 自定义
+                    </button>
+                </div>
+                <div class="custom-colors-section \${currentMode === 'custom' ? 'active' : ''}" id="custom-colors-section">
+                    <div class="color-list-header">
+                        <span class="color-count">已选择 <strong id="color-count">\${colorList.length}</strong> 个颜色</span>
+                        <button type="button" class="color-add-btn" onclick="addRandomColor()">
+                            <span>🎲</span>
+                            <span>随机添加</span>
+                        </button>
+                    </div>
+                    <div class="color-items \${colorList.length === 0 ? 'empty' : ''}" id="color-items">
+                        \${colorList.map((color, index) => \`
+                            <div class="color-item" draggable="true" data-color="\${color}" data-index="\${index}">
+                                <span class="drag-handle">☰</span>
+                                <div class="color-preview" style="background-color: #\${color.toString(16).padStart(6, '0')}" 
+                                     onclick="editColor(\${index})"></div>
+                                <div class="color-info">
+                                    <div class="color-value">#\${color.toString(16).toUpperCase().padStart(6, '0')}</div>
+                                    <div class="color-labels">
+                                        <span class="color-label">十进制: \${color}</span>
+                                        <span class="color-label">RGB: \${(color >> 16) & 255}, \${(color >> 8) & 255}, \${color & 255}</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="color-remove-btn" onclick="removeColor(\${index})">×</button>
+                            </div>
+                        \`).join('')}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 颜色选择器模态框 -->
+            <div class="color-picker-modal" id="color-picker-modal">
+                <div class="color-picker-content">
+                    <div class="color-picker-header">
+                        <h3 class="color-picker-title">🎨 选择颜色</h3>
+                        <button type="button" class="color-picker-close" onclick="closeColorPicker()">×</button>
+                    </div>
+                    <div class="color-picker-body">
+                        <div class="color-input-group">
+                            <div class="color-input-wrapper">
+                                <label class="color-input-label">颜色选择</label>
+                                <input type="color" class="color-input-native" id="color-input-native" value="#ffffff">
+                            </div>
+                            <div class="color-input-wrapper">
+                                <label class="color-input-label">十六进制</label>
+                                <input type="text" class="color-input-text" id="color-input-hex" value="#FFFFFF" 
+                                       maxlength="7" pattern="^#[0-9A-Fa-f]{6}$">
+                            </div>
+                        </div>
+                        <div class="color-input-wrapper">
+                            <label class="color-input-label">预设颜色</label>
+                            <div class="color-presets" id="color-presets"></div>
+                        </div>
+                    </div>
+                    <div class="color-picker-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeColorPicker()">取消</button>
+                        <button type="button" class="btn btn-primary" onclick="confirmColorPicker()">确定</button>
+                    </div>
+                </div>
+            </div>
+        \`;
+        
+        // 初始化拖放和颜色选择器
+        setTimeout(() => {
+            setupColorDragAndDrop();
+            initColorPicker();
+        }, 0);
+        
     } else {
         if (value && value.length > 50) {
             const rows = Math.min(Math.max(Math.ceil(value.length / 50), 3), 10);
@@ -1068,6 +1227,7 @@ function renderValueInput(item) {
             \`;
         }
     }
+
 }
 
 /* ========================================
@@ -1273,4 +1433,248 @@ renderEnvList = function() {
         });
     }
 };
+/* ========================================
+   颜色选择器功能
+   ======================================== */
+let currentColorMode = 'default';
+let customColors = [];
+let editingColorIndex = null;
+
+// 切换颜色模式
+function switchColorMode(mode) {
+    currentColorMode = mode;
+    
+    document.querySelectorAll('.color-mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+    
+    const customSection = document.getElementById('custom-colors-section');
+    if (customSection) {
+        customSection.classList.toggle('active', mode === 'custom');
+    }
+}
+
+// 添加随机颜色
+function addRandomColor() {
+    const randomColor = Math.floor(Math.random() * 16777216);
+    customColors.push(randomColor);
+    updateColorList();
+    addLog(\`🎨 添加随机颜色: #\${randomColor.toString(16).toUpperCase().padStart(6, '0')}\`, 'info');
+}
+
+// 编辑颜色
+function editColor(index) {
+    editingColorIndex = index;
+    const color = customColors[index];
+    const hexColor = '#' + color.toString(16).padStart(6, '0');
+    
+    document.getElementById('color-input-native').value = hexColor;
+    document.getElementById('color-input-hex').value = hexColor.toUpperCase();
+    document.getElementById('color-picker-modal').classList.add('active');
+}
+
+// 移除颜色
+function removeColor(index) {
+    const color = customColors[index];
+    customColors.splice(index, 1);
+    updateColorList();
+    addLog(\`🗑️ 移除颜色: #\${color.toString(16).toUpperCase().padStart(6, '0')}\`, 'info');
+}
+
+// 更新颜色列表显示
+function updateColorList() {
+    const container = document.getElementById('color-items');
+    const countEl = document.getElementById('color-count');
+    
+    if (countEl) {
+        countEl.textContent = customColors.length;
+    }
+    
+    if (customColors.length === 0) {
+        container.classList.add('empty');
+        container.innerHTML = '';
+    } else {
+        container.classList.remove('empty');
+        container.innerHTML = customColors.map((color, index) => \`
+            <div class="color-item" draggable="true" data-color="\${color}" data-index="\${index}">
+                <span class="drag-handle">☰</span>
+                <div class="color-preview" style="background-color: #\${color.toString(16).padStart(6, '0')}" 
+                     onclick="editColor(\${index})"></div>
+                <div class="color-info">
+                    <div class="color-value">#\${color.toString(16).toUpperCase().padStart(6, '0')}</div>
+                    <div class="color-labels">
+                        <span class="color-label">十进制: \${color}</span>
+                        <span class="color-label">RGB: \${(color >> 16) & 255}, \${(color >> 8) & 255}, \${color & 255}</span>
+                    </div>
+                </div>
+                <button type="button" class="color-remove-btn" onclick="removeColor(\${index})">×</button>
+            </div>
+        \`).join('');
+    }
+    
+    setupColorDragAndDrop();
+}
+
+// 初始化颜色选择器
+function initColorPicker() {
+    const nativeInput = document.getElementById('color-input-native');
+    const hexInput = document.getElementById('color-input-hex');
+    const presetsContainer = document.getElementById('color-presets');
+    
+    if (!nativeInput || !hexInput || !presetsContainer) return;
+    
+    // 常用颜色预设
+    const presetColors = [
+        '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#000000',
+        '#FFB6C1', '#FFA500', '#32CD32', '#1E90FF', '#FF69B4', '#9370DB', '#20B2AA', '#696969',
+        '#FF6347', '#FFD700', '#7FFF00', '#4169E1', '#FF1493', '#8A2BE2', '#00CED1', '#A9A9A9',
+        '#DC143C', '#FFA07A', '#00FA9A', '#6495ED', '#DB7093', '#BA55D3', '#48D1CC', '#808080'
+    ];
+    
+    presetsContainer.innerHTML = presetColors.map(color => \`
+        <div class="color-preset" style="background-color: \${color}" 
+             onclick="selectPresetColor('\${color}')"></div>
+    \`).join('');
+    
+    // 原生颜色选择器变化
+    nativeInput.addEventListener('input', function() {
+        hexInput.value = this.value.toUpperCase();
+    });
+    
+    // 十六进制输入变化
+    hexInput.addEventListener('input', function() {
+        let value = this.value.trim();
+        if (!value.startsWith('#')) {
+            value = '#' + value;
+        }
+        if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+            nativeInput.value = value;
+        }
+    });
+}
+
+// 选择预设颜色
+function selectPresetColor(hexColor) {
+    document.getElementById('color-input-native').value = hexColor;
+    document.getElementById('color-input-hex').value = hexColor.toUpperCase();
+}
+
+// 确认颜色选择
+function confirmColorPicker() {
+    const hexInput = document.getElementById('color-input-hex');
+    const hexColor = hexInput.value.trim();
+    
+    if (!/^#[0-9A-Fa-f]{6}$/.test(hexColor)) {
+        customAlert('请输入有效的十六进制颜色值（例如：#FF0000）', '⚠️ 格式错误');
+        return;
+    }
+    
+    const decimalColor = parseInt(hexColor.substring(1), 16);
+    
+    if (editingColorIndex !== null) {
+        customColors[editingColorIndex] = decimalColor;
+        addLog(\`✏️ 修改颜色: #\${decimalColor.toString(16).toUpperCase().padStart(6, '0')}\`, 'info');
+        editingColorIndex = null;
+    } else {
+        customColors.push(decimalColor);
+        addLog(\`➕ 添加颜色: #\${decimalColor.toString(16).toUpperCase().padStart(6, '0')}\`, 'info');
+    }
+    
+    updateColorList();
+    closeColorPicker();
+}
+
+// 关闭颜色选择器
+function closeColorPicker() {
+    document.getElementById('color-picker-modal').classList.remove('active');
+    editingColorIndex = null;
+}
+
+// 设置颜色拖放
+let draggedColorElement = null;
+
+function setupColorDragAndDrop() {
+    const container = document.getElementById('color-items');
+    if (!container) return;
+    
+    const items = container.querySelectorAll('.color-item');
+    
+    items.forEach(item => {
+        item.addEventListener('dragstart', handleColorDragStart);
+        item.addEventListener('dragend', handleColorDragEnd);
+        item.addEventListener('dragover', handleColorDragOver);
+        item.addEventListener('drop', handleColorDrop);
+        item.addEventListener('dragenter', handleColorDragEnter);
+        item.addEventListener('dragleave', handleColorDragLeave);
+    });
+}
+
+function handleColorDragStart(e) {
+    draggedColorElement = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleColorDragEnd(e) {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.color-item').forEach(item => {
+        item.classList.remove('drag-over');
+    });
+}
+
+function handleColorDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+}
+
+function handleColorDragEnter(e) {
+    if (this !== draggedColorElement) {
+        this.classList.add('drag-over');
+    }
+}
+
+function handleColorDragLeave(e) {
+    this.classList.remove('drag-over');
+}
+
+function handleColorDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+    
+    if (draggedColorElement !== this) {
+        const container = document.getElementById('color-items');
+        const allItems = Array.from(container.querySelectorAll('.color-item'));
+        const draggedIndex = allItems.indexOf(draggedColorElement);
+        const targetIndex = allItems.indexOf(this);
+        
+        // 交换数组中的位置
+        const temp = customColors[draggedIndex];
+        customColors.splice(draggedIndex, 1);
+        customColors.splice(targetIndex, 0, temp);
+        
+        updateColorList();
+        addLog('🔄 调整颜色顺序', 'info');
+    }
+    
+    this.classList.remove('drag-over');
+    return false;
+}
+
+// 获取颜色配置值
+function getColorPickerValue() {
+    if (currentColorMode === 'default') {
+        return 'default';
+    } else if (currentColorMode === 'white') {
+        return 'white';
+    } else if (currentColorMode === 'color') {
+        return 'color';
+    } else if (currentColorMode === 'custom') {
+        return JSON.stringify(customColors);
+    }
+    return 'default';
+}
 `;
