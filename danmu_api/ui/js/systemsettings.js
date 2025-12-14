@@ -1569,43 +1569,68 @@ function customPrompt(message, title, defaultValue = '') {
     return new Promise((resolve) => {
         const modal = document.createElement('div');
         modal.className = 'modal active';
+        modal.style.zIndex = '10000'; // 确保在颜色配置模态框之上
         modal.innerHTML = \`
-            <div class="modal-overlay" onclick="this.parentElement.remove(); resolve(null);"></div>
+            <div class="modal-overlay"></div>
             <div class="modal-container" style="max-width: 500px;">
                 <div class="modal-header">
                     <h3 class="modal-title">\${title}</h3>
-                    <button class="modal-close" onclick="this.closest('.modal').remove(); resolve(null);">×</button>
+                    <button class="modal-close">×</button>
                 </div>
                 <div class="modal-body">
                     <p style="white-space: pre-line; margin-bottom: var(--spacing-lg); color: var(--text-secondary);">\${message}</p>
                     <textarea class="form-textarea" id="prompt-textarea" rows="6" placeholder="请输入内容...">\${defaultValue}</textarea>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove();">取消</button>
-                    <button class="btn btn-primary" onclick="
-                        const value = document.getElementById('prompt-textarea').value;
-                        this.closest('.modal').remove();
-                        window.dispatchEvent(new CustomEvent('prompt-result', { detail: value }));
-                    ">确定</button>
+                    <button class="btn btn-secondary" id="prompt-cancel-btn">取消</button>
+                    <button class="btn btn-primary" id="prompt-confirm-btn">确定</button>
                 </div>
             </div>
         \`;
         
         document.body.appendChild(modal);
-        document.getElementById('prompt-textarea').focus();
         
-        window.addEventListener('prompt-result', function handler(e) {
-            resolve(e.detail);
-            window.removeEventListener('prompt-result', handler);
-        }, { once: true });
+        // 绑定事件处理器
+        const overlay = modal.querySelector('.modal-overlay');
+        const closeBtn = modal.querySelector('.modal-close');
+        const cancelBtn = modal.querySelector('#prompt-cancel-btn');
+        const confirmBtn = modal.querySelector('#prompt-confirm-btn');
+        const textarea = modal.querySelector('#prompt-textarea');
         
-        // ESC键关闭
-        modal.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                modal.remove();
-                resolve(null);
+        // 关闭函数
+        const closeModal = () => {
+            modal.remove();
+            resolve(null);
+        };
+        
+        // 确认函数
+        const confirmModal = () => {
+            const value = textarea.value;
+            modal.remove();
+            resolve(value);
+        };
+        
+        // 绑定事件
+        overlay.addEventListener('click', closeModal);
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        confirmBtn.addEventListener('click', confirmModal);
+        
+        // 回车键确认，ESC键取消
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                e.preventDefault();
+                confirmModal();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                closeModal();
             }
         });
+        
+        // 聚焦到文本框
+        setTimeout(() => {
+            textarea.focus();
+        }, 100);
     });
 }
 function addRandomColor() {
