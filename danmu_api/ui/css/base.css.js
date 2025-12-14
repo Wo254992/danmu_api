@@ -945,4 +945,291 @@ body {
 .mb-3 { margin-bottom: var(--spacing-md); }
 .mb-4 { margin-bottom: var(--spacing-lg); }
 .mb-5 { margin-bottom: var(--spacing-xl); }
+/* ========================================
+   平台配置状态卡片
+   ======================================== */
+.platform-config-card {
+    margin: var(--spacing-lg);
+    padding: var(--spacing-xl);
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+}
+
+.platform-config-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow);
+}
+
+.platform-config-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.platform-config-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--transition-base);
+}
+
+.platform-config-icon-wrapper.status-complete {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.platform-config-icon-wrapper.status-incomplete {
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.platform-config-icon-wrapper.status-error {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.platform-config-icon {
+    width: 20px;
+    height: 20px;
+    transition: all var(--transition-base);
+}
+
+.platform-config-icon-wrapper.status-complete .platform-config-icon {
+    stroke: var(--success-color);
+}
+
+.platform-config-icon-wrapper.status-incomplete .platform-config-icon {
+    stroke: var(--warning-color);
+}
+
+.platform-config-icon-wrapper.status-error .platform-config-icon {
+    stroke: var(--danger-color);
+}
+
+.platform-config-title-wrapper {
+    flex: 1;
+    min-width: 0;
+}
+
+.platform-config-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.platform-config-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.platform-config-status.status-complete {
+    color: var(--success-color);
+}
+
+.platform-config-status.status-incomplete {
+    color: var(--warning-color);
+}
+
+.platform-config-status.status-error {
+    color: var(--danger-color);
+}
+
+.platform-config-content {
+    min-height: 60px;
+}
+
+.platform-config-loading {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.config-loading-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--gray-200);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.platform-config-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.platform-config-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius-sm);
+    border-left: 3px solid transparent;
+    transition: all var(--transition-fast);
+}
+
+.platform-config-item:hover {
+    background: var(--bg-tertiary);
+    transform: translateX(2px);
+}
+
+.platform-config-item.config-complete {
+    border-left-color: var(--success-color);
+}
+
+.platform-config-item.config-incomplete {
+    border-left-color: var(--warning-color);
+}
+
+.platform-config-item-name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+}
+
+.platform-config-item-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.platform-config-item-status svg {
+    width: 12px;
+    height: 12px;
+}
+
+.platform-config-item-status.status-complete {
+    color: var(--success-color);
+}
+
+.platform-config-item-status.status-incomplete {
+    color: var(--warning-color);
+}
+
+.platform-config-footer {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+.platform-config-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-md);
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.platform-config-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.platform-config-btn:active {
+    transform: translateY(0);
+}
+
+.platform-config-btn svg {
+    flex-shrink: 0;
+}
+
+.platform-config-no-check {
+    padding: var(--spacing-lg);
+    text-align: center;
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius-sm);
+    border: 1px dashed var(--border-color);
+}
+
+.platform-config-no-check-icon {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-sm);
+    opacity: 0.6;
+}
+
+.platform-config-no-check-text {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+    .platform-config-card {
+        margin: var(--spacing-md);
+        padding: var(--spacing-lg);
+    }
+    
+    .platform-config-header {
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .platform-config-icon-wrapper {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .platform-config-icon {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .platform-config-title {
+        font-size: 0.9375rem;
+    }
+    
+    .platform-config-status {
+        font-size: 0.7rem;
+    }
+    
+    .platform-config-item {
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    .platform-config-item-name {
+        font-size: 0.75rem;
+    }
+    
+    .platform-config-item-status {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .platform-config-title {
+        font-size: 0.875rem;
+    }
+    
+    .platform-config-btn {
+        font-size: 0.75rem;
+        padding: var(--spacing-sm);
+    }
+}
 `;
