@@ -1377,26 +1377,19 @@ function addColorFromPicker() {
 }
 
 /**
- * 添加随机颜色
+ * 添加真正的随机颜色
  */
 function addRandomColor() {
-    // 预设的常用颜色（十进制）
-    const colors = [
-        16777215, // 白色
-        16744319, // 红色
-        16752762, // 橙色
-        16774799, // 黄色
-        9498256,  // 绿色
-        8388564,  // 青色
-        8900346,  // 蓝色
-        14204888, // 紫色
-        16758465  // 粉色
-    ];
+    // 生成真正随机的RGB值
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
     
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    const hexColor = '#' + randomColor.toString(16).padStart(6, '0');
+    // 转换为十进制和十六进制
+    const decimalColor = r * 256 * 256 + g * 256 + b;
+    const hexColor = '#' + decimalColor.toString(16).padStart(6, '0');
     
-    addColorToList(randomColor, hexColor);
+    addColorToList(decimalColor, hexColor);
 }
 
 /**
@@ -1429,7 +1422,7 @@ function setColorPreset(preset) {
     
     if (colors.length === 0) {
         container.classList.add('empty');
-        customAlert(\`已设置为：\${presetName}\`, '✅ 配置成功');
+        customAlert('已设置为：' + presetName, '✅ 配置成功');
         return;
     }
     
@@ -1443,18 +1436,34 @@ function setColorPreset(preset) {
         colorItem.draggable = true;
         colorItem.dataset.value = colorDecimal;
         colorItem.dataset.index = idx;
-        colorItem.innerHTML = \`
-            <div class="color-preview" style="background-color: \${hexColor};" title="\${hexColor} (\${colorDecimal})"></div>
-            <span class="color-value">\${hexColor}</span>
-            <button type="button" class="color-remove-btn" onclick="removeColorItem(this)" title="删除">×</button>
-        \`;
+        
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'color-preview';
+        previewDiv.style.backgroundColor = hexColor;
+        previewDiv.title = hexColor + ' (' + colorDecimal + ')';
+        
+        const valueSpan = document.createElement('span');
+        valueSpan.className = 'color-value';
+        valueSpan.textContent = hexColor;
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'color-remove-btn';
+        removeBtn.title = '删除';
+        removeBtn.textContent = '×';
+        removeBtn.onclick = function() { removeColorItem(this); };
+        
+        colorItem.appendChild(previewDiv);
+        colorItem.appendChild(valueSpan);
+        colorItem.appendChild(removeBtn);
+        
         container.appendChild(colorItem);
     });
     
     // 重新设置拖放
     setupColorDragAndDrop();
     
-    customAlert(\`已设置为：\${presetName}\\n\\n共 \${colors.length} 个颜色\`, '✅ 配置成功');
+    customAlert('已设置为：' + presetName + '\\n\\n共 ' + colors.length + ' 个颜色', '✅ 配置成功');
 }
 
 /**
@@ -1477,11 +1486,26 @@ function addColorToList(decimalColor, hexColor) {
     colorItem.draggable = true;
     colorItem.dataset.value = decimalColor;
     colorItem.dataset.index = newIndex;
-    colorItem.innerHTML = \`
-        <div class="color-preview" style="background-color: \${hexColor};" title="\${hexColor} (\${decimalColor})"></div>
-        <span class="color-value">\${hexColor}</span>
-        <button type="button" class="color-remove-btn" onclick="removeColorItem(this)" title="删除">×</button>
-    \`;
+    
+    const previewDiv = document.createElement('div');
+    previewDiv.className = 'color-preview';
+    previewDiv.style.backgroundColor = hexColor;
+    previewDiv.title = hexColor + ' (' + decimalColor + ')';
+    
+    const valueSpan = document.createElement('span');
+    valueSpan.className = 'color-value';
+    valueSpan.textContent = hexColor;
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'color-remove-btn';
+    removeBtn.title = '删除';
+    removeBtn.textContent = '×';
+    removeBtn.onclick = function() { removeColorItem(this); };
+    
+    colorItem.appendChild(previewDiv);
+    colorItem.appendChild(valueSpan);
+    colorItem.appendChild(removeBtn);
 
     container.appendChild(colorItem);
 
