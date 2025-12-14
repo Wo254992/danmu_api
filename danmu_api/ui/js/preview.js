@@ -9,6 +9,33 @@ function renderPreview() {
     // 显示加载状态
     showLoadingIndicator('preview-area');
     
+    // 辅助函数：生成颜色预览HTML
+    function generateColorPreviewHTML(itemValue, itemType) {
+        if (itemType !== 'color-list' || !itemValue || itemValue === 'default') {
+            return '';
+        }
+        
+        let colors = [];
+        if (itemValue === 'white') {
+            colors = ['16777215'];
+        } else if (itemValue === 'color') {
+            colors = ['16777215', '16744319', '16752762', '16774799', '9498256', '8388564', '8900346', '14204888', '16758465'];
+        } else {
+            colors = itemValue.split(',').map(v => v.trim()).filter(v => v && !isNaN(v));
+        }
+        
+        if (colors.length === 0) {
+            return '';
+        }
+        
+        const colorDots = colors.map(c => {
+            const hex = '#' + parseInt(c).toString(16).padStart(6, '0');
+            return '<div class="preview-color-dot" style="background-color: ' + hex + ';" title="' + hex + '"></div>';
+        }).join('');
+        
+        return '<div class="preview-colors">' + colorDots + '</div>';
+    }
+    
     fetch('/api/config')
         .then(response => response.json())
         .then(config => {
@@ -67,7 +94,9 @@ function renderPreview() {
                             </h3>
                         </div>
                         <div class="preview-items">
-                            \${items.map((item, itemIndex) => \`
+                            \${items.map((item, itemIndex) => {
+                                const colorPreviewHTML = generateColorPreviewHTML(item.value, item.type);
+                                return \`
                                 <div class="preview-item" style="animation: fadeInUp 0.3s ease-out \${(index * 0.1) + (itemIndex * 0.05)}s backwards;">
                                     <div class="preview-item-header">
                                         <strong class="preview-key">
@@ -77,6 +106,7 @@ function renderPreview() {
                                         <span class="preview-type-badge">\${getTypeBadge(item.type || 'text')}</span>
                                     </div>
                                     <div class="preview-value-container">
+                                        \${colorPreviewHTML}
                                         <code class="preview-value">\${escapeHtml(formatValue(item.value))}</code>
                                         <button class="preview-copy-btn" onclick="copyPreviewValue('\${escapeHtml(String(item.value)).replace(/'/g, "\\\\'")}', this)" title="复制值">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -92,7 +122,8 @@ function renderPreview() {
                                         </div>
                                     \` : ''}
                                 </div>
-                            \`).join('')}
+                            \`;
+                            }).join('')}
                         </div>
                     </div>
                 \`;
@@ -186,7 +217,8 @@ function getTypeBadge(type) {
         boolean: '布尔',
         number: '数字',
         select: '单选',
-        'multi-select': '多选'
+        'multi-select': '多选',
+        'color-list': '颜色'
     };
     return badges[type] || '文本';
 }
