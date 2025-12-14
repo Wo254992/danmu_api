@@ -868,7 +868,9 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
     } else if (type === 'color-list') {
         // 从隐藏的 input 中获取颜色值
         value = document.getElementById('text-value').value.trim();
-        itemData = { key, value, description, type };
+        // 保存当前的颜色数据，用于重新渲染
+        const currentColors = value.split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
+        itemData = { key, value, description, type, colors: currentColors };
     } else {
         value = document.getElementById('text-value').value.trim();
         itemData = { key, value, description, type };
@@ -1064,13 +1066,22 @@ function renderValueInput(item) {
                    16744319, 16752762, 16774799, 9498256, 8388564, 8900346, 14204888, 16758465];
         
         let colors = [];
-        // 处理初始值：如果是 'color' 或 'default' 或空，使用默认池；否则解析CSV
-        if (!value || value === 'color' || value === 'default') {
+        
+        // 优先使用 item.colors（编辑时保存的颜色数组）
+        if (item && item.colors && Array.isArray(item.colors)) {
+            colors = [...item.colors];
+        } else if (!value || value === 'color' || value === 'default') {
+            // 如果是 'color' 或 'default' 或空，使用默认池
             colors = [...defaultPool];
         } else if (value === 'white') {
             colors = [16777215];
         } else {
+            // 否则解析CSV
             colors = String(value).split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
+            // 如果解析失败，使用默认池
+            if (colors.length === 0) {
+                colors = [...defaultPool];
+            }
         }
 
         // 隐藏的实际存储 input
@@ -1078,35 +1089,44 @@ function renderValueInput(item) {
 
         container.innerHTML = \`
             \${hiddenInput}
-            <label class="form-label">颜色池配置 (拖动排序，点击X删除)</label>
+            <label class="form-label">颜色池配置</label>
+            <div class="color-pool-hint">💡 拖动颜色块可调整顺序，点击 × 可删除</div>
             <div class="color-pool-controls">
-                <div class="color-picker-wrapper" title="选择颜色">
+                <div class="color-picker-wrapper" title="点击选择颜色">
                     <input type="color" id="color-picker-input" class="color-picker-input" value="#ffffff">
+                    <span class="color-picker-label">选择颜色</span>
                 </div>
                 <button type="button" class="btn btn-sm btn-primary" onclick="addColorFromPicker()">
-                    <span class="btn-icon-text">➕ 添加选中颜色</span>
+                    <span class="btn-icon-text">➕ 添加</span>
                 </button>
                 <button type="button" class="btn btn-sm btn-secondary" onclick="addRandomColor()">
-                    <span class="btn-icon-text">🎲 随机增加一个</span>
+                    <span class="btn-icon-text">🎲 随机</span>
                 </button>
                 <button type="button" class="btn btn-sm btn-danger" onclick="resetColorPool()">
-                    <span class="btn-icon-text">↺ 重置为默认</span>
+                    <span class="btn-icon-text">↺ 重置</span>
                 </button>
             </div>
             
             <div class="color-pool-container \${colors.length === 0 ? 'empty' : ''}" id="color-pool-container">
-                \${colors.map(colorInt => {
+                \${colors.map((colorInt, index) => {
                     const hex = '#' + colorInt.toString(16).padStart(6, '0').toUpperCase();
-                    const hexShort = hex.substring(1); // 去掉 # 号
+                    const hexShort = hex.substring(1);
                     return \`
-                        <div class="color-chip" draggable="true" data-value="\${colorInt}" style="background-color: \${hex};" title="\${hex} (\${colorInt})">
+                        <div class="color-chip" draggable="true" data-value="\${colorInt}" style="background-color: \${hex}; animation-delay: \${index * 0.05}s;" title="\${hex} (\${colorInt})">
                             <span class="color-hex-label">\${hexShort}</span>
                             <button type="button" class="remove-chip-btn" onclick="removeColorChip(this)">×</button>
                         </div>
                     \`;
                 }).join('')}
             </div>
-            <div class="form-help">当前颜色池数量: <span id="pool-count">\${colors.length}</span></div>
+            <div class="form-help">
+                <span class="pool-stats">
+                    <span class="pool-count-badge">
+                        <span class="pool-count-icon">🎨</span>
+                        <span id="pool-count">\${colors.length}</span> 个颜色
+                    </span>
+                </span>
+            </div>
         \`;
 
         setupColorDragAndDrop();
