@@ -626,8 +626,10 @@ function renderEnvList() {
         const typeLabel = item.type === 'boolean' ? 'bool' :
                          item.type === 'number' ? 'num' :
                          item.type === 'select' ? 'select' :
-                         item.type === 'multi-select' ? 'multi' : 'text';
-        const badgeClass = item.type === 'multi-select' ? 'multi' : '';
+                         item.type === 'multi-select' ? 'multi' :
+                         item.type === 'color-list' ? 'color' : 'text';
+        const badgeClass = item.type === 'multi-select' ? 'multi' : 
+                          item.type === 'color-list' ? 'color' : '';
 
         return \`
             <div class="env-item" style="animation: fadeInUp 0.3s ease-out \${index * 0.05}s backwards;">
@@ -675,7 +677,16 @@ function editEnv(index) {
     document.getElementById('env-category').value = currentCategory;
     document.getElementById('env-key').value = item.key;
     document.getElementById('env-description').value = item.description || '';
-    document.getElementById('value-type').value = item.type || 'text';
+    
+    // 确保 type 字段正确设置，如果没有 type 则根据内容判断
+    let itemType = item.type || 'text';
+    
+    // 如果没有明确的 type，但有 colors 数组，说明是 color-list
+    if (!item.type && item.colors && Array.isArray(item.colors)) {
+        itemType = 'color-list';
+    }
+    
+    document.getElementById('value-type').value = itemType;
 
     document.getElementById('env-category').disabled = true;
     document.getElementById('env-key').readOnly = true;
