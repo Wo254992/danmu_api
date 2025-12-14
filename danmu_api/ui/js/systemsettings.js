@@ -1,5 +1,5 @@
 // language=JavaScript
-export const systemSettingsJsContent = /* javascript */ `
+const systemSettingsJsContent = /* javascript */ `
 /* ========================================
    系统配置状态管理
    ======================================== */
@@ -1573,3 +1573,4 @@ function getColorPickerValue() {
     return 'default';
 }
 `;
+module.exports = { systemSettingsJsContent };
