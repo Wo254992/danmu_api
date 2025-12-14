@@ -182,15 +182,24 @@ export class Envs {
                             this.env['CONVERT_COLOR_TO_WHITE'] === 'true' || 
                             this.env['CONVERT_COLOR_TO_WHITE'] === 1 || 
                             this.env['CONVERT_COLOR_TO_WHITE'] === '1';
+      // 记录旧环境变量
+      this.originalEnvVars.set('CONVERT_COLOR_TO_WHITE', this.env['CONVERT_COLOR_TO_WHITE']);
     } else if (typeof process !== 'undefined' && process.env?.['CONVERT_COLOR_TO_WHITE']) {
       const val = process.env['CONVERT_COLOR_TO_WHITE'];
       convertColorToWhite = val === 'true' || val === '1';
+      // 记录旧环境变量
+      this.originalEnvVars.set('CONVERT_COLOR_TO_WHITE', val);
     }
 
     // 如果设置了旧的 CONVERT_COLOR_TO_WHITE，则转换为新的 CONVERT_COLOR 值
-    // true -> '16777215', false -> 'default'
-    const defaultColor = convertColorToWhite ? '16777215' : 'default';
-    return this.get('CONVERT_COLOR', defaultColor, 'string');
+    // true -> 'white', false -> 'default'
+    const defaultColor = convertColorToWhite ? 'white' : 'default';
+    const result = this.get('CONVERT_COLOR', defaultColor, 'string');
+    
+    // 确保正确记录到 accessedEnvVars
+    this.accessedEnvVars.set('CONVERT_COLOR', result);
+    
+    return result;
   }
 
   /**
