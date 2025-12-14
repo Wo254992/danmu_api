@@ -619,6 +619,229 @@ input:disabled + .slider {
 }
 
 /* ========================================
+   颜色选择器
+   ======================================== */
+.color-mode-selector {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.color-mode-btn {
+    flex: 1;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: center;
+}
+
+.color-mode-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.color-mode-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+    border-color: transparent;
+    box-shadow: var(--shadow-colored);
+}
+
+.custom-color-panel {
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.custom-color-panel.active {
+    display: block;
+}
+
+.color-list-container {
+    min-height: 120px;
+    background: var(--bg-secondary);
+    border: 3px dashed var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    transition: all var(--transition-fast);
+}
+
+.color-list-container.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.color-list-container.empty::before {
+    content: '🎨 拖动颜色块排序，点击 x 删除';
+    color: var(--text-tertiary);
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.color-list-container.drag-over {
+    background: rgba(99, 102, 241, 0.08);
+    border-color: var(--primary-color);
+    box-shadow: inset 0 0 0 2px var(--primary-color);
+}
+
+.color-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.color-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: move;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+    user-select: none;
+}
+
+.color-item:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
+}
+
+.color-item.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg) scale(1.1);
+    cursor: grabbing;
+}
+
+.color-preview {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--border-radius-sm);
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.color-code {
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 80px;
+}
+
+.color-remove-btn {
+    width: 24px;
+    height: 24px;
+    background: rgba(239, 68, 68, 0.1);
+    border: none;
+    border-radius: 50%;
+    color: var(--danger-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.125rem;
+    font-weight: bold;
+    transition: all var(--transition-fast);
+    padding: 0;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.color-remove-btn:hover {
+    background: var(--danger-color);
+    color: white;
+    transform: scale(1.2) rotate(90deg);
+}
+
+.color-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.color-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--bg-tertiary);
+    border-radius: var(--border-radius);
+    border: 2px solid var(--border-color);
+}
+
+.color-picker-input {
+    width: 60px;
+    height: 40px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    padding: 0;
+    background: none;
+}
+
+.color-picker-input:hover {
+    transform: scale(1.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.color-hex-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.color-hex-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.add-color-btn {
+    padding: 0.75rem 1.5rem !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.random-color-btn {
+    padding: 0.75rem 1.5rem !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
    复选框和单选框
    ======================================== */
 .form-checkbox,
