@@ -1569,10 +1569,10 @@ function customPrompt(message, title, defaultValue = '') {
     return new Promise((resolve) => {
         const modal = document.createElement('div');
         modal.className = 'modal active';
-        modal.style.zIndex = '100000'; // 确保在颜色配置模态框之上
+        modal.style.cssText = 'z-index: 100000 !important; position: fixed !important;'; // 确保在颜色配置模态框之上
         modal.innerHTML = \`
-            <div class="modal-overlay"></div>
-            <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-overlay" style="z-index: 99999 !important;"></div>
+            <div class="modal-container" style="max-width: 500px; z-index: 100000 !important; position: relative !important;">
                 <div class="modal-header">
                     <h3 class="modal-title">\${title}</h3>
                     <button class="modal-close">×</button>
