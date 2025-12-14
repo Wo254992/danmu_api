@@ -1892,4 +1892,45 @@ export const dynamicCssContent = /* css */ `
     margin-top: 0;
     line-height: 1;
 }
+/* ========================================
+   预览页面颜色显示样式
+   ======================================== */
+.preview-colors {
+    display: flex;
+    gap: var(--spacing-xs);
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+.preview-color-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    cursor: help;
+    transition: all var(--transition-fast);
+}
+
+.preview-color-dot:hover {
+    transform: scale(1.2);
+    box-shadow: var(--shadow);
+    z-index: 1;
+}
+
+@media (max-width: 768px) {
+    .preview-colors {
+        gap: 6px;
+        padding: var(--spacing-xs);
+    }
+    
+    .preview-color-dot {
+        width: 20px;
+        height: 20px;
+    }
+}
 `;
