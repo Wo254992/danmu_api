@@ -627,10 +627,8 @@ function renderEnvList() {
                          item.type === 'number' ? 'num' :
                          item.type === 'select' ? 'select' :
                          item.type === 'multi-select' ? 'multi' :
-                         item.type === 'color-list' ? 'color' : 
-                         item.type ? item.type.substring(0, 4) : 'text';
-        const badgeClass = item.type === 'multi-select' ? 'multi' : 
-                          item.type === 'color-list' ? 'color' : '';
+                         item.type === 'color-list' ? 'color' : 'text';
+        const badgeClass = item.type === 'multi-select' ? 'multi' : '';
 
         return \`
             <div class="env-item" style="animation: fadeInUp 0.3s ease-out \${index * 0.05}s backwards;">
