@@ -1135,9 +1135,6 @@ function renderValueInput(item) {
                 <button type="button" class="btn btn-sm btn-secondary" onclick="addRandomColor()" title="随机添加颜色">
                     <span class="btn-icon-text">🎲 随机</span>
                 </button>
-                <button type="button" class="btn btn-sm btn-secondary" onclick="importColorList()" title="批量导入">
-                    <span class="btn-icon-text">📥 导入</span>
-                </button>
                 <button type="button" class="btn btn-sm btn-danger" onclick="resetColorPool()" title="重置为默认">
                     <span class="btn-icon-text">↺ 重置</span>
                 </button>
@@ -1515,124 +1512,6 @@ function addColorFromHexInput() {
     addColorFromInput();
 }
 
-function importColorList() {
-    customPrompt(
-        '请输入颜色列表，支持以下格式：\\n\\n1. HEX格式（逗号分隔）：FFFFFF, FF5733, 00ADEF\\n2. 十进制格式（逗号分隔）：16777215, 16734003, 44783\\n3. 混合格式：#FFFFFF, 16734003, FF5733\\n\\n每行一个或用逗号分隔',
-        '📥 批量导入颜色',
-        ''
-    ).then(input => {
-        if (!input || input.trim() === '') return;
-        
-        const colors = [];
-        const items = input.split(/[,\\n\\s]+/).map(s => s.trim()).filter(s => s);
-        
-        for (const item of items) {
-            let decimal = null;
-            
-            // 尝试解析HEX格式
-            const hexMatch = item.match(/^#?([0-9A-Fa-f]{6})$/);
-            if (hexMatch) {
-                decimal = parseInt(hexMatch[1], 16);
-            } else if (item.match(/^#?([0-9A-Fa-f]{3})$/)) {
-                // 简写格式
-                const short = item.replace('#', '');
-                const expanded = short.split('').map(c => c + c).join('');
-                decimal = parseInt(expanded, 16);
-            } else {
-                // 尝试解析十进制
-                decimal = parseInt(item, 10);
-            }
-            
-            if (!isNaN(decimal) && decimal >= 0 && decimal <= 16777215) {
-                colors.push(decimal);
-            }
-        }
-        
-        if (colors.length === 0) {
-            customAlert('未能解析出有效的颜色值', '⚠️ 导入失败');
-            return;
-        }
-        
-        const container = document.getElementById('color-pool-container');
-        colors.forEach((color, index) => {
-            const chip = createColorChip(color);
-            chip.style.animationDelay = (index * 0.05) + 's';
-            container.appendChild(chip);
-        });
-        
-        updateColorPoolInput();
-        customAlert(\`成功导入 \${colors.length} 个颜色\`, '✅ 导入成功');
-    });
-}
-
-function customPrompt(message, title, defaultValue = '') {
-    return new Promise((resolve) => {
-        const modal = document.createElement('div');
-        modal.className = 'modal active';
-        modal.style.zIndex = '100000'; // 确保在颜色配置模态框之上
-        modal.innerHTML = \`
-            <div class="modal-overlay"></div>
-            <div class="modal-container" style="max-width: 500px;">
-                <div class="modal-header">
-                    <h3 class="modal-title">\${title}</h3>
-                    <button class="modal-close">×</button>
-                </div>
-                <div class="modal-body">
-                    <p style="white-space: pre-line; margin-bottom: var(--spacing-lg); color: var(--text-secondary);">\${message}</p>
-                    <textarea class="form-textarea" id="prompt-textarea" rows="6" placeholder="请输入内容...">\${defaultValue}</textarea>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" id="prompt-cancel-btn">取消</button>
-                    <button class="btn btn-primary" id="prompt-confirm-btn">确定</button>
-                </div>
-            </div>
-        \`;
-        
-        document.body.appendChild(modal);
-        
-        // 绑定事件处理器
-        const overlay = modal.querySelector('.modal-overlay');
-        const closeBtn = modal.querySelector('.modal-close');
-        const cancelBtn = modal.querySelector('#prompt-cancel-btn');
-        const confirmBtn = modal.querySelector('#prompt-confirm-btn');
-        const textarea = modal.querySelector('#prompt-textarea');
-        
-        // 关闭函数
-        const closeModal = () => {
-            modal.remove();
-            resolve(null);
-        };
-        
-        // 确认函数
-        const confirmModal = () => {
-            const value = textarea.value;
-            modal.remove();
-            resolve(value);
-        };
-        
-        // 绑定事件
-        overlay.addEventListener('click', closeModal);
-        closeBtn.addEventListener('click', closeModal);
-        cancelBtn.addEventListener('click', closeModal);
-        confirmBtn.addEventListener('click', confirmModal);
-        
-        // 回车键确认，ESC键取消
-        textarea.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                e.preventDefault();
-                confirmModal();
-            } else if (e.key === 'Escape') {
-                e.preventDefault();
-                closeModal();
-            }
-        });
-        
-        // 聚焦到文本框
-        setTimeout(() => {
-            textarea.focus();
-        }, 100);
-    });
-}
 function addRandomColor() {
     // 生成真随机颜色 (0 - 16777215)
     const randomDecimal = Math.floor(Math.random() * 16777216);
