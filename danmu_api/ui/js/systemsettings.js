@@ -1057,48 +1057,6 @@ function renderValueInput(item) {
 
         setupDragAndDrop();
 
-    } else if (type === 'multi-select') {
-        const options = item && item.options ? item.options : ['option1', 'option2', 'option3', 'option4'];
-        const stringValue = typeof value === 'string' ? value : String(value || '');
-        const selectedValues = stringValue ? stringValue.split(',').map(v => v.trim()).filter(v => v) : [];
-
-        const optionsInput = item ? '' : \`
-            <div class="form-group">
-                <label class="form-label">可选项 (逗号分隔)</label>
-                <input type="text" class="form-input" id="multi-options" placeholder="例如: auth,payment,analytics"
-                       value="\${options.join(',')}" onchange="updateMultiOptions()">
-            </div>
-        \`;
-
-        container.innerHTML = \`
-            \${optionsInput}
-            <label class="form-label">已选择 (拖动调整顺序)</label>
-            <div class="multi-select-container">
-                <div class="selected-tags \${selectedValues.length === 0 ? 'empty' : ''}" id="selected-tags">
-                    \${selectedValues.map(val => \`
-                        <div class="selected-tag" draggable="true" data-value="\${val}">
-                            <span class="tag-text">\${val}</span>
-                            <button type="button" class="remove-btn" onclick="removeSelectedTag(this)">×</button>
-                        </div>
-                    \`).join('')}
-                </div>
-                <label class="form-label">可选项 (点击添加)</label>
-                <div class="available-tags" id="available-tags">
-                    \${options.map(opt => {
-                        const isSelected = selectedValues.includes(opt);
-                        return \`
-                            <div class="available-tag \${isSelected ? 'disabled' : ''}"
-                                 data-value="\${opt}" onclick="addSelectedTag(this)">
-                                \${opt}
-                            </div>
-                        \`;
-                    }).join('')}
-                </div>
-            </div>
-        \`;
-
-        setupDragAndDrop();
-
     } else if (type === 'color-picker') {
         // 解析当前值
         let currentMode = 'default';
@@ -1227,7 +1185,6 @@ function renderValueInput(item) {
             \`;
         }
     }
-
 }
 
 /* ========================================
