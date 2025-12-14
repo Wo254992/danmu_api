@@ -1864,24 +1864,7 @@ export const dynamicCssContent = /* css */ `
         font-size: 0.6875rem;
     }
 }
-/* ========================================
-   颜色选择器动画
-   ======================================== */
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-}
 
-.color-list.drag-over {
-    background: rgba(99, 102, 241, 0.08);
-    border-color: var(--primary-color);
-}
 /* ========================================
    复制按钮对齐修复补丁
    ======================================== */
