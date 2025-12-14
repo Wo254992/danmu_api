@@ -949,8 +949,8 @@ body {
    平台配置状态卡片
    ======================================== */
 .platform-config-card {
-    margin: var(--spacing-lg);
-    padding: var(--spacing-lg);
+    margin: 0 0 var(--spacing-lg) 0;
+    padding: var(--spacing-md);
     background: var(--bg-primary);
     border-radius: var(--border-radius-lg);
     border: 1px solid var(--border-color);
@@ -1025,7 +1025,8 @@ body {
     font-size: 0.875rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 2px;
+    margin-bottom: 1px;
+    line-height: 1.2;
 }
 
 .platform-config-status {
@@ -1155,8 +1156,8 @@ body {
 }
 
 .platform-config-footer {
-    margin-top: var(--spacing-md);
-    padding-top: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
     border-top: 1px solid var(--border-color);
 }
 
@@ -1216,8 +1217,8 @@ body {
 /* 移动端优化 */
 @media (max-width: 768px) {
     .platform-config-card {
-        margin: var(--spacing-md);
-        padding: var(--spacing-md);
+        margin: 0 0 var(--spacing-md) 0;
+        padding: var(--spacing-sm);
     }
     
     .platform-config-icon-wrapper {
