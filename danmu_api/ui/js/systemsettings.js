@@ -866,13 +866,11 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
         const options = Array.from(document.querySelectorAll('.available-tag')).map(el => el.dataset.value);
         itemData = { key, value, description, type, options };
     } else if (type === 'color-list') {
-        const container = document.getElementById('selected-colors');
-        const selectedColors = container ? 
-            Array.from(container.querySelectorAll('.color-item')).map(el => el.dataset.value) : 
-            [];
+        const selectedColors = Array.from(document.querySelectorAll('#selected-colors .color-item'))
+            .map(el => el.dataset.value);
         value = selectedColors.join(',');
         itemData = { key, value, description, type };
-    }
+    } else {
         value = document.getElementById('text-value').value.trim();
         itemData = { key, value, description, type };
     }
