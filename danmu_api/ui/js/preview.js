@@ -77,6 +77,25 @@ function renderPreview() {
                                         <span class="preview-type-badge">\${getTypeBadge(item.type || 'text')}</span>
                                     </div>
                                     <div class="preview-value-container">
+                                        \${item.type === 'color-list' && item.value && item.value !== 'default' ? \`
+                                            <div class="preview-colors">
+                                                \${(() => {
+                                                    let colors = [];
+                                                    const val = item.value;
+                                                    if (val === 'white') {
+                                                        colors = ['16777215'];
+                                                    } else if (val === 'color') {
+                                                        colors = ['16777215', '16744319', '16752762', '16774799', '9498256', '8388564', '8900346', '14204888', '16758465'];
+                                                    } else if (val !== 'default') {
+                                                        colors = val.split(',').map(v => v.trim()).filter(v => v && !isNaN(v));
+                                                    }
+                                                    return colors.map(c => {
+                                                        const hex = '#' + parseInt(c).toString(16).padStart(6, '0');
+                                                        return \\\`<div class="preview-color-dot" style="background-color: \${hex};" title="\${hex}"></div>\\\`;
+                                                    }).join('');
+                                                })()}
+                                            </div>
+                                        \` : ''}
                                         <code class="preview-value">\${escapeHtml(formatValue(item.value))}</code>
                                         <button class="preview-copy-btn" onclick="copyPreviewValue('\${escapeHtml(String(item.value)).replace(/'/g, "\\\\'")}', this)" title="复制值">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -186,7 +205,8 @@ function getTypeBadge(type) {
         boolean: '布尔',
         number: '数字',
         select: '单选',
-        'multi-select': '多选'
+        'multi-select': '多选',
+        'color-list': '颜色'
     };
     return badges[type] || '文本';
 }
