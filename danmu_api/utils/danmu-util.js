@@ -232,8 +232,19 @@ export function convertToDanmakuJson(contents, platform) {
       // 向后兼容：使用预设的随机颜色列表（白色概率更高）
       colorList = [16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 
                    16744319, 16752762, 16774799, 9498256, 8388564, 8900346, 14204888, 16758465];
+    } else if (convertColorValue.startsWith('[') && convertColorValue.endsWith(']')) {
+      // 新格式：JSON数组格式，支持自定义颜色列表
+      try {
+        colorList = JSON.parse(convertColorValue);
+        if (!Array.isArray(colorList) || colorList.length === 0) {
+          shouldConvertColor = false;
+        }
+      } catch (e) {
+        log("error", `解析颜色配置失败: ${e.message}`, e);
+        shouldConvertColor = false;
+      }
     } else {
-      // 新格式：解析十进制颜色值列表
+      // 旧格式：逗号分隔的十进制颜色值列表（向后兼容）
       colorList = convertColorValue.split(',')
         .map(v => v.trim())
         .filter(v => v && !isNaN(v))
