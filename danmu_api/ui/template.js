@@ -73,31 +73,6 @@ export const HTML_TEMPLATE = /* html */ `
                     <span class="copy-hint">点击复制</span>
                 </div>
             </div>
-
-            <!-- 平台配置状态卡片 -->
-            <div class="platform-config-card" id="platform-config-card">
-                <div class="platform-config-header" onclick="togglePlatformConfig()">
-                    <div class="platform-config-icon-wrapper">
-                        <svg class="platform-config-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div class="platform-config-title-wrapper">
-                        <div class="platform-config-title">平台配置</div>
-                        <div class="platform-config-status" id="platform-config-status">检测中...</div>
-                    </div>
-                    <svg class="platform-config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                </div>
-                <div class="platform-config-content" id="platform-config-content" style="display: none;">
-                    <div class="platform-config-loading">
-                        <div class="config-loading-spinner"></div>
-                        <span>正在检测配置...</span>
-                    </div>
-                </div>
-            </div>
-
             <nav class="nav-menu">
                 <a href="#preview" class="nav-item active" data-section="preview" onclick="switchSection('preview'); return false;">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
