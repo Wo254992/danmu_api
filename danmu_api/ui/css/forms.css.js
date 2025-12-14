@@ -653,7 +653,29 @@ input:disabled + .slider {
     cursor: pointer;
     font-weight: 500;
 }
-// 在 formsCssContent 的最后 `*/;` 之前添加：
+/* ========================================
+   表单布局工具
+   ======================================== */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.form-inline {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--spacing-lg);
+}
+
+.form-inline .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.form-inline .btn {
+    flex-shrink: 0;
+}
 
 /* ========================================
    颜色选择器
@@ -846,28 +868,5 @@ input:disabled + .slider {
 
 .custom-color-panel.active {
     display: block;
-}
-/* ========================================
-   表单布局工具
-   ======================================== */
-.form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: var(--spacing-lg);
-}
-
-.form-inline {
-    display: flex;
-    align-items: flex-end;
-    gap: var(--spacing-lg);
-}
-
-.form-inline .form-group {
-    flex: 1;
-    margin-bottom: 0;
-}
-
-.form-inline .btn {
-    flex-shrink: 0;
 }
 `;
