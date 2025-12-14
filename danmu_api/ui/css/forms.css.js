@@ -677,4 +677,106 @@ input:disabled + .slider {
 .form-inline .btn {
     flex-shrink: 0;
 }
+
+/* ========================================
+   颜色池编辑器样式
+   ======================================== */
+.color-pool-controls {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.color-picker-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.color-picker-input {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    cursor: pointer;
+    background: none;
+}
+
+.color-pool-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    min-height: 100px;
+    align-content: flex-start;
+}
+
+.color-pool-container.empty {
+    justify-content: center;
+    align-items: center;
+}
+
+.color-pool-container.empty::before {
+    content: '🎨 暂无颜色，请添加...';
+    color: var(--text-tertiary);
+    font-size: 0.9375rem;
+}
+
+.color-chip {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    position: relative;
+    cursor: move;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid rgba(255,255,255,0.2);
+}
+
+.color-chip:hover {
+    transform: scale(1.15);
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+}
+
+.color-chip.dragging {
+    opacity: 0.5;
+    transform: scale(0.9);
+}
+
+.color-chip .remove-chip-btn {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 16px;
+    height: 16px;
+    background: var(--danger-color);
+    color: white;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.color-chip:hover .remove-chip-btn {
+    opacity: 1;
+}
+
+.btn-icon-text {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
 `;
