@@ -1106,19 +1106,39 @@ function renderValueInput(item) {
         container.innerHTML = \`
             \${hiddenInput}
             <label class="form-label">颜色池配置</label>
-            <div class="color-pool-hint">💡 拖动颜色块可调整顺序，点击 × 可删除</div>
+            <div class="color-pool-hint">
+                拖动颜色块可调整顺序，点击 × 可删除
+            </div>
             <div class="color-pool-controls">
-                <div class="color-picker-wrapper" title="点击选择颜色">
-                    <input type="color" id="color-picker-input" class="color-picker-input" value="#ffffff">
-                    <span class="color-picker-label">选择颜色</span>
+                <div class="color-input-group">
+                    <span class="color-input-label">添加颜色</span>
+                    <div class="color-input-wrapper">
+                        <div class="color-picker-wrapper" title="点击选择颜色">
+                            <input type="color" id="color-picker-input" class="color-picker-input" value="#ffffff">
+                            <span class="color-picker-label">拾色器</span>
+                        </div>
+                        <div class="color-hex-input-wrapper">
+                            <span class="color-hex-prefix">#</span>
+                            <input type="text" 
+                                   id="color-hex-input" 
+                                   class="color-hex-input" 
+                                   placeholder="输入HEX颜色码" 
+                                   maxlength="6"
+                                   oninput="syncHexToColorPicker(this.value)"
+                                   onkeypress="if(event.key==='Enter') addColorFromHexInput()">
+                        </div>
+                        <button type="button" class="color-add-btn" onclick="addColorFromInput()" title="添加到颜色池">
+                            ➕
+                        </button>
+                    </div>
                 </div>
-                <button type="button" class="btn btn-sm btn-primary" onclick="addColorFromPicker()">
-                    <span class="btn-icon-text">➕ 添加</span>
-                </button>
-                <button type="button" class="btn btn-sm btn-secondary" onclick="addRandomColor()">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="addRandomColor()" title="随机添加颜色">
                     <span class="btn-icon-text">🎲 随机</span>
                 </button>
-                <button type="button" class="btn btn-sm btn-danger" onclick="resetColorPool()">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="importColorList()" title="批量导入">
+                    <span class="btn-icon-text">📥 导入</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="resetColorPool()" title="重置为默认">
                     <span class="btn-icon-text">↺ 重置</span>
                 </button>
             </div>
@@ -1146,6 +1166,16 @@ function renderValueInput(item) {
         \`;
 
         setupColorDragAndDrop();
+        
+        // 同步拾色器和输入框
+        const colorPicker = document.getElementById('color-picker-input');
+        const hexInput = document.getElementById('color-hex-input');
+        
+        if (colorPicker && hexInput) {
+            colorPicker.addEventListener('input', function() {
+                hexInput.value = this.value.substring(1).toUpperCase();
+            });
+        }
 
     } else {
         if (value && value.length > 50) {
@@ -1423,7 +1453,161 @@ function addColorFromPicker() {
     container.appendChild(createColorChip(decimal));
     updateColorPoolInput();
 }
+function syncHexToColorPicker(hexValue) {
+    const picker = document.getElementById('color-picker-input');
+    if (!picker) return;
+    
+    // 移除非hex字符
+    hexValue = hexValue.replace(/[^0-9A-Fa-f]/g, '');
+    
+    if (hexValue.length === 6) {
+        picker.value = '#' + hexValue;
+    } else if (hexValue.length === 3) {
+        // 支持简写格式 #RGB -> #RRGGBB
+        const expanded = hexValue.split('').map(char => char + char).join('');
+        picker.value = '#' + expanded;
+    }
+}
 
+function addColorFromInput() {
+    const hexInput = document.getElementById('color-hex-input');
+    const picker = document.getElementById('color-picker-input');
+    
+    if (!hexInput || !picker) return;
+    
+    let hexValue = hexInput.value.trim().replace(/[^0-9A-Fa-f]/g, '');
+    
+    if (hexValue.length === 0) {
+        // 如果输入框为空，使用拾色器的值
+        hexValue = picker.value.substring(1);
+    } else if (hexValue.length === 3) {
+        // 支持简写格式
+        hexValue = hexValue.split('').map(char => char + char).join('');
+    }
+    
+    if (hexValue.length !== 6) {
+        customAlert('请输入有效的6位HEX颜色代码\\n例如: FFFFFF 或 FF5733', '⚠️ 格式错误');
+        hexInput.focus();
+        return;
+    }
+    
+    const decimal = parseInt(hexValue, 16);
+    
+    if (isNaN(decimal)) {
+        customAlert('无效的颜色值', '⚠️ 格式错误');
+        return;
+    }
+    
+    const container = document.getElementById('color-pool-container');
+    const chip = createColorChip(decimal);
+    container.appendChild(chip);
+    updateColorPoolInput();
+    
+    // 清空输入框
+    hexInput.value = '';
+    hexInput.focus();
+    
+    // 添加成功反馈
+    chip.style.animation = 'colorChipFadeIn 0.4s ease-out, pulse 0.6s ease-out';
+}
+
+function addColorFromHexInput() {
+    addColorFromInput();
+}
+
+function importColorList() {
+    customPrompt(
+        '请输入颜色列表，支持以下格式：\\n\\n1. HEX格式（逗号分隔）：FFFFFF, FF5733, 00ADEF\\n2. 十进制格式（逗号分隔）：16777215, 16734003, 44783\\n3. 混合格式：#FFFFFF, 16734003, FF5733\\n\\n每行一个或用逗号分隔',
+        '📥 批量导入颜色',
+        ''
+    ).then(input => {
+        if (!input || input.trim() === '') return;
+        
+        const colors = [];
+        const items = input.split(/[,\\n\\s]+/).map(s => s.trim()).filter(s => s);
+        
+        for (const item of items) {
+            let decimal = null;
+            
+            // 尝试解析HEX格式
+            const hexMatch = item.match(/^#?([0-9A-Fa-f]{6})$/);
+            if (hexMatch) {
+                decimal = parseInt(hexMatch[1], 16);
+            } else if (item.match(/^#?([0-9A-Fa-f]{3})$/)) {
+                // 简写格式
+                const short = item.replace('#', '');
+                const expanded = short.split('').map(c => c + c).join('');
+                decimal = parseInt(expanded, 16);
+            } else {
+                // 尝试解析十进制
+                decimal = parseInt(item, 10);
+            }
+            
+            if (!isNaN(decimal) && decimal >= 0 && decimal <= 16777215) {
+                colors.push(decimal);
+            }
+        }
+        
+        if (colors.length === 0) {
+            customAlert('未能解析出有效的颜色值', '⚠️ 导入失败');
+            return;
+        }
+        
+        const container = document.getElementById('color-pool-container');
+        colors.forEach((color, index) => {
+            const chip = createColorChip(color);
+            chip.style.animationDelay = (index * 0.05) + 's';
+            container.appendChild(chip);
+        });
+        
+        updateColorPoolInput();
+        customAlert(\`成功导入 \${colors.length} 个颜色\`, '✅ 导入成功');
+    });
+}
+
+function customPrompt(message, title, defaultValue = '') {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = \`
+            <div class="modal-overlay" onclick="this.parentElement.remove(); resolve(null);"></div>
+            <div class="modal-container" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">\${title}</h3>
+                    <button class="modal-close" onclick="this.closest('.modal').remove(); resolve(null);">×</button>
+                </div>
+                <div class="modal-body">
+                    <p style="white-space: pre-line; margin-bottom: var(--spacing-lg); color: var(--text-secondary);">\${message}</p>
+                    <textarea class="form-textarea" id="prompt-textarea" rows="6" placeholder="请输入内容...">\${defaultValue}</textarea>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove();">取消</button>
+                    <button class="btn btn-primary" onclick="
+                        const value = document.getElementById('prompt-textarea').value;
+                        this.closest('.modal').remove();
+                        window.dispatchEvent(new CustomEvent('prompt-result', { detail: value }));
+                    ">确定</button>
+                </div>
+            </div>
+        \`;
+        
+        document.body.appendChild(modal);
+        document.getElementById('prompt-textarea').focus();
+        
+        window.addEventListener('prompt-result', function handler(e) {
+            resolve(e.detail);
+            window.removeEventListener('prompt-result', handler);
+        }, { once: true });
+        
+        // ESC键关闭
+        modal.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                modal.remove();
+                resolve(null);
+            }
+        });
+    });
+}
 function addRandomColor() {
     // 生成真随机颜色 (0 - 16777215)
     const randomDecimal = Math.floor(Math.random() * 16777216);
