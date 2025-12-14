@@ -169,14 +169,28 @@ export class Envs {
   static getOriginalEnvVars() {
     return this.originalEnvVars;
   }
-  
+
   /** 解析弹幕转换颜色
    * @returns {string} 弹幕转换颜色
    */
   static resolveConvertColor() {
     // CONVERT_COLOR_TO_WHITE 变量向前兼容处理
-    let convertColorToWhite = this.get('CONVERT_COLOR_TO_WHITE', false, 'boolean');
-    return this.get('CONVERT_COLOR', convertColorToWhite ? 'white': 'default', 'string');
+    // 直接从原始环境变量读取，不记录到 accessedEnvVars
+    let convertColorToWhite = false;
+    if (typeof this.env !== 'undefined' && this.env['CONVERT_COLOR_TO_WHITE']) {
+      convertColorToWhite = this.env['CONVERT_COLOR_TO_WHITE'] === true || 
+                            this.env['CONVERT_COLOR_TO_WHITE'] === 'true' || 
+                            this.env['CONVERT_COLOR_TO_WHITE'] === 1 || 
+                            this.env['CONVERT_COLOR_TO_WHITE'] === '1';
+    } else if (typeof process !== 'undefined' && process.env?.['CONVERT_COLOR_TO_WHITE']) {
+      const val = process.env['CONVERT_COLOR_TO_WHITE'];
+      convertColorToWhite = val === 'true' || val === '1';
+    }
+    
+    // 如果设置了旧的 CONVERT_COLOR_TO_WHITE，则转换为新的 CONVERT_COLOR 值
+    // true -> 'white', false -> 'default'
+    const defaultColor = convertColorToWhite ? 'white' : 'default';
+    return this.get('CONVERT_COLOR', defaultColor, 'string');
   }
 
   /**
@@ -195,7 +209,7 @@ export class Envs {
    */
   static load(env = {}) {
     this.env = env;
-    
+
     // 环境变量分类和描述映射
     const envVarConfig = {
       // API配置
@@ -211,7 +225,7 @@ export class Envs {
       'VOD_REQUEST_TIMEOUT': { category: 'source', type: 'number', description: 'VOD请求超时时间，默认10000', min: 5000, max: 30000 },
       'BILIBILI_COOKIE': { category: 'source', type: 'text', description: 'B站Cookie' },
       'YOUKU_CONCURRENCY': { category: 'source', type: 'number', description: '优酷并发配置，默认8', min: 1, max: 16 },
-      
+
       // 匹配配置
       'PLATFORM_ORDER': { category: 'match', type: 'multi-select', options: this.ALLOWED_PLATFORMS, description: '平台排序配置' },
       'EPISODE_TITLE_FILTER': { category: 'match', type: 'text', description: '剧集标题过滤规则' },
@@ -246,7 +260,7 @@ export class Envs {
       'DEPLOY_PLATFROM_TOKEN': { category: 'system', type: 'text', description: '部署平台访问令牌' },
       'NODE_TLS_REJECT_UNAUTHORIZED': { category: 'system', type: 'number', description: '在建立 HTTPS 连接时是否验证服务器的 SSL/TLS 证书，0表示忽略，默认为1', min: 0, max: 1 },
     };
-    
+
     return {
       vodAllowedPlatforms: this.VOD_ALLOWED_PLATFORMS,
       allowedPlatforms: this.ALLOWED_PLATFORMS,
