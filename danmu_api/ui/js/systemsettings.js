@@ -866,9 +866,29 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
         const options = Array.from(document.querySelectorAll('.available-tag')).map(el => el.dataset.value);
         itemData = { key, value, description, type, options };
     } else if (type === 'color-list') {
+        const container = document.getElementById('selected-colors');
         const selectedColors = Array.from(document.querySelectorAll('#selected-colors .color-item'))
             .map(el => el.dataset.value);
-        value = selectedColors.join(',');
+        
+        // 检查是否为空（default 模式）
+        if (!container || container.classList.contains('empty') || selectedColors.length === 0) {
+            value = 'default';
+        } else {
+            // 将颜色数组转为字符串
+            const colorsStr = selectedColors.join(',');
+            
+            // 检查是否匹配预设模式
+            if (colorsStr === '16777215') {
+                // 单个白色 = white 预设
+                value = 'white';
+            } else if (colorsStr === '16777215,16777215,16777215,16777215,16777215,16777215,16777215,16777215,16744319,16752762,16774799,9498256,8388564,8900346,14204888,16758465') {
+                // 标准随机彩色预设 = color
+                value = 'color';
+            } else {
+                // 自定义颜色列表，保存为逗号分隔的十进制值
+                value = colorsStr;
+            }
+        }
         itemData = { key, value, description, type };
     } else {
         value = document.getElementById('text-value').value.trim();
@@ -1060,23 +1080,27 @@ function renderValueInput(item) {
         setupDragAndDrop();
 
     } else if (type === 'color-list') {
+        // 确保值是字符串
         const stringValue = typeof value === 'string' ? value : String(value || '');
-        // 支持两种格式：
-        // 1. 新格式：十进制颜色值，如 "16777215,16744319"
-        // 2. 旧格式：模式名称，如 "default", "white", "color"
+        // 支持三种格式：
+        // 1. 预设模式名称：'default', 'white', 'color'
+        // 2. 新格式：十进制颜色值列表，如 "16777215,16744319"
+        // 3. 旧格式兼容：单个十进制值（如旧版的 '16777215'）
         let selectedColors = [];
+        let isDefaultMode = false;
         
         if (stringValue === 'default' || stringValue === '') {
             // 默认不转换颜色
             selectedColors = [];
+            isDefaultMode = true;
         } else if (stringValue === 'white') {
-            // 转换为白色
+            // 转换为白色（显示为一个白色方块）
             selectedColors = ['16777215'];
         } else if (stringValue === 'color') {
-            // 随机颜色（使用预设的颜色列表）
-            selectedColors = ['16777215', '16744319', '16752762', '16774799', '9498256', '8388564', '8900346', '14204888', '16758465'];
+            // 随机彩色预设（16个颜色：8白+8彩）
+            selectedColors = ['16777215', '16777215', '16777215', '16777215', '16777215', '16777215', '16777215', '16777215', '16744319', '16752762', '16774799', '9498256', '8388564', '8900346', '14204888', '16758465'];
         } else {
-            // 新格式：直接解析十进制颜色值
+            // 自定义格式：直接解析十进制颜色值
             selectedColors = stringValue.split(',').map(v => v.trim()).filter(v => v && !isNaN(v));
         }
 
@@ -1106,7 +1130,7 @@ function renderValueInput(item) {
             
             <label class="form-label" style="margin-top: 20px;">已选择颜色 (拖动调整顺序，可重复添加提高概率)</label>
             <div class="color-list-container">
-                <div class="selected-colors \${selectedColors.length === 0 ? 'empty' : ''}" id="selected-colors">
+                <div class="selected-colors \${selectedColors.length === 0 || isDefaultMode ? 'empty' : ''}" id="selected-colors" data-default-mode="\${isDefaultMode}">
                     \${selectedColors.map((colorDecimal, idx) => {
                         const colorHex = '#' + parseInt(colorDecimal).toString(16).padStart(6, '0');
                         return \`
