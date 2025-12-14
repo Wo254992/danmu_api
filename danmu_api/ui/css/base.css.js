@@ -949,7 +949,7 @@ body {
    平台配置状态卡片
    ======================================== */
 .platform-config-card {
-    margin: 0 0 var(--spacing-lg) 0;
+    margin: var(--spacing-lg);
     padding: var(--spacing-md);
     background: var(--bg-primary);
     border-radius: var(--border-radius-lg);
@@ -1156,8 +1156,8 @@ body {
 }
 
 .platform-config-footer {
-    margin-top: var(--spacing-sm);
-    padding-top: var(--spacing-sm);
+    margin-top: 8px;
+    padding-top: 8px;
     border-top: 1px solid var(--border-color);
 }
 
@@ -1217,7 +1217,7 @@ body {
 /* 移动端优化 */
 @media (max-width: 768px) {
     .platform-config-card {
-        margin: 0 0 var(--spacing-md) 0;
+        margin: var(--spacing-md);
         padding: var(--spacing-sm);
     }
     
