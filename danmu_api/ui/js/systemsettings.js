@@ -1090,12 +1090,7 @@ function renderValueInput(item) {
         let selectedColors = [];
         let isDefaultMode = false;
         
-        // 处理星号（已脱敏的值）
-        if (/^\*+$/.test(stringValue)) {
-            // 如果是星号，表示已有配置但被脱敏，默认设为 'default' 以便用户重新配置
-            selectedColors = [];
-            isDefaultMode = true;
-        } else if (stringValue === 'default' || stringValue === '') {
+        if (stringValue === 'default' || stringValue === '') {
             // 默认不转换颜色
             selectedColors = [];
             isDefaultMode = true;
