@@ -1060,8 +1060,8 @@ body {
 }
 
 .platform-config-content {
-    margin-top: var(--spacing-md);
-    padding-top: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
     border-top: 1px solid var(--border-color);
     animation: slideDown 0.3s ease-out;
 }
@@ -1100,14 +1100,14 @@ body {
 .platform-config-items {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xs);
+    gap: 6px;
 }
 
 .platform-config-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--spacing-sm);
+    padding: 6px var(--spacing-sm);
     background: var(--bg-secondary);
     border-radius: var(--border-radius-sm);
     border-left: 2px solid transparent;
