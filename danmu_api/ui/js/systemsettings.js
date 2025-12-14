@@ -1081,13 +1081,36 @@ function renderValueInput(item) {
         }
 
         container.innerHTML = \`
-            <label class="form-label">已选择颜色 (拖动调整顺序)</label>
+            <label class="form-label">快捷配置</label>
+            <div class="color-preset-actions">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="setColorPreset('default')">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    不转换 (default)
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="setColorPreset('white')">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                    </svg>
+                    全白色 (white)
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="setColorPreset('color')">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                    </svg>
+                    随机彩色 (color)
+                </button>
+            </div>
+            
+            <label class="form-label" style="margin-top: 20px;">已选择颜色 (拖动调整顺序，可重复添加提高概率)</label>
             <div class="color-list-container">
                 <div class="selected-colors \${selectedColors.length === 0 ? 'empty' : ''}" id="selected-colors">
-                    \${selectedColors.map(colorDecimal => {
+                    \${selectedColors.map((colorDecimal, idx) => {
                         const colorHex = '#' + parseInt(colorDecimal).toString(16).padStart(6, '0');
                         return \`
-                            <div class="color-item" draggable="true" data-value="\${colorDecimal}">
+                            <div class="color-item" draggable="true" data-value="\${colorDecimal}" data-index="\${idx}">
                                 <div class="color-preview" style="background-color: \${colorHex};" title="\${colorHex} (\${colorDecimal})"></div>
                                 <span class="color-value">\${colorHex}</span>
                                 <button type="button" class="color-remove-btn" onclick="removeColorItem(this)" title="删除">×</button>
@@ -1377,29 +1400,83 @@ function addRandomColor() {
 }
 
 /**
- * 添加颜色到列表
+ * 设置颜色预设
+ */
+function setColorPreset(preset) {
+    const container = document.getElementById('selected-colors');
+    if (!container) return;
+
+    // 清空现有颜色
+    container.innerHTML = '';
+    
+    let colors = [];
+    let presetName = '';
+    
+    if (preset === 'default') {
+        // 不转换颜色
+        colors = [];
+        presetName = '不转换';
+    } else if (preset === 'white') {
+        // 全白色
+        colors = ['16777215'];
+        presetName = '全白色';
+    } else if (preset === 'color') {
+        // 随机彩色（8个白色 + 8个彩色，提高白色概率）
+        colors = ['16777215', '16777215', '16777215', '16777215', '16777215', '16777215', '16777215', '16777215', 
+                  '16744319', '16752762', '16774799', '9498256', '8388564', '8900346', '14204888', '16758465'];
+        presetName = '随机彩色';
+    }
+    
+    if (colors.length === 0) {
+        container.classList.add('empty');
+        customAlert(\`已设置为：\${presetName}\`, '✅ 配置成功');
+        return;
+    }
+    
+    container.classList.remove('empty');
+    
+    // 添加所有颜色
+    colors.forEach((colorDecimal, idx) => {
+        const hexColor = '#' + parseInt(colorDecimal).toString(16).padStart(6, '0');
+        const colorItem = document.createElement('div');
+        colorItem.className = 'color-item';
+        colorItem.draggable = true;
+        colorItem.dataset.value = colorDecimal;
+        colorItem.dataset.index = idx;
+        colorItem.innerHTML = \`
+            <div class="color-preview" style="background-color: \${hexColor};" title="\${hexColor} (\${colorDecimal})"></div>
+            <span class="color-value">\${hexColor}</span>
+            <button type="button" class="color-remove-btn" onclick="removeColorItem(this)" title="删除">×</button>
+        \`;
+        container.appendChild(colorItem);
+    });
+    
+    // 重新设置拖放
+    setupColorDragAndDrop();
+    
+    customAlert(\`已设置为：\${presetName}\\n\\n共 \${colors.length} 个颜色\`, '✅ 配置成功');
+}
+
+/**
+ * 添加颜色到列表（允许重复）
  */
 function addColorToList(decimalColor, hexColor) {
     const container = document.getElementById('selected-colors');
     if (!container) return;
 
-    // 检查颜色是否已存在
-    const existingColors = Array.from(container.querySelectorAll('.color-item'))
-        .map(item => item.dataset.value);
-    
-    if (existingColors.includes(String(decimalColor))) {
-        customAlert('该颜色已存在', '💡 提示');
-        return;
-    }
-
     // 移除空状态
     container.classList.remove('empty');
 
-    // 创建颜色项
+    // 获取当前索引
+    const currentItems = container.querySelectorAll('.color-item');
+    const newIndex = currentItems.length;
+
+    // 创建颜色项（允许重复，用于提高概率）
     const colorItem = document.createElement('div');
     colorItem.className = 'color-item';
     colorItem.draggable = true;
     colorItem.dataset.value = decimalColor;
+    colorItem.dataset.index = newIndex;
     colorItem.innerHTML = \`
         <div class="color-preview" style="background-color: \${hexColor};" title="\${hexColor} (\${decimalColor})"></div>
         <span class="color-value">\${hexColor}</span>
