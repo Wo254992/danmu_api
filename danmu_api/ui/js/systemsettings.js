@@ -865,6 +865,11 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
         value = selectedTags.join(',');
         const options = Array.from(document.querySelectorAll('.available-tag')).map(el => el.dataset.value);
         itemData = { key, value, description, type, options };
+    } else if (type === 'color-list') {
+        const selectedColors = Array.from(document.querySelectorAll('.color-item'))
+            .map(el => el.dataset.value);
+        value = selectedColors.join(',');
+        itemData = { key, value, description, type };
     } else {
         value = document.getElementById('text-value').value.trim();
         itemData = { key, value, description, type };
@@ -1053,6 +1058,64 @@ function renderValueInput(item) {
         \`;
 
         setupDragAndDrop();
+
+    } else if (type === 'color-list') {
+        const stringValue = typeof value === 'string' ? value : String(value || '');
+        // 支持两种格式：
+        // 1. 新格式：十进制颜色值，如 "16777215,16744319"
+        // 2. 旧格式：模式名称，如 "default", "white", "color"
+        let selectedColors = [];
+        
+        if (stringValue === 'default' || stringValue === '') {
+            // 默认不转换颜色
+            selectedColors = [];
+        } else if (stringValue === 'white') {
+            // 转换为白色
+            selectedColors = ['16777215'];
+        } else if (stringValue === 'color') {
+            // 随机颜色（使用预设的颜色列表）
+            selectedColors = ['16777215', '16744319', '16752762', '16774799', '9498256', '8388564', '8900346', '14204888', '16758465'];
+        } else {
+            // 新格式：直接解析十进制颜色值
+            selectedColors = stringValue.split(',').map(v => v.trim()).filter(v => v && !isNaN(v));
+        }
+
+        container.innerHTML = \`
+            <label class="form-label">已选择颜色 (拖动调整顺序)</label>
+            <div class="color-list-container">
+                <div class="selected-colors \${selectedColors.length === 0 ? 'empty' : ''}" id="selected-colors">
+                    \${selectedColors.map(colorDecimal => {
+                        const colorHex = '#' + parseInt(colorDecimal).toString(16).padStart(6, '0');
+                        return \`
+                            <div class="color-item" draggable="true" data-value="\${colorDecimal}">
+                                <div class="color-preview" style="background-color: \${colorHex};" title="\${colorHex} (\${colorDecimal})"></div>
+                                <span class="color-value">\${colorHex}</span>
+                                <button type="button" class="color-remove-btn" onclick="removeColorItem(this)" title="删除">×</button>
+                            </div>
+                        \`;
+                    }).join('')}
+                </div>
+                <div class="color-actions">
+                    <input type="color" id="color-picker" class="color-picker-input" value="#ffffff">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="addColorFromPicker()">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        添加颜色
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addRandomColor()">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        </svg>
+                        随机颜色
+                    </button>
+                </div>
+            </div>
+        \`;
+
+        setupColorDragAndDrop();
 
     } else {
         if (value && value.length > 50) {
@@ -1273,4 +1336,178 @@ renderEnvList = function() {
         });
     }
 };
+/* ========================================
+   颜色选择器相关函数
+   ======================================== */
+
+/**
+ * 从颜色选择器添加颜色
+ */
+function addColorFromPicker() {
+    const picker = document.getElementById('color-picker');
+    if (!picker) return;
+
+    const hexColor = picker.value;
+    const decimalColor = parseInt(hexColor.replace('#', ''), 16);
+    
+    addColorToList(decimalColor, hexColor);
+}
+
+/**
+ * 添加随机颜色
+ */
+function addRandomColor() {
+    // 预设的常用颜色（十进制）
+    const colors = [
+        16777215, // 白色
+        16744319, // 红色
+        16752762, // 橙色
+        16774799, // 黄色
+        9498256,  // 绿色
+        8388564,  // 青色
+        8900346,  // 蓝色
+        14204888, // 紫色
+        16758465  // 粉色
+    ];
+    
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    const hexColor = '#' + randomColor.toString(16).padStart(6, '0');
+    
+    addColorToList(randomColor, hexColor);
+}
+
+/**
+ * 添加颜色到列表
+ */
+function addColorToList(decimalColor, hexColor) {
+    const container = document.getElementById('selected-colors');
+    if (!container) return;
+
+    // 检查颜色是否已存在
+    const existingColors = Array.from(container.querySelectorAll('.color-item'))
+        .map(item => item.dataset.value);
+    
+    if (existingColors.includes(String(decimalColor))) {
+        customAlert('该颜色已存在', '💡 提示');
+        return;
+    }
+
+    // 移除空状态
+    container.classList.remove('empty');
+
+    // 创建颜色项
+    const colorItem = document.createElement('div');
+    colorItem.className = 'color-item';
+    colorItem.draggable = true;
+    colorItem.dataset.value = decimalColor;
+    colorItem.innerHTML = \`
+        <div class="color-preview" style="background-color: \${hexColor};" title="\${hexColor} (\${decimalColor})"></div>
+        <span class="color-value">\${hexColor}</span>
+        <button type="button" class="color-remove-btn" onclick="removeColorItem(this)" title="删除">×</button>
+    \`;
+
+    container.appendChild(colorItem);
+
+    // 重新设置拖放
+    setupColorDragAndDrop();
+
+    // 添加动画
+    colorItem.style.animation = 'fadeInUp 0.3s ease-out';
+}
+
+/**
+ * 删除颜色项
+ */
+function removeColorItem(button) {
+    const colorItem = button.closest('.color-item');
+    const container = document.getElementById('selected-colors');
+    
+    if (!colorItem || !container) return;
+
+    // 添加删除动画
+    colorItem.style.animation = 'fadeOutRight 0.3s ease-out';
+    
+    setTimeout(() => {
+        colorItem.remove();
+        
+        // 如果没有颜色了，添加空状态
+        if (container.children.length === 0) {
+            container.classList.add('empty');
+        }
+    }, 300);
+}
+
+/**
+ * 设置颜色列表的拖放功能
+ */
+let draggedColorElement = null;
+
+function setupColorDragAndDrop() {
+    const container = document.getElementById('selected-colors');
+    if (!container) return;
+    
+    const items = container.querySelectorAll('.color-item');
+
+    items.forEach(item => {
+        item.addEventListener('dragstart', handleColorDragStart);
+        item.addEventListener('dragend', handleColorDragEnd);
+        item.addEventListener('dragover', handleColorDragOver);
+        item.addEventListener('drop', handleColorDrop);
+        item.addEventListener('dragenter', handleColorDragEnter);
+        item.addEventListener('dragleave', handleColorDragLeave);
+    });
+}
+
+function handleColorDragStart(e) {
+    draggedColorElement = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleColorDragEnd(e) {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.color-item').forEach(item => {
+        item.classList.remove('drag-over');
+    });
+}
+
+function handleColorDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+}
+
+function handleColorDragEnter(e) {
+    if (this !== draggedColorElement) {
+        this.classList.add('drag-over');
+    }
+}
+
+function handleColorDragLeave(e) {
+    this.classList.remove('drag-over');
+}
+
+function handleColorDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+
+    if (draggedColorElement !== this) {
+        const container = document.getElementById('selected-colors');
+        const allItems = Array.from(container.querySelectorAll('.color-item'));
+        const draggedIndex = allItems.indexOf(draggedColorElement);
+        const targetIndex = allItems.indexOf(this);
+
+        if (draggedIndex < targetIndex) {
+            this.parentNode.insertBefore(draggedColorElement, this.nextSibling);
+        } else {
+            this.parentNode.insertBefore(draggedColorElement, this);
+        }
+    }
+
+    this.classList.remove('drag-over');
+    return false;
+}
 `;
