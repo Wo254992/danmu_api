@@ -796,7 +796,19 @@ input:disabled + .slider {
     color: white;
     transform: scale(1.15) rotate(90deg);
 }
+/* 快捷配置按钮 */
+.color-preset-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-lg);
+}
 
+.color-preset-actions .btn {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+}
 .color-actions {
     display: flex;
     gap: var(--spacing-sm);
