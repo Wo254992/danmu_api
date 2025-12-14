@@ -1068,20 +1068,25 @@ function renderValueInput(item) {
         let colors = [];
         
         // 优先使用 item.colors（编辑时保存的颜色数组）
-        if (item && item.colors && Array.isArray(item.colors)) {
+        if (item && item.colors && Array.isArray(item.colors) && item.colors.length > 0) {
             colors = [...item.colors];
         } else if (!value || value === 'color' || value === 'default') {
             // 如果是 'color' 或 'default' 或空，使用默认池
             colors = [...defaultPool];
         } else if (value === 'white') {
             colors = [16777215];
+        } else if (typeof value === 'string' && value.trim() !== '') {
+            // 否则解析CSV字符串
+            const parsed = value.split(',').map(v => {
+                const num = parseInt(v.trim(), 10);
+                return isNaN(num) ? null : num;
+            }).filter(v => v !== null);
+            
+            // 如果成功解析到颜色，使用解析结果；否则使用默认池
+            colors = parsed.length > 0 ? parsed : [...defaultPool];
         } else {
-            // 否则解析CSV
-            colors = String(value).split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
-            // 如果解析失败，使用默认池
-            if (colors.length === 0) {
-                colors = [...defaultPool];
-            }
+            // 其他情况使用默认池
+            colors = [...defaultPool];
         }
 
         // 隐藏的实际存储 input
