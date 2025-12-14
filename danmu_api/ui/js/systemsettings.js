@@ -5,36 +5,7 @@ export const systemSettingsJsContent = /* javascript */ `
    ======================================== */
 let deploymentInProgress = false;
 let cacheClearing = false;
-/* ========================================
-   颜色数据标准化
-   ======================================== */
-function normalizeColorListItem(item) {
-    // 如果已经有 colors 数组且类型正确，直接返回
-    if (item.type === 'color-list' && item.colors && Array.isArray(item.colors)) {
-        return item;
-    }
-    
-    // 如果有 colors 数组但类型不对
-    if (item.colors && Array.isArray(item.colors)) {
-        item.type = 'color-list';
-        return item;
-    }
-    
-    // 如果值是逗号分隔的数字
-    if (item.value && typeof item.value === 'string') {
-        const numbers = item.value.split(',')
-            .map(v => parseInt(v.trim(), 10))
-            .filter(v => !isNaN(v) && v >= 0 && v <= 16777215);
-        
-        if (numbers.length > 0) {
-            item.type = 'color-list';
-            item.colors = numbers;
-            return item;
-        }
-    }
-    
-    return item;
-}
+
 /* ========================================
    显示/隐藏清理缓存模态框
    ======================================== */
@@ -618,14 +589,6 @@ async function checkDeployPlatformConfig() {
 async function fetchAndSetConfig() {
     const config = await fetch(buildApiUrl('/api/config', true)).then(response => response.json());
     currentAdminToken = config.originalEnvVars?.ADMIN_TOKEN || '';
-    
-    // 标准化所有颜色列表数据
-    Object.keys(envVariables).forEach(category => {
-        envVariables[category] = envVariables[category].map(item => {
-            return normalizeColorListItem(item);
-        });
-    });
-    
     return config;
 }
 
@@ -660,20 +623,11 @@ function renderEnvList() {
     }
 
     list.innerHTML = items.map((item, index) => {
-        // 智能识别类型
-        let itemType = item.type;
-        
-        // 如果有 colors 数组，自动识别为 color-list
-        if (!itemType && item.colors && Array.isArray(item.colors)) {
-            itemType = 'color-list';
-            item.type = 'color-list';  // 修正类型
-        }
-        
-        const typeLabel = itemType === 'boolean' ? 'bool' :
-                         itemType === 'number' ? 'num' :
-                         itemType === 'select' ? 'select' :
-                         itemType === 'multi-select' ? 'multi' :
-                         itemType === 'color-list' ? 'color' : 'text';
+        const typeLabel = item.type === 'boolean' ? 'bool' :
+                         item.type === 'number' ? 'num' :
+                         item.type === 'select' ? 'select' :
+                         item.type === 'multi-select' ? 'multi' :
+                         item.type === 'color-list' ? 'color' : 'text';
         const badgeClass = item.type === 'multi-select' ? 'multi' : 
                           item.type === 'color-list' ? 'color' : '';
 
@@ -712,10 +666,6 @@ function renderEnvList() {
    ======================================== */
 function editEnv(index) {
     const item = envVariables[currentCategory][index];
-    
-    // 标准化颜色数据
-    normalizeColorListItem(item);
-    
     const editButton = event.target.closest('.btn');
     
     const originalText = editButton.innerHTML;
@@ -728,24 +678,12 @@ function editEnv(index) {
     document.getElementById('env-key').value = item.key;
     document.getElementById('env-description').value = item.description || '';
     
-    // 智能识别类型
+    // 确保 type 字段正确设置，如果没有 type 则根据内容判断
     let itemType = item.type || 'text';
     
-    // 如果有 colors 数组，一定是 color-list
-    if (item.colors && Array.isArray(item.colors)) {
+    // 如果没有明确的 type，但有 colors 数组，说明是 color-list
+    if (!item.type && item.colors && Array.isArray(item.colors)) {
         itemType = 'color-list';
-        // 确保 item.type 被正确设置
-        item.type = 'color-list';
-    }
-    // 如果值是逗号分隔的数字且没有明确类型，也可能是 color-list
-    else if (!item.type && typeof item.value === 'string') {
-        const numbers = item.value.split(',').map(v => parseInt(v.trim(), 10));
-        const allNumbers = numbers.every(n => !isNaN(n) && n >= 0 && n <= 16777215);
-        if (allNumbers && numbers.length > 0) {
-            itemType = 'color-list';
-            item.type = 'color-list';
-            item.colors = numbers;
-        }
     }
     
     document.getElementById('value-type').value = itemType;
@@ -907,7 +845,7 @@ function updateLoadingText(text, detail) {
 }
 
 /* ========================================
-   表单提交
+   表单提交 (修复类型丢失问题版)
    ======================================== */
 document.getElementById('env-form').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -915,53 +853,67 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
     const category = document.getElementById('env-category').value;
     const key = document.getElementById('env-key').value.trim();
     const description = document.getElementById('env-description').value.trim();
-    const type = document.getElementById('value-type').value;
+    
+    // 🛠️ 核心修复：不完全依赖 value-type 的值，而是根据界面元素反推真实类型
+    // 这能防止 color-list 因为选项缺失被误保存为 text
+    let type = document.getElementById('value-type').value;
+    
+    if (document.getElementById('color-pool-container')) {
+        type = 'color-list'; // 强制修正为颜色列表
+    } else if (document.getElementById('bool-value')) {
+        type = 'boolean';
+    } else if (document.getElementById('num-slider')) {
+        type = 'number';
+    } else if (document.querySelector('.tag-selector')) {
+        type = 'select';
+    } else if (document.querySelector('.multi-select-container')) {
+        type = 'multi-select';
+    }
 
     let value, itemData;
 
-    if (type === 'boolean') {
-        value = document.getElementById('bool-value').checked ? 'true' : 'false';
-        itemData = { key, value, description, type };
-    } else if (type === 'number') {
-        value = document.getElementById('num-value').textContent;
-        const min = parseInt(document.getElementById('num-slider').min);
-        const max = parseInt(document.getElementById('num-slider').max);
-        itemData = { key, value, description, type, min, max };
-    } else if (type === 'select') {
-        const selected = document.querySelector('.tag-option.selected');
-        value = selected ? selected.dataset.value : '';
-        const options = Array.from(document.querySelectorAll('.tag-option')).map(el => el.dataset.value);
-        itemData = { key, value, description, type, options };
-    } else if (type === 'multi-select') {
-        const selectedTags = Array.from(document.querySelectorAll('.selected-tag'))
-            .map(el => el.dataset.value);
-        value = selectedTags.join(',');
-        const options = Array.from(document.querySelectorAll('.available-tag')).map(el => el.dataset.value);
-        itemData = { key, value, description, type, options };
-    } else if (type === 'color-list') {
-        // 从隐藏的 input 中获取颜色值
-        value = document.getElementById('text-value').value.trim();
-        // 保存当前的颜色数据，用于重新渲染
-        const currentColors = value.split(',')
-            .map(v => parseInt(v.trim(), 10))
-            .filter(v => !isNaN(v) && v >= 0 && v <= 16777215);
-        
-        // 如果没有有效颜色，使用默认白色
-        if (currentColors.length === 0) {
-            currentColors.push(16777215);
+    try {
+        if (type === 'boolean') {
+            value = document.getElementById('bool-value').checked ? 'true' : 'false';
+            itemData = { key, value, description, type };
+        } else if (type === 'number') {
+            value = document.getElementById('num-value').textContent;
+            const min = parseInt(document.getElementById('num-slider').min);
+            const max = parseInt(document.getElementById('num-slider').max);
+            itemData = { key, value, description, type, min, max };
+        } else if (type === 'select') {
+            const selected = document.querySelector('.tag-option.selected');
+            value = selected ? selected.dataset.value : '';
+            const options = Array.from(document.querySelectorAll('.tag-option')).map(el => el.dataset.value);
+            itemData = { key, value, description, type, options };
+        } else if (type === 'multi-select') {
+            const selectedTags = Array.from(document.querySelectorAll('.selected-tag'))
+                .map(el => el.dataset.value);
+            value = selectedTags.join(',');
+            const options = Array.from(document.querySelectorAll('.available-tag')).map(el => el.dataset.value);
+            itemData = { key, value, description, type, options };
+        } else if (type === 'color-list') {
+            // 安全获取 text-value
+            const hiddenInput = document.getElementById('text-value');
+            if (!hiddenInput) {
+                // 如果找不到隐藏域，尝试从颜色块重建数据，防止报错
+                const chips = document.querySelectorAll('#color-pool-container .color-chip');
+                const values = Array.from(chips).map(chip => chip.dataset.value);
+                value = values.join(',');
+            } else {
+                value = hiddenInput.value.trim();
+            }
+            // 保存当前的颜色数据，用于重新渲染
+            const currentColors = value.split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
+            itemData = { key, value, description, type, colors: currentColors };
+        } else {
+            const textInput = document.getElementById('text-value');
+            value = textInput ? textInput.value.trim() : '';
+            itemData = { key, value, description, type };
         }
-        
-        // 重要：确保 type 和 colors 都被保存
-        itemData = { 
-            key, 
-            value, 
-            description, 
-            type: 'color-list',  // 显式设置类型
-            colors: currentColors 
-        };
-    } else {
-        value = document.getElementById('text-value').value.trim();
-        itemData = { key, value, description, type };
+    } catch (err) {
+        customAlert('获取表单数据失败: ' + err.message, '❌ 错误');
+        return;
     }
 
     // 显示保存中状态
@@ -982,6 +934,7 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
         let result = await response.json();
 
         if (!result.success) {
+            // 如果 set 失败，尝试 add
             response = await fetch(buildApiUrl('/api/env/add'), {
                 method: 'POST',
                 headers: {
@@ -989,7 +942,6 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
                 },
                 body: JSON.stringify({ key, value })
             });
-
             result = await response.json();
         }
 
@@ -998,18 +950,20 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
                 envVariables[category] = [];
             }
 
+            // 更新本地数据
             if (editingKey !== null) {
-                // 更新时保持完整的数据结构
+                // 确保保留原有的 type 和 colors 结构，防止退化为 text
                 envVariables[currentCategory][editingKey] = {
-                    ...envVariables[currentCategory][editingKey],
-                    ...itemData
+                    ...envVariables[currentCategory][editingKey], // 保留旧属性
+                    ...itemData // 覆盖新属性
                 };
-                addLog(\`✅ 更新配置项: \${key} = \${value}\`, 'success');
+                addLog(\`✅ 更新配置项: \${key}\`, 'success');
             } else {
                 envVariables[category].push(itemData);
-                addLog(\`✅ 添加配置项: \${key} = \${value}\`, 'success');
+                addLog(\`✅ 添加配置项: \${key}\`, 'success');
             }
 
+            // 如果类别改变，切换标签
             if (category !== currentCategory) {
                 currentCategory = category;
                 document.querySelectorAll('.tab-btn').forEach((btn, i) => {
@@ -1018,7 +972,11 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
             }
 
             renderEnvList();
-            renderPreview();
+            
+            // 安全调用 renderPreview
+            if (typeof renderPreview === 'function') {
+                renderPreview();
+            }
             
             // 成功动画
             submitBtn.innerHTML = '<span>✅</span> <span>保存成功!</span>';
@@ -1026,9 +984,11 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
             
             setTimeout(() => {
                 closeModal();
-                submitBtn.innerHTML = originalText;
-                submitBtn.style.background = '';
-                submitBtn.disabled = false;
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.style.background = '';
+                    submitBtn.disabled = false;
+                }, 300);
             }, 1000);
         } else {
             submitBtn.innerHTML = originalText;
@@ -1039,6 +999,7 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
     } catch (error) {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
+        console.error(error);
         addLog(\`❌ 更新环境变量失败: \${error.message}\`, 'error');
         customAlert('更新环境变量失败: ' + error.message, '❌ 网络错误');
     }
@@ -1163,157 +1124,87 @@ function renderValueInput(item) {
         if (item && item.colors && Array.isArray(item.colors) && item.colors.length > 0) {
             colors = [...item.colors];
         } else if (!value || value === 'color' || value === 'default') {
+            // 如果是 'color' 或 'default' 或空，使用默认池
             colors = [...defaultPool];
         } else if (value === 'white') {
             colors = [16777215];
         } else if (typeof value === 'string' && value.trim() !== '') {
+            // 否则解析CSV字符串
             const parsed = value.split(',').map(v => {
                 const num = parseInt(v.trim(), 10);
                 return isNaN(num) ? null : num;
             }).filter(v => v !== null);
             
+            // 如果成功解析到颜色，使用解析结果；否则使用默认池
             colors = parsed.length > 0 ? parsed : [...defaultPool];
         } else {
+            // 其他情况使用默认池
             colors = [...defaultPool];
         }
 
+        // 隐藏的实际存储 input
         const hiddenInput = \`<input type="hidden" id="text-value" value="\${colors.join(',')}">\`;
 
         container.innerHTML = \`
             \${hiddenInput}
             <label class="form-label">颜色池配置</label>
             <div class="color-pool-hint">
-                <span class="hint-icon">💡</span>
-                <span>点击颜色块编辑，拖动调整顺序</span>
+                拖动颜色块可调整顺序，点击 × 可删除
             </div>
-            
-            <div class="color-editor-panel" id="color-editor-panel" style="display: none;">
-                <div class="color-editor-header">
-                    <h4 class="editor-title">
-                        <span class="editor-icon">🎨</span>
-                        编辑颜色
-                    </h4>
-                    <button type="button" class="editor-close-btn" onclick="closeColorEditor()">✕</button>
-                </div>
-                
-                <div class="color-editor-body">
-                    <div class="color-preview-section">
-                        <div class="color-preview-box" id="color-preview-box">
-                            <div class="preview-color" id="preview-color"></div>
-                            <div class="preview-alpha" id="preview-alpha"></div>
+            <div class="color-pool-controls">
+                <div class="color-input-group">
+                    <span class="color-input-label">添加颜色</span>
+                    <div class="color-input-wrapper">
+                        <div class="color-picker-wrapper" title="点击选择颜色">
+                            <input type="color" id="color-picker-input" class="color-picker-input" value="#ffffff">
+                            <span class="color-picker-label">拾色器</span>
                         </div>
-                        <div class="color-info">
-                            <span class="color-info-label">预览</span>
-                            <span class="color-info-value" id="preview-hex-display">#FFFFFF</span>
-                        </div>
-                    </div>
-                    
-                    <div class="color-picker-section">
-                        <label class="editor-label">
-                            <span class="label-icon">🎨</span>
-                            拾色器
-                        </label>
-                        <input type="color" id="color-editor-picker" class="color-editor-picker" value="#ffffff">
-                    </div>
-                    
-                    <div class="color-hex-section">
-                        <label class="editor-label">
-                            <span class="label-icon">#</span>
-                            HEX颜色码
-                        </label>
-                        <div class="hex-input-group">
-                            <span class="hex-prefix">#</span>
+                        <div class="color-hex-input-wrapper">
+                            <span class="color-hex-prefix">#</span>
                             <input type="text" 
-                                   id="color-editor-hex" 
-                                   class="color-editor-hex-input" 
-                                   placeholder="FFFFFF" 
+                                   id="color-hex-input" 
+                                   class="color-hex-input" 
+                                   placeholder="输入HEX颜色码" 
                                    maxlength="6"
-                                   oninput="updateColorFromHex(this.value)">
+                                   oninput="syncHexToColorPicker(this.value)"
+                                   onkeypress="if(event.key==='Enter') addColorFromHexInput()">
                         </div>
-                    </div>
-                    
-                    <div class="color-alpha-section">
-                        <label class="editor-label">
-                            <span class="label-icon">◐</span>
-                            不透明度
-                            <span class="alpha-value" id="alpha-value-display">100%</span>
-                        </label>
-                        <input type="range" 
-                               id="color-editor-alpha" 
-                               class="color-editor-alpha-slider" 
-                               min="0" 
-                               max="100" 
-                               value="100"
-                               oninput="updateAlphaDisplay(this.value)">
-                        <div class="alpha-markers">
-                            <span>0%</span>
-                            <span>25%</span>
-                            <span>50%</span>
-                            <span>75%</span>
-                            <span>100%</span>
-                        </div>
-                    </div>
-                    
-                    <div class="editor-actions">
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="closeColorEditor()">
-                            取消
-                        </button>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="saveColorEdit()">
-                            <span class="btn-icon">✓</span>
-                            保存
+                        <button type="button" class="color-add-btn" onclick="addColorFromInput()" title="添加到颜色池">
+                            ➕
                         </button>
                     </div>
                 </div>
-            </div>
-            
-            <div class="color-pool-actions">
-                <button type="button" class="action-btn action-btn-primary" onclick="addNewColorChip()" title="添加新颜色">
-                    <span class="action-btn-icon">➕</span>
-                    <span class="action-btn-text">添加</span>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="addRandomColor()" title="随机添加颜色">
+                    <span class="btn-icon-text">🎲 随机</span>
                 </button>
-                <button type="button" class="action-btn action-btn-secondary" onclick="addRandomColor()" title="随机添加">
-                    <span class="action-btn-icon">🎲</span>
-                    <span class="action-btn-text">随机</span>
-                </button>
-                <button type="button" class="action-btn action-btn-danger" onclick="resetColorPool()" title="重置">
-                    <span class="action-btn-icon">↺</span>
-                    <span class="action-btn-text">重置</span>
+                <button type="button" class="btn btn-sm btn-danger" onclick="resetColorPool()" title="重置为默认">
+                    <span class="btn-icon-text">↺ 重置</span>
                 </button>
             </div>
             
-            <div class="color-chips-grid \${colors.length === 0 ? 'empty' : ''}" id="color-chips-grid">
+            <div class="color-pool-container \${colors.length === 0 ? 'empty' : ''}" id="color-pool-container">
                 \${colors.map((colorInt, index) => {
                     const hex = '#' + colorInt.toString(16).padStart(6, '0').toUpperCase();
                     const hexShort = hex.substring(1);
                     return \`
-                        <div class="color-chip-item" 
-                             draggable="true" 
-                             data-value="\${colorInt}" 
-                             data-index="\${index}"
-                             onclick="editColorChip(\${index})"
-                             style="background-color: \${hex}; animation-delay: \${index * 0.03}s;">
-                            <div class="chip-content">
-                                <span class="chip-hex">#\${hexShort}</span>
-                            </div>
-                            <button type="button" 
-                                    class="chip-remove-btn" 
-                                    onclick="event.stopPropagation(); removeColorChip(this)"
-                                    title="删除">×</button>
+                        <div class="color-chip" draggable="true" data-value="\${colorInt}" style="background-color: \${hex}; animation-delay: \${index * 0.05}s;" title="\${hex} (\${colorInt})">
+                            <span class="color-hex-label">\${hexShort}</span>
+                            <button type="button" class="remove-chip-btn" onclick="removeColorChip(this)">×</button>
                         </div>
                     \`;
                 }).join('')}
             </div>
-            
-            <div class="color-pool-stats">
-                <div class="stat-item">
-                    <span class="stat-icon">🎨</span>
-                    <span class="stat-label">颜色数量</span>
-                    <span class="stat-value" id="color-count">\${colors.length}</span>
-                </div>
+            <div class="form-help">
+                <span class="pool-stats">
+                    <span class="pool-count-badge">
+                        <span class="pool-count-icon">🎨</span>
+                        <span id="pool-count">\${colors.length}</span> 个颜色
+                    </span>
+                </span>
             </div>
         \`;
 
-        setupColorChipDragDrop();
+        setupColorDragAndDrop();
         
         // 同步拾色器和输入框
         const colorPicker = document.getElementById('color-picker-input');
@@ -1546,287 +1437,207 @@ renderEnvList = function() {
 };
 
 /* ========================================
-   颜色池操作 - 高级版本
+   颜色池操作相关函数
    ======================================== */
-let currentEditingIndex = null;
-
 function updateColorPoolInput() {
-    const chips = document.querySelectorAll('.color-chip-item');
+    const chips = document.querySelectorAll('#color-pool-container .color-chip');
     const values = Array.from(chips).map(chip => chip.dataset.value);
     document.getElementById('text-value').value = values.join(',');
     
-    const countEl = document.getElementById('color-count');
+    // 更新计数
+    const countEl = document.getElementById('pool-count');
     if (countEl) countEl.textContent = values.length;
     
-    const grid = document.getElementById('color-chips-grid');
+    // 更新容器空状态
+    const container = document.getElementById('color-pool-container');
     if (values.length === 0) {
-        grid.classList.add('empty');
+        container.classList.add('empty');
     } else {
-        grid.classList.remove('empty');
+        container.classList.remove('empty');
     }
 }
 
-function addNewColorChip() {
-    currentEditingIndex = null;
-    openColorEditor('#FFFFFF', 100);
+function createColorChip(colorInt) {
+    const hex = '#' + parseInt(colorInt).toString(16).padStart(6, '0').toUpperCase();
+    const hexShort = hex.substring(1); // 去掉 # 号
+    const chip = document.createElement('div');
+    chip.className = 'color-chip';
+    chip.draggable = true;
+    chip.dataset.value = colorInt;
+    chip.style.backgroundColor = hex;
+    chip.title = \`\${hex} (\${colorInt})\`;
+    
+    chip.innerHTML = \`
+        <span class="color-hex-label">\${hexShort}</span>
+        <button type="button" class="remove-chip-btn" onclick="removeColorChip(this)">×</button>
+    \`;
+    
+    // 绑定拖拽事件
+    chip.addEventListener('dragstart', handleColorDragStart);
+    chip.addEventListener('dragend', handleColorDragEnd);
+    chip.addEventListener('dragover', handleColorDragOver);
+    chip.addEventListener('drop', handleColorDrop);
+    chip.addEventListener('dragenter', handleColorDragEnter);
+    chip.addEventListener('dragleave', handleColorDragLeave);
+    
+    return chip;
 }
 
-function editColorChip(index) {
-    const chip = document.querySelector(\`.color-chip-item[data-index="\${index}"]\`);
-    if (!chip) return;
+function addColorFromPicker() {
+    const picker = document.getElementById('color-picker-input');
+    const hex = picker.value;
+    const decimal = parseInt(hex.replace('#', ''), 16);
     
-    currentEditingIndex = index;
-    const colorInt = parseInt(chip.dataset.value);
-    const hex = '#' + colorInt.toString(16).padStart(6, '0').toUpperCase();
-    
-    openColorEditor(hex, 100);
+    const container = document.getElementById('color-pool-container');
+    container.appendChild(createColorChip(decimal));
+    updateColorPoolInput();
 }
-
-function openColorEditor(hexColor, alpha) {
-    const panel = document.getElementById('color-editor-panel');
-    const picker = document.getElementById('color-editor-picker');
-    const hexInput = document.getElementById('color-editor-hex');
-    const alphaSlider = document.getElementById('color-editor-alpha');
-    const previewColor = document.getElementById('preview-color');
-    const previewAlpha = document.getElementById('preview-alpha');
-    const previewHex = document.getElementById('preview-hex-display');
+function syncHexToColorPicker(hexValue) {
+    const picker = document.getElementById('color-picker-input');
+    if (!picker) return;
     
-    picker.value = hexColor;
-    hexInput.value = hexColor.substring(1);
-    alphaSlider.value = alpha;
-    
-    updatePreview(hexColor, alpha);
-    
-    panel.style.display = 'block';
-    panel.style.animation = 'slideInUp 0.3s ease-out';
-    
-    // 监听拾色器变化
-    picker.oninput = function() {
-        const hex = this.value;
-        hexInput.value = hex.substring(1);
-        updatePreview(hex, alphaSlider.value);
-    };
-}
-
-function closeColorEditor() {
-    const panel = document.getElementById('color-editor-panel');
-    panel.style.animation = 'slideOutDown 0.3s ease-out';
-    setTimeout(() => {
-        panel.style.display = 'none';
-        currentEditingIndex = null;
-    }, 300);
-}
-
-function updateColorFromHex(hexValue) {
+    // 移除非hex字符
     hexValue = hexValue.replace(/[^0-9A-Fa-f]/g, '');
     
     if (hexValue.length === 6) {
-        const hex = '#' + hexValue;
-        document.getElementById('color-editor-picker').value = hex;
-        updatePreview(hex, document.getElementById('color-editor-alpha').value);
+        picker.value = '#' + hexValue;
     } else if (hexValue.length === 3) {
-        const expanded = hexValue.split('').map(c => c + c).join('');
-        const hex = '#' + expanded;
-        document.getElementById('color-editor-picker').value = hex;
-        updatePreview(hex, document.getElementById('color-editor-alpha').value);
+        // 支持简写格式 #RGB -> #RRGGBB
+        const expanded = hexValue.split('').map(char => char + char).join('');
+        picker.value = '#' + expanded;
     }
 }
 
-function updateAlphaDisplay(value) {
-    document.getElementById('alpha-value-display').textContent = value + '%';
-    const hex = document.getElementById('color-editor-picker').value;
-    updatePreview(hex, value);
-}
-
-function updatePreview(hex, alpha) {
-    const previewColor = document.getElementById('preview-color');
-    const previewAlpha = document.getElementById('preview-alpha');
-    const previewHex = document.getElementById('preview-hex-display');
+function addColorFromInput() {
+    const hexInput = document.getElementById('color-hex-input');
+    const picker = document.getElementById('color-picker-input');
     
-    previewColor.style.backgroundColor = hex;
-    previewAlpha.style.opacity = alpha / 100;
-    previewHex.textContent = hex.toUpperCase();
-}
-
-function saveColorEdit() {
-    const hex = document.getElementById('color-editor-picker').value;
-    const decimal = parseInt(hex.substring(1), 16);
+    if (!hexInput || !picker) return;
     
-    if (isNaN(decimal)) {
-        customAlert('无效的颜色值', '⚠️ 错误');
+    let hexValue = hexInput.value.trim().replace(/[^0-9A-Fa-f]/g, '');
+    
+    if (hexValue.length === 0) {
+        // 如果输入框为空，使用拾色器的值
+        hexValue = picker.value.substring(1);
+    } else if (hexValue.length === 3) {
+        // 支持简写格式
+        hexValue = hexValue.split('').map(char => char + char).join('');
+    }
+    
+    if (hexValue.length !== 6) {
+        customAlert('请输入有效的6位HEX颜色代码\\n例如: FFFFFF 或 FF5733', '⚠️ 格式错误');
+        hexInput.focus();
         return;
     }
     
-    const grid = document.getElementById('color-chips-grid');
+    const decimal = parseInt(hexValue, 16);
     
-    if (currentEditingIndex !== null) {
-        // 编辑现有颜色
-        const chip = document.querySelector(\`.color-chip-item[data-index="\${currentEditingIndex}"]\`);
-        if (chip) {
-            chip.dataset.value = decimal;
-            chip.style.backgroundColor = hex;
-            chip.querySelector('.chip-hex').textContent = hex.toUpperCase();
-        }
-    } else {
-        // 添加新颜色
-        const index = grid.querySelectorAll('.color-chip-item').length;
-        const newChip = document.createElement('div');
-        newChip.className = 'color-chip-item';
-        newChip.draggable = true;
-        newChip.dataset.value = decimal;
-        newChip.dataset.index = index;
-        newChip.style.backgroundColor = hex;
-        newChip.style.animation = 'chipFadeIn 0.4s ease-out';
-        newChip.onclick = function() { editColorChip(index); };
-        
-        newChip.innerHTML = \`
-            <div class="chip-content">
-                <span class="chip-hex">\${hex.toUpperCase()}</span>
-            </div>
-            <button type="button" 
-                    class="chip-remove-btn" 
-                    onclick="event.stopPropagation(); removeColorChip(this)"
-                    title="删除">×</button>
-        \`;
-        
-        grid.appendChild(newChip);
-        setupChipDragEvents(newChip);
-        
-        // 重新索引
-        reindexChips();
+    if (isNaN(decimal)) {
+        customAlert('无效的颜色值', '⚠️ 格式错误');
+        return;
     }
     
+    const container = document.getElementById('color-pool-container');
+    const chip = createColorChip(decimal);
+    container.appendChild(chip);
     updateColorPoolInput();
-    closeColorEditor();
+    
+    // 清空输入框
+    hexInput.value = '';
+    hexInput.focus();
+    
+    // 添加成功反馈
+    chip.style.animation = 'colorChipFadeIn 0.4s ease-out, pulse 0.6s ease-out';
 }
 
-function removeColorChip(btn) {
-    const chip = btn.closest('.color-chip-item');
-    chip.style.animation = 'chipFadeOut 0.3s ease-out';
-    setTimeout(() => {
-        chip.remove();
-        reindexChips();
-        updateColorPoolInput();
-    }, 300);
-}
-
-function reindexChips() {
-    const chips = document.querySelectorAll('.color-chip-item');
-    chips.forEach((chip, index) => {
-        chip.dataset.index = index;
-        chip.onclick = function() { editColorChip(index); };
-    });
+function addColorFromHexInput() {
+    addColorFromInput();
 }
 
 function addRandomColor() {
+    // 生成真随机颜色 (0 - 16777215)
     const randomDecimal = Math.floor(Math.random() * 16777216);
-    const hex = '#' + randomDecimal.toString(16).padStart(6, '0').toUpperCase();
-    
-    currentEditingIndex = null;
-    openColorEditor(hex, 100);
+    const container = document.getElementById('color-pool-container');
+    container.appendChild(createColorChip(randomDecimal));
+    updateColorPoolInput();
+}
+
+function removeColorChip(btn) {
+    btn.parentElement.remove();
+    updateColorPoolInput();
 }
 
 function resetColorPool() {
-    customConfirm('确定要重置为默认颜色池吗？', '🔄 重置确认').then(confirmed => {
-        if (confirmed) {
-            const defaultPool = [16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 
-                       16744319, 16752762, 16774799, 9498256, 8388564, 8900346, 14204888, 16758465];
-            
-            const grid = document.getElementById('color-chips-grid');
-            grid.innerHTML = defaultPool.map((colorInt, index) => {
-                const hex = '#' + colorInt.toString(16).padStart(6, '0').toUpperCase();
-                const hexShort = hex.substring(1);
-                return \`
-                    <div class="color-chip-item" 
-                         draggable="true" 
-                         data-value="\${colorInt}" 
-                         data-index="\${index}"
-                         onclick="editColorChip(\${index})"
-                         style="background-color: \${hex}; animation: chipFadeIn 0.4s ease-out \${index * 0.03}s backwards;">
-                        <div class="chip-content">
-                            <span class="chip-hex">#\${hexShort}</span>
-                        </div>
-                        <button type="button" 
-                                class="chip-remove-btn" 
-                                onclick="event.stopPropagation(); removeColorChip(this)"
-                                title="删除">×</button>
-                    </div>
-                \`;
-            }).join('');
-            
-            setupColorChipDragDrop();
-            updateColorPoolInput();
-        }
+    if(!confirm('确定要重置为默认高亮颜色池吗？')) return;
+    
+    const defaultPool = [16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 
+                   16744319, 16752762, 16774799, 9498256, 8388564, 8900346, 14204888, 16758465];
+                   
+    const container = document.getElementById('color-pool-container');
+    container.innerHTML = '';
+    defaultPool.forEach(color => {
+        container.appendChild(createColorChip(color));
+    });
+    updateColorPoolInput();
+}
+
+/* 颜色拖放逻辑 */
+let draggedColor = null;
+
+function setupColorDragAndDrop() {
+    const chips = document.querySelectorAll('.color-chip');
+    chips.forEach(chip => {
+        chip.addEventListener('dragstart', handleColorDragStart);
+        chip.addEventListener('dragend', handleColorDragEnd);
+        chip.addEventListener('dragover', handleColorDragOver);
+        chip.addEventListener('drop', handleColorDrop);
+        chip.addEventListener('dragenter', handleColorDragEnter);
+        chip.addEventListener('dragleave', handleColorDragLeave);
     });
 }
 
-/* 颜色拖放 */
-let draggedChip = null;
-
-function setupColorChipDragDrop() {
-    const chips = document.querySelectorAll('.color-chip-item');
-    chips.forEach(chip => setupChipDragEvents(chip));
-}
-
-function setupChipDragEvents(chip) {
-    chip.addEventListener('dragstart', handleChipDragStart);
-    chip.addEventListener('dragend', handleChipDragEnd);
-    chip.addEventListener('dragover', handleChipDragOver);
-    chip.addEventListener('drop', handleChipDrop);
-    chip.addEventListener('dragenter', handleChipDragEnter);
-    chip.addEventListener('dragleave', handleChipDragLeave);
-}
-
-function handleChipDragStart(e) {
-    draggedChip = this;
-    this.style.opacity = '0.5';
+function handleColorDragStart(e) {
+    draggedColor = this;
+    this.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
 }
 
-function handleChipDragEnd(e) {
-    this.style.opacity = '';
-    document.querySelectorAll('.color-chip-item').forEach(chip => {
-        chip.style.transform = '';
-        chip.style.borderColor = '';
-    });
+function handleColorDragEnd(e) {
+    this.classList.remove('dragging');
+    draggedColor = null;
 }
 
-function handleChipDragOver(e) {
+function handleColorDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     return false;
 }
 
-function handleChipDragEnter(e) {
-    if (this !== draggedChip) {
+function handleColorDragEnter(e) {
+    if (this !== draggedColor) {
         this.style.transform = 'scale(1.1)';
-        this.style.borderColor = 'var(--primary-color)';
     }
 }
 
-function handleChipDragLeave(e) {
+function handleColorDragLeave(e) {
     this.style.transform = '';
-    this.style.borderColor = '';
 }
 
-function handleChipDrop(e) {
+function handleColorDrop(e) {
     e.stopPropagation();
     this.style.transform = '';
-    this.style.borderColor = '';
 
-    if (draggedChip && draggedChip !== this) {
-        const grid = document.getElementById('color-chips-grid');
-        const chips = Array.from(grid.querySelectorAll('.color-chip-item'));
-        const draggedIndex = chips.indexOf(draggedChip);
+    if (draggedColor && draggedColor !== this) {
+        const container = document.getElementById('color-pool-container');
+        const chips = Array.from(container.querySelectorAll('.color-chip'));
+        const draggedIndex = chips.indexOf(draggedColor);
         const targetIndex = chips.indexOf(this);
 
         if (draggedIndex < targetIndex) {
-            this.parentNode.insertBefore(draggedChip, this.nextSibling);
+            this.parentNode.insertBefore(draggedColor, this.nextSibling);
         } else {
-            this.parentNode.insertBefore(draggedChip, this);
+            this.parentNode.insertBefore(draggedColor, this);
         }
-        
-        reindexChips();
         updateColorPoolInput();
     }
     return false;
