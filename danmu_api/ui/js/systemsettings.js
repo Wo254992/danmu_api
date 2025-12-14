@@ -846,7 +846,27 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
 
     let value, itemData;
 
-    if (type === 'boolean') {
+    if (type === 'color-picker') {
+        const activeMode = document.querySelector('.preset-mode-btn.active');
+        const mode = activeMode ? activeMode.dataset.mode : 'default';
+        
+        if (mode === 'custom') {
+            const colorItems = document.querySelectorAll('#color-list .color-item');
+            const colors = Array.from(colorItems).map(item => item.dataset.color);
+            value = colors.join(',');
+            
+            if (colors.length === 0) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                customAlert('请至少添加一个颜色！', '⚠️ 配置不完整');
+                return;
+            }
+        } else {
+            value = mode; // 'default', 'white', 或 'color'
+        }
+        
+        itemData = { key, value, description, type };
+    } else if (type === 'boolean') {
         value = document.getElementById('bool-value').checked ? 'true' : 'false';
         itemData = { key, value, description, type };
     } else if (type === 'number') {
@@ -951,7 +971,91 @@ function renderValueInput(item) {
     const container = document.getElementById('value-input-container');
     const type = item ? item.type : document.getElementById('value-type').value;
     const value = item ? item.value : '';
-
+// 颜色选择器类型
+    if (type === 'color-picker') {
+        const key = item ? item.key : document.getElementById('env-key').value;
+        
+        // 预设模式选择
+        let selectedMode = 'default';
+        let customColors = [];
+        
+        if (value === 'white') {
+            selectedMode = 'white';
+        } else if (value === 'color') {
+            selectedMode = 'color';
+        } else if (value && value !== 'default' && value.includes(',')) {
+            selectedMode = 'custom';
+            customColors = value.split(',').map(v => v.trim()).filter(v => v && !isNaN(v)).map(v => parseInt(v, 10));
+        } else if (value && value !== 'default' && value !== 'white' && value !== 'color') {
+            selectedMode = 'custom';
+            customColors = value.split(',').map(v => v.trim()).filter(v => v && !isNaN(v)).map(v => parseInt(v, 10));
+        }
+        
+        container.innerHTML = \`
+            <label class="form-label">颜色模式</label>
+            <div class="preset-mode-select">
+                <button type="button" class="preset-mode-btn \${selectedMode === 'default' ? 'active' : ''}" 
+                        data-mode="default" onclick="selectColorMode('default')">
+                    🔘 默认（不转换）
+                </button>
+                <button type="button" class="preset-mode-btn \${selectedMode === 'white' ? 'active' : ''}" 
+                        data-mode="white" onclick="selectColorMode('white')">
+                    ⚪ 全部白色
+                </button>
+                <button type="button" class="preset-mode-btn \${selectedMode === 'color' ? 'active' : ''}" 
+                        data-mode="color" onclick="selectColorMode('color')">
+                    🎨 预设随机
+                </button>
+                <button type="button" class="preset-mode-btn \${selectedMode === 'custom' ? 'active' : ''}" 
+                        data-mode="custom" onclick="selectColorMode('custom')">
+                    🎯 自定义
+                </button>
+            </div>
+            
+            <div class="custom-color-panel \${selectedMode === 'custom' ? 'active' : ''}" id="custom-color-panel">
+                <label class="form-label">自定义颜色列表 (拖动排序)</label>
+                <div class="color-picker-container">
+                    <div class="color-list \${customColors.length === 0 ? 'empty' : ''}" id="color-list">
+                        \${customColors.map(color => \`
+                            <div class="color-item" draggable="true" data-color="\${color}" 
+                                 style="background-color: rgb(\${(color >> 16) & 255}, \${(color >> 8) & 255}, \${color & 255});">
+                                <div class="color-item-inner">
+                                    <button type="button" class="color-remove-btn" onclick="removeColor(this)">×</button>
+                                    <span class="color-value-label">#\${color.toString(16).padStart(6, '0').toUpperCase()}</span>
+                                </div>
+                            </div>
+                        \`).join('')}
+                    </div>
+                    <div class="color-picker-actions">
+                        <button type="button" class="btn btn-primary" onclick="addColorFromPicker()">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="16"/>
+                                <line x1="8" y1="12" x2="16" y2="12"/>
+                            </svg>
+                            <span>调色板选择</span>
+                            <div class="color-input-wrapper" style="display: inline-block; margin-left: 8px;">
+                                <input type="color" id="color-picker-input" onchange="applyPickedColor(this.value)">
+                                <div class="color-preview" id="color-picker-preview" 
+                                     style="background-color: #6366f1;" 
+                                     onclick="document.getElementById('color-picker-input').click()">
+                                </div>
+                            </div>
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="addRandomColor()">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <span>随机颜色</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        \`;
+        
+        setupColorDragAndDrop();
+        return;
+    }
     if (type === 'boolean') {
         const checked = value === 'true' || value === true;
         container.innerHTML = \`
@@ -1273,4 +1377,145 @@ renderEnvList = function() {
         });
     }
 };
+/* ========================================
+   颜色选择器功能
+   ======================================== */
+function selectColorMode(mode) {
+    document.querySelectorAll('.preset-mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+    
+    const customPanel = document.getElementById('custom-color-panel');
+    if (mode === 'custom') {
+        customPanel.classList.add('active');
+    } else {
+        customPanel.classList.remove('active');
+    }
+}
+
+function addColorFromPicker() {
+    // 触发颜色选择器
+    document.getElementById('color-picker-input').click();
+}
+
+function applyPickedColor(hexColor) {
+    // 转换 hex 到十进制
+    const decimal = parseInt(hexColor.substring(1), 16);
+    addColorToList(decimal);
+    
+    // 更新预览颜色
+    document.getElementById('color-picker-preview').style.backgroundColor = hexColor;
+}
+
+function addRandomColor() {
+    // 生成真正的随机颜色 (0 到 16777215)
+    const randomColor = Math.floor(Math.random() * 16777216);
+    addColorToList(randomColor);
+    
+    addLog(\`🎨 添加随机颜色: #\${randomColor.toString(16).padStart(6, '0').toUpperCase()}\`, 'success');
+}
+
+function addColorToList(colorDecimal) {
+    const colorList = document.getElementById('color-list');
+    if (!colorList) return;
+    
+    colorList.classList.remove('empty');
+    
+    const r = (colorDecimal >> 16) & 255;
+    const g = (colorDecimal >> 8) & 255;
+    const b = colorDecimal & 255;
+    
+    const colorItem = document.createElement('div');
+    colorItem.className = 'color-item';
+    colorItem.draggable = true;
+    colorItem.dataset.color = colorDecimal;
+    colorItem.style.backgroundColor = \`rgb(\${r}, \${g}, \${b})\`;
+    colorItem.innerHTML = \`
+        <div class="color-item-inner">
+            <button type="button" class="color-remove-btn" onclick="removeColor(this)">×</button>
+            <span class="color-value-label">#\${colorDecimal.toString(16).padStart(6, '0').toUpperCase()}</span>
+        </div>
+    \`;
+    
+    colorList.appendChild(colorItem);
+    setupColorDragAndDrop();
+    
+    // 添加动画
+    colorItem.style.animation = 'fadeInUp 0.3s ease-out';
+}
+
+function removeColor(button) {
+    const colorItem = button.closest('.color-item');
+    const colorList = document.getElementById('color-list');
+    
+    colorItem.style.animation = 'fadeOut 0.3s ease-out';
+    setTimeout(() => {
+        colorItem.remove();
+        if (colorList && colorList.children.length === 0) {
+            colorList.classList.add('empty');
+        }
+    }, 300);
+}
+
+function setupColorDragAndDrop() {
+    const colorList = document.getElementById('color-list');
+    if (!colorList) return;
+    
+    const colorItems = colorList.querySelectorAll('.color-item');
+    let draggedColorElement = null;
+    
+    colorItems.forEach(item => {
+        item.addEventListener('dragstart', function(e) {
+            draggedColorElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        
+        item.addEventListener('dragend', function(e) {
+            this.classList.remove('dragging');
+            colorList.querySelectorAll('.color-item').forEach(el => {
+                el.classList.remove('drag-over');
+            });
+        });
+        
+        item.addEventListener('dragover', function(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        });
+        
+        item.addEventListener('dragenter', function(e) {
+            if (this !== draggedColorElement) {
+                this.classList.add('drag-over');
+            }
+        });
+        
+        item.addEventListener('dragleave', function(e) {
+            this.classList.remove('drag-over');
+        });
+        
+        item.addEventListener('drop', function(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            if (draggedColorElement !== this) {
+                const allItems = Array.from(colorList.querySelectorAll('.color-item'));
+                const draggedIndex = allItems.indexOf(draggedColorElement);
+                const targetIndex = allItems.indexOf(this);
+                
+                if (draggedIndex < targetIndex) {
+                    this.parentNode.insertBefore(draggedColorElement, this.nextSibling);
+                } else {
+                    this.parentNode.insertBefore(draggedColorElement, this);
+                }
+            }
+            
+            this.classList.remove('drag-over');
+            return false;
+        });
+    });
+}
 `;
