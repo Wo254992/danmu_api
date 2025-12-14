@@ -15,6 +15,11 @@ function renderPreview() {
             return '';
         }
         
+        // 处理星号（脱敏值）
+        if (/^\*+$/.test(itemValue)) {
+            return '';
+        }
+        
         let colors = [];
         if (itemValue === 'white') {
             colors = ['16777215'];
