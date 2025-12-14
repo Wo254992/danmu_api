@@ -645,6 +645,7 @@ async function init() {
         renderEnvList();
         renderPreview();
         addLog('🎉 系统初始化完成', 'success');
+        checkPlatformConfig();
         fetchRealLogs();
     } catch (error) {
         console.error('初始化失败:', error);
@@ -700,5 +701,191 @@ function animateNumber(elementId, start, end, duration) {
         }
         element.textContent = Math.round(current);
     }, 16);
+}
+/* ========================================
+   检查平台配置状态
+   ======================================== */
+async function checkPlatformConfig() {
+    const card = document.getElementById('platform-config-card');
+    const statusEl = document.getElementById('platform-config-status');
+    const contentEl = document.getElementById('platform-config-content');
+    const footerEl = document.getElementById('platform-config-footer');
+    const iconWrapper = card.querySelector('.platform-config-icon-wrapper');
+    
+    if (!card || !statusEl || !contentEl) return;
+    
+    try {
+        const response = await fetch(buildApiUrl('/api/config', true));
+        if (!response.ok) {
+            throw new Error('无法获取配置信息');
+        }
+        
+        const config = await response.json();
+        const deployPlatform = (config.envs?.deployPlatform || 'node').toLowerCase();
+        const originalEnvVars = config.originalEnvVars || {};
+        
+        // 定义各平台需要的变量
+        const platformRequirements = {
+            'vercel': {
+                required: ['DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'],
+                optional: []
+            },
+            'netlify': {
+                required: ['DEPLOY_PLATFROM_ACCOUNT', 'DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'],
+                optional: []
+            },
+            'edgeone': {
+                required: ['DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'],
+                optional: []
+            },
+            'cloudflare': {
+                required: ['DEPLOY_PLATFROM_ACCOUNT', 'DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'],
+                optional: []
+            },
+            'node': {
+                required: [],
+                optional: []
+            },
+            'docker': {
+                required: [],
+                optional: []
+            }
+        };
+        
+        const requirements = platformRequirements[deployPlatform] || { required: [], optional: [] };
+        
+        // 检查 Node.js 和 Docker 平台
+        if (deployPlatform === 'node' || deployPlatform === 'docker') {
+            iconWrapper.className = 'platform-config-icon-wrapper status-complete';
+            iconWrapper.innerHTML = \`
+                <svg class="platform-config-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            \`;
+            
+            statusEl.textContent = '✓ 无需配置';
+            statusEl.className = 'platform-config-status status-complete';
+            
+            contentEl.innerHTML = \`
+                <div class="platform-config-no-check">
+                    <div class="platform-config-no-check-icon">✓</div>
+                    <div class="platform-config-no-check-text">
+                        \${deployPlatform === 'node' ? 'Node.js' : 'Docker'} 部署模式无需额外配置环境变量
+                    </div>
+                </div>
+            \`;
+            
+            footerEl.style.display = 'none';
+            
+            addLog(\`✓ 平台配置检查完成 - \${deployPlatform === 'node' ? 'Node.js' : 'Docker'} 模式无需配置\`, 'success');
+            return;
+        }
+        
+        // 检查必需变量
+        const missingVars = [];
+        const configuredVars = [];
+        
+        requirements.required.forEach(varName => {
+            const value = originalEnvVars[varName];
+            if (!value || value.trim() === '') {
+                missingVars.push(varName);
+            } else {
+                configuredVars.push(varName);
+            }
+        });
+        
+        // 更新状态
+        const totalRequired = requirements.required.length;
+        const configured = configuredVars.length;
+        
+        if (missingVars.length === 0) {
+            // 全部配置完成
+            iconWrapper.className = 'platform-config-icon-wrapper status-complete';
+            iconWrapper.innerHTML = \`
+                <svg class="platform-config-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            \`;
+            
+            statusEl.textContent = \`✓ 配置完整 (\${configured}/\${totalRequired})\`;
+            statusEl.className = 'platform-config-status status-complete';
+            
+            footerEl.style.display = 'none';
+            
+            addLog(\`✓ 平台配置检查完成 - 所有必需变量已配置\`, 'success');
+        } else {
+            // 有缺失项
+            iconWrapper.className = 'platform-config-icon-wrapper status-incomplete';
+            iconWrapper.innerHTML = \`
+                <svg class="platform-config-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            \`;
+            
+            statusEl.textContent = \`⚠ 配置不完整 (\${configured}/\${totalRequired})\`;
+            statusEl.className = 'platform-config-status status-incomplete';
+            
+            footerEl.style.display = 'block';
+            
+            addLog(\`⚠ 平台配置检查 - 缺失 \${missingVars.length} 个必需变量\`, 'warn');
+        }
+        
+        // 渲染配置项列表
+        let itemsHtml = '<div class="platform-config-items">';
+        
+        requirements.required.forEach(varName => {
+            const isConfigured = configuredVars.includes(varName);
+            itemsHtml += \`
+                <div class="platform-config-item \${isConfigured ? 'config-complete' : 'config-incomplete'}">
+                    <div class="platform-config-item-name">\${varName}</div>
+                    <div class="platform-config-item-status \${isConfigured ? 'status-complete' : 'status-incomplete'}">
+                        \${isConfigured ? \`
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>已配置</span>
+                        \` : \`
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            <span>未配置</span>
+                        \`}
+                    </div>
+                </div>
+            \`;
+        });
+        
+        itemsHtml += '</div>';
+        contentEl.innerHTML = itemsHtml;
+        
+    } catch (error) {
+        console.error('检查平台配置失败:', error);
+        
+        iconWrapper.className = 'platform-config-icon-wrapper status-error';
+        iconWrapper.innerHTML = \`
+            <svg class="platform-config-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+        \`;
+        
+        statusEl.textContent = '✗ 检查失败';
+        statusEl.className = 'platform-config-status status-error';
+        
+        contentEl.innerHTML = \`
+            <div class="platform-config-no-check">
+                <div class="platform-config-no-check-icon">⚠️</div>
+                <div class="platform-config-no-check-text">
+                    无法获取配置信息<br>
+                    <small style="opacity: 0.7;">\${error.message}</small>
+                </div>
+            </div>
+        \`;
+        
+        footerEl.style.display = 'none';
+        
+        addLog(\`✗ 平台配置检查失败: \${error.message}\`, 'error');
+    }
 }
 `;
