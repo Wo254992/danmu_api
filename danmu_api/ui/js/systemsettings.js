@@ -1054,6 +1054,57 @@ function renderValueInput(item) {
 
         setupDragAndDrop();
 
+    } else if (type === 'color-list') {
+        // 默认颜色池（与后端 danmu-util.js 保持一致）
+        const defaultPool = [16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 
+                   16744319, 16752762, 16774799, 9498256, 8388564, 8900346, 14204888, 16758465];
+        
+        let colors = [];
+        // 处理初始值：如果是 'color' 或 'default' 或空，使用默认池；否则解析CSV
+        if (!value || value === 'color' || value === 'default') {
+            colors = [...defaultPool];
+        } else if (value === 'white') {
+            colors = [16777215];
+        } else {
+            colors = String(value).split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
+        }
+
+        // 隐藏的实际存储 input
+        const hiddenInput = \`<input type="hidden" id="text-value" value="\${colors.join(',')}">\`;
+
+        container.innerHTML = \`
+            \${hiddenInput}
+            <label class="form-label">颜色池配置 (拖动排序，点击X删除)</label>
+            <div class="color-pool-controls">
+                <div class="color-picker-wrapper" title="选择颜色">
+                    <input type="color" id="color-picker-input" class="color-picker-input" value="#ffffff">
+                </div>
+                <button type="button" class="btn btn-sm btn-primary" onclick="addColorFromPicker()">
+                    <span class="btn-icon-text">➕ 添加选中颜色</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="addRandomColor()">
+                    <span class="btn-icon-text">🎲 随机增加一个</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="resetColorPool()">
+                    <span class="btn-icon-text">↺ 重置为默认</span>
+                </button>
+            </div>
+            
+            <div class="color-pool-container \${colors.length === 0 ? 'empty' : ''}" id="color-pool-container">
+                \${colors.map(colorInt => {
+                    const hex = '#' + colorInt.toString(16).padStart(6, '0');
+                    return \`
+                        <div class="color-chip" draggable="true" data-value="\${colorInt}" style="background-color: \${hex};" title="\${hex} (\${colorInt})">
+                            <button type="button" class="remove-chip-btn" onclick="removeColorChip(this)">×</button>
+                        </div>
+                    \`;
+                }).join('')}
+            </div>
+            <div class="form-help">当前颜色池数量: <span id="pool-count">\${colors.length}</span></div>
+        \`;
+
+        setupColorDragAndDrop();
+
     } else {
         if (value && value.length > 50) {
             const rows = Math.min(Math.max(Math.ceil(value.length / 50), 3), 10);
@@ -1273,4 +1324,146 @@ renderEnvList = function() {
         });
     }
 };
+
+/* ========================================
+   颜色池操作相关函数
+   ======================================== */
+function updateColorPoolInput() {
+    const chips = document.querySelectorAll('#color-pool-container .color-chip');
+    const values = Array.from(chips).map(chip => chip.dataset.value);
+    document.getElementById('text-value').value = values.join(',');
+    
+    // 更新计数
+    const countEl = document.getElementById('pool-count');
+    if (countEl) countEl.textContent = values.length;
+    
+    // 更新容器空状态
+    const container = document.getElementById('color-pool-container');
+    if (values.length === 0) {
+        container.classList.add('empty');
+    } else {
+        container.classList.remove('empty');
+    }
+}
+
+function createColorChip(colorInt) {
+    const hex = '#' + parseInt(colorInt).toString(16).padStart(6, '0');
+    const chip = document.createElement('div');
+    chip.className = 'color-chip';
+    chip.draggable = true;
+    chip.dataset.value = colorInt;
+    chip.style.backgroundColor = hex;
+    chip.title = \`\${hex} (\${colorInt})\`;
+    
+    chip.innerHTML = \`<button type="button" class="remove-chip-btn" onclick="removeColorChip(this)">×</button>\`;
+    
+    // 绑定拖拽事件
+    chip.addEventListener('dragstart', handleColorDragStart);
+    chip.addEventListener('dragend', handleColorDragEnd);
+    chip.addEventListener('dragover', handleColorDragOver);
+    chip.addEventListener('drop', handleColorDrop);
+    chip.addEventListener('dragenter', handleColorDragEnter);
+    chip.addEventListener('dragleave', handleColorDragLeave);
+    
+    return chip;
+}
+
+function addColorFromPicker() {
+    const picker = document.getElementById('color-picker-input');
+    const hex = picker.value;
+    const decimal = parseInt(hex.replace('#', ''), 16);
+    
+    const container = document.getElementById('color-pool-container');
+    container.appendChild(createColorChip(decimal));
+    updateColorPoolInput();
+}
+
+function addRandomColor() {
+    // 生成真随机颜色 (0 - 16777215)
+    const randomDecimal = Math.floor(Math.random() * 16777216);
+    const container = document.getElementById('color-pool-container');
+    container.appendChild(createColorChip(randomDecimal));
+    updateColorPoolInput();
+}
+
+function removeColorChip(btn) {
+    btn.parentElement.remove();
+    updateColorPoolInput();
+}
+
+function resetColorPool() {
+    if(!confirm('确定要重置为默认高亮颜色池吗？')) return;
+    
+    const defaultPool = [16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 16777215, 
+                   16744319, 16752762, 16774799, 9498256, 8388564, 8900346, 14204888, 16758465];
+                   
+    const container = document.getElementById('color-pool-container');
+    container.innerHTML = '';
+    defaultPool.forEach(color => {
+        container.appendChild(createColorChip(color));
+    });
+    updateColorPoolInput();
+}
+
+/* 颜色拖放逻辑 */
+let draggedColor = null;
+
+function setupColorDragAndDrop() {
+    const chips = document.querySelectorAll('.color-chip');
+    chips.forEach(chip => {
+        chip.addEventListener('dragstart', handleColorDragStart);
+        chip.addEventListener('dragend', handleColorDragEnd);
+        chip.addEventListener('dragover', handleColorDragOver);
+        chip.addEventListener('drop', handleColorDrop);
+        chip.addEventListener('dragenter', handleColorDragEnter);
+        chip.addEventListener('dragleave', handleColorDragLeave);
+    });
+}
+
+function handleColorDragStart(e) {
+    draggedColor = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleColorDragEnd(e) {
+    this.classList.remove('dragging');
+    draggedColor = null;
+}
+
+function handleColorDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+}
+
+function handleColorDragEnter(e) {
+    if (this !== draggedColor) {
+        this.style.transform = 'scale(1.1)';
+    }
+}
+
+function handleColorDragLeave(e) {
+    this.style.transform = '';
+}
+
+function handleColorDrop(e) {
+    e.stopPropagation();
+    this.style.transform = '';
+
+    if (draggedColor && draggedColor !== this) {
+        const container = document.getElementById('color-pool-container');
+        const chips = Array.from(container.querySelectorAll('.color-chip'));
+        const draggedIndex = chips.indexOf(draggedColor);
+        const targetIndex = chips.indexOf(this);
+
+        if (draggedIndex < targetIndex) {
+            this.parentNode.insertBefore(draggedColor, this.nextSibling);
+        } else {
+            this.parentNode.insertBefore(draggedColor, this);
+        }
+        updateColorPoolInput();
+    }
+    return false;
+}
 `;
