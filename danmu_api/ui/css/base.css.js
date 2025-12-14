@@ -426,7 +426,7 @@ body {
    版本卡片 - 简洁大方
    ======================================== */
 .version-card {
-    margin: var(--spacing-lg);
+    margin: var(--spacing-lg) var(--spacing-lg) 0 var(--spacing-lg);
     padding: var(--spacing-xl);
     background: var(--bg-primary);
     border-radius: var(--border-radius-lg);
@@ -949,7 +949,7 @@ body {
    平台配置状态卡片
    ======================================== */
 .platform-config-card {
-    margin: var(--spacing-lg);
+    margin: var(--spacing-md) var(--spacing-lg) var(--spacing-lg) var(--spacing-lg);
     padding: var(--spacing-md);
     background: var(--bg-primary);
     border-radius: var(--border-radius-lg);
@@ -1216,8 +1216,12 @@ body {
 
 /* 移动端优化 */
 @media (max-width: 768px) {
+    .version-card {
+        margin: var(--spacing-md) var(--spacing-md) 0 var(--spacing-md);
+    }
+    
     .platform-config-card {
-        margin: var(--spacing-md);
+        margin: var(--spacing-sm) var(--spacing-md) var(--spacing-md) var(--spacing-md);
         padding: var(--spacing-sm);
     }
     
