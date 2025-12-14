@@ -186,7 +186,8 @@ function getTypeBadge(type) {
         boolean: '布尔',
         number: '数字',
         select: '单选',
-        'multi-select': '多选'
+        'multi-select': '多选',
+        'color-picker': '颜色'
     };
     return badges[type] || '文本';
 }
