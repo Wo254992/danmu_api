@@ -703,7 +703,7 @@ input:disabled + .slider {
 
 .color-pool-controls {
     display: grid;
-    grid-template-columns: 1fr auto auto auto;
+    grid-template-columns: 1fr auto auto;
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
     padding: var(--spacing-lg);
