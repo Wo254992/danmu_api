@@ -626,7 +626,8 @@ function renderEnvList() {
         const typeLabel = item.type === 'boolean' ? 'bool' :
                          item.type === 'number' ? 'num' :
                          item.type === 'select' ? 'select' :
-                         item.type === 'multi-select' ? 'multi' : 'text';
+                         item.type === 'multi-select' ? 'multi' :
+                         item.type === 'color-list' ? 'color' : 'text';
         const badgeClass = item.type === 'multi-select' ? 'multi' : '';
 
         return \`
