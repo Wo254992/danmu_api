@@ -703,13 +703,34 @@ function animateNumber(elementId, start, end, duration) {
     }, 16);
 }
 /* ========================================
+   折叠/展开平台配置卡片
+   ======================================== */
+function togglePlatformConfig() {
+    const card = document.getElementById('platform-config-card');
+    const content = document.getElementById('platform-config-content');
+    
+    if (!card || !content) return;
+    
+    const isExpanded = card.classList.contains('expanded');
+    
+    if (isExpanded) {
+        // 折叠
+        content.style.display = 'none';
+        card.classList.remove('expanded');
+    } else {
+        // 展开
+        content.style.display = 'block';
+        card.classList.add('expanded');
+    }
+}
+
+/* ========================================
    检查平台配置状态
    ======================================== */
 async function checkPlatformConfig() {
     const card = document.getElementById('platform-config-card');
     const statusEl = document.getElementById('platform-config-status');
     const contentEl = document.getElementById('platform-config-content');
-    const footerEl = document.getElementById('platform-config-footer');
     const iconWrapper = card.querySelector('.platform-config-icon-wrapper');
     
     if (!card || !statusEl || !contentEl) return;
@@ -727,32 +748,26 @@ async function checkPlatformConfig() {
         // 定义各平台需要的变量
         const platformRequirements = {
             'vercel': {
-                required: ['DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'],
-                optional: []
+                required: ['DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN']
             },
             'netlify': {
-                required: ['DEPLOY_PLATFROM_ACCOUNT', 'DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'],
-                optional: []
+                required: ['DEPLOY_PLATFROM_ACCOUNT', 'DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN']
             },
             'edgeone': {
-                required: ['DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'],
-                optional: []
+                required: ['DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN']
             },
             'cloudflare': {
-                required: ['DEPLOY_PLATFROM_ACCOUNT', 'DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'],
-                optional: []
+                required: ['DEPLOY_PLATFROM_ACCOUNT', 'DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN']
             },
             'node': {
-                required: [],
-                optional: []
+                required: []
             },
             'docker': {
-                required: [],
-                optional: []
+                required: []
             }
         };
         
-        const requirements = platformRequirements[deployPlatform] || { required: [], optional: [] };
+        const requirements = platformRequirements[deployPlatform] || { required: [] };
         
         // 检查 Node.js 和 Docker 平台
         if (deployPlatform === 'node' || deployPlatform === 'docker') {
@@ -770,12 +785,10 @@ async function checkPlatformConfig() {
                 <div class="platform-config-no-check">
                     <div class="platform-config-no-check-icon">✓</div>
                     <div class="platform-config-no-check-text">
-                        \${deployPlatform === 'node' ? 'Node.js' : 'Docker'} 部署模式无需额外配置环境变量
+                        \${deployPlatform === 'node' ? 'Node.js' : 'Docker'} 部署模式<br>无需额外配置环境变量
                     </div>
                 </div>
             \`;
-            
-            footerEl.style.display = 'none';
             
             addLog(\`✓ 平台配置检查完成 - \${deployPlatform === 'node' ? 'Node.js' : 'Docker'} 模式无需配置\`, 'success');
             return;
@@ -810,8 +823,6 @@ async function checkPlatformConfig() {
             statusEl.textContent = \`✓ 配置完整 (\${configured}/\${totalRequired})\`;
             statusEl.className = 'platform-config-status status-complete';
             
-            footerEl.style.display = 'none';
-            
             addLog(\`✓ 平台配置检查完成 - 所有必需变量已配置\`, 'success');
         } else {
             // 有缺失项
@@ -824,8 +835,6 @@ async function checkPlatformConfig() {
             
             statusEl.textContent = \`⚠ 配置不完整 (\${configured}/\${totalRequired})\`;
             statusEl.className = 'platform-config-status status-incomplete';
-            
-            footerEl.style.display = 'block';
             
             addLog(\`⚠ 平台配置检查 - 缺失 \${missingVars.length} 个必需变量\`, 'warn');
         }
@@ -856,6 +865,22 @@ async function checkPlatformConfig() {
         });
         
         itemsHtml += '</div>';
+        
+        // 如果有缺失项，添加"立即配置"按钮
+        if (missingVars.length > 0) {
+            itemsHtml += \`
+                <div class="platform-config-footer">
+                    <button class="platform-config-btn" onclick="switchSection('env'); return false;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span>立即配置</span>
+                    </button>
+                </div>
+            \`;
+        }
+        
         contentEl.innerHTML = itemsHtml;
         
     } catch (error) {
@@ -878,12 +903,10 @@ async function checkPlatformConfig() {
                 <div class="platform-config-no-check-icon">⚠️</div>
                 <div class="platform-config-no-check-text">
                     无法获取配置信息<br>
-                    <small style="opacity: 0.7;">\${error.message}</small>
+                    <small style="opacity: 0.7; font-size: 0.625rem;">\${error.message}</small>
                 </div>
             </div>
         \`;
-        
-        footerEl.style.display = 'none';
         
         addLog(\`✗ 平台配置检查失败: \${error.message}\`, 'error');
     }
