@@ -1569,7 +1569,7 @@ function customPrompt(message, title, defaultValue = '') {
     return new Promise((resolve) => {
         const modal = document.createElement('div');
         modal.className = 'modal active';
-        modal.style.zIndex = '10000'; // 确保在颜色配置模态框之上
+        modal.style.zIndex = '100000'; // 确保在颜色配置模态框之上
         modal.innerHTML = \`
             <div class="modal-overlay"></div>
             <div class="modal-container" style="max-width: 500px;">
