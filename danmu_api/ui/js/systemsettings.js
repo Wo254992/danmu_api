@@ -845,7 +845,7 @@ function updateLoadingText(text, detail) {
 }
 
 /* ========================================
-   表单提交
+   表单提交 (修复类型丢失问题版)
    ======================================== */
 document.getElementById('env-form').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -853,38 +853,67 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
     const category = document.getElementById('env-category').value;
     const key = document.getElementById('env-key').value.trim();
     const description = document.getElementById('env-description').value.trim();
-    const type = document.getElementById('value-type').value;
+    
+    // 🛠️ 核心修复：不完全依赖 value-type 的值，而是根据界面元素反推真实类型
+    // 这能防止 color-list 因为选项缺失被误保存为 text
+    let type = document.getElementById('value-type').value;
+    
+    if (document.getElementById('color-pool-container')) {
+        type = 'color-list'; // 强制修正为颜色列表
+    } else if (document.getElementById('bool-value')) {
+        type = 'boolean';
+    } else if (document.getElementById('num-slider')) {
+        type = 'number';
+    } else if (document.querySelector('.tag-selector')) {
+        type = 'select';
+    } else if (document.querySelector('.multi-select-container')) {
+        type = 'multi-select';
+    }
 
     let value, itemData;
 
-    if (type === 'boolean') {
-        value = document.getElementById('bool-value').checked ? 'true' : 'false';
-        itemData = { key, value, description, type };
-    } else if (type === 'number') {
-        value = document.getElementById('num-value').textContent;
-        const min = parseInt(document.getElementById('num-slider').min);
-        const max = parseInt(document.getElementById('num-slider').max);
-        itemData = { key, value, description, type, min, max };
-    } else if (type === 'select') {
-        const selected = document.querySelector('.tag-option.selected');
-        value = selected ? selected.dataset.value : '';
-        const options = Array.from(document.querySelectorAll('.tag-option')).map(el => el.dataset.value);
-        itemData = { key, value, description, type, options };
-    } else if (type === 'multi-select') {
-        const selectedTags = Array.from(document.querySelectorAll('.selected-tag'))
-            .map(el => el.dataset.value);
-        value = selectedTags.join(',');
-        const options = Array.from(document.querySelectorAll('.available-tag')).map(el => el.dataset.value);
-        itemData = { key, value, description, type, options };
-    } else if (type === 'color-list') {
-        // 从隐藏的 input 中获取颜色值
-        value = document.getElementById('text-value').value.trim();
-        // 保存当前的颜色数据，用于重新渲染
-        const currentColors = value.split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
-        itemData = { key, value, description, type, colors: currentColors };
-    } else {
-        value = document.getElementById('text-value').value.trim();
-        itemData = { key, value, description, type };
+    try {
+        if (type === 'boolean') {
+            value = document.getElementById('bool-value').checked ? 'true' : 'false';
+            itemData = { key, value, description, type };
+        } else if (type === 'number') {
+            value = document.getElementById('num-value').textContent;
+            const min = parseInt(document.getElementById('num-slider').min);
+            const max = parseInt(document.getElementById('num-slider').max);
+            itemData = { key, value, description, type, min, max };
+        } else if (type === 'select') {
+            const selected = document.querySelector('.tag-option.selected');
+            value = selected ? selected.dataset.value : '';
+            const options = Array.from(document.querySelectorAll('.tag-option')).map(el => el.dataset.value);
+            itemData = { key, value, description, type, options };
+        } else if (type === 'multi-select') {
+            const selectedTags = Array.from(document.querySelectorAll('.selected-tag'))
+                .map(el => el.dataset.value);
+            value = selectedTags.join(',');
+            const options = Array.from(document.querySelectorAll('.available-tag')).map(el => el.dataset.value);
+            itemData = { key, value, description, type, options };
+        } else if (type === 'color-list') {
+            // 安全获取 text-value
+            const hiddenInput = document.getElementById('text-value');
+            if (!hiddenInput) {
+                // 如果找不到隐藏域，尝试从颜色块重建数据，防止报错
+                const chips = document.querySelectorAll('#color-pool-container .color-chip');
+                const values = Array.from(chips).map(chip => chip.dataset.value);
+                value = values.join(',');
+            } else {
+                value = hiddenInput.value.trim();
+            }
+            // 保存当前的颜色数据，用于重新渲染
+            const currentColors = value.split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
+            itemData = { key, value, description, type, colors: currentColors };
+        } else {
+            const textInput = document.getElementById('text-value');
+            value = textInput ? textInput.value.trim() : '';
+            itemData = { key, value, description, type };
+        }
+    } catch (err) {
+        customAlert('获取表单数据失败: ' + err.message, '❌ 错误');
+        return;
     }
 
     // 显示保存中状态
@@ -905,6 +934,7 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
         let result = await response.json();
 
         if (!result.success) {
+            // 如果 set 失败，尝试 add
             response = await fetch(buildApiUrl('/api/env/add'), {
                 method: 'POST',
                 headers: {
@@ -912,7 +942,6 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
                 },
                 body: JSON.stringify({ key, value })
             });
-
             result = await response.json();
         }
 
@@ -921,14 +950,20 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
                 envVariables[category] = [];
             }
 
+            // 更新本地数据
             if (editingKey !== null) {
-                envVariables[currentCategory][editingKey] = itemData;
-                addLog(\`✅ 更新配置项: \${key} = \${value}\`, 'success');
+                // 确保保留原有的 type 和 colors 结构，防止退化为 text
+                envVariables[currentCategory][editingKey] = {
+                    ...envVariables[currentCategory][editingKey], // 保留旧属性
+                    ...itemData // 覆盖新属性
+                };
+                addLog(\`✅ 更新配置项: \${key}\`, 'success');
             } else {
                 envVariables[category].push(itemData);
-                addLog(\`✅ 添加配置项: \${key} = \${value}\`, 'success');
+                addLog(\`✅ 添加配置项: \${key}\`, 'success');
             }
 
+            // 如果类别改变，切换标签
             if (category !== currentCategory) {
                 currentCategory = category;
                 document.querySelectorAll('.tab-btn').forEach((btn, i) => {
@@ -937,7 +972,11 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
             }
 
             renderEnvList();
-            renderPreview();
+            
+            // 安全调用 renderPreview
+            if (typeof renderPreview === 'function') {
+                renderPreview();
+            }
             
             // 成功动画
             submitBtn.innerHTML = '<span>✅</span> <span>保存成功!</span>';
@@ -945,9 +984,11 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
             
             setTimeout(() => {
                 closeModal();
-                submitBtn.innerHTML = originalText;
-                submitBtn.style.background = '';
-                submitBtn.disabled = false;
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.style.background = '';
+                    submitBtn.disabled = false;
+                }, 300);
             }, 1000);
         } else {
             submitBtn.innerHTML = originalText;
@@ -958,6 +999,7 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
     } catch (error) {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
+        console.error(error);
         addLog(\`❌ 更新环境变量失败: \${error.message}\`, 'error');
         customAlert('更新环境变量失败: ' + error.message, '❌ 网络错误');
     }
