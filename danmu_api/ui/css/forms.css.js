@@ -709,13 +709,19 @@ input:disabled + .slider {
 .color-pool-container {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
     background: var(--bg-secondary);
-    border: 2px solid var(--border-color);
-    border-radius: var(--border-radius);
-    min-height: 100px;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius-lg);
+    min-height: 140px;
     align-content: flex-start;
+    transition: all 0.3s ease;
+}
+
+.color-pool-container:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--primary-color);
 }
 
 .color-pool-container.empty {
@@ -730,48 +736,78 @@ input:disabled + .slider {
 }
 
 .color-chip {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    border-radius: var(--border-radius);
     position: relative;
     cursor: move;
     box-shadow: var(--shadow-sm);
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 2px solid rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+    border: 3px solid rgba(255,255,255,0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
 .color-chip:hover {
-    transform: scale(1.15);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: var(--shadow-lg);
     z-index: 10;
+    border-color: rgba(255,255,255,0.6);
 }
 
 .color-chip.dragging {
-    opacity: 0.5;
-    transform: scale(0.9);
+    opacity: 0.6;
+    transform: scale(0.95) rotate(5deg);
+    cursor: grabbing;
+}
+
+.color-hex-label {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Monaco', 'Consolas', monospace;
+    color: rgba(0,0,0,0.7);
+    background: rgba(255,255,255,0.9);
+    padding: 3px 6px;
+    border-radius: 4px;
+    text-shadow: none;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    user-select: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .color-chip .remove-chip-btn {
     position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 16px;
-    height: 16px;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
     background: var(--danger-color);
     color: white;
     border-radius: 50%;
-    border: none;
+    border: 2px solid white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: 12px;
+    font-weight: bold;
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
 }
 
 .color-chip:hover .remove-chip-btn {
     opacity: 1;
+    transform: scale(1.1);
+}
+
+.color-chip .remove-chip-btn:hover {
+    background: #dc2626;
+    transform: scale(1.2) rotate(90deg);
 }
 
 .btn-icon-text {
