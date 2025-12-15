@@ -699,7 +699,7 @@ export const componentsCssContent = /* css */ `
     border-radius: var(--border-radius-xl);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     width: 100%;
-    max-width: 540px;
+    max-width: 480px;
     max-height: 90vh;
     overflow-y: auto;
     animation: modalSlideIn var(--transition-spring);
@@ -707,7 +707,7 @@ export const componentsCssContent = /* css */ `
 }
 
 .modal-lg {
-    max-width: 760px;
+    max-width: 680px;
 }
 
 @keyframes modalSlideIn {
@@ -725,13 +725,13 @@ export const componentsCssContent = /* css */ `
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg) var(--spacing-xl);
     border-bottom: 2px solid var(--border-color);
     background: var(--bg-secondary);
 }
 
 .modal-title {
-    font-size: 1.25rem;
+    font-size: 1.0625rem;
     font-weight: 700;
     color: var(--text-primary);
     margin: 0;
@@ -739,12 +739,12 @@ export const componentsCssContent = /* css */ `
 }
 
 .modal-close {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     background: var(--gray-100);
     border: none;
     border-radius: 50%;
-    font-size: 1.5rem;
+    font-size: 1.375rem;
     color: var(--text-secondary);
     cursor: pointer;
     display: flex;
@@ -761,15 +761,15 @@ export const componentsCssContent = /* css */ `
 }
 
 .modal-body {
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg) var(--spacing-xl);
     background: var(--bg-primary);
 }
 
 .modal-desc {
     color: var(--text-secondary);
-    margin-bottom: var(--spacing-lg);
-    line-height: 1.6;
-    font-size: 0.875rem;
+    margin-bottom: var(--spacing-md);
+    line-height: 1.5;
+    font-size: 0.8125rem;
 }
 
 .modal-list {
@@ -820,7 +820,7 @@ export const componentsCssContent = /* css */ `
     display: flex;
     justify-content: flex-end;
     gap: var(--spacing-sm);
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg) var(--spacing-xl);
     border-top: 2px solid var(--border-color);
     flex-wrap: wrap;
     background: var(--bg-secondary);
