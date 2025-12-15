@@ -728,4 +728,77 @@ export const colorsCssContent = /* css */ `
         grid-column: auto;
     }
 }
+/* ========================================
+   导入方式选择对话框样式 (追加/替换)
+   ======================================== */
+.custom-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.custom-dialog-container {
+    background: var(--bg-primary, #ffffff);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    width: 90%;
+    animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid color-mix(in srgb, var(--border-color, #e2e8f0) 80%, transparent);
+}
+
+.custom-dialog-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--border-color, #e2e8f0) 80%, transparent);
+}
+
+.custom-dialog-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-primary, #1e293b);
+}
+
+.custom-dialog-body {
+    padding: 1.5rem;
+    color: var(--text-secondary, #64748b);
+    line-height: 1.6;
+}
+
+.custom-dialog-body strong {
+    color: var(--primary-color, #3b82f6);
+    font-size: 1.2em;
+}
+
+.custom-dialog-actions {
+    padding: 1rem 1.5rem 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.custom-dialog-actions .btn {
+    min-width: 100px;
+}
+
+/* 适配暗色模式 (如果系统变量未定义则使用默认值) */
+@media (prefers-color-scheme: dark) {
+    .custom-dialog-container {
+        background: var(--bg-primary, #1e293b);
+    }
+    .custom-dialog-header h3 {
+        color: var(--text-primary, #f1f5f9);
+    }
+    .custom-dialog-body {
+        color: var(--text-secondary, #94a3b8);
+    }
+}
 `;
