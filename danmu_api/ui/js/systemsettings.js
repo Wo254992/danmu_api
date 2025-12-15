@@ -1177,6 +1177,9 @@ function renderValueInput(item) {
                 <button type="button" class="btn btn-sm btn-secondary" onclick="addRandomColor()" title="随机添加颜色">
                     <span class="btn-icon-text">🎲 随机</span>
                 </button>
+                <button type="button" class="btn btn-sm btn-primary" onclick="showBatchImportModal()" title="批量导入颜色">
+                    <span class="btn-icon-text">📥 批量导入</span>
+                </button>
                 <button type="button" class="btn btn-sm btn-danger" onclick="resetColorPool()" title="重置为默认">
                     <span class="btn-icon-text">↺ 重置</span>
                 </button>
@@ -1205,7 +1208,51 @@ function renderValueInput(item) {
         \`;
 
         setupColorDragAndDrop();
-        
+        // 添加批量导入模态框（只在 color-list 类型时添加一次）
+        if (!document.getElementById('batch-import-modal')) {
+            const modalHTML = \`
+                <div id="batch-import-modal" class="batch-import-modal">
+                    <div class="batch-import-container">
+                        <div class="batch-import-header">
+                            <h3 class="batch-import-title">
+                                📥 批量导入颜色
+                            </h3>
+                            <button type="button" class="batch-import-close" onclick="closeBatchImportModal()">×</button>
+                        </div>
+                        
+                        <div class="batch-import-hint">
+                            <strong>支持的格式：</strong>
+                            • HEX 格式：#FFFFFF 或 FFFFFF<br>
+                            • 十进制格式：16777215<br>
+                            • 多个颜色可用逗号、空格或换行分隔<br>
+                            • 示例：#FF5733, 16777215, #00FF00
+                        </div>
+                        
+                        <textarea id="batch-import-textarea" 
+                                  class="batch-import-textarea" 
+                                  placeholder="输入颜色值，支持多种格式...
+例如：
+#FFFFFF, #FF5733, #00FF00
+16777215, 16744319, 65280
+FFFFFF FF5733 00FF00"></textarea>
+                        
+                        <div id="batch-import-preview" class="batch-import-preview" style="display: none;">
+                            <div class="batch-import-preview-title">预览 (<span id="preview-count">0</span> 个颜色)</div>
+                            <div id="batch-import-preview-colors" class="batch-import-preview-colors"></div>
+                        </div>
+                        
+                        <div class="batch-import-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeBatchImportModal()">取消</button>
+                            <button type="button" class="btn btn-primary" onclick="previewBatchImport()">预览</button>
+                            <button type="button" class="btn btn-success" onclick="confirmBatchImport()">导入</button>
+                        </div>
+                    </div>
+                </div>
+            \`;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        setupColorDragAndDrop();
         // 同步拾色器和输入框
         const colorPicker = document.getElementById('color-picker-input');
         const hexInput = document.getElementById('color-hex-input');
@@ -1642,4 +1689,168 @@ function handleColorDrop(e) {
     }
     return false;
 }
+/* ========================================
+   批量导入颜色功能
+   ======================================== */
+function showBatchImportModal() {
+    const modal = document.getElementById('batch-import-modal');
+    if (modal) {
+        modal.classList.add('active');
+        document.getElementById('batch-import-textarea').value = '';
+        document.getElementById('batch-import-preview').style.display = 'none';
+    }
+}
+
+function closeBatchImportModal() {
+    const modal = document.getElementById('batch-import-modal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+function parseBatchColorInput(input) {
+    const colors = [];
+    const errors = [];
+    
+    // 分割输入：支持逗号、空格、换行
+    const rawValues = input
+        .split(/[\\s,\\n]+/)
+        .map(v => v.trim())
+        .filter(v => v.length > 0);
+    
+    rawValues.forEach((value, index) => {
+        let decimal = null;
+        
+        // 移除可能的 # 号
+        const cleanValue = value.replace(/^#/, '');
+        
+        // 尝试解析为 HEX
+        if (/^[0-9A-Fa-f]{6}$/.test(cleanValue)) {
+            decimal = parseInt(cleanValue, 16);
+        } 
+        // 尝试解析为 3 位 HEX 简写
+        else if (/^[0-9A-Fa-f]{3}$/.test(cleanValue)) {
+            const expanded = cleanValue.split('').map(c => c + c).join('');
+            decimal = parseInt(expanded, 16);
+        }
+        // 尝试解析为十进制
+        else if (/^\\d+$/.test(cleanValue)) {
+            decimal = parseInt(cleanValue, 10);
+            // 验证范围
+            if (decimal < 0 || decimal > 16777215) {
+                errors.push(\`第 \${index + 1} 个值 "\${value}" 超出有效范围 (0-16777215)\`);
+                return;
+            }
+        }
+        // 无法识别的格式
+        else {
+            errors.push(\`第 \${index + 1} 个值 "\${value}" 格式无效\`);
+            return;
+        }
+        
+        if (decimal !== null && !isNaN(decimal)) {
+            colors.push(decimal);
+        }
+    });
+    
+    return { colors, errors };
+}
+
+function previewBatchImport() {
+    const textarea = document.getElementById('batch-import-textarea');
+    const input = textarea.value.trim();
+    
+    if (!input) {
+        customAlert('请输入要导入的颜色值', '⚠️ 提示');
+        return;
+    }
+    
+    const { colors, errors } = parseBatchColorInput(input);
+    
+    if (errors.length > 0) {
+        const errorMsg = '解析错误：\\n\\n' + errors.join('\\n');
+        customAlert(errorMsg, '⚠️ 格式错误');
+        return;
+    }
+    
+    if (colors.length === 0) {
+        customAlert('没有找到有效的颜色值', '⚠️ 提示');
+        return;
+    }
+    
+    // 显示预览
+    const previewContainer = document.getElementById('batch-import-preview');
+    const previewColors = document.getElementById('batch-import-preview-colors');
+    const previewCount = document.getElementById('preview-count');
+    
+    previewCount.textContent = colors.length;
+    previewColors.innerHTML = colors.map(colorInt => {
+        const hex = '#' + colorInt.toString(16).padStart(6, '0').toUpperCase();
+        return \`<div class="batch-import-preview-chip" style="background-color: \${hex};" title="\${hex} (\${colorInt})"></div>\`;
+    }).join('');
+    
+    previewContainer.style.display = 'block';
+    
+    // 添加预览动画
+    previewContainer.style.animation = 'fadeInUp 0.4s ease-out';
+}
+
+function confirmBatchImport() {
+    const textarea = document.getElementById('batch-import-textarea');
+    const input = textarea.value.trim();
+    
+    if (!input) {
+        customAlert('请输入要导入的颜色值', '⚠️ 提示');
+        return;
+    }
+    
+    const { colors, errors } = parseBatchColorInput(input);
+    
+    if (errors.length > 0) {
+        const errorMsg = '解析错误：\\n\\n' + errors.join('\\n');
+        customAlert(errorMsg, '⚠️ 格式错误');
+        return;
+    }
+    
+    if (colors.length === 0) {
+        customAlert('没有找到有效的颜色值', '⚠️ 提示');
+        return;
+    }
+    
+    // 询问导入方式
+    customConfirm(
+        \`检测到 \${colors.length} 个有效颜色\\n\\n选择导入方式：\\n• 确定 = 追加到现有颜色池\\n• 取消 = 替换现有颜色池\`,
+        '📥 导入确认'
+    ).then(append => {
+        const container = document.getElementById('color-pool-container');
+        
+        if (!append) {
+            // 替换模式：清空现有颜色
+            container.innerHTML = '';
+        }
+        
+        // 添加新颜色
+        colors.forEach((colorInt, index) => {
+            const chip = createColorChip(colorInt);
+            chip.style.animationDelay = (index * 0.05) + 's';
+            container.appendChild(chip);
+        });
+        
+        updateColorPoolInput();
+        closeBatchImportModal();
+        
+        // 显示成功提示
+        const modeText = append ? '追加' : '替换';
+        showSuccessAnimation(\`成功\${modeText} \${colors.length} 个颜色\`);
+        addLog(\`✅ 批量导入颜色成功：\${modeText}了 \${colors.length} 个颜色\`, 'success');
+    });
+}
+
+// 点击模态框背景关闭
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('batch-import-modal');
+    if (modal && e.target === modal) {
+        closeBatchImportModal();
+    }
+});
 `;
