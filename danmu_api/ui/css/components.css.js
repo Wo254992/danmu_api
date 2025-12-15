@@ -725,13 +725,13 @@ export const componentsCssContent = /* css */ `
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-2xl);
+    padding: var(--spacing-xl);
     border-bottom: 2px solid var(--border-color);
     background: var(--bg-secondary);
 }
 
 .modal-title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--text-primary);
     margin: 0;
@@ -761,15 +761,15 @@ export const componentsCssContent = /* css */ `
 }
 
 .modal-body {
-    padding: var(--spacing-2xl);
+    padding: var(--spacing-xl);
     background: var(--bg-primary);
 }
 
 .modal-desc {
     color: var(--text-secondary);
     margin-bottom: var(--spacing-lg);
-    line-height: 1.7;
-    font-size: 0.9375rem;
+    line-height: 1.6;
+    font-size: 0.875rem;
 }
 
 .modal-list {
@@ -820,7 +820,7 @@ export const componentsCssContent = /* css */ `
     display: flex;
     justify-content: flex-end;
     gap: var(--spacing-sm);
-    padding: var(--spacing-2xl);
+    padding: var(--spacing-xl);
     border-top: 2px solid var(--border-color);
     flex-wrap: wrap;
     background: var(--bg-secondary);
