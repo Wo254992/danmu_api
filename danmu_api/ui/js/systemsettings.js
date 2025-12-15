@@ -1565,6 +1565,18 @@ function syncHexToColorPicker(hexValue) {
     }
 }
 
+function isCoarsePointerDevice() {
+    return (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ||
+           /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+}
+
+function blurActiveElement() {
+    const el = document.activeElement;
+    if (el && typeof el.blur === 'function') {
+        el.blur();
+    }
+}
+
 function addColorFromInput() {
     const hexInput = document.getElementById('color-hex-input');
     const picker = document.getElementById('color-picker-input');
@@ -1583,7 +1595,11 @@ function addColorFromInput() {
     
     if (hexValue.length !== 6) {
         customAlert('请输入有效的6位HEX颜色代码\\n例如: FFFFFF 或 FF5733', '⚠️ 格式错误');
-        hexInput.focus();
+        if (!isCoarsePointerDevice()) {
+            hexInput.focus();
+        } else {
+            blurActiveElement();
+        }
         return;
     }
     
@@ -1591,6 +1607,11 @@ function addColorFromInput() {
     
     if (isNaN(decimal)) {
         customAlert('无效的颜色值', '⚠️ 格式错误');
+        if (!isCoarsePointerDevice()) {
+            hexInput.focus();
+        } else {
+            blurActiveElement();
+        }
         return;
     }
     
@@ -1601,7 +1622,13 @@ function addColorFromInput() {
     
     // 清空输入框
     hexInput.value = '';
-    hexInput.focus();
+    
+    // 移动端：不要强制 focus，否则会弹出软键盘
+    if (!isCoarsePointerDevice()) {
+        hexInput.focus();
+    } else {
+        blurActiveElement();
+    }
     
     // 添加成功反馈
     chip.style.animation = 'colorChipFadeIn 0.4s ease-out, pulse 0.6s ease-out';
