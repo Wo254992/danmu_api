@@ -1859,7 +1859,6 @@ function confirmBatchImport() {
     
     // 延迟一下再显示导入方式选择，等待模态框关闭动画完成
     setTimeout(() => {
-        // 创建自定义三选项对话框
         showImportModeDialog(colors);
     }, 350);
 }
@@ -2010,4 +2009,190 @@ document.addEventListener('click', function(e) {
         closeBatchImportModal();
     }
 });
+/* ========================================
+   导入方式选择对话框（追加/替换/取消）
+   ======================================== */
+// 全局变量存储待导入的颜色
+let pendingImportColors = null;
+
+function showImportModeDialog(colors) {
+    // 保存颜色数据到全局变量
+    pendingImportColors = colors;
+    
+    const dialog = document.createElement('div');
+    dialog.className = 'custom-dialog-overlay';
+    dialog.id = 'import-mode-dialog';
+    dialog.innerHTML = \`
+        <div class="custom-dialog-container">
+            <div class="custom-dialog-header">
+                <h3>📥 选择导入方式</h3>
+            </div>
+            <div class="custom-dialog-body">
+                <p>检测到 <strong>\${colors.length}</strong> 个有效颜色</p>
+                <p>请选择导入方式：</p>
+            </div>
+            <div class="custom-dialog-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeImportModeDialog('cancel')">
+                    ❌ 取消
+                </button>
+                <button type="button" class="btn btn-warning" onclick="closeImportModeDialog('replace')">
+                    🔄 替换
+                </button>
+                <button type="button" class="btn btn-primary" onclick="closeImportModeDialog('append')">
+                    ➕ 追加
+                </button>
+            </div>
+        </div>
+    \`;
+    
+    // 添加样式（只添加一次）
+    if (!document.getElementById('import-mode-dialog-style')) {
+        const style = document.createElement('style');
+        style.id = 'import-mode-dialog-style';
+        style.textContent = \`
+            .custom-dialog-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                backdrop-filter: blur(8px);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.3s ease-out;
+            }
+            
+            .custom-dialog-container {
+                background: #ffffff;
+                border-radius: 16px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                max-width: 500px;
+                width: 90%;
+                animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+            
+            @media (prefers-color-scheme: dark) {
+                .custom-dialog-container {
+                    background: #1e293b;
+                }
+            }
+            
+            .custom-dialog-header {
+                padding: 1.5rem;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            }
+            
+            @media (prefers-color-scheme: dark) {
+                .custom-dialog-header {
+                    border-bottom-color: rgba(255, 255, 255, 0.1);
+                }
+            }
+            
+            .custom-dialog-header h3 {
+                margin: 0;
+                font-size: 1.5rem;
+                color: #1e293b;
+            }
+            
+            @media (prefers-color-scheme: dark) {
+                .custom-dialog-header h3 {
+                    color: #f1f5f9;
+                }
+            }
+            
+            .custom-dialog-body {
+                padding: 1.5rem;
+                color: #64748b;
+                line-height: 1.6;
+            }
+            
+            @media (prefers-color-scheme: dark) {
+                .custom-dialog-body {
+                    color: #94a3b8;
+                }
+            }
+            
+            .custom-dialog-body strong {
+                color: #3b82f6;
+                font-size: 1.2em;
+            }
+            
+            .custom-dialog-actions {
+                padding: 1rem 1.5rem 1.5rem;
+                display: flex;
+                gap: 0.75rem;
+                justify-content: flex-end;
+            }
+            
+            .custom-dialog-actions .btn {
+                min-width: 100px;
+            }
+        \`;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(dialog);
+    
+    // 点击背景关闭
+    dialog.addEventListener('click', function(e) {
+        if (e.target === dialog) {
+            closeImportModeDialog('cancel');
+        }
+    });
+}
+
+function closeImportModeDialog(mode) {
+    const dialog = document.getElementById('import-mode-dialog');
+    if (!dialog) return;
+    
+    const dialogContainer = dialog.querySelector('.custom-dialog-container');
+    if (dialogContainer) {
+        dialogContainer.style.animation = 'modalSlideOut 0.3s ease-out';
+    }
+    
+    setTimeout(() => {
+        dialog.remove();
+    }, 300);
+    
+    if (mode === 'cancel' || !pendingImportColors) {
+        addLog('ℹ️ 用户取消了批量导入操作', 'info');
+        pendingImportColors = null;
+        return;
+    }
+    
+    const colors = pendingImportColors;
+    const container = document.getElementById('color-pool-container');
+    
+    if (!container) {
+        addLog('❌ 找不到颜色池容器', 'error');
+        pendingImportColors = null;
+        return;
+    }
+    
+    if (mode === 'replace') {
+        // 替换模式：清空现有颜色
+        container.innerHTML = '';
+        addLog(\`🔄 清空现有颜色池\`, 'info');
+    }
+    
+    // 添加新颜色
+    addLog(\`➕ 开始添加 \${colors.length} 个颜色\`, 'info');
+    colors.forEach((colorInt, index) => {
+        const chip = createColorChip(colorInt);
+        chip.style.animationDelay = (index * 0.05) + 's';
+        container.appendChild(chip);
+    });
+    
+    updateColorPoolInput();
+    
+    const modeText = mode === 'append' ? '追加' : '替换';
+    showSuccessAnimation(\`成功\${modeText} \${colors.length} 个颜色\`);
+    addLog(\`✅ 批量导入颜色成功：\${modeText}了 \${colors.length} 个颜色\`, 'success');
+    
+    // 清理全局变量
+    pendingImportColors = null;
+}
 `;
