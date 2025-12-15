@@ -1203,6 +1203,10 @@ function renderValueInput(item) {
                         <span class="pool-count-icon">🎨</span>
                         <span id="pool-count">\${colors.length}</span> 个颜色
                     </span>
+                    <span class="pool-count-badge" style="background: linear-gradient(135deg, #9ca3af, #6b7280); margin-left: 8px;" title="白色 (16777215) 占比">
+                        <span class="pool-count-icon">⚪</span>
+                        <span id="white-percent">\${colors.length > 0 ? Math.round((colors.filter(c => parseInt(c) === 16777215).length / colors.length) * 100) : 0}%</span> 白色
+                    </span>
                 </span>
             </div>
         \`;
@@ -1494,6 +1498,12 @@ function updateColorPoolInput() {
     // 更新计数
     const countEl = document.getElementById('pool-count');
     if (countEl) countEl.textContent = values.length;
+
+    // 更新白色占比
+    const whiteCount = values.filter(v => parseInt(v) === 16777215).length;
+    const whitePercent = values.length > 0 ? Math.round((whiteCount / values.length) * 100) : 0;
+    const percentEl = document.getElementById('white-percent');
+    if (percentEl) percentEl.textContent = whitePercent + '%';
     
     // 更新容器空状态
     const container = document.getElementById('color-pool-container');
