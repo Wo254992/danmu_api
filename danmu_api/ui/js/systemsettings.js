@@ -1876,10 +1876,12 @@ function confirmBatchImport() {
         updateColorPoolInput();
         closeBatchImportModal();
         
-        // 显示成功提示
+        // 等待批量导入模态框关闭动画完成，再显示成功提示
         const modeText = append ? '追加' : '替换';
-        showSuccessAnimation(\`成功\${modeText} \${colors.length} 个颜色\`);
-        addLog(\`✅ 批量导入颜色成功：\${modeText}了 \${colors.length} 个颜色\`, 'success');
+        setTimeout(() => {
+            showSuccessAnimation(\`成功\${modeText} \${colors.length} 个颜色\`);
+            addLog(\`✅ 批量导入颜色成功：\${modeText}了 \${colors.length} 个颜色\`, 'success');
+        }, 300);
     });
 }
 
