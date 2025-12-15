@@ -10,7 +10,9 @@ import { logviewJsContent } from "./js/logview.js";
 import { apitestJsContent } from "./js/apitest.js";
 import { pushDanmuJsContent } from "./js/pushdanmu.js";
 import { systemSettingsJsContent } from "./js/systemsettings.js";
-
+import { previewStatsCssContent } from "./css/preview-stats.css.js";
+import { modeBadgeCssContent } from "./css/mode-badge.css.js";
+import { colorsCssContent } from "./css/colors.css.js";
 // language=HTML
 export const HTML_TEMPLATE = /* html */ `
 <!DOCTYPE html>
@@ -25,7 +27,11 @@ export const HTML_TEMPLATE = /* html */ `
     <style>${formsCssContent}</style>
     <style>${responsiveCssContent}</style>
     <style>${dynamicCssContent}</style>
+    <style>${previewStatsCssContent}</style>
+    <style>${modeBadgeCssContent}</style>
+    <style>${colorsCssContent}</style>
 </head>
+
 <body>
     <!-- 顶部进度条 -->
     <div class="progress-bar-top" id="progress-bar-top"></div>
