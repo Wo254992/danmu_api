@@ -254,156 +254,23 @@ export const componentsCssContent = /* css */ `
     margin-top: var(--spacing-sm);
     font-style: italic;
 }
-/* ========================================
-   日志过滤器
-   ======================================== */
-.log-filters {
-    display: flex;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-xl);
-    padding: var(--spacing-md);
-    background: var(--bg-card);
-    backdrop-filter: var(--blur-md);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border-color);
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-.log-filters::-webkit-scrollbar {
-    height: 4px;
-}
-
-.log-filter-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    padding: 0.75rem 1.25rem;
-    background: var(--bg-secondary);
-    border: 2px solid var(--border-color);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    white-space: nowrap;
-    position: relative;
-    overflow: hidden;
-    font-weight: 600;
-    font-size: 0.875rem;
-    flex-shrink: 0;
-}
-
-.log-filter-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
-    transition: width var(--transition-base);
-    z-index: 0;
-}
-
-.log-filter-btn:hover::before {
-    width: 100%;
-}
-
-.log-filter-btn:hover {
-    border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.log-filter-btn.active {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-    color: white;
-    border-color: transparent;
-    box-shadow: var(--shadow-colored);
-    transform: translateY(-2px);
-}
-
-.log-filter-btn.active .filter-icon {
-    transform: scale(1.2);
-}
-
-.filter-icon {
-    font-size: 1.125rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform var(--transition-fast);
-    z-index: 1;
-    position: relative;
-}
-
-.filter-text {
-    font-size: 0.875rem;
-    font-weight: 600;
-    z-index: 1;
-    position: relative;
-}
-
-.filter-badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 24px;
-    height: 24px;
-    padding: 0 6px;
-    background: var(--danger-color);
-    color: white;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    z-index: 1;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-}
-
-.log-filter-btn.active .filter-badge {
-    background: rgba(255, 255, 255, 0.3);
-    color: white;
-}
-
-.log-filter-btn[data-filter="all"] .filter-badge {
-    background: var(--primary-color);
-}
-
-.log-filter-btn[data-filter="error"] .filter-badge {
-    background: var(--danger-color);
-}
-
-.log-filter-btn[data-filter="warn"] .filter-badge {
-    background: var(--warning-color);
-}
-
-.log-filter-btn[data-filter="info"] .filter-badge {
-    background: var(--info-color);
-}
-
-.log-filter-btn[data-filter="success"] .filter-badge {
-    background: var(--success-color);
-}
 
 /* ========================================
-   日志终端容器
+   日志终端
    ======================================== */
 .log-terminal {
     background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
     border-radius: var(--border-radius-lg);
-    padding: 0;
+    padding: var(--spacing-xl);
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
     font-size: 0.875rem;
     line-height: 1.7;
     color: #c9d1d9;
     max-height: 600px;
     overflow-y: auto;
-    overflow-x: hidden;
     box-shadow: var(--shadow-inner), var(--shadow-lg);
     border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
-    word-wrap: break-word;
 }
 
 .log-terminal::before {
@@ -412,55 +279,24 @@ export const componentsCssContent = /* css */ `
     top: 0;
     left: 0;
     right: 0;
-    height: 50px;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, transparent 100%);
+    height: 40px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, transparent 100%);
     pointer-events: none;
-    z-index: 1;
 }
 
-.log-terminal::-webkit-scrollbar {
-    width: 8px;
-}
-
-.log-terminal::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
-}
-
-.log-terminal::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-}
-
-.log-terminal::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-/* ========================================
-   日志条目
-   ======================================== */
 .log-entry {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-left: 4px solid transparent;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-left: 3px solid transparent;
+    margin-bottom: var(--spacing-xs);
+    border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
     transition: all var(--transition-fast);
-    animation: logFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
-    min-height: 48px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.log-icon {
-    display: none;
+    animation: logFadeIn 0.3s ease-out;
 }
 
 @keyframes logFadeIn {
     from {
         opacity: 0;
-        transform: translateX(-20px);
+        transform: translateX(-10px);
     }
     to {
         opacity: 1;
@@ -468,227 +304,29 @@ export const componentsCssContent = /* css */ `
     }
 }
 
-.log-entry::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 0;
-    background: rgba(255, 255, 255, 0.03);
-    transition: width var(--transition-fast);
-}
-
 .log-entry:hover {
     background: rgba(255, 255, 255, 0.05);
 }
 
-.log-entry:hover::before {
-    width: 100%;
-}
-
-.log-icon {
-    font-size: 1rem;
-    flex-shrink: 0;
-    line-height: 1.7;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    margin-top: 2px;
-}
-
-.log-time {
-    color: rgba(201, 209, 217, 0.6);
-    font-size: 0.8125rem;
-    flex-shrink: 0;
-    font-weight: 500;
-    min-width: 90px;
-    white-space: nowrap;
-}
-
-.log-message {
-    flex: 1;
-    word-wrap: break-word;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    max-width: 100%;
-    min-width: 0;
-}
-/* ========================================
-   日志类型样式
-   ======================================== */
-.log-entry.log-info {
+.log-entry.info {
+    color: #58a6ff;
     border-left-color: #58a6ff;
 }
 
-.log-entry.log-info .log-message {
-    color: #58a6ff;
-}
-
-.log-entry.log-success {
+.log-entry.success {
+    color: #3fb950;
     border-left-color: #3fb950;
 }
 
-.log-entry.log-success .log-message {
-    color: #3fb950;
-}
-
-.log-entry.log-warn {
-    border-left-color: #d29922;
-    background: rgba(210, 153, 34, 0.05);
-}
-
-.log-entry.log-warn .log-message {
+.log-entry.warn {
     color: #d29922;
+    border-left-color: #d29922;
 }
 
-.log-entry.log-error {
-    border-left-color: #f85149;
-    background: rgba(248, 81, 73, 0.1);
-}
-
-.log-entry.log-error .log-message {
+.log-entry.error {
     color: #f85149;
-    font-weight: 600;
-}
-
-/* ========================================
-   空状态
-   ======================================== */
-.log-empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-3xl) var(--spacing-xl);
-    text-align: center;
-    min-height: 300px;
-}
-
-.empty-icon {
-    width: 64px;
-    height: 64px;
-    color: rgba(201, 209, 217, 0.3);
-    margin-bottom: var(--spacing-lg);
-    stroke-width: 1.5;
-}
-
-.empty-text {
-    font-size: 1rem;
-    color: rgba(201, 209, 217, 0.5);
-    font-weight: 600;
-    margin: 0;
-}
-
-/* ========================================
-   自动刷新按钮激活状态
-   ======================================== */
-.btn#autoRefreshBtn.active {
-    background: linear-gradient(135deg, var(--success-color), #34d399);
-    color: white;
-    box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.4);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.4);
-    }
-    50% {
-        box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.6);
-    }
-}
-
-/* ========================================
-   响应式优化
-   ======================================== */
-@media (max-width: 768px) {
-    .log-filters {
-        padding: var(--spacing-sm);
-        gap: var(--spacing-xs);
-    }
-    
-    .log-filter-btn {
-        padding: 0.625rem 1rem;
-        font-size: 0.8125rem;
-    }
-    
-    .filter-icon {
-        font-size: 1rem;
-    }
-    
-    .filter-badge {
-        min-width: 20px;
-        height: 20px;
-        font-size: 0.6875rem;
-    }
-    
-    .log-terminal {
-        max-height: 400px;
-        font-size: 0.8125rem;
-    }
-    
-    .log-entry {
-        padding: var(--spacing-sm) var(--spacing-md);
-        gap: var(--spacing-xs);
-        flex-wrap: wrap;
-    }
-    
-    .log-time {
-        font-size: 0.75rem;
-        min-width: 80px;
-    }
-    
-    .log-message {
-        font-size: 0.8125rem;
-    }
-    
-    .empty-icon {
-        width: 48px;
-        height: 48px;
-    }
-    
-    .empty-text {
-        font-size: 0.875rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .log-filters {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-    }
-    
-    .log-filter-btn {
-        padding: 0.5rem 0.875rem;
-        min-width: auto;
-    }
-    
-    .filter-text {
-        font-size: 0.75rem;
-    }
-    
-    .log-terminal {
-        max-height: 300px;
-    }
-    
-    .log-entry {
-        padding: var(--spacing-xs) var(--spacing-sm);
-        border-left-width: 3px;
-    }
-    
-    .log-icon {
-        font-size: 0.875rem;
-        width: 16px;
-    }
-    
-    .log-time {
-        font-size: 0.6875rem;
-        min-width: 70px;
-    }
+    border-left-color: #f85149;
+    background: rgba(248, 81, 73, 0.05);
 }
 
 /* ========================================
