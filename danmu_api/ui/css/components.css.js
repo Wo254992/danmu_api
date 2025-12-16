@@ -399,9 +399,11 @@ export const componentsCssContent = /* css */ `
     color: #c9d1d9;
     max-height: 600px;
     overflow-y: auto;
+    overflow-x: hidden;
     box-shadow: var(--shadow-inner), var(--shadow-lg);
     border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
+    word-wrap: break-word;
 }
 
 .log-terminal::before {
@@ -446,6 +448,9 @@ export const componentsCssContent = /* css */ `
     transition: all var(--transition-fast);
     animation: logFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
+    min-height: 48px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 @keyframes logFadeIn {
@@ -486,6 +491,7 @@ export const componentsCssContent = /* css */ `
     align-items: center;
     justify-content: center;
     width: 20px;
+    margin-top: 2px;
 }
 
 .log-time {
@@ -494,14 +500,19 @@ export const componentsCssContent = /* css */ `
     flex-shrink: 0;
     font-weight: 500;
     min-width: 90px;
+    white-space: nowrap;
 }
 
 .log-message {
     flex: 1;
+    word-wrap: break-word;
     word-break: break-word;
+    overflow-wrap: break-word;
     line-height: 1.6;
+    white-space: pre-wrap;
+    max-width: 100%;
+    min-width: 0;
 }
-
 /* ========================================
    日志类型样式
    ======================================== */
