@@ -374,9 +374,7 @@ body {
     }
     
     .log-icon {
-        font-size: 0.9375rem;
-        width: 18px;
-        margin-top: 0;
+        display: none;
     }
     
     .log-time {
@@ -1216,8 +1214,7 @@ body {
     }
     
     .log-icon {
-        font-size: 0.875rem;
-        width: 16px;
+        display: none;
     }
     
     .log-time {
@@ -1352,6 +1349,10 @@ body {
     
     .log-entry {
         padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    .log-icon {
+        display: none;
     }
     
     .log-message {
