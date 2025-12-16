@@ -453,6 +453,10 @@ export const componentsCssContent = /* css */ `
     box-sizing: border-box;
 }
 
+.log-icon {
+    display: none;
+}
+
 @keyframes logFadeIn {
     from {
         opacity: 0;
