@@ -41,18 +41,33 @@ function renderLogs() {
         return;
     }
     
-    container.innerHTML = filteredLogs.map(log => {
+    container.innerHTML = filteredLogs.map((log, index) => {
         const typeIcon = getLogTypeIcon(log.type);
         const escapedMessage = escapeHtml(log.message);
+        const shortTime = log.timestamp.substring(0, 5); // 只显示 HH:MM
+        const isLongMessage = escapedMessage.length > 120;
+        const displayMessage = isLongMessage ? escapedMessage.substring(0, 120) + '...' : escapedMessage;
+        const logId = \`log-\${index}\`;
         
         return \`
-            <div class="log-entry log-\${log.type}" data-type="\${log.type}">
-                <div class="log-header">
+            <div class="log-entry log-\${log.type}" data-type="\${log.type}" data-full="\${isLongMessage}">
+                <div class="log-meta">
                     <span class="log-icon">\${typeIcon}</span>
-                    <span class="log-timestamp">[\${log.timestamp}]</span>
-                    <span class="log-type-badge">\${getLogTypeText(log.type)}</span>
+                    <span class="log-time">\${shortTime}</span>
+                    <span class="log-type-tag log-type-\${log.type}">\${getLogTypeText(log.type)}</span>
                 </div>
-                <div class="log-message">\${escapedMessage}</div>
+                <div class="log-content">
+                    <div class="log-message" id="\${logId}-short">\${displayMessage}</div>
+                    \${isLongMessage ? \`
+                        <div class="log-message-full" id="\${logId}-full" style="display: none;">\${escapedMessage}</div>
+                        <button class="log-expand-btn" onclick="toggleLogMessage('\${logId}')">
+                            <span class="expand-text">展开</span>
+                            <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    \` : ''}
+                </div>
             </div>
         \`;
     }).join('');
@@ -315,5 +330,31 @@ function highlightJSON(obj) {
         }
         return '<span class="' + cls + '">' + match + '</span>';
     });
+}
+/* ========================================
+   切换日志消息展开/收起
+   ======================================== */
+function toggleLogMessage(logId) {
+    const shortMsg = document.getElementById(\`\${logId}-short\`);
+    const fullMsg = document.getElementById(\`\${logId}-full\`);
+    const btn = event.target.closest('.log-expand-btn');
+    const expandText = btn.querySelector('.expand-text');
+    const expandIcon = btn.querySelector('.expand-icon');
+    
+    if (fullMsg.style.display === 'none') {
+        // 展开
+        shortMsg.style.display = 'none';
+        fullMsg.style.display = 'block';
+        expandText.textContent = '收起';
+        expandIcon.style.transform = 'rotate(180deg)';
+        btn.classList.add('expanded');
+    } else {
+        // 收起
+        shortMsg.style.display = 'block';
+        fullMsg.style.display = 'none';
+        expandText.textContent = '展开';
+        expandIcon.style.transform = 'rotate(0deg)';
+        btn.classList.remove('expanded');
+    }
 }
 `;
