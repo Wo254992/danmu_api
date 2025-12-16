@@ -437,24 +437,20 @@ export const componentsCssContent = /* css */ `
 }
 
 /* ========================================
-   日志条目
+   日志条目 - 优化版
    ======================================== */
 .log-entry {
     display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
+    flex-direction: column;
+    gap: var(--spacing-xs);
     padding: var(--spacing-md) var(--spacing-lg);
-    border-left: 4px solid transparent;
+    border-left: 3px solid transparent;
     transition: all var(--transition-fast);
     animation: logFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
-    min-height: 48px;
     width: 100%;
     box-sizing: border-box;
-}
-
-.log-icon {
-    display: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 @keyframes logFadeIn {
@@ -487,36 +483,132 @@ export const componentsCssContent = /* css */ `
     width: 100%;
 }
 
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+/* 日志元信息 */
+.log-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-wrap: nowrap;
+}
+
 .log-icon {
     font-size: 1rem;
     flex-shrink: 0;
-    line-height: 1.7;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 20px;
-    margin-top: 2px;
+    height: 20px;
 }
 
 .log-time {
-    color: rgba(201, 209, 217, 0.6);
-    font-size: 0.8125rem;
+    color: rgba(201, 209, 217, 0.5);
+    font-size: 0.75rem;
     flex-shrink: 0;
-    font-weight: 500;
-    min-width: 90px;
-    white-space: nowrap;
+    font-weight: 600;
+    font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+    letter-spacing: 0.5px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.log-type-tag {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.log-type-tag.log-type-info {
+    background: rgba(88, 166, 255, 0.2);
+    color: #58a6ff;
+}
+
+.log-type-tag.log-type-success {
+    background: rgba(63, 185, 80, 0.2);
+    color: #3fb950;
+}
+
+.log-type-tag.log-type-warn {
+    background: rgba(210, 153, 34, 0.2);
+    color: #d29922;
+}
+
+.log-type-tag.log-type-error {
+    background: rgba(248, 81, 73, 0.2);
+    color: #f85149;
+}
+
+/* 日志内容区 */
+.log-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding-left: 28px;
 }
 
 .log-message {
-    flex: 1;
+    color: rgba(201, 209, 217, 0.9);
+    line-height: 1.6;
     word-wrap: break-word;
     word-break: break-word;
     overflow-wrap: break-word;
-    line-height: 1.6;
     white-space: pre-wrap;
-    max-width: 100%;
-    min-width: 0;
+    font-size: 0.8125rem;
 }
+
+.log-message-full {
+    color: rgba(201, 209, 217, 0.9);
+    line-height: 1.6;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    font-size: 0.8125rem;
+}
+
+/* 展开按钮 */
+.log-expand-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: rgba(201, 209, 217, 0.7);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    margin-top: 4px;
+    align-self: flex-start;
+}
+
+.log-expand-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(201, 209, 217, 0.9);
+}
+
+.log-expand-btn .expand-icon {
+    width: 14px;
+    height: 14px;
+    transition: transform var(--transition-fast);
+}
+
+.log-expand-btn.expanded .expand-icon {
+    transform: rotate(180deg);
+}
+
 /* ========================================
    日志类型样式
    ======================================== */
@@ -524,35 +616,18 @@ export const componentsCssContent = /* css */ `
     border-left-color: #58a6ff;
 }
 
-.log-entry.log-info .log-message {
-    color: #58a6ff;
-}
-
 .log-entry.log-success {
     border-left-color: #3fb950;
 }
 
-.log-entry.log-success .log-message {
-    color: #3fb950;
-}
-
 .log-entry.log-warn {
     border-left-color: #d29922;
-    background: rgba(210, 153, 34, 0.05);
-}
-
-.log-entry.log-warn .log-message {
-    color: #d29922;
+    background: rgba(210, 153, 34, 0.03);
 }
 
 .log-entry.log-error {
     border-left-color: #f85149;
-    background: rgba(248, 81, 73, 0.1);
-}
-
-.log-entry.log-error .log-message {
-    color: #f85149;
-    font-weight: 600;
+    background: rgba(248, 81, 73, 0.05);
 }
 
 /* ========================================
