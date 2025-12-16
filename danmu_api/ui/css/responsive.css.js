@@ -515,6 +515,58 @@ body {
         font-size: 0.9375rem;
     }
 
+    /* 日志过滤器 - 移动端 */
+    .log-filters {
+        padding: var(--spacing-sm);
+        gap: var(--spacing-xs);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .log-filter-btn {
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .filter-icon {
+        font-size: 1rem;
+    }
+
+    .filter-badge {
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        font-size: 0.6875rem;
+        line-height: 20px;
+    }
+
+    /* 日志条目 - 移动端 */
+    .log-entry {
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .log-header {
+        gap: var(--spacing-xs);
+    }
+
+    .log-icon {
+        font-size: 1rem;
+    }
+
+    .log-timestamp {
+        font-size: 0.75rem;
+    }
+
+    .log-type-badge {
+        padding: 3px 8px;
+        font-size: 0.6875rem;
+    }
+
+    .log-message {
+        font-size: 0.8125rem;
+        line-height: 1.5;
+    }
+
     /* 日志终端 */
     .log-terminal {
         font-size: 0.8125rem;
@@ -524,6 +576,18 @@ body {
         box-sizing: border-box;
     }
 
+    .log-empty-state {
+        padding: var(--spacing-2xl);
+    }
+
+    .log-empty-state .empty-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .log-empty-state .empty-text {
+        font-size: 1rem;
+    }
     /* API 响应 */
     .response-content {
         font-size: 0.8125rem;
