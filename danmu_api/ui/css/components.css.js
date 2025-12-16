@@ -254,13 +254,200 @@ export const componentsCssContent = /* css */ `
     margin-top: var(--spacing-sm);
     font-style: italic;
 }
+/* ========================================
+   日志过滤器
+   ======================================== */
+.log-filters {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+    flex-wrap: wrap;
+    background: var(--bg-card);
+    backdrop-filter: var(--blur-md);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+}
+
+.log-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 0.625rem 1.125rem;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    position: relative;
+    overflow: hidden;
+}
+
+.log-filter-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.log-filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--border-color-hover);
+}
+
+.log-filter-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+    border-color: transparent;
+    box-shadow: var(--shadow-colored);
+    transform: translateY(-2px);
+}
+
+.log-filter-btn.active .filter-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+}
+
+.filter-icon {
+    font-size: 1.125rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.filter-text {
+    position: relative;
+    z-index: 1;
+}
+
+.filter-count {
+    min-width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gray-200);
+    color: var(--text-primary);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0 8px;
+    position: relative;
+    z-index: 1;
+    transition: all var(--transition-fast);
+}
 
 /* ========================================
    日志终端
    ======================================== */
+.log-terminal-wrapper {
+    background: var(--bg-card);
+    backdrop-filter: var(--blur-md);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+}
+
+.log-terminal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.terminal-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.terminal-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.terminal-dot:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 8px currentColor;
+}
+
+.terminal-dot-red {
+    background: #ff5f56;
+}
+
+.terminal-dot-yellow {
+    background: #ffbd2e;
+}
+
+.terminal-dot-green {
+    background: #27c93f;
+}
+
+.terminal-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #c9d1d9;
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    letter-spacing: 0.5px;
+}
+
+.terminal-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.terminal-action-btn {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius-sm);
+    color: #c9d1d9;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    padding: 0;
+}
+
+.terminal-action-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.terminal-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.terminal-action-btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
 .log-terminal {
     background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-    border-radius: var(--border-radius-lg);
     padding: var(--spacing-xl);
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
     font-size: 0.875rem;
@@ -268,8 +455,6 @@ export const componentsCssContent = /* css */ `
     color: #c9d1d9;
     max-height: 600px;
     overflow-y: auto;
-    box-shadow: var(--shadow-inner), var(--shadow-lg);
-    border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
 }
 
@@ -285,12 +470,16 @@ export const componentsCssContent = /* css */ `
 }
 
 .log-entry {
-    padding: var(--spacing-sm) var(--spacing-md);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
     border-left: 3px solid transparent;
     margin-bottom: var(--spacing-xs);
     border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
     transition: all var(--transition-fast);
     animation: logFadeIn 0.3s ease-out;
+    background: rgba(0, 0, 0, 0.2);
 }
 
 @keyframes logFadeIn {
@@ -306,27 +495,72 @@ export const componentsCssContent = /* css */ `
 
 .log-entry:hover {
     background: rgba(255, 255, 255, 0.05);
+    transform: translateX(4px);
+}
+
+.log-timestamp {
+    color: rgba(201, 209, 217, 0.5);
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    font-weight: 500;
+    min-width: 85px;
+}
+
+.log-type-badge {
+    flex-shrink: 0;
+    font-size: 1rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.log-message {
+    flex: 1;
+    word-break: break-word;
 }
 
 .log-entry.info {
-    color: #58a6ff;
     border-left-color: #58a6ff;
 }
 
+.log-entry.info .log-message {
+    color: #58a6ff;
+}
+
 .log-entry.success {
-    color: #3fb950;
     border-left-color: #3fb950;
 }
 
+.log-entry.success .log-message {
+    color: #3fb950;
+}
+
 .log-entry.warn {
-    color: #d29922;
     border-left-color: #d29922;
+    background: rgba(210, 153, 34, 0.05);
+}
+
+.log-entry.warn .log-message {
+    color: #d29922;
 }
 
 .log-entry.error {
-    color: #f85149;
     border-left-color: #f85149;
-    background: rgba(248, 81, 73, 0.05);
+    background: rgba(248, 81, 73, 0.1);
+}
+
+.log-entry.error .log-message {
+    color: #f85149;
+    font-weight: 600;
+}
+
+.log-entry.hidden {
+    display: none;
 }
 
 /* ========================================
