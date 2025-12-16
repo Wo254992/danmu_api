@@ -18,12 +18,32 @@ function renderLogs() {
     if (!container) return;
     
     container.innerHTML = logs.map(log => \`
-        <div class="log-entry \${log.type}">
-            <span style="opacity: 0.7;">[\${log.timestamp}]</span> \${escapeHtml(log.message)}
+        <div class="log-entry \${log.type} \${currentFilter !== 'all' && currentFilter !== log.type ? 'hidden' : ''}">
+            <span class="log-timestamp">[\${log.timestamp}]</span>
+            <span class="log-type-badge \${log.type}">\${getLogTypeIcon(log.type)}</span>
+            <span class="log-message">\${escapeHtml(log.message)}</span>
         </div>
     \`).join('');
     
-    container.scrollTop = container.scrollHeight;
+    if (autoScroll) {
+        container.scrollTop = container.scrollHeight;
+    }
+    
+    updateLogCounts();
+}
+
+
+/* ========================================
+   获取日志类型图标
+   ======================================== */
+function getLogTypeIcon(type) {
+    const icons = {
+        info: 'ℹ️',
+        success: '✅',
+        warn: '⚠️',
+        error: '❌'
+    };
+    return icons[type] || 'ℹ️';
 }
 
 /* ========================================
@@ -138,5 +158,69 @@ function highlightJSON(obj) {
         }
         return '<span class="' + cls + '">' + match + '</span>';
     });
+}
+/* ========================================
+   过滤日志
+   ======================================== */
+let currentFilter = 'all';
+let autoScroll = true;
+
+function filterLogs(type) {
+    currentFilter = type;
+    
+    // 更新按钮状态
+    document.querySelectorAll('.log-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(\`[data-filter="\${type}"]\`).classList.add('active');
+    
+    // 过滤日志
+    const logEntries = document.querySelectorAll('.log-entry');
+    logEntries.forEach(entry => {
+        if (type === 'all' || entry.classList.contains(type)) {
+            entry.classList.remove('hidden');
+        } else {
+            entry.classList.add('hidden');
+        }
+    });
+    
+    updateLogCounts();
+}
+
+/* ========================================
+   更新日志计数
+   ======================================== */
+function updateLogCounts() {
+    const counts = {
+        all: logs.length,
+        info: logs.filter(log => log.type === 'info').length,
+        success: logs.filter(log => log.type === 'success').length,
+        warn: logs.filter(log => log.type === 'warn').length,
+        error: logs.filter(log => log.type === 'error').length
+    };
+    
+    Object.keys(counts).forEach(type => {
+        const countEl = document.getElementById(\`count-\${type}\`);
+        if (countEl) {
+            countEl.textContent = counts[type];
+        }
+    });
+}
+
+/* ========================================
+   切换自动滚动
+   ======================================== */
+function toggleAutoScroll() {
+    autoScroll = !autoScroll;
+    const btn = event.target.closest('.terminal-action-btn');
+    if (autoScroll) {
+        btn.classList.add('active');
+        const container = document.getElementById('log-container');
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    } else {
+        btn.classList.remove('active');
+    }
 }
 `;
