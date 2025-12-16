@@ -218,7 +218,10 @@ export const HTML_TEMPLATE = /* html */ `
             <!-- 日志查看 -->
             <section class="content-section" id="logs-section">
                 <div class="section-header">
-                    <h2 class="section-title">日志查看</h2>
+                    <div>
+                        <h2 class="section-title">日志查看</h2>
+                        <p class="section-desc">实时系统运行日志，支持按类型筛选</p>
+                    </div>
                     <div class="header-actions">
                         <button class="btn btn-primary" onclick="refreshLogs()">
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -234,9 +237,56 @@ export const HTML_TEMPLATE = /* html */ `
                         </button>
                     </div>
                 </div>
-                <div class="log-terminal" id="log-container"></div>
+                
+                <!-- 日志过滤器 -->
+                <div class="log-filters">
+                    <button class="log-filter-btn active" data-filter="all" onclick="filterLogs('all')">
+                        <span class="filter-icon">📋</span>
+                        <span class="filter-text">全部</span>
+                        <span class="filter-count" id="count-all">0</span>
+                    </button>
+                    <button class="log-filter-btn" data-filter="error" onclick="filterLogs('error')">
+                        <span class="filter-icon">❌</span>
+                        <span class="filter-text">错误</span>
+                        <span class="filter-count" id="count-error">0</span>
+                    </button>
+                    <button class="log-filter-btn" data-filter="warn" onclick="filterLogs('warn')">
+                        <span class="filter-icon">⚠️</span>
+                        <span class="filter-text">警告</span>
+                        <span class="filter-count" id="count-warn">0</span>
+                    </button>
+                    <button class="log-filter-btn" data-filter="success" onclick="filterLogs('success')">
+                        <span class="filter-icon">✅</span>
+                        <span class="filter-text">成功</span>
+                        <span class="filter-count" id="count-success">0</span>
+                    </button>
+                    <button class="log-filter-btn" data-filter="info" onclick="filterLogs('info')">
+                        <span class="filter-icon">ℹ️</span>
+                        <span class="filter-text">信息</span>
+                        <span class="filter-count" id="count-info">0</span>
+                    </button>
+                </div>
+                
+                <!-- 日志终端 -->
+                <div class="log-terminal-wrapper">
+                    <div class="log-terminal-header">
+                        <div class="terminal-controls">
+                            <span class="terminal-dot terminal-dot-red"></span>
+                            <span class="terminal-dot terminal-dot-yellow"></span>
+                            <span class="terminal-dot terminal-dot-green"></span>
+                        </div>
+                        <div class="terminal-title">System Logs</div>
+                        <div class="terminal-actions">
+                            <button class="terminal-action-btn" onclick="toggleAutoScroll()" title="自动滚动">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="log-terminal" id="log-container"></div>
+                </div>
             </section>
-
             <!-- 接口调试 -->
             <section class="content-section" id="api-section">
                 <div class="section-header">
