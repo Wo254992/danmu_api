@@ -426,85 +426,12 @@ function showSuccessAnimation(message) {
         </div>
     \`;
     
-    const style = document.createElement('style');
-    style.textContent = \`
-        .success-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: successFadeIn 0.3s ease-out;
-        }
-        
-        @keyframes successFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes successFadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        
-        .success-content {
-            text-align: center;
-            animation: successBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        
-        @keyframes successBounce {
-            0% {
-                opacity: 0;
-                transform: scale(0.3) translateY(100px);
-            }
-            50% {
-                transform: scale(1.1) translateY(-10px);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-        
-        .success-icon {
-            font-size: 8rem;
-            margin-bottom: 1rem;
-            filter: drop-shadow(0 0 30px rgba(16, 185, 129, 0.6));
-            animation: successPulse 1s ease-in-out infinite;
-        }
-        
-        @keyframes successPulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-        }
-        
-        .success-message {
-            color: white;
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
-        }
-    \`;
-    
-    document.head.appendChild(style);
     document.body.appendChild(successOverlay);
     
     setTimeout(() => {
         successOverlay.style.animation = 'successFadeOut 0.5s ease-out';
         setTimeout(() => {
             successOverlay.remove();
-            style.remove();
         }, 500);
     }, 2000);
 }
@@ -756,35 +683,6 @@ function deleteEnv(index) {
         }
     });
 }
-
-/* ========================================
-   添加淡出动画样式
-   ======================================== */
-const fadeOutStyle = document.createElement('style');
-fadeOutStyle.textContent = \`
-    @keyframes fadeOutRight {
-        from {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateX(100px);
-        }
-    }
-    
-    @keyframes modalSlideOut {
-        from {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-        to {
-            opacity: 0;
-            transform: scale(0.9) translateY(20px);
-        }
-    }
-\`;
-document.head.appendChild(fadeOutStyle);
 
 /* ========================================
    关闭模态框
