@@ -307,7 +307,7 @@ body {
         font-size: 1.125rem;
         margin-bottom: var(--spacing-lg);
     }
-        /* 日志过滤器 - 移动端 */
+/* 日志过滤器 - 移动端 */
     .log-filters {
         padding: var(--spacing-sm);
         gap: var(--spacing-xs);
@@ -346,7 +346,7 @@ body {
     
     /* 日志终端 - 移动端优化 */
     .log-terminal {
-        padding: var(--spacing-sm);
+        padding: 0;
         max-height: 450px;
         font-size: 0.8125rem;
         overflow-x: hidden;
@@ -357,43 +357,53 @@ body {
     .log-entry {
         padding: var(--spacing-sm) var(--spacing-md);
         gap: var(--spacing-xs);
-        flex-direction: column;
-        align-items: stretch;
         border-left-width: 3px;
-        min-height: auto;
         width: 100%;
         box-sizing: border-box;
     }
     
-    .log-entry-header {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-        margin-bottom: var(--spacing-xs);
+    .log-meta {
+        gap: 6px;
         flex-wrap: nowrap;
     }
     
     .log-icon {
-        display: none;
+        width: 16px;
+        height: 16px;
+        font-size: 0.875rem;
     }
     
     .log-time {
         font-size: 0.6875rem;
+        padding: 2px 6px;
         min-width: auto;
-        flex-shrink: 0;
     }
     
-    .log-message {
-        font-size: 0.8125rem;
+    .log-type-tag {
+        font-size: 0.625rem;
+        padding: 2px 6px;
+    }
+    
+    .log-content {
+        padding-left: 22px;
+        gap: 6px;
+    }
+    
+    .log-message,
+    .log-message-full {
+        font-size: 0.75rem;
         line-height: 1.5;
-        padding-left: 0;
-        width: 100%;
-        max-width: 100%;
-        word-wrap: break-word;
-        word-break: break-word;
-        overflow-wrap: break-word;
-        white-space: pre-wrap;
-        box-sizing: border-box;
+    }
+    
+    .log-expand-btn {
+        padding: 3px 8px;
+        font-size: 0.6875rem;
+        margin-top: 2px;
+    }
+    
+    .log-expand-btn .expand-icon {
+        width: 12px;
+        height: 12px;
     }
     /* 模态框 - 移动端优化(不透明背景) */
     .modal-overlay {
