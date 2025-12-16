@@ -917,4 +917,242 @@ export const componentsCssContent = /* css */ `
 .input-group .btn {
     flex-shrink: 0;
 }
+/* ========================================
+   日志过滤器样式
+   ======================================== */
+.log-filters {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+    overflow-x: auto;
+    padding: var(--spacing-md);
+    background: var(--bg-card);
+    backdrop-filter: var(--blur-md);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+    -webkit-overflow-scrolling: touch;
+}
+
+.log-filters::-webkit-scrollbar {
+    height: 6px;
+}
+
+.log-filters::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 3px;
+}
+
+.log-filters::-webkit-scrollbar-thumb {
+    background: var(--gray-300);
+    border-radius: 3px;
+}
+
+.log-filters::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-400);
+}
+
+.log-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 0.75rem 1.25rem;
+    background: var(--bg-secondary);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.log-filter-btn:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color-hover);
+    transform: translateY(-2px);
+}
+
+.log-filter-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+    border-color: transparent;
+    box-shadow: var(--shadow-colored);
+}
+
+.filter-icon {
+    font-size: 1.125rem;
+    line-height: 1;
+}
+
+.filter-text {
+    font-weight: 600;
+}
+
+.filter-badge {
+    display: none;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 24px;
+    text-align: center;
+}
+
+.log-filter-btn.active .filter-badge {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ========================================
+   日志条目样式 - 优化版
+   ======================================== */
+.log-entry {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius-lg);
+    border-left: 4px solid var(--gray-300);
+    transition: all var(--transition-fast);
+    animation: logSlideIn 0.3s ease-out;
+}
+
+@keyframes logSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.log-entry:hover {
+    background: var(--bg-tertiary);
+    transform: translateX(4px);
+    box-shadow: var(--shadow-sm);
+}
+
+.log-entry:last-child {
+    margin-bottom: 0;
+}
+
+.log-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.log-icon {
+    font-size: 1.125rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.log-timestamp {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.log-type-badge {
+    padding: 4px 10px;
+    background: var(--gray-200);
+    color: var(--text-secondary);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.log-message {
+    color: var(--text-primary);
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+/* 不同类型日志的样式 */
+.log-info {
+    border-left-color: #58a6ff;
+}
+
+.log-info .log-type-badge {
+    background: linear-gradient(135deg, #58a6ff, #79c0ff);
+    color: white;
+}
+
+.log-success {
+    border-left-color: #3fb950;
+}
+
+.log-success .log-type-badge {
+    background: linear-gradient(135deg, #3fb950, #56d364);
+    color: white;
+}
+
+.log-warn {
+    border-left-color: #d29922;
+    background: rgba(210, 153, 34, 0.05);
+}
+
+.log-warn .log-type-badge {
+    background: linear-gradient(135deg, #d29922, #e3b341);
+    color: white;
+}
+
+.log-error {
+    border-left-color: #f85149;
+    background: rgba(248, 81, 73, 0.08);
+}
+
+.log-error .log-type-badge {
+    background: linear-gradient(135deg, #f85149, #ff7b72);
+    color: white;
+}
+
+.log-error .log-message {
+    color: #f85149;
+    font-weight: 500;
+}
+
+/* ========================================
+   日志空状态
+   ======================================== */
+.log-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3xl);
+    text-align: center;
+    opacity: 0.6;
+}
+
+.log-empty-state .empty-icon {
+    width: 80px;
+    height: 80px;
+    stroke: var(--text-tertiary);
+    stroke-width: 1.5;
+    margin-bottom: var(--spacing-lg);
+}
+
+.log-empty-state .empty-text {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 500;
+}
 `;
