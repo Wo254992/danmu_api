@@ -307,94 +307,7 @@ body {
         font-size: 1.125rem;
         margin-bottom: var(--spacing-lg);
     }
-        /* 日志过滤器 - 移动端 */
-    .log-filters {
-        padding: var(--spacing-sm);
-        gap: var(--spacing-xs);
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        margin: 0 0 var(--spacing-md) 0;
-    }
-    
-    .log-filters::-webkit-scrollbar {
-        display: none;
-    }
-    
-    .log-filter-btn {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.8125rem;
-        white-space: nowrap;
-        flex-shrink: 0;
-        min-width: auto;
-    }
-    
-    .filter-icon {
-        font-size: 0.9375rem;
-    }
-    
-    .filter-text {
-        font-size: 0.8125rem;
-    }
-    
-    .filter-badge {
-        min-width: 20px;
-        height: 20px;
-        font-size: 0.6875rem;
-        padding: 0 5px;
-    }
-    
-    /* 日志终端 - 移动端优化 */
-    .log-terminal {
-        padding: var(--spacing-sm);
-        max-height: 450px;
-        font-size: 0.8125rem;
-        overflow-x: hidden;
-        width: 100%;
-        box-sizing: border-box;
-    }
-    
-    .log-entry {
-        padding: var(--spacing-sm) var(--spacing-md);
-        gap: var(--spacing-xs);
-        flex-direction: column;
-        align-items: stretch;
-        border-left-width: 3px;
-        min-height: auto;
-        width: 100%;
-        box-sizing: border-box;
-    }
-    
-    .log-entry-header {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-        margin-bottom: var(--spacing-xs);
-        flex-wrap: nowrap;
-    }
-    
-    .log-icon {
-        display: none;
-    }
-    
-    .log-time {
-        font-size: 0.6875rem;
-        min-width: auto;
-        flex-shrink: 0;
-    }
-    
-    .log-message {
-        font-size: 0.8125rem;
-        line-height: 1.5;
-        padding-left: 0;
-        width: 100%;
-        max-width: 100%;
-        word-wrap: break-word;
-        word-break: break-word;
-        overflow-wrap: break-word;
-        white-space: pre-wrap;
-        box-sizing: border-box;
-    }
+
     /* 模态框 - 移动端优化(不透明背景) */
     .modal-overlay {
         padding: 0;
@@ -1199,31 +1112,11 @@ body {
         font-size: 0.875rem;
     }
 
-    /* 日志终端 - 超小屏幕 */
+    /* 日志终端 */
     .log-terminal {
         font-size: 0.75rem;
-        max-height: 350px;
-        padding: var(--spacing-xs) var(--spacing-sm);
-        overflow-x: hidden;
-    }
-    
-    .log-entry {
-        padding: var(--spacing-xs) var(--spacing-sm);
-        gap: 6px;
-        min-height: auto;
-    }
-    
-    .log-icon {
-        display: none;
-    }
-    
-    .log-time {
-        font-size: 0.625rem;
-    }
-    
-    .log-message {
-        font-size: 0.75rem;
-        line-height: 1.4;
+        max-height: 300px;
+        padding: var(--spacing-md);
     }
 
     /* 模态框 */
@@ -1341,25 +1234,6 @@ body {
     .modal-body {
         max-height: calc(96vh - 140px);
     }
-        /* 日志终端 - 横屏优化 */
-    .log-terminal {
-        max-height: 35vh;
-        font-size: 0.8125rem;
-    }
-    
-    .log-entry {
-        padding: var(--spacing-xs) var(--spacing-sm);
-    }
-    
-    .log-icon {
-        display: none;
-    }
-    
-    .log-message {
-        font-size: 0.8125rem;
-        line-height: 1.5;
-    }
-
     /* ==================== 版本卡片 ==================== */
     .version-card {
         margin: var(--spacing-sm);
