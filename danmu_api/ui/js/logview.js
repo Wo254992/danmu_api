@@ -41,16 +41,25 @@ function renderLogs() {
         return;
     }
     
-    container.innerHTML = filteredLogs.map(log => \`
-        <div class="log-entry log-\${log.type}">
-            <span class="log-icon">\${getLogIcon(log.type)}</span>
-            <span class="log-time">[\${log.timestamp}]</span>
-            <span class="log-message">\${escapeHtml(log.message)}</span>
-        </div>
-    \`).join('');
+    container.innerHTML = filteredLogs.map(log => {
+        // 清理消息中的图标字符
+        let cleanMessage = log.message
+            .replace(/^[ℹ️✅❌⚠️]\\s*/, '')  // 移除开头的图标
+            .replace(/[\\uD83D\\uDC49\\uD83D\\uDD0D\\u2699\\uFE0F\\u2705\\u274C\\u26A0\\uFE0F\\u2139\\uFE0F]/g, '') // 移除所有 emoji
+            .trim();
+        
+        return \`
+            <div class="log-entry log-\${log.type}">
+                <span class="log-icon">\${getLogIcon(log.type)}</span>
+                <span class="log-time">[\${log.timestamp}]</span>
+                <span class="log-message">\${escapeHtml(cleanMessage)}</span>
+            </div>
+        \`;
+    }).join('');
     
     container.scrollTop = container.scrollHeight;
 }
+
 
 /* ========================================
    获取日志图标
