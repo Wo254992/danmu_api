@@ -2068,7 +2068,11 @@ function updateColorDisplay(hexColor, decimal) {
     if (previewLarge) previewLarge.style.background = hexColor;
     if (hexDisplay) hexDisplay.value = hexColor.substring(1);
     if (decDisplay) decDisplay.value = decimal;
-    if (hexInput) hexInput.value = hexColor.substring(1);
+    
+    // 修复：如果当前焦点在输入框内，不要强制更新值，防止干扰用户输入
+    if (hexInput && document.activeElement !== hexInput) {
+        hexInput.value = hexColor.substring(1);
+    }
 }
 
 function toggleColorPicker() {
