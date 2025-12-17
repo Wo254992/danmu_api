@@ -446,4 +446,258 @@ export const formsCssContent = /* css */ `
     cursor: not-allowed;
     background: var(--bg-tertiary);
 }
+
+/* ========================================
+   颜色选择器基础
+   ======================================== */
+.color-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.color-input-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.color-input-wrapper {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.color-picker-input {
+    width: 60px;
+    height: 44px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    background: var(--bg-primary);
+}
+
+.color-picker-input:hover {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+.color-hex-input-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 200px;
+}
+
+.color-hex-prefix {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+    pointer-events: none;
+}
+
+.color-hex-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2rem;
+    background: var(--bg-secondary);
+    backdrop-filter: var(--blur-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    transition: all var(--transition-fast);
+}
+
+.color-hex-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: var(--bg-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.color-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.color-add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.color-add-btn:active {
+    transform: translateY(0);
+}
+
+.color-add-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ========================================
+   颜色池样式
+   ======================================== */
+.color-pool-hint {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    backdrop-filter: var(--blur-sm);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--primary-color);
+}
+
+.color-pool-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.btn-icon-text {
+    font-size: 0.875rem;
+}
+
+.color-pool-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    backdrop-filter: var(--blur-sm);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    min-height: 120px;
+    transition: all var(--transition-fast);
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.color-pool-container.empty::before {
+    content: '暂无颜色，点击上方按钮添加';
+    color: var(--text-tertiary);
+    font-size: 0.875rem;
+    width: 100%;
+    text-align: center;
+    line-height: 88px;
+}
+
+.color-chip {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-md);
+    cursor: move;
+    transition: all var(--transition-fast);
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    animation: colorChipFadeIn 0.4s ease-out backwards;
+}
+
+@keyframes colorChipFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.color-chip:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+    z-index: 1;
+}
+
+.color-chip.dragging {
+    opacity: 0.5;
+    transform: scale(0.9);
+}
+
+.color-hex-label {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+}
+
+.remove-chip-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.color-chip:hover .remove-chip-btn {
+    opacity: 1;
+}
+
+.remove-chip-btn:hover {
+    background: var(--danger-color);
+    transform: scale(1.2);
+}
+
+.pool-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pool-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: var(--radius-md);
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.pool-count-icon {
+    font-size: 1rem;
+}
 `;
