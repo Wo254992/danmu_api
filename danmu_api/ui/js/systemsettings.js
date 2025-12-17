@@ -2074,6 +2074,7 @@ function updateColorDisplay(hexColor, decimal) {
 function toggleColorPicker() {
     const dropdown = document.getElementById('color-picker-dropdown');
     const trigger = document.getElementById('color-picker-trigger');
+    const wrapper = document.querySelector('.color-picker-panel-wrapper');
     
     if (!dropdown) return;
     
@@ -2082,11 +2083,18 @@ function toggleColorPicker() {
     if (colorPickerState.isOpen) {
         dropdown.classList.add('active');
         trigger.classList.add('active');
+        if (wrapper) wrapper.classList.add('picker-active');
     } else {
         dropdown.classList.remove('active');
         trigger.classList.remove('active');
+        if (wrapper) {
+            setTimeout(() => {
+                wrapper.classList.remove('picker-active');
+            }, 300);
+        }
     }
 }
+
 
 function handleOutsideClick(e) {
     const wrapper = document.querySelector('.color-picker-panel-wrapper');
