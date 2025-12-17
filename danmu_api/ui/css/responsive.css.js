@@ -64,15 +64,15 @@ export const responsiveCssContent = /* css */ `
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1rem;
+        padding: 0.875rem 1rem;
         background: var(--bg-primary);
         backdrop-filter: var(--blur-md);
         border-radius: var(--radius-lg);
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
         border: 1px solid var(--border-color);
         box-shadow: var(--shadow-sm);
         position: sticky;
-        top: 1rem;
+        top: 0;
         z-index: 100;
     }
 
