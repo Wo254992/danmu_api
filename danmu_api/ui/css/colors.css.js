@@ -88,19 +88,27 @@ export const colorsCssContent = /* css */ `
 
 .color-input-wrapper {
     display: grid;
-    grid-template-columns: 1fr 1.4fr auto;
+    grid-template-columns: 1.2fr 1.4fr auto;
     gap: 8px;
     align-items: stretch;
 }
 
-/* 拾色器区域：更“卡片化” */
-.color-picker-wrapper {
+/* ========================================
+   高级调色板面板
+   ======================================== */
+.color-picker-panel-wrapper {
     position: relative;
+    width: 100%;
+}
+
+.color-picker-trigger {
+    position: relative;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: 8px 10px;
+    padding: 8px 12px;
     background: color-mix(in srgb, #fff 92%, var(--bg-secondary));
     border: 1px solid color-mix(in srgb, var(--border-color) 85%, transparent);
     border-radius: calc(var(--border-radius-sm) + 2px);
@@ -112,7 +120,7 @@ export const colorsCssContent = /* css */ `
         0 6px 18px rgba(0, 0, 0, 0.06);
 }
 
-.color-picker-wrapper:hover {
+.color-picker-trigger:hover {
     border-color: color-mix(in srgb, var(--primary-color) 60%, var(--border-color));
     box-shadow:
         0 10px 22px rgba(99,102,241,0.14),
@@ -120,25 +128,26 @@ export const colorsCssContent = /* css */ `
     transform: translateY(-1px);
 }
 
-.color-picker-wrapper:active {
-    transform: translateY(0);
+.color-picker-trigger.active {
+    border-color: var(--primary-color);
+    box-shadow:
+        0 0 0 3px rgba(99, 102, 241, 0.12),
+        0 10px 22px rgba(99,102,241,0.18);
 }
 
-/* color input 更“徽章”效果 */
-.color-picker-input {
+.color-preview {
     width: 28px;
     height: 28px;
-    padding: 0;
-    border: 2px solid rgba(255,255,255,0.95);
     border-radius: 10px;
-    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.95);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), inset 0 1px 2px rgba(0,0,0,0.1);
     transition: all var(--transition-fast);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+    flex-shrink: 0;
 }
 
-.color-picker-input:hover {
+.color-picker-trigger:hover .color-preview {
     transform: scale(1.06);
-    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.20);
 }
 
 .color-picker-label {
@@ -147,6 +156,164 @@ export const colorsCssContent = /* css */ `
     color: var(--text-secondary);
     user-select: none;
     white-space: nowrap;
+    flex: 1;
+}
+
+.picker-arrow {
+    width: 18px;
+    height: 18px;
+    color: var(--text-tertiary);
+    transition: transform var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.color-picker-trigger.active .picker-arrow {
+    transform: rotate(180deg);
+}
+
+.color-picker-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--bg-primary);
+    border: 1px solid color-mix(in srgb, var(--border-color) 75%, transparent);
+    border-radius: calc(var(--border-radius) + 4px);
+    padding: 16px;
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255,255,255,0.1) inset;
+    z-index: 1000;
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.color-picker-dropdown.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.color-picker-canvas-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 280 / 180;
+    border-radius: calc(var(--border-radius-sm) + 2px);
+    overflow: hidden;
+    box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.15),
+        inset 0 0 0 1px rgba(0,0,0,0.1);
+    margin-bottom: 12px;
+    cursor: crosshair;
+}
+
+#color-picker-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.color-picker-cursor {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 3px solid white;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 
+        0 0 0 1px rgba(0,0,0,0.3),
+        0 4px 12px rgba(0,0,0,0.4);
+    transition: transform 0.1s ease;
+}
+
+.color-picker-hue-wrapper {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    border-radius: calc(var(--border-radius-sm) + 1px);
+    overflow: hidden;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.12),
+        inset 0 0 0 1px rgba(0,0,0,0.08);
+    margin-bottom: 14px;
+    cursor: pointer;
+}
+
+#color-picker-hue {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.color-hue-cursor {
+    position: absolute;
+    top: 50%;
+    width: 4px;
+    height: 140%;
+    background: white;
+    border-radius: 2px;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 
+        0 0 0 1px rgba(0,0,0,0.4),
+        0 3px 10px rgba(0,0,0,0.5);
+}
+
+.color-picker-info {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.color-preview-large {
+    width: 60px;
+    height: 60px;
+    border-radius: calc(var(--border-radius) + 2px);
+    border: 2px solid rgba(255,255,255,0.95);
+    box-shadow: 
+        0 10px 24px rgba(0, 0, 0, 0.18),
+        inset 0 2px 4px rgba(0,0,0,0.08);
+    flex-shrink: 0;
+}
+
+.color-values {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.color-value-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.color-value-label {
+    font-size: 0.625rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 32px;
+}
+
+.color-value-input {
+    flex: 1;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+    font-weight: 700;
+    color: var(--text-primary);
+    background: color-mix(in srgb, #fff 90%, var(--bg-secondary));
+    border: 1px solid color-mix(in srgb, var(--border-color) 85%, transparent);
+    border-radius: calc(var(--border-radius-sm) + 1px);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
 }
 
 /* HEX 输入：更稳、更高级 */
@@ -212,18 +379,19 @@ export const colorsCssContent = /* css */ `
 /* + 按钮：更像主操作按钮 */
 .color-add-btn {
     height: 40px;
-    min-width: 44px;
+    min-width: 80px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 0.75rem;
+    gap: 6px;
+    padding: 0 0.85rem;
 
     background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     color: white;
     border: none;
     border-radius: calc(var(--border-radius-sm) + 4px);
     font-weight: 800;
-    font-size: 1rem;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
     box-shadow:
@@ -231,6 +399,17 @@ export const colorsCssContent = /* css */ `
         inset 0 1px 0 rgba(255,255,255,0.25);
     position: relative;
     z-index: 1;
+}
+
+.color-add-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.5px;
+}
+
+.color-add-btn span {
+    font-weight: 800;
+    letter-spacing: 0.3px;
 }
 
 .color-add-btn:hover {
@@ -651,10 +830,29 @@ export const colorsCssContent = /* css */ `
         gap: 8px;
     }
 
-    .color-picker-wrapper,
+    .color-picker-trigger,
     .color-hex-input,
     .color-add-btn {
         width: 100%;
+    }
+    
+    .color-picker-dropdown {
+        left: -8px;
+        right: -8px;
+        width: calc(100% + 16px);
+    }
+    
+    .color-picker-canvas-wrapper {
+        aspect-ratio: 280 / 200;
+    }
+    
+    .color-picker-info {
+        flex-direction: column;
+    }
+    
+    .color-preview-large {
+        width: 100%;
+        height: 50px;
     }
 
     .color-add-btn {
