@@ -1,6 +1,44 @@
 // language=CSS
 export const componentsCssContent = /* css */ `
 /* ========================================
+   通用动画定义 - 统一管理
+   ======================================== */
+@keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+/* ========================================
    按钮组件
    ======================================== */
 .btn {
@@ -1118,15 +1156,6 @@ export const componentsCssContent = /* css */ `
     animation: overlayFadeIn var(--transition-base);
 }
 
-@keyframes overlayFadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
 .modal-overlay.active {
     display: flex;
 }
@@ -1145,17 +1174,6 @@ export const componentsCssContent = /* css */ `
 
 .modal-lg {
     max-width: 680px;
-}
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9) translateY(40px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
 }
 
 .modal-header {
@@ -1305,12 +1323,6 @@ export const componentsCssContent = /* css */ `
     animation: spin 0.8s linear infinite;
     margin: 0 auto var(--spacing-xl);
     box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
 }
 
 .loading-spinner-small {
