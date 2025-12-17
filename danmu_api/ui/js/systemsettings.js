@@ -2075,18 +2075,57 @@ function toggleColorPicker() {
     const dropdown = document.getElementById('color-picker-dropdown');
     const trigger = document.getElementById('color-picker-trigger');
     
-    if (!dropdown) return;
+    if (!dropdown || !trigger) return; // 增加安全性检查
     
     colorPickerState.isOpen = !colorPickerState.isOpen;
     
     if (colorPickerState.isOpen) {
         dropdown.classList.add('active');
         trigger.classList.add('active');
+        
+        // ==================== 核心修复开始 ====================
+        // 获取触发按钮在屏幕上的绝对位置
+        const rect = trigger.getBoundingClientRect();
+        
+        // 强制修改为 Fixed 定位，使其脱离模态框的 overflow 限制
+        dropdown.style.position = 'fixed';
+        dropdown.style.zIndex = '100001'; // 确保高于所有模态框和遮罩层
+        
+        // 动态计算位置（向下展开）
+        // +5 是为了留一点间隙
+        dropdown.style.top = (rect.bottom + 5) + 'px';
+        dropdown.style.left = rect.left + 'px';
+        
+        // 防止超出屏幕右侧（简单适配）
+        if (rect.left + 280 > window.innerWidth) { // 280是面板大概宽度
+            dropdown.style.left = 'auto';
+            dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+        }
+
+        // 防止超出屏幕底部（如果下方空间不足，则向上展开）
+        const dropdownHeight = 350; // 面板大概高度
+        if (rect.bottom + dropdownHeight > window.innerHeight) {
+            dropdown.style.top = 'auto';
+            dropdown.style.bottom = (window.innerHeight - rect.top + 5) + 'px';
+        }
+        // ==================== 核心修复结束 ====================
+        
     } else {
         dropdown.classList.remove('active');
         trigger.classList.remove('active');
+        
+        // 关闭时清理内联样式，避免下次打开时位置错乱
+        setTimeout(() => {
+            dropdown.style.position = '';
+            dropdown.style.zIndex = '';
+            dropdown.style.top = '';
+            dropdown.style.left = '';
+            dropdown.style.right = '';
+            dropdown.style.bottom = '';
+        }, 300); // 配合 CSS 动画时间
     }
 }
+
 
 function handleOutsideClick(e) {
     const wrapper = document.querySelector('.color-picker-panel-wrapper');
