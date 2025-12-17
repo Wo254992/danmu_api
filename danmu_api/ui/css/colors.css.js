@@ -75,6 +75,12 @@ export const colorsCssContent = /* css */ `
     display: flex;
     flex-direction: column;
     gap: 6px;
+    position: relative;
+    z-index: 1;
+}
+
+.color-input-group.picker-active {
+    z-index: 10003;
 }
 
 .color-input-label {
