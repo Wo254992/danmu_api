@@ -2015,11 +2015,11 @@ function updateColorFromCanvas(e, canvas, cursor) {
     let x = e.clientX - rect.left;
     let y = e.clientY - rect.top;
     
-    x = Math.max(0, Math.min(x, canvas.width));
-    y = Math.max(0, Math.min(y, canvas.height));
+    x = Math.max(0, Math.min(x, rect.width));
+    y = Math.max(0, Math.min(y, rect.height));
     
-    const s = (x / canvas.width) * 100;
-    const v = 100 - (y / canvas.height) * 100;
+    const s = (x / rect.width) * 100;
+    const v = 100 - (y / rect.height) * 100;
     
     colorPickerState.currentColor.s = s;
     colorPickerState.currentColor.v = v;
@@ -2034,9 +2034,9 @@ function updateHueFromBar(e, hueCanvas, hueCursor, canvas) {
     const rect = hueCanvas.getBoundingClientRect();
     let x = e.clientX - rect.left;
     
-    x = Math.max(0, Math.min(x, hueCanvas.width));
+    x = Math.max(0, Math.min(x, rect.width));
     
-    const hue = (x / hueCanvas.width) * 360;
+    const hue = (x / rect.width) * 360;
     colorPickerState.currentColor.h = hue;
     
     hueCursor.style.left = x + 'px';
