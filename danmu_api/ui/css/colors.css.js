@@ -53,7 +53,7 @@ export const colorsCssContent = /* css */ `
         0 10px 30px rgba(0, 0, 0, 0.08),
         inset 0 1px 0 rgba(255,255,255,0.35);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .color-pool-controls::before {
