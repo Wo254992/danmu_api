@@ -1053,9 +1053,37 @@ function renderValueInput(item) {
                 <div class="color-input-group">
                     <span class="color-input-label">添加颜色</span>
                     <div class="color-input-wrapper">
-                        <div class="color-picker-wrapper" title="点击选择颜色">
-                            <input type="color" id="color-picker-input" class="color-picker-input" value="#ffffff">
-                            <span class="color-picker-label">拾色器</span>
+                        <div class="color-picker-panel-wrapper">
+                            <button type="button" class="color-picker-trigger" id="color-picker-trigger" onclick="toggleColorPicker()">
+                                <span class="color-preview" id="color-preview" style="background: #ffffff;"></span>
+                                <span class="color-picker-label">选择颜色</span>
+                                <svg class="picker-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="color-picker-dropdown" id="color-picker-dropdown">
+                                <div class="color-picker-canvas-wrapper">
+                                    <canvas id="color-picker-canvas" width="280" height="180"></canvas>
+                                    <div class="color-picker-cursor" id="color-picker-cursor"></div>
+                                </div>
+                                <div class="color-picker-hue-wrapper">
+                                    <canvas id="color-picker-hue" width="280" height="20"></canvas>
+                                    <div class="color-hue-cursor" id="color-hue-cursor"></div>
+                                </div>
+                                <div class="color-picker-info">
+                                    <div class="color-preview-large" id="color-preview-large" style="background: #ffffff;"></div>
+                                    <div class="color-values">
+                                        <div class="color-value-group">
+                                            <label class="color-value-label">HEX</label>
+                                            <input type="text" id="color-hex-display" class="color-value-input" value="FFFFFF" readonly>
+                                        </div>
+                                        <div class="color-value-group">
+                                            <label class="color-value-label">DEC</label>
+                                            <input type="text" id="color-dec-display" class="color-value-input" value="16777215" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="color-hex-input-wrapper">
                             <span class="color-hex-prefix">#</span>
@@ -1067,8 +1095,12 @@ function renderValueInput(item) {
                                    oninput="syncHexToColorPicker(this.value)"
                                    onkeypress="if(event.key==='Enter') addColorFromHexInput()">
                         </div>
-                        <button type="button" class="color-add-btn" onclick="addColorFromInput()" title="添加到颜色池">
-                            ➕
+                        <button type="button" class="color-add-btn" onclick="addColorFromPicker()" title="添加到颜色池">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>添加</span>
                         </button>
                     </div>
                 </div>
@@ -1155,15 +1187,11 @@ FFFFFF FF5733 00FF00"></textarea>
         }
 
         setupColorDragAndDrop();
-        // 同步拾色器和输入框
-        const colorPicker = document.getElementById('color-picker-input');
-        const hexInput = document.getElementById('color-hex-input');
         
-        if (colorPicker && hexInput) {
-            colorPicker.addEventListener('input', function() {
-                hexInput.value = this.value.substring(1).toUpperCase();
-            });
-        }
+        // 初始化高级调色板
+        setTimeout(() => {
+            initAdvancedColorPicker();
+        }, 100);
 
     } else {
         if (value && value.length > 50) {
@@ -1865,4 +1893,292 @@ function closeImportModeDialog(mode) {
     // 清理全局变量
     pendingImportColors = null;
 }
+/* ========================================
+   高级调色板功能
+   ======================================== */
+let colorPickerState = {
+    currentColor: { h: 0, s: 100, v: 100 },
+    isOpen: false
+};
+
+function initAdvancedColorPicker() {
+    const canvas = document.getElementById('color-picker-canvas');
+    const hueCanvas = document.getElementById('color-picker-hue');
+    
+    if (!canvas || !hueCanvas) return;
+    
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const hueCtx = hueCanvas.getContext('2d');
+    
+    // 绘制色相条
+    drawHueBar(hueCtx, hueCanvas.width, hueCanvas.height);
+    
+    // 绘制主调色板
+    updateColorCanvas(ctx, canvas.width, canvas.height, colorPickerState.currentColor.h);
+    
+    // 更新显示
+    updateColorDisplay('#FFFFFF', 16777215);
+    
+    // 绑定事件
+    setupColorPickerEvents(canvas, hueCanvas);
+    
+    // 点击外部关闭
+    document.addEventListener('click', handleOutsideClick);
+}
+
+function drawHueBar(ctx, width, height) {
+    for (let i = 0; i < width; i++) {
+        const hue = (i / width) * 360;
+        ctx.fillStyle = \`hsl(\${hue}, 100%, 50%)\`;
+        ctx.fillRect(i, 0, 1, height);
+    }
+}
+
+function updateColorCanvas(ctx, width, height, hue) {
+    // 绘制饱和度和亮度渐变
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const s = (x / width) * 100;
+            const v = 100 - (y / height) * 100;
+            ctx.fillStyle = hsvToRgbString(hue, s, v);
+            ctx.fillRect(x, y, 1, 1);
+        }
+    }
+}
+
+function setupColorPickerEvents(canvas, hueCanvas) {
+    const cursor = document.getElementById('color-picker-cursor');
+    const hueCursor = document.getElementById('color-hue-cursor');
+    
+    let isDraggingCanvas = false;
+    let isDraggingHue = false;
+    
+    // 主画布事件
+    canvas.addEventListener('mousedown', (e) => {
+        isDraggingCanvas = true;
+        updateColorFromCanvas(e, canvas, cursor);
+    });
+    
+    canvas.addEventListener('touchstart', (e) => {
+        isDraggingCanvas = true;
+        updateColorFromCanvas(e.touches[0], canvas, cursor);
+        e.preventDefault();
+    });
+    
+    // 色相条事件
+    hueCanvas.addEventListener('mousedown', (e) => {
+        isDraggingHue = true;
+        updateHueFromBar(e, hueCanvas, hueCursor, canvas);
+    });
+    
+    hueCanvas.addEventListener('touchstart', (e) => {
+        isDraggingHue = true;
+        updateHueFromBar(e.touches[0], hueCanvas, hueCursor, canvas);
+        e.preventDefault();
+    });
+    
+    // 全局移动事件
+    document.addEventListener('mousemove', (e) => {
+        if (isDraggingCanvas) {
+            updateColorFromCanvas(e, canvas, cursor);
+        }
+        if (isDraggingHue) {
+            updateHueFromBar(e, hueCanvas, hueCursor, canvas);
+        }
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+        if (isDraggingCanvas) {
+            updateColorFromCanvas(e.touches[0], canvas, cursor);
+            e.preventDefault();
+        }
+        if (isDraggingHue) {
+            updateHueFromBar(e.touches[0], hueCanvas, hueCursor, canvas);
+            e.preventDefault();
+        }
+    });
+    
+    // 全局释放事件
+    document.addEventListener('mouseup', () => {
+        isDraggingCanvas = false;
+        isDraggingHue = false;
+    });
+    
+    document.addEventListener('touchend', () => {
+        isDraggingCanvas = false;
+        isDraggingHue = false;
+    });
+}
+
+function updateColorFromCanvas(e, canvas, cursor) {
+    const rect = canvas.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+    
+    x = Math.max(0, Math.min(x, canvas.width));
+    y = Math.max(0, Math.min(y, canvas.height));
+    
+    const s = (x / canvas.width) * 100;
+    const v = 100 - (y / canvas.height) * 100;
+    
+    colorPickerState.currentColor.s = s;
+    colorPickerState.currentColor.v = v;
+    
+    cursor.style.left = x + 'px';
+    cursor.style.top = y + 'px';
+    
+    updateColorFromState();
+}
+
+function updateHueFromBar(e, hueCanvas, hueCursor, canvas) {
+    const rect = hueCanvas.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    
+    x = Math.max(0, Math.min(x, hueCanvas.width));
+    
+    const hue = (x / hueCanvas.width) * 360;
+    colorPickerState.currentColor.h = hue;
+    
+    hueCursor.style.left = x + 'px';
+    
+    // 重绘主画布
+    const ctx = canvas.getContext('2d');
+    updateColorCanvas(ctx, canvas.width, canvas.height, hue);
+    
+    updateColorFromState();
+}
+
+function updateColorFromState() {
+    const { h, s, v } = colorPickerState.currentColor;
+    const rgb = hsvToRgb(h, s, v);
+    const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+    const decimal = parseInt(hex, 16);
+    
+    updateColorDisplay('#' + hex, decimal);
+}
+
+function updateColorDisplay(hexColor, decimal) {
+    const preview = document.getElementById('color-preview');
+    const previewLarge = document.getElementById('color-preview-large');
+    const hexDisplay = document.getElementById('color-hex-display');
+    const decDisplay = document.getElementById('color-dec-display');
+    const hexInput = document.getElementById('color-hex-input');
+    
+    if (preview) preview.style.background = hexColor;
+    if (previewLarge) previewLarge.style.background = hexColor;
+    if (hexDisplay) hexDisplay.value = hexColor.substring(1);
+    if (decDisplay) decDisplay.value = decimal;
+    if (hexInput) hexInput.value = hexColor.substring(1);
+}
+
+function toggleColorPicker() {
+    const dropdown = document.getElementById('color-picker-dropdown');
+    const trigger = document.getElementById('color-picker-trigger');
+    
+    if (!dropdown) return;
+    
+    colorPickerState.isOpen = !colorPickerState.isOpen;
+    
+    if (colorPickerState.isOpen) {
+        dropdown.classList.add('active');
+        trigger.classList.add('active');
+    } else {
+        dropdown.classList.remove('active');
+        trigger.classList.remove('active');
+    }
+}
+
+function handleOutsideClick(e) {
+    const wrapper = document.querySelector('.color-picker-panel-wrapper');
+    const dropdown = document.getElementById('color-picker-dropdown');
+    
+    if (!wrapper || !dropdown) return;
+    
+    if (colorPickerState.isOpen && !wrapper.contains(e.target)) {
+        dropdown.classList.remove('active');
+        document.getElementById('color-picker-trigger').classList.remove('active');
+        colorPickerState.isOpen = false;
+    }
+}
+
+function hsvToRgb(h, s, v) {
+    s = s / 100;
+    v = v / 100;
+    
+    const c = v * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = v - c;
+    
+    let r, g, b;
+    
+    if (h < 60) { r = c; g = x; b = 0; }
+    else if (h < 120) { r = x; g = c; b = 0; }
+    else if (h < 180) { r = 0; g = c; b = x; }
+    else if (h < 240) { r = 0; g = x; b = c; }
+    else if (h < 300) { r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
+    
+    return {
+        r: Math.round((r + m) * 255),
+        g: Math.round((g + m) * 255),
+        b: Math.round((b + m) * 255)
+    };
+}
+
+function hsvToRgbString(h, s, v) {
+    const rgb = hsvToRgb(h, s, v);
+    return \`rgb(\${rgb.r}, \${rgb.g}, \${rgb.b})\`;
+}
+
+function rgbToHex(r, g, b) {
+    return ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0').toUpperCase();
+}
+
+function addColorFromPicker() {
+    const hexDisplay = document.getElementById('color-hex-display');
+    if (!hexDisplay) return;
+    
+    const hexValue = hexDisplay.value;
+    const decimal = parseInt(hexValue, 16);
+    
+    if (isNaN(decimal)) {
+        customAlert('无效的颜色值', '⚠️ 格式错误');
+        return;
+    }
+    
+    const container = document.getElementById('color-pool-container');
+    const chip = createColorChip(decimal);
+    container.appendChild(chip);
+    updateColorPoolInput();
+    
+    // 添加成功反馈
+    chip.style.animation = 'colorChipFadeIn 0.4s ease-out, pulse 0.6s ease-out';
+    
+    // 关闭调色板
+    const dropdown = document.getElementById('color-picker-dropdown');
+    const trigger = document.getElementById('color-picker-trigger');
+    if (dropdown) dropdown.classList.remove('active');
+    if (trigger) trigger.classList.remove('active');
+    colorPickerState.isOpen = false;
+}
+
+// 修改原有的 syncHexToColorPicker 函数
+const originalSyncHexToColorPicker = typeof syncHexToColorPicker !== 'undefined' ? syncHexToColorPicker : function() {};
+syncHexToColorPicker = function(hexValue) {
+    // 移除非hex字符
+    hexValue = hexValue.replace(/[^0-9A-Fa-f]/g, '');
+    
+    if (hexValue.length === 6 || hexValue.length === 3) {
+        if (hexValue.length === 3) {
+            hexValue = hexValue.split('').map(char => char + char).join('');
+        }
+        
+        // 更新调色板显示
+        const decimal = parseInt(hexValue, 16);
+        updateColorDisplay('#' + hexValue, decimal);
+        
+        // 更新调色板游标位置（可选）
+        // 这里可以添加逻辑将hex转换回HSV并更新游标位置
+    }
+};
 `;
