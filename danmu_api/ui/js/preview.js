@@ -44,10 +44,6 @@ function renderPreview() {
                 animateNumber('manual-configs', 0, manualConfigs, 700);
             }
             
-            // 更新部署平台信息
-            const deployPlatform = config.envs?.deployPlatform || 'node';
-            updateDeployPlatformDisplay(deployPlatform);
-            
             // 检测系统状态
             checkSystemStatus();
             
@@ -248,49 +244,6 @@ function escapeHtml(text) {
         "'": '&#039;'
     };
     return String(text).replace(/[&<>"']/g, m => map[m]);
-}
-
-/* ========================================
-   更新部署平台显示
-   ======================================== */
-function updateDeployPlatformDisplay(platform) {
-    const deployPlatformEl = document.getElementById('deploy-platform');
-    const deployIconWrapper = document.getElementById('deploy-icon-wrapper');
-    
-    if (!deployPlatformEl) return;
-    
-    // 平台名称映射
-    const platformNames = {
-        'node': 'Node.js',
-        'vercel': 'Vercel',
-        'netlify': 'Netlify',
-        'cloudflare': 'Cloudflare',
-        'edgeone': 'EdgeOne',
-        'docker': 'Docker'
-    };
-    
-    // 平台图标映射
-    const platformIcons = {
-        'node': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
-        'vercel': '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 22.525H0l12-21.05 12 21.05z"/></svg>',
-        'netlify': '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.934 8.519a1.044 1.044 0 0 1 .303.23l2.349-1.045-2.192-2.171-.491 2.954zM12.06 6.546a1.305 1.305 0 0 1 .209.574l3.497 1.482a1.044 1.044 0 0 1 .355-.177l.574-3.55-4.635 1.671zM11.933 7.972a1.321 1.321 0 0 1-.762-.241l-3.895 2.323a1.168 1.168 0 0 1 .063.312l3.852.958a1.305 1.305 0 0 1 .742-.343V7.972z"/></svg>',
-        'cloudflare': '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 13.5c-.4 0-.7.1-1 .3l-.1-.3-1.5-4.4c-.1-.3-.3-.6-.5-.8-.3-.3-.7-.4-1.1-.4H6.8c-.2 0-.3.1-.3.3v.3l.5 1.5c.1.2.2.3.4.3h4.4l2.3 6.7c.1.2.2.3.4.3h2c.2 0 .3-.1.4-.3l.4-1.2c.2-.5.6-.9 1.1-1.1.5-.2 1-.1 1.4.2l.5-1.5c.1-.2 0-.5-.2-.6-.4-.3-1-.5-1.6-.5z"/></svg>',
-        'edgeone': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
-        'docker': '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.983 11.078h2.119a.186.186 0 0 0 .186-.185V9.006a.186.186 0 0 0-.186-.186h-2.119a.185.185 0 0 0-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 0 0 .186-.186V3.574a.186.186 0 0 0-.186-.185h-2.118a.185.185 0 0 0-.185.185v1.888c0 .102.082.185.185.186m0 2.716h2.118a.187.187 0 0 0 .186-.186V6.29a.186.186 0 0 0-.186-.185h-2.118a.185.185 0 0 0-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 0 0 .184-.186V6.29a.185.185 0 0 0-.185-.185H8.1a.185.185 0 0 0-.185.185v1.887c0 .102.083.185.185.186"/></svg>'
-    };
-    
-    const platformKey = platform.toLowerCase();
-    const displayName = platformNames[platformKey] || platform;
-    
-    deployPlatformEl.textContent = displayName;
-    deployPlatformEl.className = 'stat-value stat-value-text deploy-badge-' + platformKey;
-    
-    // 更新图标
-    if (deployIconWrapper && platformIcons[platformKey]) {
-        deployIconWrapper.innerHTML = platformIcons[platformKey];
-    }
-    
-    addLog(\`📦 部署平台: \${displayName}\`, 'info');
 }
 
 /* ========================================
