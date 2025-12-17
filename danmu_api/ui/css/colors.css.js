@@ -99,6 +99,7 @@ export const colorsCssContent = /* css */ `
 .color-picker-panel-wrapper {
     position: relative;
     width: 100%;
+    z-index: 100;
 }
 
 .color-picker-trigger {
