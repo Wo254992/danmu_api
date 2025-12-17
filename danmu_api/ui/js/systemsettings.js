@@ -2075,6 +2075,7 @@ function toggleColorPicker() {
     const dropdown = document.getElementById('color-picker-dropdown');
     const trigger = document.getElementById('color-picker-trigger');
     const wrapper = document.querySelector('.color-picker-panel-wrapper');
+    const inputGroup = document.querySelector('.color-input-group');
     
     if (!dropdown) return;
     
@@ -2084,12 +2085,18 @@ function toggleColorPicker() {
         dropdown.classList.add('active');
         trigger.classList.add('active');
         if (wrapper) wrapper.classList.add('picker-active');
+        if (inputGroup) inputGroup.classList.add('picker-active');
     } else {
         dropdown.classList.remove('active');
         trigger.classList.remove('active');
         if (wrapper) {
             setTimeout(() => {
                 wrapper.classList.remove('picker-active');
+            }, 300);
+        }
+        if (inputGroup) {
+            setTimeout(() => {
+                inputGroup.classList.remove('picker-active');
             }, 300);
         }
     }
