@@ -15,10 +15,29 @@ export const responsiveCssContent = /* css */ `
    移动端适配 (< 768px)
    ======================================== */
 @media (max-width: 767px) {
+    /* 全局防止溢出 */
+    html, body {
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+    
+    * {
+        max-width: 100%;
+    }
+    
+    .app-container,
+    .main-content,
+    .sidebar,
+    .content-section {
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
     /* 主布局 */
     .main-content {
         margin-left: 0;
-        padding: 1rem;
+        padding: 0.75rem;
+        max-width: 100vw;
+        overflow-x: hidden;
     }
 
     /* 侧边栏 */
@@ -127,10 +146,20 @@ export const responsiveCssContent = /* css */ `
 
     .input-group {
         flex-direction: column;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .input-group .btn {
         width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     /* 按钮 */
@@ -293,6 +322,17 @@ export const responsiveCssContent = /* css */ `
     /* 卡片 */
     .card {
         padding: 1rem;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .form-card,
+    .preview-hero-card,
+    .preview-category,
+    .env-item,
+    .log-terminal {
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     /* 成功动画 */
