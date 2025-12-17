@@ -183,7 +183,7 @@ export const colorsCssContent = /* css */ `
     box-shadow: 
         0 20px 50px rgba(0, 0, 0, 0.25),
         0 0 0 1px rgba(255,255,255,0.1) inset;
-    z-index: 1000;
+    z-index: 10001;
     display: none;
     opacity: 0;
     transform: translateY(-10px) scale(0.95);
