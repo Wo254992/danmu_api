@@ -92,6 +92,11 @@ body {
     line-height: 1.6;
     overflow-x: hidden;
     transition: background var(--transition-base);
+    max-width: 100vw;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 /* 滚动条美化 */
@@ -122,6 +127,8 @@ body {
     display: flex;
     min-height: 100vh;
     position: relative;
+    max-width: 100vw;
+    overflow-x: hidden;
 }
 
 .main-content {
