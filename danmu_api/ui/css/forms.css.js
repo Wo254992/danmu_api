@@ -587,6 +587,8 @@ export const formsCssContent = /* css */ `
     border-radius: var(--radius-md);
     min-height: 120px;
     transition: all var(--transition-fast);
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .color-pool-container.empty::before {
