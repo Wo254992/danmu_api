@@ -56,6 +56,40 @@ export const dynamicCssContent = /* css */ `
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-lg);
 }
+/* 深色模式预览卡片增强 */
+[data-theme="dark"] .preview-hero-card {
+    background: rgba(17, 24, 39, 0.8);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6),
+                0 0 60px rgba(99, 102, 241, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .preview-stat-card {
+    background: rgba(17, 24, 39, 0.7);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .preview-stat-card:hover {
+    border-color: rgba(129, 140, 248, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(129, 140, 248, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transform: translateY(-6px);
+}
+
+[data-theme="dark"] .preview-category {
+    background: rgba(17, 24, 39, 0.7);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+[data-theme="dark"] .preview-category:hover {
+    border-color: rgba(129, 140, 248, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(99, 102, 241, 0.15);
+}
 
 .preview-hero-content {
     display: flex;
