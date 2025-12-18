@@ -334,44 +334,6 @@ export const responsiveCssContent = /* css */ `
         max-width: 100%;
         box-sizing: border-box;
     }
-
-    /* 动漫搜索结果网格 - 移动端优化 */
-    .anime-grid,
-    .anime-grid-container {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.75rem;
-    }
-
-    .anime-card {
-        border-radius: var(--radius-md);
-    }
-
-    .anime-card-image-wrapper {
-        padding-top: 140%;
-    }
-
-    .anime-info {
-        padding: 0.5rem;
-    }
-
-    .anime-title {
-        font-size: 0.75rem;
-        -webkit-line-clamp: 1;
-        margin-bottom: 0.25rem;
-    }
-
-    .anime-meta {
-        gap: 0.25rem;
-    }
-
-    .episode-count {
-        font-size: 0.6875rem;
-    }
-
-    .meta-icon {
-        font-size: 0.75rem;
-    }
-
     /* 成功动画 */
     .success-icon {
         font-size: 4rem;
@@ -430,24 +392,6 @@ export const responsiveCssContent = /* css */ `
         height: 44px;
     }
 
-    /* 动漫搜索结果 - 小屏优化 */
-    .anime-grid,
-    .anime-grid-container {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-    }
-
-    .anime-info {
-        padding: 0.375rem;
-    }
-
-    .anime-title {
-        font-size: 0.6875rem;
-    }
-
-    .episode-count {
-        font-size: 0.625rem;
-    }
 }
 
 /* ========================================
