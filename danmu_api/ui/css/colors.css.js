@@ -687,10 +687,6 @@ export const colorsCssContent = /* css */ `
     flex-wrap: nowrap;
     white-space: nowrap;
 }
-.pool-stats {
-    max-width: 100%;
-    overflow-x: auto;
-}
 
 .pool-count-badge {
     display: inline-flex;
