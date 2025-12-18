@@ -5,7 +5,7 @@ import { httpGet } from "../utils/http-util.js";
 import { convertToAsciiSum } from "../utils/codec-util.js";
 import { generateValidStartDate } from "../utils/time-util.js";
 import { addAnime, removeEarliestAnime } from "../utils/cache-util.js";
-import { titleMatches } from "../utils/common-util.js";
+import { titleMatches, strictTitleMatch, normalizeSpaces } from "../utils/common-util.js";
 
 // =====================
 // 获取韩剧TV弹幕
@@ -142,9 +142,34 @@ export default class HanjutvSource extends BaseSource {
     }
 
     // 使用 map 和 async 时需要返回 Promise 数组，并等待所有 Promise 完成
+    // 对于韩剧TV，使用宽松的模糊匹配，但在结果中标记匹配类型
     const processHanjutvAnimes = await Promise.all(sourceAnimes
-      .filter(s => titleMatches(s.name, queryTitle))
       .map(async (anime) => {
+        // 计算匹配类型：严格匹配 > 宽松匹配
+        const normalizedAnimeName = normalizeSpaces(anime.name);
+        const normalizedQueryTitle = normalizeSpaces(queryTitle);
+        
+        let matchType = 0; // 0=不匹配, 1=宽松匹配, 2=严格匹配
+        
+        if (globals.strictTitleMatch) {
+          // 严格模式
+          if (strictTitleMatch(anime.name, queryTitle)) {
+            matchType = 2;
+          }
+        } else {
+          // 宽松模式
+          if (strictTitleMatch(anime.name, queryTitle)) {
+            matchType = 2; // 严格匹配
+          } else if (normalizedAnimeName.includes(normalizedQueryTitle)) {
+            matchType = 1; // 宽松匹配
+          }
+        }
+        
+        // 如果不匹配，返回 null
+        if (matchType === 0) {
+          return null;
+        }
+        
         try {
           const detail = await this.getDetail(anime.sid);
           const eps = await this.getEpisodes(anime.sid);
@@ -171,19 +196,31 @@ export default class HanjutvSource extends BaseSource {
               rating: detail.rank,
               isFavorited: true,
               source: "hanjutv",
+              matchType: matchType, // 添加匹配类型标记
             };
 
-            tmpAnimes.push(transformedAnime);
-
-            addAnime({...transformedAnime, links: links});
-
-            if (globals.animes.length > globals.MAX_ANIMES) removeEarliestAnime();
+            // 返回带匹配类型的结果，用于后续排序
+            return { anime: transformedAnime, links: links, matchType: matchType };
           }
         } catch (error) {
           log("error", `[Hanjutv] Error processing anime: ${error.message}`);
         }
       })
     );
+
+    // 过滤掉 null 值并按匹配类型排序
+    const validResults = processHanjutvAnimes.filter(result => result !== null);
+    
+    // 按匹配类型排序：严格匹配(2) > 宽松匹配(1)
+    validResults.sort((a, b) => b.matchType - a.matchType);
+    
+    // 提取动漫信息和添加到缓存
+    for (const result of validResults) {
+      tmpAnimes.push(result.anime);
+      addAnime({...result.anime, links: result.links});
+      
+      if (globals.animes.length > globals.MAX_ANIMES) removeEarliestAnime();
+    }
 
     this.sortAndPushAnimesByYear(tmpAnimes, curAnimes);
 
