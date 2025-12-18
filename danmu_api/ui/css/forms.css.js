@@ -49,6 +49,32 @@ export const formsCssContent = /* css */ `
 .form-textarea:hover {
     border-color: var(--primary-color);
 }
+/* 深色模式表单增强 */
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .form-textarea {
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    color: var(--text-primary);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .form-select:focus,
+[data-theme="dark"] .form-textarea:focus {
+    background: rgba(17, 24, 39, 0.8);
+    border-color: #818cf8;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2),
+                inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .form-input:hover,
+[data-theme="dark"] .form-select:hover,
+[data-theme="dark"] .form-textarea:hover {
+    border-color: rgba(129, 140, 248, 0.4);
+    box-shadow: 0 0 20px rgba(129, 140, 248, 0.1),
+                inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
 
 .form-input::placeholder,
 .form-textarea::placeholder {
