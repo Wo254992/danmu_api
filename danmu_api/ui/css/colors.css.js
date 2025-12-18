@@ -545,13 +545,13 @@ export const colorsCssContent = /* css */ `
    ======================================== */
 .color-pool-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
-    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: 0.375rem;
     padding: 0.75rem;
     background: var(--bg-secondary);
     border: 2px dashed var(--border-color);
     border-radius: var(--radius-lg);
-    min-height: 96px;
+    min-height: 80px;
     align-content: start;
     transition: all var(--transition-fast);
 }
@@ -591,7 +591,7 @@ export const colorsCssContent = /* css */ `
 .color-chip {
     width: 100%;
     aspect-ratio: 1;
-    min-height: 56px;
+    min-height: 40px;
     border-radius: var(--radius-sm);
     position: relative;
     cursor: move;
@@ -627,13 +627,13 @@ export const colorsCssContent = /* css */ `
 
 /* 颜色块标签 */
 .color-hex-label {
-    font-size: 0.6875rem;
+    font-size: 0.5625rem;
     font-weight: 700;
     font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
     color: rgba(0, 0, 0, 0.8);
     background: rgba(255, 255, 255, 0.95);
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
+    padding: 0.125rem 0.25rem;
+    border-radius: 4px;
     text-shadow: none;
     letter-spacing: 0.3px;
     pointer-events: none;
@@ -986,18 +986,18 @@ export const colorsCssContent = /* css */ `
     }
 
     .color-pool-container {
-        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-        gap: 0.5rem;
-        padding: 0.75rem;
+        grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+        gap: 0.375rem;
+        padding: 0.5rem;
     }
 
     .color-chip {
-        min-height: 60px;
+        min-height: 36px;
     }
 
     .color-hex-label {
-        font-size: 0.5625rem;
-        padding: 0.1875rem 0.375rem;
+        font-size: 0.5rem;
+        padding: 0.125rem 0.25rem;
     }
 
     .batch-import-container {
@@ -1023,8 +1023,8 @@ export const colorsCssContent = /* css */ `
     }
 
     .pool-count-badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.625rem;
+        font-size: 0.6875rem;
+        padding: 0.1875rem 0.5rem;
     }
 
     .color-picker-info {
@@ -1035,6 +1035,20 @@ export const colorsCssContent = /* css */ `
     .color-preview-large {
         width: 100%;
         height: 48px;
+    }
+
+    .color-pool-container {
+        grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
+        gap: 0.25rem;
+    }
+
+    .color-chip {
+        min-height: 32px;
+    }
+
+    .color-hex-label {
+        font-size: 0.4375rem;
+        padding: 0.0625rem 0.1875rem;
     }
 }
 `;
