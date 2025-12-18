@@ -174,6 +174,9 @@ export default class HanjutvSource extends BaseSource {
           }
 
           if (links.length > 0) {
+            // 提取别名信息（韩剧TV API返回的alias字段）
+            const aliases = detail.alias || [];
+            
             let transformedAnime = {
               animeId: anime.animeId,
               bangumiId: String(anime.animeId),
@@ -187,6 +190,7 @@ export default class HanjutvSource extends BaseSource {
               isFavorited: true,
               source: "hanjutv",
               matchType: matchType, // 添加匹配类型标记用于排序
+              aliases: aliases, // 保存别名数组，用于自动匹配
             };
 
             // 返回带匹配类型的结果，用于后续排序
