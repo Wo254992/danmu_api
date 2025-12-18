@@ -318,6 +318,8 @@ function updateSystemStatusUI(status, text) {
     };
     
     addLog('🔍 系统状态: ' + text, logTypes[status] || 'info');
+    // 同步更新移动端状态指示器
+    updateMobileStatusIndicator(status);
 }
 
 /* ========================================
@@ -357,5 +359,29 @@ function updateCurrentModeDisplay() {
     
     addLog('🔐 当前模式: ' + modeName, 'info');
 }
-
+/* ========================================
+   更新移动端状态指示器
+   ======================================== */
+function updateMobileStatusIndicator(status) {
+    const mobileStatus = document.getElementById('mobile-status');
+    if (!mobileStatus) return;
+    
+    const statusDot = mobileStatus.querySelector('.status-dot');
+    if (!statusDot) return;
+    
+    // 移除所有状态类
+    statusDot.classList.remove('status-running', 'status-warning', 'status-error');
+    
+    // 添加对应状态类
+    statusDot.classList.add('status-' + status);
+    
+    // 更新提示文本
+    const statusTexts = {
+        'running': '系统运行正常',
+        'warning': '系统部分异常',
+        'error': '系统连接失败'
+    };
+    
+    mobileStatus.title = statusTexts[status] || '系统状态未知';
+}
 `;
