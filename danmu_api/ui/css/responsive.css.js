@@ -335,6 +335,116 @@ export const responsiveCssContent = /* css */ `
         box-sizing: border-box;
     }
 
+    /* 动漫搜索结果网格 - 移动端优化 */
+    .anime-grid,
+    .anime-grid-container {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .anime-card {
+        border-radius: var(--radius-md);
+    }
+
+    .anime-info {
+        padding: 0.625rem;
+    }
+
+    .anime-title {
+        font-size: 0.8125rem;
+        margin-bottom: 0.25rem;
+        line-height: 1.3;
+    }
+
+    .anime-meta {
+        gap: 0.25rem;
+    }
+
+    .episode-count {
+        font-size: 0.6875rem;
+    }
+
+    .meta-icon {
+        font-size: 0.8125rem;
+    }
+
+    .anime-card-overlay .view-icon {
+        font-size: 1.5rem;
+    }
+
+    .anime-card-overlay .view-text {
+        font-size: 0.75rem;
+    }
+
+    /* 搜索结果标题 - 移动端优化 */
+    .search-results-header {
+        margin-bottom: 1rem;
+    }
+
+    .results-title {
+        font-size: 1rem;
+        gap: 0.5rem;
+    }
+
+    .title-icon {
+        font-size: 1.125rem;
+    }
+
+    .results-count {
+        padding: 0.1875rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .results-hint {
+        font-size: 0.75rem;
+    }
+
+    /* 剧集列表 - 移动端优化 */
+    .episode-list-header {
+        padding: 1rem;
+    }
+
+    .episode-anime-title {
+        font-size: 1.125rem;
+        gap: 0.5rem;
+    }
+
+    .episode-anime-icon {
+        font-size: 1.25rem;
+    }
+
+    .episode-stats {
+        gap: 0.75rem;
+    }
+
+    .episode-stat-item {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    .episode-grid {
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .episode-item {
+        padding: 0.875rem;
+        gap: 0.75rem;
+    }
+
+    .episode-number {
+        font-size: 0.875rem;
+        gap: 0.375rem;
+    }
+
+    .episode-icon {
+        font-size: 1rem;
+    }
+
+    .episode-title {
+        font-size: 0.75rem;
+    }
+
     /* 成功动画 */
     .success-icon {
         font-size: 4rem;
