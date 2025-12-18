@@ -883,6 +883,8 @@ export const dynamicCssContent = /* css */ `
     max-height: 600px;
     overflow-y: auto;
     border: 1px solid var(--border-color);
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .response-content.xml {
