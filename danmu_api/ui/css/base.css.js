@@ -47,28 +47,52 @@ export const baseCssContent = /* css */ `
     --radius-xl: 20px;
 }
 
-/* 深色模式 */
+/* 深色模式 - 高级配色方案 */
 [data-theme="dark"] {
-    --bg-primary: rgba(15, 23, 42, 0.95);
-    --bg-secondary: rgba(30, 41, 59, 0.9);
-    --bg-tertiary: rgba(51, 65, 85, 0.85);
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --text-tertiary: #94a3b8;
-    --border-color: rgba(71, 85, 105, 0.6);
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+    /* 背景色 - 更深邃的黑色调，带有微妙的蓝色底色 */
+    --bg-primary: rgba(10, 15, 30, 0.97);
+    --bg-secondary: rgba(17, 24, 39, 0.92);
+    --bg-tertiary: rgba(31, 41, 55, 0.88);
     
-    /* 深色模式功能色调整 - 引用色阶 */
-    --primary-color: var(--primary-400);
-    --primary-hover: var(--primary-500);
-    --success-color: var(--success-400);
-    --success-hover: var(--success-500);
-    --warning-color: var(--warning-400);
-    --warning-hover: var(--warning-500);
-    --danger-color: var(--danger-400);
-    --danger-hover: var(--danger-500);
+    /* 文本色 - 更柔和的白色，减少眼睛疲劳 */
+    --text-primary: #e2e8f0;
+    --text-secondary: #a0aec0;
+    --text-tertiary: #718096;
+    
+    /* 边框色 - 带有微妙的发光效果 */
+    --border-color: rgba(99, 102, 241, 0.15);
+    
+    /* 阴影 - 更深邃，带有微妙的彩色光晕 */
+    --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(99, 102, 241, 0.1);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(99, 102, 241, 0.15);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.7), 0 4px 16px rgba(99, 102, 241, 0.2);
+    
+    /* 模糊效果增强 */
+    --blur-sm: blur(12px);
+    --blur-md: blur(16px);
+    --blur-lg: blur(24px);
+    
+    /* 功能色 - 更亮，更有活力 */
+    --primary-color: #818cf8;
+    --primary-hover: #a78bfa;
+    --success-color: #34d399;
+    --success-hover: #6ee7b7;
+    --warning-color: #fbbf24;
+    --warning-hover: #fcd34d;
+    --danger-color: #f87171;
+    --danger-hover: #fca5a5;
+    
+    /* 渐变色 - 更鲜明的对比 */
+    --gradient-primary: linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #c084fc 100%);
+    --gradient-success: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    --gradient-warning: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    --gradient-danger: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+    
+    /* 特殊效果 */
+    --glow-primary: 0 0 20px rgba(129, 140, 248, 0.3);
+    --glow-success: 0 0 20px rgba(52, 211, 153, 0.3);
+    --glow-warning: 0 0 20px rgba(251, 191, 36, 0.3);
+    --glow-danger: 0 0 20px rgba(248, 113, 113, 0.3);
 }
 
 /* ========================================
@@ -91,8 +115,19 @@ body {
     background: var(--bg-secondary);
     line-height: 1.6;
     overflow-x: hidden;
-    transition: background var(--transition-base);
+    transition: background var(--transition-base), color var(--transition-base);
     max-width: 100vw;
+}
+
+/* 深色模式专属背景纹理 */
+[data-theme="dark"] body {
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+    background-size: 100% 100%;
+    background-attachment: fixed;
 }
 
 * {
@@ -118,6 +153,28 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--text-tertiary);
+}
+/* 深色模式滚动条增强 */
+[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: rgba(17, 24, 39, 0.5);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+        to bottom,
+        rgba(129, 140, 248, 0.4),
+        rgba(167, 139, 250, 0.4)
+    );
+    box-shadow: inset 0 0 6px rgba(129, 140, 248, 0.3);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+        to bottom,
+        rgba(129, 140, 248, 0.6),
+        rgba(167, 139, 250, 0.6)
+    );
+    box-shadow: 0 0 10px rgba(129, 140, 248, 0.5);
 }
 
 /* ========================================
