@@ -704,6 +704,13 @@ export const colorsCssContent = /* css */ `
 .pool-count-icon {
     font-size: 0.9375rem;
 }
+.form-help {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 0.5rem;
+}
+
 /* ========================================
    颜色池标题行
    ======================================== */
