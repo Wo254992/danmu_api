@@ -1417,22 +1417,35 @@ renderEnvList = function() {
    颜色池操作相关函数
    ======================================== */
 function updateColorPoolInput() {
-    const chips = document.querySelectorAll('#color-pool-container .color-chip');
-    const values = Array.from(chips).map(chip => chip.dataset.value);
+    const container = document.getElementById('color-pool-container');
+    const chips = Array.from(container.querySelectorAll('.color-chip'));
+    
+    const values = chips.map(chip => chip.dataset.value);
     document.getElementById('text-value').value = values.join(',');
     
     // 更新计数
     const countEl = document.getElementById('pool-count');
     if (countEl) countEl.textContent = values.length;
 
-    // 更新白色占比
-    const whiteCount = values.filter(v => parseInt(v) === 16777215).length;
+    // 白色统计
+    const whiteValues = values.filter(v => parseInt(v) === 16777215);
+    const whiteCount = whiteValues.length;
     const whitePercent = values.length > 0 ? Math.round((whiteCount / values.length) * 100) : 0;
+
     const percentEl = document.getElementById('white-percent');
     if (percentEl) percentEl.textContent = whitePercent + '%';
-    
-    // 更新容器空状态
-    const container = document.getElementById('color-pool-container');
+
+    // 合并显示白色（只在 UI 层）
+    const whiteChips = chips.filter(chip => parseInt(chip.dataset.value) === 16777215);
+    if (whiteChips.length > 1) {
+        whiteChips.slice(1).forEach(chip => chip.remove());
+        const label = whiteChips[0].querySelector('.color-hex-label');
+        if (label) {
+            label.textContent = `FFFFFF × ${whiteCount}`;
+        }
+    }
+
+    // 空状态
     if (values.length === 0) {
         container.classList.add('empty');
     } else {
