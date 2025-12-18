@@ -17,6 +17,31 @@ export const componentsCssContent = /* css */ `
     z-index: 1000;
     box-shadow: var(--shadow-md);
 }
+/* 深色模式侧边栏增强 */
+[data-theme="dark"] .sidebar {
+    background: rgba(10, 15, 30, 0.95);
+    border-right: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5), 
+                0 0 40px rgba(99, 102, 241, 0.1);
+}
+
+[data-theme="dark"] .sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(129, 140, 248, 0.5) 20%,
+        rgba(167, 139, 250, 0.5) 50%,
+        rgba(192, 132, 252, 0.5) 80%,
+        transparent
+    );
+    opacity: 0.6;
+}
 
 .sidebar-header {
     padding: 1.5rem;
@@ -381,6 +406,53 @@ export const componentsCssContent = /* css */ `
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
+/* 深色模式按钮增强 */
+[data-theme="dark"] .btn-primary {
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+    box-shadow: 0 4px 12px rgba(129, 140, 248, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #a78bfa 0%, #c084fc 100%);
+    box-shadow: 0 8px 24px rgba(129, 140, 248, 0.4),
+                0 0 40px rgba(167, 139, 250, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(-3px);
+}
+
+[data-theme="dark"] .btn-success {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+}
+
+[data-theme="dark"] .btn-success:hover:not(:disabled) {
+    background: linear-gradient(135deg, #6ee7b7 0%, #34d399 100%);
+    box-shadow: 0 8px 24px rgba(52, 211, 153, 0.4),
+                0 0 40px rgba(110, 231, 183, 0.3);
+}
+
+[data-theme="dark"] .btn-danger {
+    background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+    box-shadow: 0 4px 12px rgba(248, 113, 113, 0.3);
+}
+
+[data-theme="dark"] .btn-danger:hover:not(:disabled) {
+    background: linear-gradient(135deg, #fca5a5 0%, #f87171 100%);
+    box-shadow: 0 8px 24px rgba(248, 113, 113, 0.4),
+                0 0 40px rgba(252, 165, 165, 0.3);
+}
+
+[data-theme="dark"] .btn-warning {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+[data-theme="dark"] .btn-warning:hover:not(:disabled) {
+    background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
+    box-shadow: 0 8px 24px rgba(251, 191, 36, 0.4),
+                0 0 40px rgba(252, 211, 77, 0.3);
+}
 
 .btn-secondary {
     background: var(--bg-secondary);
@@ -452,6 +524,21 @@ export const componentsCssContent = /* css */ `
 .card:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
+}
+/* 深色模式卡片增强 */
+[data-theme="dark"] .card {
+    background: rgba(17, 24, 39, 0.8);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .card:hover {
+    border-color: rgba(129, 140, 248, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6),
+                0 0 40px rgba(99, 102, 241, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transform: translateY(-4px);
 }
 
 .card-title {
