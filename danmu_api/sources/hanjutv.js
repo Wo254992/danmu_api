@@ -177,10 +177,23 @@ export default class HanjutvSource extends BaseSource {
             // 提取别名信息（韩剧TV API返回的alias字段）
             const aliases = detail.alias || [];
             
+            // 检查查询词是否匹配别名，如果匹配则使用别名作为主标题
+            let displayName = anime.name;
+            const normalizedQueryTitle = normalizeSpaces(queryTitle);
+            
+            // 遍历别名，找到最匹配的那个
+            for (const alias of aliases) {
+              const normalizedAlias = normalizeSpaces(alias);
+              if (normalizedAlias === normalizedQueryTitle || normalizedAlias.includes(normalizedQueryTitle)) {
+                displayName = alias; // 使用匹配的别名作为显示名称
+                break;
+              }
+            }
+            
             let transformedAnime = {
               animeId: anime.animeId,
               bangumiId: String(anime.animeId),
-              animeTitle: `${anime.name}(${new Date(anime.updateTime).getFullYear()})【${getCategory(detail.category)}】from hanjutv`,
+              animeTitle: `${displayName}(${new Date(anime.updateTime).getFullYear()})【${getCategory(detail.category)}】from hanjutv`,
               type: getCategory(detail.category),
               typeDescription: getCategory(detail.category),
               imageUrl: anime.image.thumb,
