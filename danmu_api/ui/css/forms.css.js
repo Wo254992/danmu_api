@@ -68,7 +68,9 @@ export const formsCssContent = /* css */ `
 
 .form-help {
     display: flex;
+    flex-direction: row;
     align-items: center;
+    flex-wrap: nowrap;
     gap: 0.375rem;
     font-size: 0.8125rem;
     color: var(--text-tertiary);
