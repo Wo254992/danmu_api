@@ -340,8 +340,19 @@ async function matchAniAndEp(season, episode, searchData, title, req, platform, 
     for (const anime of searchData.animes) {
       if (globals.rememberLastSelect && preferAnimeId && anime.bangumiId.toString() !== preferAnimeId.toString() &&
           anime.animeId.toString() !== preferAnimeId.toString()) continue;
-      // 使用宽松匹配：只要标题包含关键词即可（用于自动匹配场景）
-      if (normalizeSpaces(anime.animeTitle).includes(normalizedTitle)) {
+      
+      // 检查标题匹配或别名匹配
+      let titleMatches = normalizeSpaces(anime.animeTitle).includes(normalizedTitle);
+      
+      // 如果标题不匹配，检查别名（主要用于韩剧TV）
+      if (!titleMatches && anime.aliases && Array.isArray(anime.aliases)) {
+        titleMatches = anime.aliases.some(alias => 
+          normalizeSpaces(alias).includes(normalizedTitle)
+        );
+      }
+      
+      // 使用宽松匹配：标题或别名包含关键词即可
+      if (titleMatches) {
         let originBangumiUrl = new URL(req.url.replace("/match", `bangumi/${anime.bangumiId}`));
         const bangumiRes = await getBangumi(originBangumiUrl.pathname);
         const bangumiData = await bangumiRes.json();
@@ -385,8 +396,17 @@ async function matchAniAndEp(season, episode, searchData, title, req, platform, 
     for (const anime of searchData.animes) {
       if (globals.rememberLastSelect && preferAnimeId && anime.bangumiId.toString() !== preferAnimeId.toString()) continue;
       const animeTitle = anime.animeTitle.split("(")[0].trim();
+      
+      // 检查标题严格匹配或别名严格匹配
+      let exactMatch = (animeTitle === title);
+      
+      // 如果标题不匹配，检查别名
+      if (!exactMatch && anime.aliases && Array.isArray(anime.aliases)) {
+        exactMatch = anime.aliases.some(alias => alias === title);
+      }
+      
       // 先尝试严格匹配
-      if (animeTitle === title) {
+      if (exactMatch) {
         let originBangumiUrl = new URL(req.url.replace("/match", `bangumi/${anime.bangumiId}`));
         const bangumiRes = await getBangumi(originBangumiUrl.pathname);
         const bangumiData = await bangumiRes.json();
@@ -415,8 +435,19 @@ async function matchAniAndEp(season, episode, searchData, title, req, platform, 
       for (const anime of searchData.animes) {
         if (globals.rememberLastSelect && preferAnimeId && anime.bangumiId.toString() !== preferAnimeId.toString()) continue;
         const normalizedAnimeTitle = normalizeSpaces(anime.animeTitle);
-        // 使用宽松匹配：只要标题包含关键词即可
-        if (normalizedAnimeTitle.includes(normalizedTitle)) {
+        
+        // 检查标题宽松匹配或别名宽松匹配
+        let looseMatch = normalizedAnimeTitle.includes(normalizedTitle);
+        
+        // 如果标题不匹配，检查别名
+        if (!looseMatch && anime.aliases && Array.isArray(anime.aliases)) {
+          looseMatch = anime.aliases.some(alias => 
+            normalizeSpaces(alias).includes(normalizedTitle)
+          );
+        }
+        
+        // 使用宽松匹配：标题或别名包含关键词即可
+        if (looseMatch) {
           let originBangumiUrl = new URL(req.url.replace("/match", `bangumi/${anime.bangumiId}`));
           const bangumiRes = await getBangumi(originBangumiUrl.pathname);
           const bangumiData = await bangumiRes.json();
