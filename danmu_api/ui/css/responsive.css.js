@@ -64,7 +64,7 @@ export const responsiveCssContent = /* css */ `
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1rem 1.25rem;
+        padding: 1.25rem 1.25rem;
         background: var(--bg-primary);
         backdrop-filter: var(--blur-md);
         border-radius: 0 0 var(--radius-xl) var(--radius-xl);
@@ -559,7 +559,7 @@ export const responsiveCssContent = /* css */ `
     }
 
     .mobile-header {
-        padding: 0.875rem 1rem;
+        padding: 1rem 1rem;
         margin-bottom: 1.25rem;
         border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
