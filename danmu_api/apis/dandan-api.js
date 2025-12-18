@@ -335,11 +335,12 @@ async function matchAniAndEp(season, episode, searchData, title, req, platform, 
   let resAnime;
   let resEpisode;
   if (season && episode) {
-    // 判断剧集
+    // 判断剧集 - 自动匹配时使用宽松模糊匹配
     const normalizedTitle = normalizeSpaces(title);
     for (const anime of searchData.animes) {
       if (globals.rememberLastSelect && preferAnimeId && anime.bangumiId.toString() !== preferAnimeId.toString() &&
           anime.animeId.toString() !== preferAnimeId.toString()) continue;
+      // 使用宽松匹配：只要标题包含关键词即可（用于自动匹配场景）
       if (normalizeSpaces(anime.animeTitle).includes(normalizedTitle)) {
         let originBangumiUrl = new URL(req.url.replace("/match", `bangumi/${anime.bangumiId}`));
         const bangumiRes = await getBangumi(originBangumiUrl.pathname);
@@ -379,10 +380,12 @@ async function matchAniAndEp(season, episode, searchData, title, req, platform, 
       }
     }
   } else {
-    // 判断电影
+    // 判断电影 - 自动匹配时使用宽松模糊匹配
+    const normalizedTitle = normalizeSpaces(title);
     for (const anime of searchData.animes) {
       if (globals.rememberLastSelect && preferAnimeId && anime.bangumiId.toString() !== preferAnimeId.toString()) continue;
       const animeTitle = anime.animeTitle.split("(")[0].trim();
+      // 先尝试严格匹配
       if (animeTitle === title) {
         let originBangumiUrl = new URL(req.url.replace("/match", `bangumi/${anime.bangumiId}`));
         const bangumiRes = await getBangumi(originBangumiUrl.pathname);
@@ -402,6 +405,37 @@ async function matchAniAndEp(season, episode, searchData, title, req, platform, 
             resEpisode = bangumiData.bangumi.episodes[0];
             resAnime = anime;
             break;
+          }
+        }
+      }
+    }
+    
+    // 如果严格匹配未找到，尝试宽松匹配
+    if (!resAnime) {
+      for (const anime of searchData.animes) {
+        if (globals.rememberLastSelect && preferAnimeId && anime.bangumiId.toString() !== preferAnimeId.toString()) continue;
+        const normalizedAnimeTitle = normalizeSpaces(anime.animeTitle);
+        // 使用宽松匹配：只要标题包含关键词即可
+        if (normalizedAnimeTitle.includes(normalizedTitle)) {
+          let originBangumiUrl = new URL(req.url.replace("/match", `bangumi/${anime.bangumiId}`));
+          const bangumiRes = await getBangumi(originBangumiUrl.pathname);
+          const bangumiData = await bangumiRes.json();
+          log("info", bangumiData);
+
+          if (platform) {
+            const firstIndex = bangumiData.bangumi.episodes.findIndex(episode => extractEpisodeTitle(episode.episodeTitle) === platform);
+            const indexCount = bangumiData.bangumi.episodes.filter(episode => extractEpisodeTitle(episode.episodeTitle) === platform).length;
+            if (indexCount > 0) {
+              resEpisode = bangumiData.bangumi.episodes[firstIndex];
+              resAnime = anime;
+              break;
+            }
+          } else {
+            if (bangumiData.bangumi.episodes.length > 0) {
+              resEpisode = bangumiData.bangumi.episodes[0];
+              resAnime = anime;
+              break;
+            }
           }
         }
       }
