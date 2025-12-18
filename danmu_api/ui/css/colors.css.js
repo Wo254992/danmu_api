@@ -545,13 +545,13 @@ export const colorsCssContent = /* css */ `
    ======================================== */
 .color-pool-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    gap: 0.75rem;
-    padding: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+    gap: 0.5rem;
+    padding: 0.75rem;
     background: var(--bg-secondary);
     border: 2px dashed var(--border-color);
     border-radius: var(--radius-lg);
-    min-height: 120px;
+    min-height: 96px;
     align-content: start;
     transition: all var(--transition-fast);
 }
@@ -591,19 +591,19 @@ export const colorsCssContent = /* css */ `
 .color-chip {
     width: 100%;
     aspect-ratio: 1;
-    min-height: 70px;
-    border-radius: var(--radius-md);
+    min-height: 56px;
+    border-radius: var(--radius-sm);
     position: relative;
     cursor: move;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: visible;
-    animation: colorChipFadeIn 0.35s ease-out backwards;
+    animation: colorChipFadeIn 0.3s ease-out backwards;
 }
 
 .color-chip:hover {
@@ -853,16 +853,16 @@ export const colorsCssContent = /* css */ `
     text-align: center;
 }
 
-.preview-color-chip {
+.batch-import-preview-chip {
     width: 36px;
     height: 36px;
     border-radius: var(--radius-sm);
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     transition: transform var(--transition-fast);
 }
 
-.preview-color-chip:hover {
+.batch-import-preview-chip:hover {
     transform: scale(1.15);
 }
 
