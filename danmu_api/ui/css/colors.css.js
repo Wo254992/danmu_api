@@ -704,6 +704,27 @@ export const colorsCssContent = /* css */ `
 .pool-count-icon {
     font-size: 0.9375rem;
 }
+/* ========================================
+   颜色池标题行
+   ======================================== */
+.color-pool-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.color-pool-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-shrink: 1;
+    min-width: 0;
+}
 
 /* ========================================
    批量导入模态框
