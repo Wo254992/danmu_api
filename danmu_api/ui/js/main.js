@@ -212,6 +212,11 @@ function performSectionSwitch(section) {
         toggleSidebar();
     }
     
+    // 切换到日志界面时自动刷新日志
+    if (section === 'logs') {
+        fetchRealLogs();
+    }
+    
     // 滚动到顶部
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
