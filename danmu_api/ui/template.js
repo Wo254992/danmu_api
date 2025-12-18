@@ -116,12 +116,41 @@ export const HTML_TEMPLATE = /* html */ `
         <main class="main-content">
             <!-- 移动端顶栏 -->
             <div class="mobile-header">
-                <button class="mobile-menu-btn" onclick="toggleSidebar()">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-                <h2 class="mobile-title" id="mobile-title">配置预览</h2>
+                <div class="mobile-header-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="打开菜单">
+                        <span class="menu-line"></span>
+                        <span class="menu-line"></span>
+                        <span class="menu-line"></span>
+                    </button>
+                    <div class="mobile-logo-wrapper">
+                        <img src="https://i.mji.rip/2025/09/27/eedc7b701c0fa5c1f7c175b22f441ad9.jpeg" alt="Logo" class="mobile-logo-image">
+                        <div class="mobile-title-group">
+                            <h2 class="mobile-title" id="mobile-title">配置预览</h2>
+                            <span class="mobile-subtitle" id="mobile-subtitle">Configuration</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mobile-header-right">
+                    <button class="mobile-action-btn" onclick="toggleTheme()" title="切换主题">
+                        <svg class="mobile-action-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"/>
+                            <line x1="12" y1="1" x2="12" y2="3"/>
+                            <line x1="12" y1="21" x2="12" y2="23"/>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                            <line x1="1" y1="12" x2="3" y2="12"/>
+                            <line x1="21" y1="12" x2="23" y2="12"/>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                        </svg>
+                        <svg class="mobile-action-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                    </button>
+                    <div class="mobile-status-indicator" id="mobile-status" title="系统运行正常">
+                        <span class="status-dot status-running"></span>
+                    </div>
+                </div>
             </div>
 
             <!-- 配置预览 -->
