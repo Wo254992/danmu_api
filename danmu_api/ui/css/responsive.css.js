@@ -295,13 +295,14 @@ export const responsiveCssContent = /* css */ `
     }
 
     .color-chip {
-        width: 70px;
-        height: 70px;
+        width: 44px;
+        height: 44px;
     }
 
     .pool-stats {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: nowrap;
     }
 
     /* 加载状态 */
@@ -378,8 +379,8 @@ export const responsiveCssContent = /* css */ `
     }
 
     .color-chip {
-        width: 60px;
-        height: 60px;
+        width: 36px;
+        height: 36px;
     }
 
     .number-btn {
@@ -439,8 +440,8 @@ export const responsiveCssContent = /* css */ `
 
     /* 颜色池 */
     .color-chip {
-        width: 75px;
-        height: 75px;
+        width: 48px;
+        height: 48px;
     }
 
     /* 页脚 */
