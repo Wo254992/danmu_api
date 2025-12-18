@@ -5,7 +5,7 @@ export const colorsCssContent = /* css */ `
    ======================================== */
 
 :root {
-    /* Primary 蓝色系 */
+    /* Primary 蓝色系 - 优化深色模式显示 */
     --primary-50: #eff6ff;
     --primary-100: #dbeafe;
     --primary-200: #bfdbfe;
@@ -16,7 +16,8 @@ export const colorsCssContent = /* css */ `
     --primary-700: #1d4ed8;
     --primary-800: #1e40af;
     --primary-900: #1e3a8a;
-    --primary-light: #818cf8;
+    --primary-light: #a78bfa; /* 更柔和的紫蓝色 */
+    --primary-glow: rgba(99, 102, 241, 0.4); /* 发光效果 */
 
     /* Success 绿色系 */
     --success-50: #ecfdf5;
