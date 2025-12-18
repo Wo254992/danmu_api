@@ -196,25 +196,24 @@ function performSectionSwitch(section) {
     
     // 更新移动端标题
     const titles = {
-        preview: '📋 配置预览',
-        logs: '📝 日志查看',
-        api: '🔧 接口调试',
-        push: '🚀 推送弹幕',
-        env: '⚙️ 系统配置'
+        preview: { main: '配置预览', sub: 'Configuration' },
+        logs: { main: '日志查看', sub: 'System Logs' },
+        api: { main: '接口调试', sub: 'API Testing' },
+        push: { main: '推送弹幕', sub: 'Push Danmu' },
+        env: { main: '系统配置', sub: 'Settings' }
     };
     const mobileTitle = document.getElementById('mobile-title');
-    if (mobileTitle) {
-        mobileTitle.textContent = titles[section] || '管理平台';
+    const mobileSubtitle = document.getElementById('mobile-subtitle');
+    if (mobileTitle && titles[section]) {
+        mobileTitle.textContent = titles[section].main;
+        if (mobileSubtitle) {
+            mobileSubtitle.textContent = titles[section].sub;
+        }
     }
     
     // 关闭移动端侧边栏
     if (window.innerWidth <= 768) {
         toggleSidebar();
-    }
-    
-    // 切换到日志界面时自动刷新日志
-    if (section === 'logs') {
-        fetchRealLogs();
     }
     
     // 滚动到顶部
