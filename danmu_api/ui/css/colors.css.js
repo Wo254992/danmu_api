@@ -681,10 +681,15 @@ export const colorsCssContent = /* css */ `
    统计徽章
    ======================================== */
 .pool-stats {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.75rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+.pool-stats {
+    max-width: 100%;
+    overflow-x: auto;
 }
 
 .pool-count-badge {
@@ -835,14 +840,19 @@ export const colorsCssContent = /* css */ `
 }
 
 .batch-import-preview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    display: block;
     padding: 1rem;
     background: var(--bg-tertiary);
     border-radius: var(--radius-md);
     min-height: 60px;
     border: 1px dashed var(--border-color);
+}
+
+.batch-import-preview-colors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
 }
 
 .batch-import-preview.empty::before {
