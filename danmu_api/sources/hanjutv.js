@@ -142,33 +142,23 @@ export default class HanjutvSource extends BaseSource {
     }
 
     // 使用 map 和 async 时需要返回 Promise 数组，并等待所有 Promise 完成
-    // 对于韩剧TV，使用宽松的模糊匹配，但在结果中标记匹配类型
+    // 对于韩剧TV，完全信任其搜索API，不做标题过滤（因为韩剧TV可能使用不同译名）
+    // 但在结果中标记匹配类型用于排序：严格匹配的排前面
     const processHanjutvAnimes = await Promise.all(sourceAnimes
       .map(async (anime) => {
-        // 计算匹配类型：严格匹配 > 宽松匹配
+        // 计算匹配类型用于排序：严格匹配 > 宽松匹配 > API返回
         const normalizedAnimeName = normalizeSpaces(anime.name);
         const normalizedQueryTitle = normalizeSpaces(queryTitle);
         
-        let matchType = 0; // 0=不匹配, 1=宽松匹配, 2=严格匹配
+        let matchType = 1; // 默认为1（API返回的结果）
         
-        if (globals.strictTitleMatch) {
-          // 严格模式
-          if (strictTitleMatch(anime.name, queryTitle)) {
-            matchType = 2;
-          }
-        } else {
-          // 宽松模式
-          if (strictTitleMatch(anime.name, queryTitle)) {
-            matchType = 2; // 严格匹配
-          } else if (normalizedAnimeName.includes(normalizedQueryTitle)) {
-            matchType = 1; // 宽松匹配
-          }
+        // 如果标题匹配度更高，则提升优先级
+        if (strictTitleMatch(anime.name, queryTitle)) {
+          matchType = 3; // 严格匹配，最高优先级
+        } else if (normalizedAnimeName.includes(normalizedQueryTitle)) {
+          matchType = 2; // 宽松匹配，中等优先级
         }
-        
-        // 如果不匹配，返回 null
-        if (matchType === 0) {
-          return null;
-        }
+        // 否则保持 matchType = 1（API返回但标题不直接匹配，如不同译名）
         
         try {
           const detail = await this.getDetail(anime.sid);
@@ -196,14 +186,16 @@ export default class HanjutvSource extends BaseSource {
               rating: detail.rank,
               isFavorited: true,
               source: "hanjutv",
-              matchType: matchType, // 添加匹配类型标记
+              matchType: matchType, // 添加匹配类型标记用于排序
             };
 
             // 返回带匹配类型的结果，用于后续排序
             return { anime: transformedAnime, links: links, matchType: matchType };
           }
+          return null; // 如果没有剧集则返回null
         } catch (error) {
           log("error", `[Hanjutv] Error processing anime: ${error.message}`);
+          return null;
         }
       })
     );
@@ -211,7 +203,7 @@ export default class HanjutvSource extends BaseSource {
     // 过滤掉 null 值并按匹配类型排序
     const validResults = processHanjutvAnimes.filter(result => result !== null);
     
-    // 按匹配类型排序：严格匹配(2) > 宽松匹配(1)
+    // 按匹配类型排序：严格匹配(3) > 宽松匹配(2) > API返回(1)
     validResults.sort((a, b) => b.matchType - a.matchType);
     
     // 提取动漫信息和添加到缓存
