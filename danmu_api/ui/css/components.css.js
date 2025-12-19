@@ -20,9 +20,13 @@ export const componentsCssContent = /* css */ `
 /* 深色模式侧边栏增强 */
 [data-theme="dark"] .sidebar {
     background: rgba(10, 15, 30, 0.95);
-    border-right: 1px solid rgba(99, 102, 241, 0.2);
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5), 
-                0 0 40px rgba(99, 102, 241, 0.1);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-right: 1px solid rgba(99, 102, 241, 0.3);
+    box-shadow: 
+        8px 0 32px rgba(0, 0, 0, 0.6),
+        0 0 60px rgba(99, 102, 241, 0.15),
+        inset -1px 0 0 rgba(129, 140, 248, 0.1);
+    position: relative;
 }
 
 [data-theme="dark"] .sidebar::before {
@@ -30,17 +34,59 @@ export const componentsCssContent = /* css */ `
     position: absolute;
     top: 0;
     right: 0;
-    width: 1px;
+    width: 2px;
     height: 100%;
     background: linear-gradient(
         to bottom,
-        transparent,
-        rgba(129, 140, 248, 0.5) 20%,
-        rgba(167, 139, 250, 0.5) 50%,
-        rgba(192, 132, 252, 0.5) 80%,
-        transparent
+        transparent 0%,
+        rgba(129, 140, 248, 0.6) 10%,
+        rgba(167, 139, 250, 0.7) 30%,
+        rgba(192, 132, 252, 0.7) 50%,
+        rgba(236, 72, 153, 0.6) 70%,
+        rgba(167, 139, 250, 0.6) 90%,
+        transparent 100%
     );
-    opacity: 0.6;
+    opacity: 0.8;
+    animation: sidebarGlow 4s ease-in-out infinite alternate;
+    filter: blur(1px);
+}
+
+[data-theme="dark"] .sidebar::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20px;
+    width: 100px;
+    height: 200%;
+    background: radial-gradient(
+        ellipse,
+        rgba(129, 140, 248, 0.15) 0%,
+        transparent 60%
+    );
+    pointer-events: none;
+    animation: sidebarAura 8s ease-in-out infinite alternate;
+}
+
+@keyframes sidebarGlow {
+    0% {
+        opacity: 0.6;
+        transform: scaleY(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: scaleY(1.05);
+    }
+}
+
+@keyframes sidebarAura {
+    0% {
+        transform: translateY(-10%) scale(0.9);
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(10%) scale(1.1);
+        opacity: 0.5;
+    }
 }
 
 .sidebar-header {
@@ -408,17 +454,52 @@ export const componentsCssContent = /* css */ `
 }
 /* 深色模式按钮增强 */
 [data-theme="dark"] .btn-primary {
-    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
-    box-shadow: 0 4px 12px rgba(129, 140, 248, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #c084fc 100%);
+    box-shadow: 
+        0 4px 16px rgba(129, 140, 248, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+        0 1px 0 rgba(255, 255, 255, 0.2) inset,
+        0 0 20px rgba(129, 140, 248, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    );
+    transform: scale(0);
+    transition: transform 0.6s ease;
+}
+
+[data-theme="dark"] .btn-primary:hover::before {
+    transform: scale(1);
 }
 
 [data-theme="dark"] .btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, #a78bfa 0%, #c084fc 100%);
-    box-shadow: 0 8px 24px rgba(129, 140, 248, 0.4),
-                0 0 40px rgba(167, 139, 250, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    transform: translateY(-3px);
+    background: linear-gradient(135deg, #a78bfa 0%, #c084fc 50%, #d8b4fe 100%);
+    box-shadow: 
+        0 8px 32px rgba(129, 140, 248, 0.6),
+        0 0 60px rgba(167, 139, 250, 0.4),
+        0 0 100px rgba(192, 132, 252, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+        0 1px 0 rgba(255, 255, 255, 0.3) inset;
+    transform: translateY(-4px) scale(1.02);
+}
+
+[data-theme="dark"] .btn-primary:active:not(:disabled) {
+    transform: translateY(-2px) scale(0.98);
+    box-shadow: 
+        0 4px 16px rgba(129, 140, 248, 0.4),
+        0 0 30px rgba(167, 139, 250, 0.3);
 }
 
 [data-theme="dark"] .btn-success {
@@ -525,20 +606,50 @@ export const componentsCssContent = /* css */ `
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
 }
-/* 深色模式卡片增强 */
+/* 深色模式卡片增强 - 玻璃态升级 */
 [data-theme="dark"] .card {
-    background: rgba(17, 24, 39, 0.8);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(129, 140, 248, 0.1) inset,
+        0 2px 0 rgba(255, 255, 255, 0.05) inset,
+        0 0 60px rgba(99, 102, 241, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(129, 140, 248, 0.1),
+        transparent
+    );
+    transition: left 0.7s ease;
+}
+
+[data-theme="dark"] .card:hover::before {
+    left: 100%;
 }
 
 [data-theme="dark"] .card:hover {
-    border-color: rgba(129, 140, 248, 0.4);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6),
-                0 0 40px rgba(99, 102, 241, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    transform: translateY(-4px);
+    border-color: rgba(129, 140, 248, 0.5);
+    background: rgba(17, 24, 39, 0.85);
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(129, 140, 248, 0.2) inset,
+        0 2px 0 rgba(255, 255, 255, 0.08) inset,
+        0 0 80px rgba(129, 140, 248, 0.2),
+        0 0 120px rgba(167, 139, 250, 0.1);
+    transform: translateY(-6px) scale(1.01);
 }
 
 .card-title {
