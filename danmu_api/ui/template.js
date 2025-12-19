@@ -310,9 +310,28 @@ export const HTML_TEMPLATE = /* html */ `
             <!-- 接口调试 -->
             <section class="content-section" id="api-section">
                 <div class="section-header">
-                    <h2 class="section-title">接口调试</h2>
+                    <div>
+                        <h2 class="section-title">API 测试平台</h2>
+                        <p class="section-desc">支持接口调试和弹幕测试，可视化展示弹幕数据</p>
+                    </div>
+                    <div class="api-mode-tabs">
+                        <button class="api-mode-tab active" data-mode="api-test" onclick="switchApiMode('api-test')">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <span>接口调试</span>
+                        </button>
+                        <button class="api-mode-tab" data-mode="danmu-test" onclick="switchApiMode('danmu-test')">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                            </svg>
+                            <span>弹幕测试</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="api-test-container">
+
+                <!-- 接口调试模式 -->
+                <div class="api-test-container" id="api-test-mode">
                     <div class="form-card">
                         <label class="form-label">选择接口</label>
                         <select class="form-select" id="api-select" onchange="loadApiParams()">
@@ -339,6 +358,185 @@ export const HTML_TEMPLATE = /* html */ `
                     <div class="response-card" id="api-response-container" style="display: none;">
                         <h3 class="card-title">响应结果</h3>
                         <div class="response-content" id="api-response"></div>
+                    </div>
+                </div>
+
+                <!-- 弹幕测试模式 -->
+                <div class="danmu-test-container" id="danmu-test-mode" style="display: none;">
+                    <div class="danmu-test-methods">
+                        <div class="form-card danmu-method-card">
+                            <div class="method-header">
+                                <div class="method-icon-wrapper" style="background: var(--gradient-primary);">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                    </svg>
+                                </div>
+                                <div class="method-info">
+                                    <h3 class="method-title">🎯 自动匹配测试</h3>
+                                    <p class="method-desc">通过文件名自动匹配弹幕</p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">文件名</label>
+                                <input type="text" class="form-input" id="auto-match-filename" 
+                                       placeholder="例如: 生万物 S02E08 或 无忧渡.S01E01.2160p.WEB-DL.H265.DDP.5.1">
+                                <small class="form-help">
+                                    <span class="help-icon">💡</span>
+                                    支持多种格式：季集格式、网盘命名、外语标题等
+                                </small>
+                            </div>
+                            <button class="btn btn-primary btn-lg" onclick="autoMatchDanmu()">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                <span>开始匹配</span>
+                            </button>
+                        </div>
+
+                        <div class="form-card danmu-method-card">
+                            <div class="method-header">
+                                <div class="method-icon-wrapper" style="background: var(--gradient-success);">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"/>
+                                        <path d="m21 21-4.35-4.35"/>
+                                    </svg>
+                                </div>
+                                <div class="method-info">
+                                    <h3 class="method-title">🔍 手动搜索测试</h3>
+                                    <p class="method-desc">搜索动漫并选择集数</p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">搜索关键词</label>
+                                <input type="text" class="form-input" id="manual-search-keyword" 
+                                       placeholder="例如: 生万物"
+                                       onkeypress="if(event.key==='Enter') manualSearchDanmu()">
+                                <small class="form-help">
+                                    <span class="help-icon">💡</span>
+                                    输入动漫名称进行精确搜索
+                                </small>
+                            </div>
+                            <button class="btn btn-success btn-lg" onclick="manualSearchDanmu()">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="m21 21-4.35-4.35"/>
+                                </svg>
+                                <span>开始搜索</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 搜索结果展示 -->
+                    <div id="danmu-search-results" style="display: none;"></div>
+
+                    <!-- 弹幕展示区域 -->
+                    <div id="danmu-display-area" style="display: none;">
+                        <!-- 弹幕信息卡片 -->
+                        <div class="form-card danmu-info-card">
+                            <div class="danmu-info-header">
+                                <div class="danmu-title-section">
+                                    <h3 class="danmu-title" id="danmu-title">弹幕数据</h3>
+                                    <span class="danmu-subtitle" id="danmu-subtitle">加载中...</span>
+                                </div>
+                                <div class="danmu-actions">
+                                    <button class="btn btn-primary" onclick="exportDanmu('json')">
+                                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                        </svg>
+                                        <span>导出 JSON</span>
+                                    </button>
+                                    <button class="btn btn-success" onclick="exportDanmu('xml')">
+                                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                        </svg>
+                                        <span>导出 XML</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 统计信息 -->
+                            <div class="danmu-stats-grid">
+                                <div class="danmu-stat-item">
+                                    <span class="stat-icon">💬</span>
+                                    <div class="stat-content">
+                                        <div class="stat-value" id="danmu-total-count">0</div>
+                                        <div class="stat-label">弹幕总数</div>
+                                    </div>
+                                </div>
+                                <div class="danmu-stat-item">
+                                    <span class="stat-icon">⏱️</span>
+                                    <div class="stat-content">
+                                        <div class="stat-value" id="danmu-duration">0:00</div>
+                                        <div class="stat-label">视频时长</div>
+                                    </div>
+                                </div>
+                                <div class="danmu-stat-item">
+                                    <span class="stat-icon">📊</span>
+                                    <div class="stat-content">
+                                        <div class="stat-value" id="danmu-density">0</div>
+                                        <div class="stat-label">平均密度/分</div>
+                                    </div>
+                                </div>
+                                <div class="danmu-stat-item">
+                                    <span class="stat-icon">🔥</span>
+                                    <div class="stat-content">
+                                        <div class="stat-value" id="danmu-peak-time">--:--</div>
+                                        <div class="stat-label">高能时刻</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 热力图 -->
+                        <div class="form-card danmu-heatmap-card">
+                            <h3 class="card-title">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                                <span>弹幕热力图</span>
+                            </h3>
+                            <div class="heatmap-legend">
+                                <span class="legend-label">弹幕密度：</span>
+                                <div class="legend-gradient">
+                                    <span class="legend-low">低</span>
+                                    <div class="legend-bar"></div>
+                                    <span class="legend-high">高</span>
+                                </div>
+                            </div>
+                            <canvas id="danmu-heatmap-canvas"></canvas>
+                        </div>
+
+                        <!-- 弹幕列表 -->
+                        <div class="form-card danmu-list-card">
+                            <div class="danmu-list-header">
+                                <h3 class="card-title">
+                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M4 6h16M4 12h16M4 18h7"/>
+                                    </svg>
+                                    <span>弹幕列表</span>
+                                </h3>
+                                <div class="danmu-list-filters">
+                                    <button class="danmu-filter-btn active" data-type="all" onclick="filterDanmuList('all')">
+                                        全部 (<span id="filter-all-count">0</span>)
+                                    </button>
+                                    <button class="danmu-filter-btn" data-type="scroll" onclick="filterDanmuList('scroll')">
+                                        滚动 (<span id="filter-scroll-count">0</span>)
+                                    </button>
+                                    <button class="danmu-filter-btn" data-type="top" onclick="filterDanmuList('top')">
+                                        顶部 (<span id="filter-top-count">0</span>)
+                                    </button>
+                                    <button class="danmu-filter-btn" data-type="bottom" onclick="filterDanmuList('bottom')">
+                                        底部 (<span id="filter-bottom-count">0</span>)
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="danmu-list-container" id="danmu-list-container">
+                                <div class="danmu-list-empty">
+                                    <span class="empty-icon">💬</span>
+                                    <p>暂无弹幕数据</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
