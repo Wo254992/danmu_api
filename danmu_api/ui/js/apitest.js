@@ -1181,18 +1181,16 @@ function loadMoreDanmu(comments, container) {
         const mode = parts[1];
         const modeInt = parseInt(mode);
         
-        // 兼容 JSON 和 XML 两种格式
+        // 判断颜色位置：检查 parts[3] 是否是纯数字
         let colorStr;
-        if (parts.length <= 4) {
-            // JSON 格式：时间,模式,颜色,来源
-            colorStr = parts[2] || '16777215';
+        if (parts[3] && /^\d+$/.test(parts[3])) {
+            // XML 格式：parts[3] 是纯数字，颜色在 parts[3]
+            colorStr = parts[3];
         } else {
-            // XML 格式：时间,模式,字号,颜色,...
-            colorStr = parts[3] || '16777215';
+            // JSON 格式：parts[3] 是 [bahamut] 等，颜色在 parts[2]
+            colorStr = (parts[2] || '16777215').replace(/[^\d]/g, '');
         }
         
-        // 移除非数字字符（如 [bahamut]）
-        colorStr = colorStr.replace(/[^\d]/g, '');
         const colorInt = parseInt(colorStr) || 16777215;
         const hexColor = '#' + colorInt.toString(16).padStart(6, '0');
         
@@ -1252,6 +1250,7 @@ function loadMoreDanmu(comments, container) {
         container.appendChild(endDiv);
     }
 }
+
 
 
 /* ========================================
