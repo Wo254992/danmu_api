@@ -928,8 +928,6 @@ function loadDanmuData(episodeId, title) {
         });
 }
 
-// 全局变量，保存当前的 episodeId
-let currentEpisodeId = null;
 /* ========================================
    显示弹幕数据
    ======================================== */
