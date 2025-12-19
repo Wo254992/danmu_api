@@ -328,7 +328,12 @@ export const HTML_TEMPLATE = /* html */ `
                     <div class="form-card" id="api-params" style="display: none;">
                         <h3 class="card-title">接口参数</h3>
                         <div id="params-form"></div>
-                        <button class="btn btn-success btn-lg" onclick="testApi()">发送请求</button>
+                        <button class="btn btn-success btn-lg" onclick="testApi()">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" stroke-width="2"/>
+                            </svg>
+                            <span>发送请求</span>
+                        </button>
                     </div>
 
                     <div class="response-card" id="api-response-container" style="display: none;">
@@ -408,9 +413,15 @@ export const HTML_TEMPLATE = /* html */ `
                         </div>
                         
                         <label class="form-label" style="margin-top: 20px;">搜索关键字</label>
-                        <div class="input-group">
-                            <input type="text" class="form-input" id="push-search-keyword" placeholder="请输入搜索关键字">
-                            <button class="btn btn-primary" onclick="searchAnimeForPush()">搜索</button>
+                        <div class="input-group search-input-group">
+                            <input type="text" class="form-input search-input" id="push-search-keyword" placeholder="请输入搜索关键字" onkeypress="if(event.key==='Enter') searchAnimeForPush()">
+                            <button class="btn btn-primary search-btn" onclick="searchAnimeForPush()">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <circle cx="11" cy="11" r="8" stroke-width="2"/>
+                                    <path d="m21 21-4.35-4.35" stroke-width="2"/>
+                                </svg>
+                                <span class="search-btn-text">搜索</span>
+                            </button>
                         </div>
                     </div>
                     <div id="push-anime-list" class="anime-grid" style="display: none;"></div>
@@ -475,9 +486,19 @@ export const HTML_TEMPLATE = /* html */ `
                 </ul>
                 <p class="modal-warning">清理后可能需要重新登录</p>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="confirmClearCache()">确认清理</button>
-                <button class="btn btn-secondary" onclick="hideClearCacheModal()">取消</button>
+            <div class="modal-footer modal-footer-compact">
+                <button class="btn btn-secondary btn-modal" onclick="hideClearCacheModal()">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span>取消</span>
+                </button>
+                <button class="btn btn-primary btn-modal" onclick="confirmClearCache()">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7"/>
+                    </svg>
+                    <span>确认清理</span>
+                </button>
             </div>
         </div>
     </div>
@@ -501,9 +522,19 @@ export const HTML_TEMPLATE = /* html */ `
                     <p style="margin-top: 10px;">预计耗时：30-90秒</p>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" onclick="confirmDeploySystem()">确认部署</button>
-                <button class="btn btn-secondary" onclick="hideDeploySystemModal()">取消</button>
+            <div class="modal-footer modal-footer-compact">
+                <button class="btn btn-secondary btn-modal" onclick="hideDeploySystemModal()">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span>取消</span>
+                </button>
+                <button class="btn btn-success btn-modal" onclick="confirmDeploySystem()">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    <span>确认部署</span>
+                </button>
             </div>
         </div>
     </div>
@@ -548,9 +579,19 @@ export const HTML_TEMPLATE = /* html */ `
                         <textarea class="form-textarea" id="env-description" placeholder="配置项说明" readonly></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">保存</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <div class="modal-footer modal-footer-compact">
+                    <button type="button" class="btn btn-secondary btn-modal" onclick="closeModal()">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span>取消</span>
+                    </button>
+                    <button type="submit" class="btn btn-success btn-modal">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <polyline points="20 6 9 17 4 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>保存</span>
+                    </button>
                 </div>
             </form>
         </div>
