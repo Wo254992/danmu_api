@@ -477,4 +477,107 @@ export const modeBadgeCssContent = /* css */ `
         height: 12px;
     }
 }
+/* ========================================
+   徽章高级效果 - 新增
+   ======================================== */
+
+/* 彩虹边框效果 */
+[data-theme="dark"] .badge {
+    position: relative;
+    background-clip: padding-box;
+}
+
+[data-theme="dark"] .badge::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+        135deg,
+        rgba(129, 140, 248, 0.4),
+        rgba(167, 139, 250, 0.4),
+        rgba(192, 132, 252, 0.4),
+        rgba(236, 72, 153, 0.4)
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+[data-theme="dark"] .badge:hover::before {
+    opacity: 1;
+}
+
+/* 管理员徽章特殊动画 */
+[data-theme="dark"] .mode-badge-admin {
+    animation: adminPulse 2s ease-in-out infinite;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+}
+
+[data-theme="dark"] .mode-badge-admin::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: inherit;
+    filter: blur(10px);
+    opacity: 0.5;
+    z-index: -1;
+    animation: adminGlow 2s ease-in-out infinite;
+}
+
+@keyframes adminPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+    }
+}
+
+@keyframes adminGlow {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* 运行状态呼吸灯 */
+[data-theme="dark"] .status-badge-running::before {
+    box-shadow: 
+        0 0 10px var(--success-500),
+        0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+[data-theme="dark"] .status-badge-running::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: var(--success-500);
+    border-radius: 50%;
+    left: 0.875rem;
+    filter: blur(6px);
+    opacity: 0.6;
+    animation: breathingGlow 2s ease-in-out infinite;
+}
+
+@keyframes breathingGlow {
+    0%, 100% {
+        transform: scale(0.8);
+        opacity: 0.4;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+}
 `;
