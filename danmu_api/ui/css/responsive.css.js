@@ -35,7 +35,7 @@ export const responsiveCssContent = /* css */ `
     /* 主布局 */
     .main-content {
         margin-left: 0;
-        padding: 0.75rem;
+        padding: 0 0.75rem 0.75rem;
         max-width: 100vw;
         overflow-x: hidden;
     }
@@ -585,7 +585,7 @@ export const responsiveCssContent = /* css */ `
     }
 
     .main-content {
-        padding: 0.75rem;
+        padding: 0 0.75rem 0.75rem;
     }
 
     .mobile-header {
@@ -917,7 +917,7 @@ export const responsiveCssContent = /* css */ `
 @media (max-width: 767px) and (orientation: landscape) {
     /* 减小垂直间距 */
     .main-content {
-        padding: 0.75rem;
+        padding: 0 0.75rem 0.75rem;
     }
 
     .mobile-header {
