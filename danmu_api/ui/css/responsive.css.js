@@ -64,11 +64,13 @@ export const responsiveCssContent = /* css */ `
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1.4rem 1.25rem;
+        /* 修改1：增加了垂直方向的padding (1.25rem -> 1.5rem)，使高度变高 */
+        padding: 1.5rem 1.25rem;
         background: var(--bg-primary);
         backdrop-filter: var(--blur-md);
         border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-        margin-bottom: 1.5rem;
+        /* 修改2：使用负margin抵消父容器的padding，实现顶部和两侧无缝隙 */
+        margin: -0.75rem -0.75rem 1.5rem -0.75rem;
         border: 1px solid var(--border-color);
         border-top: none;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -77,6 +79,7 @@ export const responsiveCssContent = /* css */ `
         z-index: 100;
         animation: slideInDown 0.4s ease-out;
     }
+
 
     /* 左侧区域 */
     .mobile-header-left {
@@ -589,7 +592,7 @@ export const responsiveCssContent = /* css */ `
     }
 
     .mobile-header {
-        padding: 1.15rem 1rem;
+        padding: 1.25rem 1rem;
         margin-bottom: 1.25rem;
         border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
