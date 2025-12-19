@@ -1181,8 +1181,17 @@ function loadMoreDanmu(comments, container) {
         const mode = parts[1];
         const modeInt = parseInt(mode);
         
-        // 提取颜色值（移除可能存在的 [bahamut] 等标签）
-        let colorStr = parts[3] || '16777215';
+        // 兼容 JSON 和 XML 两种格式
+        let colorStr;
+        if (parts.length <= 4) {
+            // JSON 格式：时间,模式,颜色,来源
+            colorStr = parts[2] || '16777215';
+        } else {
+            // XML 格式：时间,模式,字号,颜色,...
+            colorStr = parts[3] || '16777215';
+        }
+        
+        // 移除非数字字符（如 [bahamut]）
         colorStr = colorStr.replace(/[^\d]/g, '');
         const colorInt = parseInt(colorStr) || 16777215;
         const hexColor = '#' + colorInt.toString(16).padStart(6, '0');
