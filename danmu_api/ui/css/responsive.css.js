@@ -362,7 +362,37 @@ export const responsiveCssContent = /* css */ `
         max-width: 100%;
         box-sizing: border-box;
     }
+/* 搜索输入组在移动端保持横向布局 */
+    .input-group.search-input-group {
+        flex-direction: row;
+    }
 
+    .input-group.search-input-group .search-input {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .input-group.search-input-group .search-btn {
+        width: auto;
+        flex-shrink: 0;
+        padding: 0.75rem 1rem;
+    }
+    
+    .search-btn-text {
+        display: inline;
+    }
+    
+    /* 模态框按钮在移动端保持横向 */
+    .modal-footer-compact {
+        flex-direction: row;
+        gap: 0.625rem;
+        padding: 1rem;
+    }
+    
+    .modal-footer-compact .btn-modal {
+        font-size: 0.875rem;
+        padding: 0.625rem 1rem;
+    }
     /* 按钮 */
     .btn {
         padding: 0.625rem 1rem;
@@ -644,7 +674,24 @@ export const responsiveCssContent = /* css */ `
         width: 44px;
         height: 44px;
     }
-
+    .search-input-group .search-btn {
+        padding: 0.75rem 0.875rem;
+    }
+    
+    .search-btn-text {
+        font-size: 0.8125rem;
+    }
+    
+    .modal-footer-compact .btn-modal {
+        font-size: 0.8125rem;
+        padding: 0.625rem 0.875rem;
+        gap: 0.375rem;
+    }
+    
+    .modal-footer-compact .btn-modal .btn-icon {
+        width: 16px;
+        height: 16px;
+    }
 }
 
 /* ========================================
