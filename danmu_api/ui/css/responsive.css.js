@@ -65,13 +65,12 @@ export const responsiveCssContent = /* css */ `
         align-items: center;
         justify-content: space-between;
         padding: 1.25rem 1.25rem;
-        background: var(--bg-primary);
-        backdrop-filter: var(--blur-md);
+        background: var(--bg-secondary);
+        backdrop-filter: none;
         border-radius: 0 0 var(--radius-xl) var(--radius-xl);
         margin-bottom: 1.5rem;
-        border: 1px solid var(--border-color);
-        border-top: none;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: none;
+        box-shadow: none;
         position: sticky;
         top: 0;
         z-index: 100;
