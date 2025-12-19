@@ -62,10 +62,21 @@ export const formsCssContent = /* css */ `
 [data-theme="dark"] .form-input:focus,
 [data-theme="dark"] .form-select:focus,
 [data-theme="dark"] .form-textarea:focus {
-    background: rgba(17, 24, 39, 0.8);
+    background: rgba(17, 24, 39, 0.9);
     border-color: #818cf8;
-    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2),
-                inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 
+        0 0 0 4px rgba(129, 140, 248, 0.15),
+        0 0 20px rgba(129, 140, 248, 0.3),
+        0 0 40px rgba(167, 139, 250, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .form-textarea {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 [data-theme="dark"] .form-input:hover,
