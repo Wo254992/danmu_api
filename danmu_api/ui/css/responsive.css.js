@@ -59,42 +59,39 @@ export const responsiveCssContent = /* css */ `
         animation: overlayFadeIn 0.3s ease-out;
     }
 
-    /* 移动端头部 - 强力贴顶修复版 */
+    /* 移动端头部 - 最终修复版 */
     .mobile-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
         
-        /* 增加内部高度，让头部看起来更舒展 */
+        /* 1. 内部样式：增加内边距让头部更高、更大气 */
         padding: 1.5rem 1.25rem; 
-        
         background: var(--bg-primary);
         backdrop-filter: var(--blur-md);
-        
-        /* 只保留底部的圆角 */
         border-radius: 0 0 var(--radius-xl) var(--radius-xl);
         
-        /* --- 关键修改开始 --- */
+        /* --- 关键修复区域 START --- */
         
-        /* 1. 强制宽度为屏幕总宽 (100vw)，忽略父容器宽度限制 */
+        /* 2. 宽度修复：使用 calc 算法强制撑满屏幕，比 transform 更稳定 */
         width: 100vw;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
         
-        /* 2. 通过计算将元素拉回正中间，消除左右间距 */
-        margin-left: 50%;
-        transform: translateX(-50%);
+        /* 3. 顶部修复：向上拉动，抵消父容器的 Padding */
+        /* 如果依然有白边，请继续把 -1.5rem 改为 -2rem 或 -2.5rem */
+        margin-top: -1.5rem;
         
-        /* 3. 大幅增加顶部负边距，强行抵消父容器的顶部Padding */
-        /* 如果依然有缝隙，可以将 -2rem 继续调大，例如 -3rem */
-        margin-top: -2rem; 
+        /* 4. 底部修复（解决重叠）： */
+        /* 计算公式：底部间距 = (你向上拉的距离) + (你想要的间距) */
+        /* 这里设置 3rem，相当于补偿了上面的 -1.5rem，还保留了 1.5rem 的间距 */
+        margin-bottom: 3rem;
         
-        /* 4. 底部外边距，防止内容被遮挡 */
-        margin-bottom: 1.5rem;
-        
-        /* --- 关键修改结束 --- */
+        /* --- 关键修复区域 END --- */
 
         border: 1px solid var(--border-color);
-        border-top: none; /* 确保顶部没有边框线 */
-        border-left: none; /* 移除左右边框，保证贴边更自然 */
+        border-top: none;
+        border-left: none;
         border-right: none;
         
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
