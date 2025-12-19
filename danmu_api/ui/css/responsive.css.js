@@ -59,53 +59,24 @@ export const responsiveCssContent = /* css */ `
         animation: overlayFadeIn 0.3s ease-out;
     }
 
-    /* 移动端头部 - 终极完美修复版 */
+    /* 移动端头部 - 重新设计 */
     .mobile-header {
-        /* --- 1. 布局核心 --- */
         display: flex;
         align-items: center;
         justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 999; /* 提高层级，防止被下方内容遮盖 */
-        
-        /* --- 2. 尺寸与间距修复 (解决左侧贴边问题) --- */
-        /* 关键：强制把padding算在宽度内，防止内容溢出 */
-        box-sizing: border-box; 
-        /* 强制全屏宽度 */
-        width: 100vw; 
-        /* 内部留白：左右留出 1.5rem 的距离，保证文字不贴边 */
-        padding: 1.5rem 1.5rem; 
-        
-        /* --- 3. 越狱定位 (解决顶部和两侧间隙) --- */
-        /* 向左拉伸，强行对齐屏幕边缘 */
-        margin-left: calc(50% - 50vw);
-        margin-right: calc(50% - 50vw);
-        
-        /* 向上大幅拉伸：使用 -3rem (48px) 足以覆盖浅色模式下的任何默认间距 */
-        margin-top: -3rem; 
-        
-        /* --- 4. 底部防重叠修复 (解决下方卡片钻入问题) --- */
-        /* 计算逻辑：既然向上拉了 3rem，下面就必须推开 3rem + 想要的间距(1.5rem) = 4.5rem */
-        margin-bottom: 4.5rem;
-        
-        /* --- 5. 外观样式 --- */
+        padding: 1.4rem 1.25rem;
         background: var(--bg-primary);
         backdrop-filter: var(--blur-md);
-        /* 只保留底部圆角 */
         border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-        
-        /* 强制移除顶部和左右边框，防止出现杂色线条 */
+        margin-bottom: 1.5rem;
         border: 1px solid var(--border-color);
-        border-top: none !important;
-        border-left: none !important;
-        border-right: none !important;
-        
+        border-top: none;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        position: sticky;
+        top: 0;
+        z-index: 100;
         animation: slideInDown 0.4s ease-out;
     }
-
-
 
     /* 左侧区域 */
     .mobile-header-left {
@@ -618,7 +589,7 @@ export const responsiveCssContent = /* css */ `
     }
 
     .mobile-header {
-        padding: 1.25rem 1rem;
+        padding: 1.15rem 1rem;
         margin-bottom: 1.25rem;
         border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
