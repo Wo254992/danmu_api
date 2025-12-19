@@ -1017,47 +1017,144 @@ export const responsiveCssContent = /* css */ `
    ======================================== */
 @media (max-width: 767px) {
     [data-theme="dark"] .mobile-header {
-        background: rgba(10, 15, 30, 0.95);
-        border: 1px solid rgba(99, 102, 241, 0.25);
+        background: rgba(10, 15, 30, 0.85);
+        backdrop-filter: blur(24px) saturate(180%);
+        border: 1px solid rgba(99, 102, 241, 0.3);
         border-top: none;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6),
-                    0 0 40px rgba(99, 102, 241, 0.1);
+        box-shadow: 
+            0 4px 32px rgba(0, 0, 0, 0.7),
+            0 0 60px rgba(99, 102, 241, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05),
+            inset 0 -1px 0 rgba(129, 140, 248, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    [data-theme="dark"] .mobile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(129, 140, 248, 0.05),
+            transparent
+        );
+        animation: headerShine 8s ease-in-out infinite;
+    }
+
+    [data-theme="dark"] .mobile-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 5%;
+        right: 5%;
+        height: 1px;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(129, 140, 248, 0.5) 20%,
+            rgba(167, 139, 250, 0.5) 50%,
+            rgba(129, 140, 248, 0.5) 80%,
+            transparent
+        );
+        animation: headerGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes headerShine {
+        0% { left: -100%; }
+        50%, 100% { left: 100%; }
+    }
+
+    @keyframes headerGlow {
+        0%, 100% {
+            opacity: 0.5;
+            transform: scaleX(1);
+        }
+        50% {
+            opacity: 1;
+            transform: scaleX(1.05);
+        }
     }
 
     [data-theme="dark"] .mobile-menu-btn,
     [data-theme="dark"] .mobile-action-btn,
     [data-theme="dark"] .mobile-status-indicator {
-        background: rgba(17, 24, 39, 0.8);
-        border: 1px solid rgba(99, 102, 241, 0.2);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        background: rgba(17, 24, 39, 0.75);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.25);
+        box-shadow: 
+            inset 0 1px 0 rgba(255, 255, 255, 0.08),
+            0 4px 12px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     [data-theme="dark"] .mobile-menu-btn:hover,
     [data-theme="dark"] .mobile-action-btn:hover,
     [data-theme="dark"] .mobile-status-indicator:hover {
-        border-color: rgba(129, 140, 248, 0.4);
-        box-shadow: 0 0 20px rgba(129, 140, 248, 0.15),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        background: rgba(17, 24, 39, 0.9);
+        border-color: rgba(129, 140, 248, 0.5);
+        box-shadow: 
+            0 0 30px rgba(129, 140, 248, 0.25),
+            0 0 60px rgba(167, 139, 250, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12),
+            0 4px 16px rgba(0, 0, 0, 0.4);
+        transform: scale(1.05);
+    }
+
+    [data-theme="dark"] .mobile-menu-btn:active,
+    [data-theme="dark"] .mobile-action-btn:active,
+    [data-theme="dark"] .mobile-status-indicator:active {
+        transform: scale(0.95);
+        box-shadow: 
+            0 0 15px rgba(129, 140, 248, 0.3),
+            inset 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     [data-theme="dark"] .mobile-logo-image {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
-                    0 0 20px rgba(99, 102, 241, 0.2);
+        box-shadow: 
+            0 4px 16px rgba(0, 0, 0, 0.5),
+            0 0 30px rgba(99, 102, 241, 0.3),
+            0 0 60px rgba(129, 140, 248, 0.15);
+        border: 1px solid rgba(129, 140, 248, 0.2);
     }
 
     [data-theme="dark"] .status-dot.status-running {
-        box-shadow: 0 0 12px var(--success-color),
-                    0 0 24px rgba(52, 211, 153, 0.3);
+        box-shadow: 
+            0 0 16px var(--success-color),
+            0 0 32px rgba(52, 211, 153, 0.4),
+            0 0 48px rgba(16, 185, 129, 0.2);
+        animation: statusPulse 2s ease-in-out infinite;
     }
 
     [data-theme="dark"] .status-dot.status-warning {
-        box-shadow: 0 0 12px var(--warning-color),
-                    0 0 24px rgba(251, 191, 36, 0.3);
+        box-shadow: 
+            0 0 16px var(--warning-color),
+            0 0 32px rgba(251, 191, 36, 0.4),
+            0 0 48px rgba(245, 158, 11, 0.2);
+        animation: statusPulse 2s ease-in-out infinite;
     }
 
     [data-theme="dark"] .status-dot.status-error {
-        box-shadow: 0 0 12px var(--danger-color),
-                    0 0 24px rgba(248, 113, 113, 0.3);
+        box-shadow: 
+            0 0 16px var(--danger-color),
+            0 0 32px rgba(248, 113, 113, 0.4),
+            0 0 48px rgba(239, 68, 68, 0.2);
+        animation: statusPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes statusPulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
     }
 }
 `;
