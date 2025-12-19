@@ -46,15 +46,48 @@ export const dynamicCssContent = /* css */ `
         rgba(139, 92, 246, 0.9) 50%,
         rgba(236, 72, 153, 0.9) 100%);
     border-radius: 3px;
-    box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+    box-shadow: 
+        0 0 12px rgba(99, 102, 241, 0.4),
+        0 0 24px rgba(139, 92, 246, 0.2);
+    animation: titlePulse 3s ease-in-out infinite;
 }
 
 [data-theme="dark"] .section-title::before {
     background: linear-gradient(180deg, 
         rgba(129, 140, 248, 1) 0%, 
-        rgba(167, 139, 250, 1) 50%,
+        rgba(167, 139, 250, 1) 35%,
+        rgba(192, 132, 252, 1) 65%,
         rgba(236, 72, 153, 1) 100%);
-    box-shadow: 0 0 16px rgba(129, 140, 248, 0.6);
+    box-shadow: 
+        0 0 20px rgba(129, 140, 248, 0.8),
+        0 0 40px rgba(167, 139, 250, 0.4),
+        0 0 60px rgba(192, 132, 252, 0.2);
+}
+
+[data-theme="dark"] .section-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 5px;
+    height: 75%;
+    background: inherit;
+    border-radius: 3px;
+    filter: blur(8px);
+    opacity: 0.6;
+    z-index: -1;
+}
+
+@keyframes titlePulse {
+    0%, 100% {
+        opacity: 1;
+        filter: brightness(1);
+    }
+    50% {
+        opacity: 0.8;
+        filter: brightness(1.2);
+    }
 }
 
 .section-desc {
