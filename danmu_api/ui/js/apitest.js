@@ -1330,8 +1330,21 @@ function exportDanmu(format) {
                 return response.text();
             })
             .then(content => {
+                let finalContent = content;
+                
+                // JSON 导出：后端如果返回的是压缩一行，这里做标准化缩进
+                if (format === 'json') {
+                    try {
+                        const parsed = JSON.parse(content);
+                        finalContent = JSON.stringify(parsed, null, 2);
+                    } catch (e) {
+                        // 如果后端返回的不是合法 JSON（或包含奇怪前缀），保持原样不影响导出
+                        finalContent = content;
+                    }
+                }
+                
                 const mimeType = format === 'xml' ? 'application/xml' : 'application/json';
-                const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
+                const blob = new Blob([finalContent], { type: mimeType + ';charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
