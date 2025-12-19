@@ -581,11 +581,13 @@ export const colorsCssContent = /* css */ `
 @keyframes colorChipFadeIn {
     from {
         opacity: 0;
-        transform: scale(0.8) translateY(10px);
+        transform: scale(0.6) translateY(20px) rotate(-5deg);
+        filter: blur(4px);
     }
     to {
         opacity: 1;
-        transform: scale(1) translateY(0);
+        transform: scale(1) translateY(0) rotate(0deg);
+        filter: blur(0);
     }
 }
 
@@ -604,7 +606,28 @@ export const colorsCssContent = /* css */ `
     align-items: center;
     justify-content: center;
     overflow: visible;
-    animation: colorChipFadeIn 0.3s ease-out backwards;
+    animation: colorChipFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    position: relative;
+}
+
+.color-chip::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    opacity: 0;
+    background: inherit;
+    filter: blur(8px);
+    z-index: -1;
+    transition: opacity 0.3s ease;
+}
+
+.color-chip:hover::after {
+    opacity: 0.6;
+}
+
+[data-theme="dark"] .color-chip:hover::after {
+    opacity: 0.8;
 }
 
 .color-chip:hover {
