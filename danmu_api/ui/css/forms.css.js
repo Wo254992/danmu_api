@@ -474,4 +474,72 @@ export const formsCssContent = /* css */ `
     cursor: not-allowed;
     background: var(--bg-tertiary);
 }
+/* ========================================
+   搜索输入组优化
+   ======================================== */
+.search-input-group {
+    position: relative;
+    display: flex;
+    gap: 0;
+}
+
+.search-input-group .search-input {
+    flex: 1;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+    padding-right: 1rem;
+}
+
+.search-input-group .search-input:focus {
+    border-right: 1px solid var(--primary-color);
+    z-index: 1;
+}
+
+.search-input-group .search-btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    flex-shrink: 0;
+    min-width: auto;
+    padding: 0.75rem 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.search-input-group .search-btn .btn-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.search-btn-text {
+    font-weight: 600;
+}
+
+/* ========================================
+   紧凑型模态框底部
+   ======================================== */
+.modal-footer-compact {
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+    padding: 1.5rem;
+}
+
+.modal-footer-compact .btn-modal {
+    flex: 1;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.modal-footer-compact .btn-modal .btn-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
 `;
