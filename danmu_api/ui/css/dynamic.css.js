@@ -74,97 +74,13 @@ export const dynamicCssContent = /* css */ `
    配置预览组件
    ======================================== */
 .preview-hero-card {
-    position: relative;
-    background: linear-gradient(135deg, 
-        rgba(99, 102, 241, 0.03) 0%, 
-        rgba(139, 92, 246, 0.05) 50%,
-        rgba(236, 72, 153, 0.03) 100%);
+    background: var(--bg-primary);
     backdrop-filter: var(--blur-md);
     border-radius: var(--radius-xl);
     padding: 2rem;
     margin-bottom: 2rem;
-    border: 1px solid transparent;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* 渐变边框效果 */
-.preview-hero-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius-xl);
-    padding: 1px;
-    background: linear-gradient(135deg, 
-        rgba(99, 102, 241, 0.3),
-        rgba(139, 92, 246, 0.3),
-        rgba(236, 72, 153, 0.3),
-        rgba(99, 102, 241, 0.3));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0.6;
-    transition: opacity var(--transition-fast);
-}
-
-.preview-hero-card:hover::before {
-    opacity: 1;
-}
-
-/* 光晕效果 */
-.preview-hero-card::after {
-    content: '';
-    position: absolute;
-    inset: -150px;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-        rgba(99, 102, 241, 0.15) 0%, 
-        transparent 50%);
-    opacity: 0;
-    transition: opacity 0.6s ease;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.preview-hero-card:hover::after {
-    opacity: 1;
-}
-
-/* 确保内容在光晕之上 */
-.preview-hero-content {
-    position: relative;
-    z-index: 1;
-}
-/* 深色模式预览卡片特殊效果 */
-[data-theme="dark"] .preview-hero-card {
-    background: linear-gradient(135deg, 
-        rgba(10, 15, 30, 0.8) 0%, 
-        rgba(17, 24, 39, 0.85) 50%,
-        rgba(31, 41, 55, 0.8) 100%);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6),
-                0 0 1px rgba(99, 102, 241, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-[data-theme="dark"] .preview-hero-card::before {
-    background: linear-gradient(135deg, 
-        rgba(129, 140, 248, 0.4),
-        rgba(167, 139, 250, 0.4),
-        rgba(236, 72, 153, 0.4),
-        rgba(129, 140, 248, 0.4));
-}
-
-[data-theme="dark"] .preview-hero-card::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-        rgba(129, 140, 248, 0.25) 0%, 
-        rgba(167, 139, 250, 0.15) 25%,
-        transparent 50%);
-}
-
-[data-theme="dark"] .preview-hero-card:hover {
-    box-shadow: 0 12px 60px rgba(0, 0, 0, 0.7),
-                0 0 60px rgba(99, 102, 241, 0.15),
-                0 0 1px rgba(129, 140, 248, 0.8),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
 }
 /* 深色模式预览卡片增强 */
 [data-theme="dark"] .preview-hero-card {
@@ -254,68 +170,21 @@ export const dynamicCssContent = /* css */ `
 }
 
 .preview-stat-card {
-    position: relative;
-    background: linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.7) 0%, 
-        rgba(248, 250, 252, 0.5) 100%);
-    backdrop-filter: var(--blur-md);
+    background: var(--bg-secondary);
+    backdrop-filter: var(--blur-sm);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
-    border: 1px solid rgba(226, 232, 240, 0.5);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-fast);
     display: flex;
     align-items: center;
     gap: 1rem;
-    overflow: hidden;
-}
-
-/* 统计卡片悬浮效果 */
-.preview-stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(99, 102, 241, 0.1), 
-        transparent);
-    transition: left 0.5s ease;
-}
-
-.preview-stat-card:hover::before {
-    left: 100%;
 }
 
 .preview-stat-card:hover {
-    transform: translateY(-6px) scale(1.02);
-    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.15);
-    border-color: rgba(99, 102, 241, 0.4);
-}
-
-/* 深色模式统计卡片 */
-[data-theme="dark"] .preview-stat-card {
-    background: linear-gradient(135deg, 
-        rgba(17, 24, 39, 0.9) 0%, 
-        rgba(31, 41, 55, 0.7) 100%);
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-[data-theme="dark"] .preview-stat-card::before {
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(129, 140, 248, 0.15), 
-        transparent);
-}
-
-[data-theme="dark"] .preview-stat-card:hover {
-    border-color: rgba(129, 140, 248, 0.4);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6),
-                0 0 40px rgba(129, 140, 248, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
 }
 
 .stat-card-compact {
@@ -416,67 +285,18 @@ export const dynamicCssContent = /* css */ `
 }
 
 .preview-category {
-    position: relative;
-    background: linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.7) 0%, 
-        rgba(248, 250, 252, 0.5) 100%);
+    background: var(--bg-primary);
     backdrop-filter: var(--blur-md);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
-    border: 1px solid rgba(226, 232, 240, 0.6);
+    border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    overflow: hidden;
-}
-
-.preview-category::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius-lg);
-    padding: 1px;
-    background: linear-gradient(135deg, 
-        rgba(99, 102, 241, 0.25),
-        rgba(139, 92, 246, 0.25),
-        rgba(236, 72, 153, 0.25));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: all var(--transition-fast);
 }
 
 .preview-category:hover {
-    box-shadow: 0 8px 28px rgba(99, 102, 241, 0.15);
-    transform: translateY(-4px);
-    border-color: rgba(99, 102, 241, 0.4);
-}
-
-.preview-category:hover::before {
-    opacity: 1;
-}
-
-[data-theme="dark"] .preview-category {
-    background: linear-gradient(135deg, 
-        rgba(17, 24, 39, 0.85) 0%, 
-        rgba(31, 41, 55, 0.7) 100%);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-[data-theme="dark"] .preview-category::before {
-    background: linear-gradient(135deg, 
-        rgba(129, 140, 248, 0.35),
-        rgba(167, 139, 250, 0.35),
-        rgba(236, 72, 153, 0.35));
-}
-
-[data-theme="dark"] .preview-category:hover {
-    border-color: rgba(129, 140, 248, 0.45);
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6),
-                0 0 45px rgba(129, 140, 248, 0.18),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
 .preview-category-header {
@@ -524,54 +344,18 @@ export const dynamicCssContent = /* css */ `
 }
 
 .preview-item {
-    position: relative;
     padding: 1rem;
     background: var(--bg-secondary);
     backdrop-filter: var(--blur-sm);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    overflow: hidden;
-}
-
-.preview-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(99, 102, 241, 0.1), 
-        transparent);
-    transition: left 0.5s ease;
+    transition: all var(--transition-fast);
 }
 
 .preview-item:hover {
-    background: linear-gradient(135deg, 
-        rgba(99, 102, 241, 0.06) 0%, 
-        rgba(139, 92, 246, 0.06) 100%);
-    border-color: rgba(99, 102, 241, 0.35);
-    transform: translateX(6px);
-}
-
-.preview-item:hover::before {
-    left: 100%;
-}
-
-[data-theme="dark"] .preview-item:hover {
-    background: linear-gradient(135deg, 
-        rgba(129, 140, 248, 0.1) 0%, 
-        rgba(167, 139, 250, 0.1) 100%);
-    border-color: rgba(129, 140, 248, 0.4);
-}
-
-[data-theme="dark"] .preview-item::before {
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(129, 140, 248, 0.15), 
-        transparent);
+    background: var(--bg-tertiary);
+    border-color: var(--primary-color);
+    transform: translateX(4px);
 }
 
 .preview-item-header {
@@ -759,53 +543,15 @@ export const dynamicCssContent = /* css */ `
 }
 
 .log-terminal {
-    position: relative;
-    background: linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.65) 0%, 
-        rgba(248, 250, 252, 0.45) 100%);
+    background: var(--bg-primary);
     backdrop-filter: var(--blur-md);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
-    border: 1px solid rgba(226, 232, 240, 0.6);
+    border: 1px solid var(--border-color);
     box-shadow: var(--shadow-md);
     max-height: 600px;
     overflow-y: auto;
     font-family: 'Courier New', monospace;
-    overflow: hidden;
-}
-
-.log-terminal::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius-lg);
-    padding: 1px;
-    background: linear-gradient(135deg, 
-        rgba(99, 102, 241, 0.2),
-        rgba(139, 92, 246, 0.2),
-        rgba(236, 72, 153, 0.2));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-[data-theme="dark"] .log-terminal {
-    background: linear-gradient(135deg, 
-        rgba(17, 24, 39, 0.9) 0%, 
-        rgba(31, 41, 55, 0.75) 100%);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-[data-theme="dark"] .log-terminal::before {
-    background: linear-gradient(135deg, 
-        rgba(129, 140, 248, 0.3),
-        rgba(167, 139, 250, 0.3),
-        rgba(236, 72, 153, 0.3));
-    opacity: 0.7;
 }
 
 .log-entry {
@@ -1016,68 +762,23 @@ export const dynamicCssContent = /* css */ `
 }
 
 .env-item {
-    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1.5rem;
     padding: 1.5rem;
-    background: linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.75) 0%, 
-        rgba(248, 250, 252, 0.55) 100%);
+    background: var(--bg-primary);
     backdrop-filter: var(--blur-md);
     border-radius: var(--radius-lg);
-    border: 1px solid rgba(226, 232, 240, 0.6);
+    border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    overflow: hidden;
-}
-
-.env-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(99, 102, 241, 0.12), 
-        transparent);
-    transition: left 0.5s ease;
+    transition: all var(--transition-fast);
 }
 
 .env-item:hover {
-    box-shadow: 0 8px 28px rgba(99, 102, 241, 0.18);
-    transform: translateY(-4px);
-    border-color: rgba(99, 102, 241, 0.4);
-}
-
-.env-item:hover::before {
-    left: 100%;
-}
-
-[data-theme="dark"] .env-item {
-    background: linear-gradient(135deg, 
-        rgba(17, 24, 39, 0.9) 0%, 
-        rgba(31, 41, 55, 0.75) 100%);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-[data-theme="dark"] .env-item::before {
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(129, 140, 248, 0.18), 
-        transparent);
-}
-
-[data-theme="dark"] .env-item:hover {
-    border-color: rgba(129, 140, 248, 0.45);
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6),
-                0 0 45px rgba(129, 140, 248, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
 }
 
 .env-info {
@@ -1171,51 +872,13 @@ export const dynamicCssContent = /* css */ `
    响应式JSON显示
    ======================================== */
 .response-card {
-    position: relative;
-    background: linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.7) 0%, 
-        rgba(248, 250, 252, 0.5) 100%);
+    background: var(--bg-primary);
     backdrop-filter: var(--blur-md);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
-    border: 1px solid rgba(226, 232, 240, 0.6);
+    border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
     margin-top: 1.5rem;
-    overflow: hidden;
-}
-
-.response-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius-lg);
-    padding: 1px;
-    background: linear-gradient(135deg, 
-        rgba(99, 102, 241, 0.22),
-        rgba(139, 92, 246, 0.22),
-        rgba(236, 72, 153, 0.22));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-[data-theme="dark"] .response-card {
-    background: linear-gradient(135deg, 
-        rgba(17, 24, 39, 0.85) 0%, 
-        rgba(31, 41, 55, 0.7) 100%);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-[data-theme="dark"] .response-card::before {
-    background: linear-gradient(135deg, 
-        rgba(129, 140, 248, 0.3),
-        rgba(167, 139, 250, 0.3),
-        rgba(236, 72, 153, 0.3));
-    opacity: 0.75;
 }
 
 .response-header {
