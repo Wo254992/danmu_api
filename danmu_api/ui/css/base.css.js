@@ -119,15 +119,67 @@ body {
     max-width: 100vw;
 }
 
-/* 深色模式专属背景纹理 */
+/* 深色模式专属背景纹理 - 增强版 */
 [data-theme="dark"] body {
+    background: linear-gradient(
+        180deg,
+        rgba(10, 15, 30, 1) 0%,
+        rgba(15, 23, 42, 1) 50%,
+        rgba(10, 15, 30, 1) 100%
+    );
+    position: relative;
+}
+
+[data-theme="dark"] body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
     background-image: 
-        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
-    background-size: 100% 100%;
-    background-attachment: fixed;
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 40%);
+    animation: backgroundFlow 20s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+}
+
+[data-theme="dark"] body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            rgba(99, 102, 241, 0.03) 0px,
+            transparent 1px,
+            transparent 2px,
+            rgba(99, 102, 241, 0.03) 3px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            rgba(139, 92, 246, 0.03) 0px,
+            transparent 1px,
+            transparent 2px,
+            rgba(139, 92, 246, 0.03) 3px
+        );
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes backgroundFlow {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.1) rotate(5deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 0.6;
+    }
 }
 
 * {
@@ -154,27 +206,48 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--text-tertiary);
 }
-/* 深色模式滚动条增强 */
+/* 深色模式滚动条增强 - 高级版 */
 [data-theme="dark"] ::-webkit-scrollbar-track {
-    background: rgba(17, 24, 39, 0.5);
+    background: rgba(17, 24, 39, 0.3);
+    border-radius: 4px;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
     background: linear-gradient(
-        to bottom,
-        rgba(129, 140, 248, 0.4),
-        rgba(167, 139, 250, 0.4)
+        135deg,
+        rgba(129, 140, 248, 0.6) 0%,
+        rgba(167, 139, 250, 0.6) 50%,
+        rgba(192, 132, 252, 0.6) 100%
     );
-    box-shadow: inset 0 0 6px rgba(129, 140, 248, 0.3);
+    border-radius: 4px;
+    border: 1px solid rgba(129, 140, 248, 0.2);
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 0 10px rgba(129, 140, 248, 0.3);
+    position: relative;
 }
 
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(
-        to bottom,
-        rgba(129, 140, 248, 0.6),
-        rgba(167, 139, 250, 0.6)
+        135deg,
+        rgba(129, 140, 248, 0.8) 0%,
+        rgba(167, 139, 250, 0.8) 50%,
+        rgba(192, 132, 252, 0.8) 100%
     );
-    box-shadow: 0 0 10px rgba(129, 140, 248, 0.5);
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 0 20px rgba(129, 140, 248, 0.6),
+        0 0 40px rgba(167, 139, 250, 0.3);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(
+        135deg,
+        rgba(129, 140, 248, 1) 0%,
+        rgba(167, 139, 250, 1) 50%,
+        rgba(192, 132, 252, 1) 100%
+    );
 }
 
 /* ========================================
