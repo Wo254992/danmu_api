@@ -454,52 +454,17 @@ export const componentsCssContent = /* css */ `
 }
 /* 深色模式按钮增强 */
 [data-theme="dark"] .btn-primary {
-    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #c084fc 100%);
-    box-shadow: 
-        0 4px 16px rgba(129, 140, 248, 0.4),
-        0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-        0 1px 0 rgba(255, 255, 255, 0.2) inset,
-        0 0 20px rgba(129, 140, 248, 0.2);
-    position: relative;
-    overflow: hidden;
-}
-
-[data-theme="dark"] .btn-primary::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(
-        circle,
-        rgba(255, 255, 255, 0.3) 0%,
-        transparent 60%
-    );
-    transform: scale(0);
-    transition: transform 0.6s ease;
-}
-
-[data-theme="dark"] .btn-primary:hover::before {
-    transform: scale(1);
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+    box-shadow: 0 4px 12px rgba(129, 140, 248, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 [data-theme="dark"] .btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, #a78bfa 0%, #c084fc 50%, #d8b4fe 100%);
-    box-shadow: 
-        0 8px 32px rgba(129, 140, 248, 0.6),
-        0 0 60px rgba(167, 139, 250, 0.4),
-        0 0 100px rgba(192, 132, 252, 0.2),
-        0 0 0 1px rgba(255, 255, 255, 0.15) inset,
-        0 1px 0 rgba(255, 255, 255, 0.3) inset;
-    transform: translateY(-4px) scale(1.02);
-}
-
-[data-theme="dark"] .btn-primary:active:not(:disabled) {
-    transform: translateY(-2px) scale(0.98);
-    box-shadow: 
-        0 4px 16px rgba(129, 140, 248, 0.4),
-        0 0 30px rgba(167, 139, 250, 0.3);
+    background: linear-gradient(135deg, #a78bfa 0%, #c084fc 100%);
+    box-shadow: 0 8px 24px rgba(129, 140, 248, 0.4),
+                0 0 40px rgba(167, 139, 250, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(-3px);
 }
 
 [data-theme="dark"] .btn-success {
