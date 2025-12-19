@@ -59,26 +59,51 @@ export const responsiveCssContent = /* css */ `
         animation: overlayFadeIn 0.3s ease-out;
     }
 
-    /* 移动端头部 - 重新设计 */
+    /* 移动端头部 - 强力贴顶修复版 */
     .mobile-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        /* 修改1：增加了垂直方向的padding (1.25rem -> 1.5rem)，使高度变高 */
-        padding: 1.5rem 1.25rem;
+        
+        /* 增加内部高度，让头部看起来更舒展 */
+        padding: 1.5rem 1.25rem; 
+        
         background: var(--bg-primary);
         backdrop-filter: var(--blur-md);
+        
+        /* 只保留底部的圆角 */
         border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-        /* 修改2：使用负margin抵消父容器的padding，实现顶部和两侧无缝隙 */
-        margin: -0.75rem -0.75rem 1.5rem -0.75rem;
+        
+        /* --- 关键修改开始 --- */
+        
+        /* 1. 强制宽度为屏幕总宽 (100vw)，忽略父容器宽度限制 */
+        width: 100vw;
+        
+        /* 2. 通过计算将元素拉回正中间，消除左右间距 */
+        margin-left: 50%;
+        transform: translateX(-50%);
+        
+        /* 3. 大幅增加顶部负边距，强行抵消父容器的顶部Padding */
+        /* 如果依然有缝隙，可以将 -2rem 继续调大，例如 -3rem */
+        margin-top: -2rem; 
+        
+        /* 4. 底部外边距，防止内容被遮挡 */
+        margin-bottom: 1.5rem;
+        
+        /* --- 关键修改结束 --- */
+
         border: 1px solid var(--border-color);
-        border-top: none;
+        border-top: none; /* 确保顶部没有边框线 */
+        border-left: none; /* 移除左右边框，保证贴边更自然 */
+        border-right: none;
+        
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         position: sticky;
         top: 0;
         z-index: 100;
         animation: slideInDown 0.4s ease-out;
     }
+
 
 
     /* 左侧区域 */
