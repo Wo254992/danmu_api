@@ -440,4 +440,706 @@ function copyApiResponse(data, format, buttonElement) {
             addLog('❌ 复制失败: ' + err.message, 'error');
         });
 }
+/* ========================================
+   API 模式切换
+   ======================================== */
+function switchApiMode(mode) {
+    // 更新标签状态
+    document.querySelectorAll('.api-mode-tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.mode === mode) {
+            tab.classList.add('active');
+        }
+    });
+    
+    // 切换显示内容
+    if (mode === 'api-test') {
+        document.getElementById('api-test-mode').style.display = 'block';
+        document.getElementById('danmu-test-mode').style.display = 'none';
+        addLog('📋 切换到接口调试模式', 'info');
+    } else if (mode === 'danmu-test') {
+        document.getElementById('api-test-mode').style.display = 'none';
+        document.getElementById('danmu-test-mode').style.display = 'block';
+        addLog('💬 切换到弹幕测试模式', 'info');
+    }
+}
+
+/* ========================================
+   弹幕数据存储
+   ======================================== */
+let currentDanmuData = null;
+let filteredDanmuData = null;
+
+/* ========================================
+   自动匹配弹幕
+   ======================================== */
+function autoMatchDanmu() {
+    const filename = document.getElementById('auto-match-filename').value.trim();
+    const searchBtn = event.target;
+    
+    if (!filename) {
+        customAlert('请输入文件名', '⚠️ 提示');
+        document.getElementById('auto-match-filename').focus();
+        return;
+    }
+    
+    const originalText = searchBtn.innerHTML;
+    searchBtn.innerHTML = '<span class="loading-spinner-small"></span> <span>匹配中...</span>';
+    searchBtn.disabled = true;
+    
+    addLog(\`🎯 开始自动匹配: \${filename}\`, 'info');
+    
+    fetch(buildApiUrl('/api/v2/match'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ fileName: filename })
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(\`HTTP error! status: \${response.status}\`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.match) {
+                addLog(\`✅ 匹配成功: \${data.match.animeTitle} - 第\${data.match.episodeNumber}集\`, 'success');
+                loadDanmuData(data.match.episodeId, \`\${data.match.animeTitle} - 第\${data.match.episodeNumber}集\`);
+            } else {
+                throw new Error(data.message || '未找到匹配结果');
+            }
+        })
+        .catch(error => {
+            console.error('自动匹配失败:', error);
+            addLog(\`❌ 自动匹配失败: \${error.message}\`, 'error');
+            customAlert('自动匹配失败: ' + error.message, '❌ 匹配失败');
+        })
+        .finally(() => {
+            searchBtn.innerHTML = originalText;
+            searchBtn.disabled = false;
+        });
+}
+
+/* ========================================
+   手动搜索弹幕
+   ======================================== */
+function manualSearchDanmu() {
+    const keyword = document.getElementById('manual-search-keyword').value.trim();
+    const searchBtn = event.target;
+    
+    if (!keyword) {
+        customAlert('请输入搜索关键词', '⚠️ 提示');
+        document.getElementById('manual-search-keyword').focus();
+        return;
+    }
+    
+    const originalText = searchBtn.innerHTML;
+    searchBtn.innerHTML = '<span class="loading-spinner-small"></span> <span>搜索中...</span>';
+    searchBtn.disabled = true;
+    
+    addLog(\`🔍 开始搜索: \${keyword}\`, 'info');
+    
+    const searchUrl = buildApiUrl('/api/v2/search/anime?keyword=' + encodeURIComponent(keyword));
+    
+    fetch(searchUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(\`HTTP error! status: \${response.status}\`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.animes && data.animes.length > 0) {
+                addLog(\`✅ 找到 \${data.animes.length} 个搜索结果\`, 'success');
+                displayDanmuSearchResults(data.animes);
+            } else {
+                throw new Error('未找到相关动漫');
+            }
+        })
+        .catch(error => {
+            console.error('搜索失败:', error);
+            addLog(\`❌ 搜索失败: \${error.message}\`, 'error');
+            customAlert('搜索失败: ' + error.message, '❌ 搜索失败');
+            document.getElementById('danmu-search-results').style.display = 'none';
+        })
+        .finally(() => {
+            searchBtn.innerHTML = originalText;
+            searchBtn.disabled = false;
+        });
+}
+
+/* ========================================
+   显示搜索结果
+   ======================================== */
+function displayDanmuSearchResults(animes) {
+    const container = document.getElementById('danmu-search-results');
+    
+    let html = \`
+        <div class="form-card">
+            <h3 class="card-title">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <span>搜索结果 (\${animes.length} 个)</span>
+            </h3>
+            <div class="anime-grid">
+    \`;
+    
+    animes.forEach((anime, index) => {
+        const imageUrl = anime.imageUrl || 'https://placehold.co/150x200?text=No+Image';
+        html += \`
+            <div class="anime-card" onclick="selectAnimeForDanmu(\${anime.animeId}, '\${escapeHtml(anime.animeTitle).replace(/'/g, "\\\\'")}', \${anime.episodeCount})"
+                 style="animation: fadeInUp 0.4s ease-out \${index * 0.05}s backwards;">
+                <div class="anime-card-image-wrapper">
+                    <img src="\${imageUrl}" 
+                         alt="\${escapeHtml(anime.animeTitle)}" 
+                         referrerpolicy="no-referrer" 
+                         class="anime-image"
+                         loading="lazy">
+                    <div class="anime-card-overlay">
+                        <span class="view-icon">👁️</span>
+                        <span class="view-text">查看剧集</span>
+                    </div>
+                </div>
+                <div class="anime-info">
+                    <h4 class="anime-title" title="\${escapeHtml(anime.animeTitle)}">
+                        \${escapeHtml(anime.animeTitle)}
+                    </h4>
+                    <div class="anime-meta">
+                        <span class="episode-count">
+                            <span class="meta-icon">📺</span>
+                            共 \${anime.episodeCount} 集
+                        </span>
+                    </div>
+                </div>
+            </div>
+        \`;
+    });
+    
+    html += '</div></div>';
+    
+    container.innerHTML = html;
+    container.style.display = 'block';
+    
+    // 隐藏弹幕显示区域
+    document.getElementById('danmu-display-area').style.display = 'none';
+    
+    // 滚动到结果区域
+    setTimeout(() => {
+        container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+}
+
+/* ========================================
+   选择动漫并显示集数列表
+   ======================================== */
+function selectAnimeForDanmu(animeId, animeTitle, episodeCount) {
+    addLog(\`📺 选择动漫: \${animeTitle}\`, 'info');
+    
+    const container = document.getElementById('danmu-search-results');
+    
+    // 显示加载状态
+    container.innerHTML = \`
+        <div class="form-card">
+            <div class="loading-state">
+                <div class="loading-spinner" style="margin: 0 auto;"></div>
+                <p style="margin-top: 1rem; color: var(--text-secondary); font-weight: 600;">加载剧集列表中...</p>
+            </div>
+        </div>
+    \`;
+    
+    const bangumiUrl = buildApiUrl('/api/v2/bangumi/' + animeId);
+    
+    fetch(bangumiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(\`HTTP error! status: \${response.status}\`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.bangumi && data.bangumi.episodes) {
+                addLog(\`✅ 成功加载 \${data.bangumi.episodes.length} 个剧集\`, 'success');
+                displayEpisodeList(animeTitle, data.bangumi.episodes);
+            } else {
+                throw new Error('获取剧集列表失败');
+            }
+        })
+        .catch(error => {
+            console.error('获取剧集失败:', error);
+            addLog(\`❌ 获取剧集失败: \${error.message}\`, 'error');
+            customAlert('获取剧集失败: ' + error.message, '❌ 加载失败');
+        });
+}
+
+/* ========================================
+   显示剧集列表
+   ======================================== */
+function displayEpisodeList(animeTitle, episodes) {
+    const container = document.getElementById('danmu-search-results');
+    
+    let html = \`
+        <div class="form-card">
+            <div class="episode-list-header">
+                <h3 class="episode-anime-title">
+                    <span class="episode-anime-icon">🎬</span>
+                    \${escapeHtml(animeTitle)}
+                </h3>
+                <div class="episode-stats">
+                    <span class="episode-stat-item">
+                        <span class="episode-stat-icon">📺</span>
+                        <span>共 \${episodes.length} 集</span>
+                    </span>
+                </div>
+            </div>
+            <div class="episode-grid">
+    \`;
+    
+    episodes.forEach((episode, index) => {
+        html += \`
+            <div class="episode-item" style="animation: fadeInUp 0.3s ease-out \${index * 0.03}s backwards;">
+                <div class="episode-info">
+                    <div class="episode-number">
+                        <span class="episode-icon">📺</span>
+                        第 \${episode.episodeNumber} 集
+                    </div>
+                    <div class="episode-title">\${escapeHtml(episode.episodeTitle || '无标题')}</div>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="loadDanmuData(\${episode.episodeId}, '\${escapeHtml(animeTitle + ' - 第' + episode.episodeNumber + '集').replace(/'/g, "\\\\'")}')">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                    </svg>
+                    <span>加载弹幕</span>
+                </button>
+            </div>
+        \`;
+    });
+    
+    html += '</div></div>';
+    
+    container.innerHTML = html;
+}
+
+/* ========================================
+   加载弹幕数据
+   ======================================== */
+function loadDanmuData(episodeId, title) {
+    addLog(\`💬 开始加载弹幕: \${title}\`, 'info');
+    
+    // 显示弹幕展示区域
+    const displayArea = document.getElementById('danmu-display-area');
+    displayArea.style.display = 'block';
+    
+    // 更新标题
+    document.getElementById('danmu-title').textContent = title;
+    document.getElementById('danmu-subtitle').textContent = '正在加载弹幕数据...';
+    
+    // 清空之前的数据
+    document.getElementById('danmu-list-container').innerHTML = \`
+        <div class="loading-state" style="padding: 2rem;">
+            <div class="loading-spinner" style="margin: 0 auto;"></div>
+            <p style="margin-top: 1rem; color: var(--text-secondary);">加载弹幕中...</p>
+        </div>
+    \`;
+    
+    // 滚动到显示区域
+    setTimeout(() => {
+        displayArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+    
+    const commentUrl = buildApiUrl('/api/v2/comment/' + episodeId + '?format=json');
+    
+    fetch(commentUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(\`HTTP error! status: \${response.status}\`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.comments) {
+                currentDanmuData = data.comments;
+                addLog(\`✅ 成功加载 \${data.comments.length} 条弹幕\`, 'success');
+                displayDanmuData(title, data.comments);
+            } else {
+                throw new Error('弹幕数据格式错误');
+            }
+        })
+        .catch(error => {
+            console.error('加载弹幕失败:', error);
+            addLog(\`❌ 加载弹幕失败: \${error.message}\`, 'error');
+            customAlert('加载弹幕失败: ' + error.message, '❌ 加载失败');
+            
+            document.getElementById('danmu-list-container').innerHTML = \`
+                <div class="search-error">
+                    <div class="error-icon">❌</div>
+                    <h3>加载失败</h3>
+                    <p>\${escapeHtml(error.message)}</p>
+                </div>
+            \`;
+        });
+}
+
+/* ========================================
+   显示弹幕数据
+   ======================================== */
+function displayDanmuData(title, comments) {
+    // 更新标题
+    document.getElementById('danmu-subtitle').textContent = \`共 \${comments.length} 条弹幕\`;
+    
+    // 计算统计数据
+    const stats = calculateDanmuStats(comments);
+    
+    // 更新统计信息
+    document.getElementById('danmu-total-count').textContent = stats.totalCount;
+    document.getElementById('danmu-duration').textContent = stats.duration;
+    document.getElementById('danmu-density').textContent = stats.density;
+    document.getElementById('danmu-peak-time').textContent = stats.peakTime;
+    
+    // 绘制热力图
+    drawHeatmap(comments, stats.maxTime);
+    
+    // 显示弹幕列表
+    filteredDanmuData = comments;
+    renderDanmuList(comments);
+}
+
+/* ========================================
+   计算弹幕统计数据
+   ======================================== */
+function calculateDanmuStats(comments) {
+    const totalCount = comments.length;
+    
+    // 找出最大时间
+    const maxTime = Math.max(...comments.map(c => c.p.split(',')[0]), 0);
+    const duration = formatTime(maxTime);
+    
+    // 计算密度（每分钟）
+    const durationMinutes = maxTime / 60;
+    const density = durationMinutes > 0 ? Math.round(totalCount / durationMinutes) : 0;
+    
+    // 找出高能时刻（弹幕最密集的时间段）
+    const peakTime = findPeakTime(comments, maxTime);
+    
+    return {
+        totalCount,
+        duration,
+        density,
+        peakTime,
+        maxTime
+    };
+}
+
+/* ========================================
+   找出高能时刻
+   ======================================== */
+function findPeakTime(comments, maxTime) {
+    if (comments.length === 0) return '--:--';
+    
+    // 将时间轴分成30秒的区间
+    const interval = 30;
+    const intervals = Math.ceil(maxTime / interval);
+    const counts = new Array(intervals).fill(0);
+    
+    comments.forEach(comment => {
+        const time = parseFloat(comment.p.split(',')[0]);
+        const index = Math.floor(time / interval);
+        if (index < intervals) {
+            counts[index]++;
+        }
+    });
+    
+    // 找出最大值的索引
+    const maxCount = Math.max(...counts);
+    const maxIndex = counts.indexOf(maxCount);
+    
+    // 返回该区间的中间时间
+    const peakTime = (maxIndex * interval) + (interval / 2);
+    return formatTime(peakTime);
+}
+
+/* ========================================
+   格式化时间
+   ======================================== */
+function formatTime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    
+    if (hours > 0) {
+        return \`\${hours}:\${minutes.toString().padStart(2, '0')}:\${secs.toString().padStart(2, '0')}\`;
+    } else {
+        return \`\${minutes}:\${secs.toString().padStart(2, '0')}\`;
+    }
+}
+
+/* ========================================
+   绘制热力图
+   ======================================== */
+function drawHeatmap(comments, maxTime) {
+    const canvas = document.getElementById('danmu-heatmap-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // 设置canvas尺寸
+    canvas.width = canvas.offsetWidth;
+    canvas.height = 120;
+    
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // 清空画布
+    ctx.clearRect(0, 0, width, height);
+    
+    // 如果没有弹幕，显示提示
+    if (comments.length === 0) {
+        ctx.fillStyle = 'var(--text-tertiary)';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('暂无弹幕数据', width / 2, height / 2);
+        return;
+    }
+    
+    // 将时间轴分成若干段
+    const segments = Math.min(Math.ceil(width / 5), 200);
+    const segmentDuration = maxTime / segments;
+    const counts = new Array(segments).fill(0);
+    
+    // 统计每段的弹幕数量
+    comments.forEach(comment => {
+        const time = parseFloat(comment.p.split(',')[0]);
+        const index = Math.min(Math.floor(time / segmentDuration), segments - 1);
+        counts[index]++;
+    });
+    
+    // 找出最大值用于归一化
+    const maxCount = Math.max(...counts, 1);
+    
+    // 绘制热力图
+    const segmentWidth = width / segments;
+    
+    counts.forEach((count, index) => {
+        const ratio = count / maxCount;
+        const barHeight = Math.max(ratio * height, 2);
+        const x = index * segmentWidth;
+        const y = height - barHeight;
+        
+        // 根据密度选择颜色
+        let color;
+        if (ratio < 0.25) {
+            color = \`rgba(59, 130, 246, \${0.2 + ratio * 0.8})\`;
+        } else if (ratio < 0.5) {
+            color = \`rgba(139, 92, 246, \${0.3 + ratio * 0.7})\`;
+        } else if (ratio < 0.75) {
+            color = \`rgba(236, 72, 153, \${0.4 + ratio * 0.6})\`;
+        } else {
+            color = \`rgba(239, 68, 68, \${0.5 + ratio * 0.5})\`;
+        }
+        
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, segmentWidth, barHeight);
+    });
+    
+    // 绘制时间轴刻度
+    ctx.strokeStyle = 'var(--border-color)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, height - 1);
+    ctx.lineTo(width, height - 1);
+    ctx.stroke();
+    
+    // 添加时间标记
+    ctx.fillStyle = 'var(--text-tertiary)';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    
+    const timeMarkers = 5;
+    for (let i = 0; i <= timeMarkers; i++) {
+        const x = (width / timeMarkers) * i;
+        const time = (maxTime / timeMarkers) * i;
+        ctx.fillText(formatTime(time), x, height - 5);
+    }
+}
+
+/* ========================================
+   渲染弹幕列表
+   ======================================== */
+function renderDanmuList(comments) {
+    const container = document.getElementById('danmu-list-container');
+    
+    if (comments.length === 0) {
+        container.innerHTML = \`
+            <div class="danmu-list-empty">
+                <span class="empty-icon">💬</span>
+                <p>暂无弹幕数据</p>
+            </div>
+        \`;
+        return;
+    }
+    
+    // 统计各类型弹幕数量
+    const typeCounts = {
+        all: comments.length,
+        scroll: 0,
+        top: 0,
+        bottom: 0
+    };
+    
+    comments.forEach(comment => {
+        const mode = parseInt(comment.p.split(',')[1]);
+        if (mode === 5) typeCounts.top++;
+        else if (mode === 4) typeCounts.bottom++;
+        else typeCounts.scroll++;
+    });
+    
+    // 更新过滤器计数
+    document.getElementById('filter-all-count').textContent = typeCounts.all;
+    document.getElementById('filter-scroll-count').textContent = typeCounts.scroll;
+    document.getElementById('filter-top-count').textContent = typeCounts.top;
+    document.getElementById('filter-bottom-count').textContent = typeCounts.bottom;
+    
+    // 渲染弹幕项
+    let html = '';
+    
+    comments.forEach((comment, index) => {
+        const [time, mode, , color] = comment.p.split(',');
+        const modeInt = parseInt(mode);
+        
+        let typeClass = '';
+        let typeName = '滚动';
+        
+        if (modeInt === 5) {
+            typeClass = 'type-top';
+            typeName = '顶部';
+        } else if (modeInt === 4) {
+            typeClass = 'type-bottom';
+            typeName = '底部';
+        }
+        
+        const hexColor = '#' + parseInt(color).toString(16).padStart(6, '0');
+        
+        html += \`
+            <div class="danmu-item \${typeClass}" style="animation-delay: \${index * 0.02}s;">
+                <div class="danmu-item-time">\${formatTime(parseFloat(time))}</div>
+                <div class="danmu-item-content">
+                    <div class="danmu-item-text">\${escapeHtml(comment.m)}</div>
+                    <div class="danmu-item-meta">
+                        <span class="danmu-item-type">\${typeName}</span>
+                        <span style="color: \${hexColor};">● \${hexColor}</span>
+                    </div>
+                </div>
+            </div>
+        \`;
+    });
+    
+    container.innerHTML = html;
+}
+
+/* ========================================
+   过滤弹幕列表
+   ======================================== */
+function filterDanmuList(type) {
+    // 更新按钮状态
+    document.querySelectorAll('.danmu-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.type === type) {
+            btn.classList.add('active');
+        }
+    });
+    
+    if (!currentDanmuData) return;
+    
+    let filtered = currentDanmuData;
+    
+    if (type !== 'all') {
+        filtered = currentDanmuData.filter(comment => {
+            const mode = parseInt(comment.p.split(',')[1]);
+            if (type === 'scroll') return mode !== 4 && mode !== 5;
+            if (type === 'top') return mode === 5;
+            if (type === 'bottom') return mode === 4;
+            return true;
+        });
+    }
+    
+    filteredDanmuData = filtered;
+    renderDanmuList(filtered);
+    
+    addLog(\`🔍 筛选弹幕: \${type} (\${filtered.length}条)\`, 'info');
+}
+
+/* ========================================
+   导出弹幕
+   ======================================== */
+function exportDanmu(format) {
+    if (!currentDanmuData || currentDanmuData.length === 0) {
+        customAlert('没有可导出的弹幕数据', '⚠️ 提示');
+        return;
+    }
+    
+    const title = document.getElementById('danmu-title').textContent;
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    const filename = \`\${title}_\${timestamp}.\${format}\`;
+    
+    let content = '';
+    let mimeType = '';
+    
+    if (format === 'json') {
+        content = JSON.stringify(currentDanmuData, null, 2);
+        mimeType = 'application/json';
+    } else if (format === 'xml') {
+        content = convertToXML(currentDanmuData);
+        mimeType = 'application/xml';
+    }
+    
+    const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    addLog(\`📥 导出弹幕: \${filename}\`, 'success');
+    customAlert(\`弹幕已导出为 \${format.toUpperCase()} 格式\`, '✅ 导出成功');
+}
+
+/* ========================================
+   转换为 XML 格式
+   ======================================== */
+function convertToXML(comments) {
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\\n';
+    xml += '<i>\\n';
+    xml += '  <chatserver>chat.bilibili.com</chatserver>\\n';
+    xml += '  <chatid>0</chatid>\\n';
+    xml += '  <mission>0</mission>\\n';
+    xml += \`  <maxlimit>\${comments.length}</maxlimit>\\n\`;
+    xml += '  <state>0</state>\\n';
+    xml += '  <real_name>0</real_name>\\n';
+    xml += '  <source>logvar-danmu-api</source>\\n';
+    
+    comments.forEach(comment => {
+        const p = comment.p;
+        const m = escapeXml(comment.m);
+        xml += \`  <d p="\${p}">\${m}</d>\\n\`;
+    });
+    
+    xml += '</i>';
+    return xml;
+}
+
+/* ========================================
+   转义 XML 特殊字符
+   ======================================== */
+function escapeXml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&apos;'
+    };
+    return String(text).replace(/[&<>"']/g, m => map[m]);
+}
 `;
