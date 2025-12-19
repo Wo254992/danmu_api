@@ -1181,29 +1181,31 @@ function loadMoreDanmu(comments, container) {
         const mode = parts[1];
         const modeInt = parseInt(mode);
         
-        // 解析颜色：兼容 JSON( time,mode,color,[source] ) / XML( time,mode,size,color,... )
-        // 并兼容可能出现的十六进制颜色写法（#RRGGBB / 0xRRGGBB / RRGGBB）
-        let colorInt = 16777215;
-        const rawColorXml = parts[3];
-        const rawColorJson = parts[2];
+        // 正确解析颜色值
+        // 后端返回格式：时间,类型,颜色,来源 (4字段)
+        // 示例：5.0,1,16777215,[qq]
+        let colorInt = 16777215; // 默认白色
         
-        if (rawColorXml && /^\d+$/.test(rawColorXml)) {
-            // XML：第4段是十进制颜色
-            colorInt = parseInt(rawColorXml, 10);
-        } else if (rawColorJson && /^\d+$/.test(rawColorJson)) {
-            // JSON：第3段是十进制颜色
-            colorInt = parseInt(rawColorJson, 10);
-        } else {
-            // 兜底：支持 "#RRGGBB" / "0xRRGGBB" / "RRGGBB"
-            const candidate = String(rawColorXml || rawColorJson || '').trim()
-                .replace(/^0x/i, '')
-                .replace(/^#/, '');
-            if (/^[0-9a-fA-F]{6}$/.test(candidate)) {
-                colorInt = parseInt(candidate, 16);
+        // 直接从第3个字段（索引2）读取颜色
+        const colorField = parts[2];
+        
+        if (colorField) {
+            // 尝试解析为十进制数字
+            const parsed = parseInt(colorField, 10);
+            if (!isNaN(parsed) && parsed >= 0 && parsed <= 16777215) {
+                colorInt = parsed;
+            } else {
+                // 尝试解析十六进制格式
+                const hexMatch = String(colorField).trim()
+                    .replace(/^0x/i, '')
+                    .replace(/^#/, '');
+                if (/^[0-9a-fA-F]{6}$/.test(hexMatch)) {
+                    colorInt = parseInt(hexMatch, 16);
+                }
             }
-        }
-        
-        const hexColor = '#' + (colorInt >>> 0).toString(16).padStart(6, '0');
+        }        
+        // 转换为十六进制颜色字符串
+        const hexColor = '#' + colorInt.toString(16).padStart(6, '0').toUpperCase();
         
         let typeClass = '';
         let typeName = '滚动';
