@@ -59,45 +59,49 @@ export const responsiveCssContent = /* css */ `
         animation: overlayFadeIn 0.3s ease-out;
     }
 
-    /* 移动端头部 - 最终修复版 */
+    /* 移动端头部 - 终极完美修复版 */
     .mobile-header {
+        /* --- 1. 布局核心 --- */
         display: flex;
         align-items: center;
         justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 999; /* 提高层级，防止被下方内容遮盖 */
         
-        /* 1. 内部样式：增加内边距让头部更高、更大气 */
-        padding: 1.5rem 1.25rem; 
-        background: var(--bg-primary);
-        backdrop-filter: var(--blur-md);
-        border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+        /* --- 2. 尺寸与间距修复 (解决左侧贴边问题) --- */
+        /* 关键：强制把padding算在宽度内，防止内容溢出 */
+        box-sizing: border-box; 
+        /* 强制全屏宽度 */
+        width: 100vw; 
+        /* 内部留白：左右留出 1.5rem 的距离，保证文字不贴边 */
+        padding: 1.5rem 1.5rem; 
         
-        /* --- 关键修复区域 START --- */
-        
-        /* 2. 宽度修复：使用 calc 算法强制撑满屏幕，比 transform 更稳定 */
-        width: 100vw;
+        /* --- 3. 越狱定位 (解决顶部和两侧间隙) --- */
+        /* 向左拉伸，强行对齐屏幕边缘 */
         margin-left: calc(50% - 50vw);
         margin-right: calc(50% - 50vw);
         
-        /* 3. 顶部修复：向上拉动，抵消父容器的 Padding */
-        /* 如果依然有白边，请继续把 -1.5rem 改为 -2rem 或 -2.5rem */
-        margin-top: -1.5rem;
+        /* 向上大幅拉伸：使用 -3rem (48px) 足以覆盖浅色模式下的任何默认间距 */
+        margin-top: -3rem; 
         
-        /* 4. 底部修复（解决重叠）： */
-        /* 计算公式：底部间距 = (你向上拉的距离) + (你想要的间距) */
-        /* 这里设置 3rem，相当于补偿了上面的 -1.5rem，还保留了 1.5rem 的间距 */
-        margin-bottom: 3rem;
+        /* --- 4. 底部防重叠修复 (解决下方卡片钻入问题) --- */
+        /* 计算逻辑：既然向上拉了 3rem，下面就必须推开 3rem + 想要的间距(1.5rem) = 4.5rem */
+        margin-bottom: 4.5rem;
         
-        /* --- 关键修复区域 END --- */
-
+        /* --- 5. 外观样式 --- */
+        background: var(--bg-primary);
+        backdrop-filter: var(--blur-md);
+        /* 只保留底部圆角 */
+        border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+        
+        /* 强制移除顶部和左右边框，防止出现杂色线条 */
         border: 1px solid var(--border-color);
-        border-top: none;
-        border-left: none;
-        border-right: none;
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
         
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        position: sticky;
-        top: 0;
-        z-index: 100;
         animation: slideInDown 0.4s ease-out;
     }
 
