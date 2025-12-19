@@ -1200,16 +1200,16 @@ function loadMoreDanmu(comments, container) {
         
         const itemDiv = document.createElement('div');
         itemDiv.className = 'danmu-item ' + typeClass;
-        itemDiv.innerHTML = `
-            <div class="danmu-item-time">${formatTime(parseFloat(time))}</div>
+        itemDiv.innerHTML = \`
+            <div class="danmu-item-time">\${formatTime(parseFloat(time))}</div>
             <div class="danmu-item-content">
-                <div class="danmu-item-text">${escapeHtml(comment.m)}</div>
+                <div class="danmu-item-text">\${escapeHtml(comment.m)}</div>
                 <div class="danmu-item-meta">
-                    <span class="danmu-item-type">${typeName}</span>
-                    <span style="color: ${hexColor};">● ${hexColor}</span>
+                    <span class="danmu-item-type">\${typeName}</span>
+                    <span style="color: \${hexColor};">● \${hexColor}</span>
                 </div>
             </div>
-        `;
+        \`;
         
         fragment.appendChild(itemDiv);
     });
@@ -1225,21 +1225,21 @@ function loadMoreDanmu(comments, container) {
         const loadMoreBtn = document.createElement('div');
         loadMoreBtn.className = 'load-more-btn';
         loadMoreBtn.style.cssText = 'padding: 1rem; text-align: center;';
-        loadMoreBtn.innerHTML = `
+        loadMoreBtn.innerHTML = \`
             <button class="btn btn-secondary" onclick="loadMoreDanmuClick()" style="width: 100%; max-width: 300px;">
                 <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path d="M19 9l-7 7-7-7"/>
                 </svg>
-                <span>加载更多 (还剩 ${remaining} 条)</span>
+                <span>加载更多 (还剩 \${remaining} 条)</span>
             </button>
-        `;
+        \`;
         container.appendChild(loadMoreBtn);
     } else {
         // 显示已加载完毕
         const endDiv = document.createElement('div');
         endDiv.className = 'danmu-list-end';
         endDiv.style.cssText = 'padding: 1.5rem; text-align: center; color: var(--text-tertiary); font-size: 0.875rem;';
-        endDiv.innerHTML = `<span>— 已加载全部 ${comments.length} 条弹幕 —</span>`;
+        endDiv.innerHTML = \`<span>— 已加载全部 \${comments.length} 条弹幕 —</span>\`;
         container.appendChild(endDiv);
     }
 }
