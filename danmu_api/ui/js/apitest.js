@@ -8,6 +8,11 @@ let filteredDanmuData = null;
 let currentEpisodeId = null;
 
 /* ========================================
+   弹幕列表分页配置
+   ======================================== */
+const DANMU_PAGE_SIZE = 50;
+let currentDanmuPage = 0;
+/* ========================================
    API配置
    ======================================== */
 const apiConfigs = {
@@ -1109,7 +1114,7 @@ function drawHeatmap(comments, maxTime) {
 }
 
 /* ========================================
-   渲染弹幕列表
+   渲染弹幕列表（分页优化版）
    ======================================== */
 function renderDanmuList(comments) {
     const container = document.getElementById('danmu-list-container');
@@ -1145,10 +1150,32 @@ function renderDanmuList(comments) {
     document.getElementById('filter-top-count').textContent = typeCounts.top;
     document.getElementById('filter-bottom-count').textContent = typeCounts.bottom;
     
-    // 渲染弹幕项
-    let html = '';
+    // 重置分页并清空容器
+    currentDanmuPage = 0;
+    container.innerHTML = '';
     
-    comments.forEach((comment, index) => {
+    // 渲染第一页
+    loadMoreDanmu(comments, container);
+}
+
+/* ========================================
+   加载更多弹幕（分页）
+   ======================================== */
+function loadMoreDanmu(comments, container) {
+    const start = currentDanmuPage * DANMU_PAGE_SIZE;
+    const end = Math.min(start + DANMU_PAGE_SIZE, comments.length);
+    const pageComments = comments.slice(start, end);
+    
+    // 移除之前的"加载更多"按钮和结束提示
+    const oldLoadMoreBtn = container.querySelector('.load-more-btn');
+    if (oldLoadMoreBtn) oldLoadMoreBtn.remove();
+    const oldEndDiv = container.querySelector('.danmu-list-end');
+    if (oldEndDiv) oldEndDiv.remove();
+    
+    // 使用 DocumentFragment 优化 DOM 操作
+    const fragment = document.createDocumentFragment();
+    
+    pageComments.forEach((comment) => {
         const [time, mode, , color] = comment.p.split(',');
         const modeInt = parseInt(mode);
         
@@ -1165,23 +1192,59 @@ function renderDanmuList(comments) {
         
         const hexColor = '#' + parseInt(color).toString(16).padStart(6, '0');
         
-        html += \`
-            <div class="danmu-item \${typeClass}" style="animation-delay: \${index * 0.02}s;">
-                <div class="danmu-item-time">\${formatTime(parseFloat(time))}</div>
-                <div class="danmu-item-content">
-                    <div class="danmu-item-text">\${escapeHtml(comment.m)}</div>
-                    <div class="danmu-item-meta">
-                        <span class="danmu-item-type">\${typeName}</span>
-                        <span style="color: \${hexColor};">● \${hexColor}</span>
-                    </div>
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'danmu-item ' + typeClass;
+        itemDiv.innerHTML = \`
+            <div class="danmu-item-time">\${formatTime(parseFloat(time))}</div>
+            <div class="danmu-item-content">
+                <div class="danmu-item-text">\${escapeHtml(comment.m)}</div>
+                <div class="danmu-item-meta">
+                    <span class="danmu-item-type">\${typeName}</span>
+                    <span style="color: \${hexColor};">● \${hexColor}</span>
                 </div>
             </div>
         \`;
+        
+        fragment.appendChild(itemDiv);
     });
     
-    container.innerHTML = html;
+    container.appendChild(fragment);
+    
+    // 更新页码
+    currentDanmuPage++;
+    
+    // 如果还有更多数据，添加"加载更多"按钮
+    if (end < comments.length) {
+        const remaining = comments.length - end;
+        const loadMoreBtn = document.createElement('div');
+        loadMoreBtn.className = 'load-more-btn';
+        loadMoreBtn.style.cssText = 'padding: 1rem; text-align: center;';
+        loadMoreBtn.innerHTML = \`
+            <button class="btn btn-secondary" onclick="loadMoreDanmuClick()" style="width: 100%; max-width: 300px;">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M19 9l-7 7-7-7"/>
+                </svg>
+                <span>加载更多 (还剩 \${remaining} 条)</span>
+            </button>
+        \`;
+        container.appendChild(loadMoreBtn);
+    } else {
+        // 显示已加载完毕
+        const endDiv = document.createElement('div');
+        endDiv.className = 'danmu-list-end';
+        endDiv.style.cssText = 'padding: 1.5rem; text-align: center; color: var(--text-tertiary); font-size: 0.875rem;';
+        endDiv.innerHTML = \`<span>— 已加载全部 \${comments.length} 条弹幕 —</span>\`;
+        container.appendChild(endDiv);
+    }
 }
 
+/* ========================================
+   加载更多按钮点击事件
+   ======================================== */
+function loadMoreDanmuClick() {
+    const container = document.getElementById('danmu-list-container');
+    loadMoreDanmu(filteredDanmuData, container);
+}
 /* ========================================
    过滤弹幕列表
    ======================================== */
@@ -1209,6 +1272,7 @@ function filterDanmuList(type) {
     }
     
     filteredDanmuData = filtered;
+    currentDanmuPage = 0;  // 重置分页
     renderDanmuList(filtered);
     
     addLog(\`🔍 筛选弹幕: \${type} (\${filtered.length}条)\`, 'info');
