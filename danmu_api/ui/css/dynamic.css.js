@@ -2305,4 +2305,23 @@ export const dynamicCssContent = /* css */ `
         width: fit-content;
     }
 }
+/* ========================================
+   弹幕分页优化 - 加载更多样式
+   ======================================== */
+.load-more-btn {
+    padding: 1rem;
+    text-align: center;
+}
+
+.load-more-btn .btn {
+    width: 100%;
+    max-width: 300px;
+}
+
+.danmu-list-end {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 0.875rem;
+}
 `;
