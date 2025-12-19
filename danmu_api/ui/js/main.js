@@ -655,6 +655,13 @@ async function init() {
         addLog('❌ 系统初始化失败: ' + error.message, 'error');
         fetchRealLogs();
     }
+    // 初始化弹幕测试相关功能
+        if (document.getElementById('danmu-heatmap-canvas')) {
+            // 预加载画布
+            const canvas = document.getElementById('danmu-heatmap-canvas');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 120;
+        }
 }
 
 /* ========================================
