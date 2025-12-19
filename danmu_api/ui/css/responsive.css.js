@@ -64,7 +64,8 @@ export const responsiveCssContent = /* css */ `
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1.4rem 1.25rem;
+        margin-top: -0.75rem;
+        padding: calc(1.5rem + env(safe-area-inset-top)) 1.25rem 1.5rem;
         background: var(--bg-primary);
         backdrop-filter: var(--blur-md);
         border-radius: 0 0 var(--radius-xl) var(--radius-xl);
@@ -589,7 +590,8 @@ export const responsiveCssContent = /* css */ `
     }
 
     .mobile-header {
-        padding: 1.15rem 1rem;
+        margin-top: -0.75rem;
+        padding: calc(1.25rem + env(safe-area-inset-top)) 1rem 1.25rem;
         margin-bottom: 1.25rem;
         border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
@@ -921,7 +923,8 @@ export const responsiveCssContent = /* css */ `
     }
 
     .mobile-header {
-        padding: 0.75rem;
+        margin-top: -0.75rem;
+        padding: calc(1rem + env(safe-area-inset-top)) 0.75rem 1rem;
         margin-bottom: 0.75rem;
     }
 
@@ -1026,9 +1029,11 @@ export const responsiveCssContent = /* css */ `
             0 0 60px rgba(99, 102, 241, 0.2),
             inset 0 1px 0 rgba(255, 255, 255, 0.05),
             inset 0 -1px 0 rgba(129, 140, 248, 0.1);
-        position: relative;
+        position: sticky;
+        top: 0;
         overflow: hidden;
     }
+
     [data-theme="dark"] .mobile-header::before {
         content: '';
         position: absolute;
