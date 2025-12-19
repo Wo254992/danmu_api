@@ -1814,4 +1814,495 @@ export const dynamicCssContent = /* css */ `
         display: none;
     }
 }
+/* ========================================
+   API 模式切换标签
+   ======================================== */
+.api-mode-tabs {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.api-mode-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--bg-secondary);
+    backdrop-filter: var(--blur-sm);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.api-mode-tab:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.api-mode-tab.active {
+    background: var(--gradient-primary);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.api-mode-tab .btn-icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* ========================================
+   弹幕测试容器
+   ======================================== */
+.danmu-test-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.danmu-test-methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.danmu-method-card {
+    border: 2px solid var(--border-color);
+    transition: all var(--transition-fast);
+}
+
+.danmu-method-card:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.method-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.method-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+}
+
+.method-icon-wrapper svg {
+    width: 28px;
+    height: 28px;
+    color: white;
+}
+
+.method-info {
+    flex: 1;
+}
+
+.method-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.method-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* ========================================
+   弹幕信息卡片
+   ======================================== */
+.danmu-info-card {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.danmu-info-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.danmu-title-section {
+    flex: 1;
+    min-width: 200px;
+}
+
+.danmu-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.danmu-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.danmu-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.danmu-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.danmu-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--bg-primary);
+    backdrop-filter: var(--blur-sm);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-fast);
+}
+
+.danmu-stat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.danmu-stat-item .stat-icon {
+    font-size: 1.75rem;
+    flex-shrink: 0;
+}
+
+.danmu-stat-item .stat-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.danmu-stat-item .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.danmu-stat-item .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* ========================================
+   弹幕热力图
+   ======================================== */
+.danmu-heatmap-card {
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.legend-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.legend-gradient {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.legend-low,
+.legend-high {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+}
+
+.legend-bar {
+    flex: 1;
+    height: 20px;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(to right, 
+        rgba(59, 130, 246, 0.2), 
+        rgba(139, 92, 246, 0.4), 
+        rgba(236, 72, 153, 0.6),
+        rgba(239, 68, 68, 0.8));
+    border: 1px solid var(--border-color);
+}
+
+#danmu-heatmap-canvas {
+    width: 100%;
+    height: 120px;
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+}
+
+/* ========================================
+   弹幕列表
+   ======================================== */
+.danmu-list-card {
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.danmu-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.danmu-list-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.danmu-filter-btn {
+    padding: 0.5rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.danmu-filter-btn:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+}
+
+.danmu-filter-btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.danmu-list-container {
+    max-height: 500px;
+    overflow-y: auto;
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    padding: 1rem;
+}
+
+.danmu-list-empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-tertiary);
+}
+
+.danmu-list-empty .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.danmu-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.875rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--primary-color);
+    transition: all var(--transition-fast);
+    animation: fadeInUp 0.3s ease-out backwards;
+}
+
+.danmu-item:hover {
+    background: var(--bg-tertiary);
+    transform: translateX(4px);
+    box-shadow: var(--shadow-sm);
+}
+
+.danmu-item-time {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 60px;
+    padding: 0.25rem 0.625rem;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: var(--radius-sm);
+    text-align: center;
+}
+
+.danmu-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.danmu-item-text {
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+.danmu-item-meta {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+}
+
+.danmu-item-type {
+    padding: 0.125rem 0.5rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+}
+
+.danmu-item.type-top {
+    border-left-color: var(--success-color);
+}
+
+.danmu-item.type-top .danmu-item-type {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.danmu-item.type-bottom {
+    border-left-color: var(--warning-color);
+}
+
+.danmu-item.type-bottom .danmu-item-type {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+/* ========================================
+   深色模式适配
+   ======================================== */
+[data-theme="dark"] .api-mode-tab {
+    background: rgba(17, 24, 39, 0.8);
+    border: 2px solid rgba(99, 102, 241, 0.2);
+}
+
+[data-theme="dark"] .api-mode-tab:hover {
+    border-color: rgba(129, 140, 248, 0.4);
+    box-shadow: 0 0 20px rgba(129, 140, 248, 0.15);
+}
+
+[data-theme="dark"] .api-mode-tab.active {
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+    box-shadow: 0 4px 12px rgba(129, 140, 248, 0.3),
+                0 0 40px rgba(167, 139, 250, 0.2);
+}
+
+[data-theme="dark"] .danmu-info-card {
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.08), rgba(167, 139, 250, 0.08));
+    border: 1px solid rgba(129, 140, 248, 0.25);
+}
+
+[data-theme="dark"] #danmu-heatmap-canvas {
+    background: rgba(17, 24, 39, 0.6);
+}
+
+/* ========================================
+   响应式适配
+   ======================================== */
+@media (max-width: 767px) {
+    .api-mode-tabs {
+        width: 100%;
+    }
+
+    .api-mode-tab {
+        flex: 1;
+        justify-content: center;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .api-mode-tab .btn-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .danmu-test-methods {
+        grid-template-columns: 1fr;
+    }
+
+    .danmu-info-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .danmu-actions {
+        width: 100%;
+    }
+
+    .danmu-actions .btn {
+        flex: 1;
+    }
+
+    .danmu-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .danmu-list-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .danmu-list-filters {
+        width: 100%;
+    }
+
+    .danmu-filter-btn {
+        flex: 1;
+        text-align: center;
+        font-size: 0.75rem;
+        padding: 0.375rem 0.5rem;
+    }
+
+    .danmu-item {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .danmu-item-time {
+        width: fit-content;
+    }
+}
 `;
