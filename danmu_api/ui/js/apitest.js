@@ -1181,18 +1181,29 @@ function loadMoreDanmu(comments, container) {
         const mode = parts[1];
         const modeInt = parseInt(mode);
         
-        // 判断颜色位置：检查 parts[3] 是否是纯数字
-        let colorStr;
-        if (parts[3] && /^\d+$/.test(parts[3])) {
-            // XML 格式：parts[3] 是纯数字，颜色在 parts[3]
-            colorStr = parts[3];
+        // 解析颜色：兼容 JSON( time,mode,color,[source] ) / XML( time,mode,size,color,... )
+        // 并兼容可能出现的十六进制颜色写法（#RRGGBB / 0xRRGGBB / RRGGBB）
+        let colorInt = 16777215;
+        const rawColorXml = parts[3];
+        const rawColorJson = parts[2];
+        
+        if (rawColorXml && /^\d+$/.test(rawColorXml)) {
+            // XML：第4段是十进制颜色
+            colorInt = parseInt(rawColorXml, 10);
+        } else if (rawColorJson && /^\d+$/.test(rawColorJson)) {
+            // JSON：第3段是十进制颜色
+            colorInt = parseInt(rawColorJson, 10);
         } else {
-            // JSON 格式：parts[3] 是 [bahamut] 等，颜色在 parts[2]
-            colorStr = (parts[2] || '16777215').replace(/[^\d]/g, '');
+            // 兜底：支持 "#RRGGBB" / "0xRRGGBB" / "RRGGBB"
+            const candidate = String(rawColorXml || rawColorJson || '').trim()
+                .replace(/^0x/i, '')
+                .replace(/^#/, '');
+            if (/^[0-9a-fA-F]{6}$/.test(candidate)) {
+                colorInt = parseInt(candidate, 16);
+            }
         }
         
-        const colorInt = parseInt(colorStr) || 16777215;
-        const hexColor = '#' + colorInt.toString(16).padStart(6, '0');
+        const hexColor = '#' + (colorInt >>> 0).toString(16).padStart(6, '0');
         
         let typeClass = '';
         let typeName = '滚动';
@@ -1213,13 +1224,17 @@ function loadMoreDanmu(comments, container) {
                 <div class="danmu-item-text">\${escapeHtml(comment.m)}</div>
                 <div class="danmu-item-meta">
                     <span class="danmu-item-type">\${typeName}</span>
-                    <span style="color: \${hexColor};">● \${hexColor}</span>
+                    <span style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <span style="width: 10px; height: 10px; border-radius: 999px; background-color: \${hexColor} !important; border: 1px solid rgba(0,0,0,0.15);"></span>
+                        <span style="color: \${hexColor} !important;">\${hexColor}</span>
+                    </span>
                 </div>
             </div>
         \`;
         
         fragment.appendChild(itemDiv);
     });
+
     
     container.appendChild(fragment);
     
