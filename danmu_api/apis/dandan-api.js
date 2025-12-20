@@ -622,7 +622,8 @@ export async function matchAnime(url, req) {
     const [preferAnimeId, preferSource] = getPreferAnimeId(title);
     log("info", `prefer animeId: ${preferAnimeId} from ${preferSource}`);
 
-    let originSearchUrl = new URL(req.url.replace("/match", `/search/anime?keyword=${title}`));
+    // 重要：对标题进行 URL 编码，避免 '?' 等字符破坏查询串
+    let originSearchUrl = new URL(req.url.replace("/match", `/search/anime?keyword=${encodeURIComponent(title)}`));
     const searchRes = await searchAnime(originSearchUrl, preferAnimeId, preferSource);
     const searchData = await searchRes.json();
     log("info", `searchData: ${searchData.animes}`);
@@ -708,7 +709,8 @@ export async function searchEpisodes(url) {
   }
 
   // 先搜索动漫
-  let searchUrl = new URL(`/search/anime?keyword=${anime}`, url.origin);
+  // 重要：对标题进行 URL 编码，避免 '?' 等字符破坏查询串
+  let searchUrl = new URL(`/search/anime?keyword=${encodeURIComponent(anime)}`, url.origin);
   const searchRes = await searchAnime(searchUrl);
   const searchData = await searchRes.json();
 
