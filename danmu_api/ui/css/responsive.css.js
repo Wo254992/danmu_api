@@ -64,29 +64,21 @@ export const responsiveCssContent = /* css */ `
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0.75rem 0.75rem;
+        padding: 1.05rem 0.75rem;
         background: var(--bg-primary);
         backdrop-filter: var(--blur-md);
         border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-        margin: 0 -0.75rem 1rem;
+        margin-left: -0.75rem;
+        margin-right: -0.75rem;
+        margin-bottom: 1.25rem;
+        width: calc(100% + 1.5rem);
+        max-width: none;
         border-bottom: 1px solid var(--border-color);
         box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
         position: sticky;
         top: 0;
         z-index: 100;
         animation: slideInDown 0.4s ease-out;
-    }
-
-    .mobile-header::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--primary-500), transparent);
-        opacity: 0.35;
-        pointer-events: none;
     }
 
     /* 左侧区域 */
@@ -600,8 +592,12 @@ export const responsiveCssContent = /* css */ `
     }
 
     .mobile-header {
-        padding: 0.625rem 0.75rem;
-        margin: 0 -0.75rem 0.875rem;
+        padding: 0.95rem 0.75rem;
+        margin-left: -0.75rem;
+        margin-right: -0.75rem;
+        margin-bottom: 1rem;
+        width: calc(100% + 1.5rem);
+        max-width: none;
         border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
 
@@ -932,8 +928,12 @@ export const responsiveCssContent = /* css */ `
     }
 
     .mobile-header {
-        padding: 0.5rem 0.75rem;
-        margin: 0 -0.75rem 0.75rem;
+        padding: 0.85rem 0.75rem;
+        margin-left: -0.75rem;
+        margin-right: -0.75rem;
+        margin-bottom: 0.75rem;
+        width: calc(100% + 1.5rem);
+        max-width: none;
     }
 
     .section-header {
@@ -1030,7 +1030,8 @@ export const responsiveCssContent = /* css */ `
     [data-theme="dark"] .mobile-header {
         background: rgba(10, 15, 30, 0.85);
         backdrop-filter: blur(24px) saturate(180%);
-        border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-top: none;
         box-shadow: 
             0 4px 32px rgba(0, 0, 0, 0.7),
             0 0 60px rgba(99, 102, 241, 0.2),
