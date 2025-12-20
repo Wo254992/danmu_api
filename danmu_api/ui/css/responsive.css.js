@@ -64,18 +64,29 @@ export const responsiveCssContent = /* css */ `
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1.25rem 1.25rem;
+        padding: 0.75rem 0.75rem;
         background: var(--bg-primary);
         backdrop-filter: var(--blur-md);
         border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--border-color);
-        border-top: none;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin: 0 -0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
         position: sticky;
         top: 0;
         z-index: 100;
         animation: slideInDown 0.4s ease-out;
+    }
+
+    .mobile-header::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary-500), transparent);
+        opacity: 0.35;
+        pointer-events: none;
     }
 
     /* 左侧区域 */
@@ -589,8 +600,8 @@ export const responsiveCssContent = /* css */ `
     }
 
     .mobile-header {
-        padding: 1rem 1rem;
-        margin-bottom: 1.25rem;
+        padding: 0.625rem 0.75rem;
+        margin: 0 -0.75rem 0.875rem;
         border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
 
@@ -921,8 +932,8 @@ export const responsiveCssContent = /* css */ `
     }
 
     .mobile-header {
-        padding: 0.75rem;
-        margin-bottom: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        margin: 0 -0.75rem 0.75rem;
     }
 
     .section-header {
@@ -1019,8 +1030,7 @@ export const responsiveCssContent = /* css */ `
     [data-theme="dark"] .mobile-header {
         background: rgba(10, 15, 30, 0.85);
         backdrop-filter: blur(24px) saturate(180%);
-        border: 1px solid rgba(99, 102, 241, 0.3);
-        border-top: none;
+        border-bottom: 1px solid rgba(99, 102, 241, 0.3);
         box-shadow: 
             0 4px 32px rgba(0, 0, 0, 0.7),
             0 0 60px rgba(99, 102, 241, 0.2),
