@@ -1809,8 +1809,16 @@ export const dynamicCssContent = /* css */ `
 
     .anime-title {
         font-size: 0.75rem;
-        -webkit-line-clamp: 1;
         margin-bottom: 0.25rem;
+        /* 移动端：标题允许自动换行，避免省略号截断 */
+        overflow: visible;
+        text-overflow: clip;
+        display: block;
+        -webkit-line-clamp: unset;
+        -webkit-box-orient: unset;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
     }
 
     .anime-meta {
