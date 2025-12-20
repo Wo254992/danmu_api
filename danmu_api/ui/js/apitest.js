@@ -106,7 +106,35 @@ const apiConfigs = {
                 required: false, 
                 placeholder: '可选: json或xml', 
                 options: ['json', 'xml'],
+                default: 'json',
                 description: '选择返回数据的格式'
+            }
+        ]
+    },
+    getCommentByUrl: {
+        name: '通过URL获取弹幕',
+        icon: '🔗',
+        method: 'GET',
+        path: '/api/v2/comment',
+        description: '通过视频URL直接获取弹幕（兼容第三方弹幕服务器格式）',
+        params: [
+            {
+                name: 'url',
+                label: '视频URL',
+                type: 'text',
+                required: true,
+                placeholder: '示例: https://example.com/video.mp4',
+                description: '输入视频直链/播放地址，后端将自动解析并获取弹幕'
+            },
+            {
+                name: 'format',
+                label: '格式',
+                type: 'select',
+                required: false,
+                placeholder: '默认: json',
+                options: ['json', 'xml'],
+                default: 'json',
+                description: '建议使用 json 便于查看；如需 xml 可切换'
             }
         ]
     }
@@ -168,11 +196,13 @@ function loadApiParams() {
         let inputHTML = '';
         
         if (param.type === 'select') {
-            let optionsHtml = '<option value="">-- 请选择 --</option>';
+            // 支持默认值：如果配置了 default，则不强制用户再手动选择
+            let optionsHtml = param.default ? '' : '<option value="">-- 请选择 --</option>';
             if (param.options) {
-                optionsHtml += param.options.map(opt => 
-                    \`<option value="\${opt}">\${opt}</option>\`
-                ).join('');
+                optionsHtml += param.options.map(opt => {
+                    const selected = (param.default !== undefined && String(param.default) === String(opt)) ? 'selected' : '';
+                    return \`<option value="\${opt}" \${selected}>\${opt}</option>\`;
+                }).join('');
             }
             inputHTML = \`
                 <select class="form-select" id="param-\${param.name}" \${param.required ? 'required' : ''}>
@@ -181,12 +211,14 @@ function loadApiParams() {
             \`;
         } else {
             const placeholder = param.placeholder || "请输入" + param.label;
+            const defaultAttr = (param.default !== undefined && param.default !== null) ? \`value="\${String(param.default).replace(/\"/g, '&quot;')}"\` : '';
             inputHTML = \`
                 <input 
                     type="\${param.type}" 
                     class="form-input" 
                     id="param-\${param.name}" 
                     placeholder="\${placeholder}" 
+                    \${defaultAttr}
                     \${param.required ? 'required' : ''}
                 >
             \`;
@@ -472,8 +504,76 @@ function switchApiMode(mode) {
     } else if (mode === 'danmu-test') {
         document.getElementById('api-test-mode').style.display = 'none';
         document.getElementById('danmu-test-mode').style.display = 'block';
+        // 每次进入弹幕测试时，先让用户选择测试方式（自动匹配 / 手动搜索）
+        resetDanmuTestUI();
         addLog('💬 切换到弹幕测试模式', 'info');
     }
+}
+
+/* ========================================
+   弹幕测试 - 方式选择与界面重置
+   ======================================== */
+let currentDanmuTestMethod = null;
+
+function resetDanmuTestUI() {
+    // 清理搜索结果与展示区域
+    const results = document.getElementById('danmu-search-results');
+    const displayArea = document.getElementById('danmu-display-area');
+    if (results) {
+        results.style.display = 'none';
+        results.innerHTML = '';
+    }
+    if (displayArea) {
+        displayArea.style.display = 'none';
+    }
+
+    // 清理方式选择状态
+    currentDanmuTestMethod = null;
+    document.querySelectorAll('.danmu-method-tab').forEach(tab => tab.classList.remove('active'));
+
+    // 显示“请选择方式”的占位内容，隐藏面板
+    const empty = document.getElementById('danmu-method-empty');
+    const autoPanel = document.getElementById('danmu-method-auto');
+    const manualPanel = document.getElementById('danmu-method-manual');
+
+    if (empty) empty.style.display = 'block';
+    if (autoPanel) autoPanel.style.display = 'none';
+    if (manualPanel) manualPanel.style.display = 'none';
+}
+
+function switchDanmuTestMethod(method) {
+    if (!method) return;
+    currentDanmuTestMethod = method;
+
+    // 切换激活态
+    document.querySelectorAll('.danmu-method-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.method === method);
+    });
+
+    // 切换面板显示
+    const empty = document.getElementById('danmu-method-empty');
+    const autoPanel = document.getElementById('danmu-method-auto');
+    const manualPanel = document.getElementById('danmu-method-manual');
+    if (empty) empty.style.display = 'none';
+    if (autoPanel) autoPanel.style.display = method === 'auto' ? 'block' : 'none';
+    if (manualPanel) manualPanel.style.display = method === 'manual' ? 'block' : 'none';
+
+    // 切换方式后，避免界面混淆：隐藏之前的搜索结果/弹幕展示
+    const results = document.getElementById('danmu-search-results');
+    const displayArea = document.getElementById('danmu-display-area');
+    if (results) results.style.display = 'none';
+    if (displayArea) displayArea.style.display = 'none';
+
+    // 自动聚焦输入框
+    setTimeout(() => {
+        if (method === 'auto') {
+            const input = document.getElementById('auto-match-filename');
+            if (input) input.focus();
+        } else {
+            const input = document.getElementById('manual-search-keyword');
+            if (input) input.focus();
+        }
+    }, 50);
 }
 /* ========================================
    自动匹配弹幕
