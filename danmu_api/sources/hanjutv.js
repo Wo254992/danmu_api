@@ -177,18 +177,39 @@ export default class HanjutvSource extends BaseSource {
             // 提取别名信息（韩剧TV API返回的alias字段）
             const aliases = detail.alias || [];
 
-            // 目标：既保留“别名召回能力”（避免漏掉真别名），又避免不相关作品伪装成目标剧名
-            // 策略：只有“安全 alias”才允许用于改名/自动匹配；仅“提到关键词”的 alias（如“模范出租车剧组”）不算
+            // 目标：保留“真别名/译名”的自动匹配能力，但避免 alias 污染导致不相关作品“伪装成搜索词”
+            // 核心：alias 只有在“有佐证字段也命中 query”时，才允许用于改名 & 提升 matchType
             const normalizedQueryTitle = normalizeSpaces(queryTitle);
             let matchedAlias = null;
             let displayName = anime.name;
 
+            const stripHtml = (html) => String(html || "")
+              .replace(/<[^>]+>/g, " ")
+              .replace(/&nbsp;/g, " ")
+              .replace(/&quot;/g, "\"")
+              .replace(/&#39;/g, "'")
+              .replace(/&amp;/g, "&");
+
+            // 这些字段相对更可信（不会像 alias 那样被塞“关联词”）
+            const displayHeading = (detail.display && detail.display.heading) ? detail.display.heading : "";
+            const evidenceText = normalizeSpaces([
+              detail.name,
+              detail.shorthand,
+              displayHeading,
+              stripHtml(detail.intro),
+              detail.crew,
+            ].filter(Boolean).join(" "));
+
+            // alias 只有在“佐证字段也包含 query”时才可信
+            // 额外兜底：alias 只有 1 个且就是 query，也可以认为较可信（减少漏掉真别名）
+            const aliasOnlyQuery = (aliases.length === 1) && (normalizeSpaces(aliases[0]) === normalizedQueryTitle);
+            const canTrustAliasForDisplay = evidenceText.includes(normalizedQueryTitle) || aliasOnlyQuery;
+
             const isSafeAliasForDisplay = (aliasNorm, queryNorm) => {
-              // 1) 完全相等：最安全（真别名/译名）
+              // 1) 完全相等：可能是真别名，但 alias 可能被污染，所以还要配合 canTrustAliasForDisplay
               if (aliasNorm === queryNorm) return true;
 
               // 2) 以 query 开头，后面只允许“季数/数字/常见季数写法”
-              //    例如：模范出租车2、模范出租车 2、模范出租车 第2季、模范出租车 S2
               if (aliasNorm.startsWith(queryNorm)) {
                 const rest = aliasNorm.slice(queryNorm.length).trim();
                 if (rest === "") return true;
@@ -202,13 +223,18 @@ export default class HanjutvSource extends BaseSource {
               const normalizedAlias = normalizeSpaces(alias);
               if (isSafeAliasForDisplay(normalizedAlias, normalizedQueryTitle)) {
                 matchedAlias = alias;
-                displayName = alias; // 允许“安全改名”：让展示名可与搜索词一致，方便前端自动匹配
+
+                // 只有“可信 alias”才允许改名成搜索词，避免 Crash/搜查班长/姐妹茶馆 伪装成“模范出租车”
+                if (canTrustAliasForDisplay) {
+                  displayName = alias;
+                }
+
                 break;
               }
             }
 
-            // 如果标题没有匹配，但命中了“安全 alias”，则把它从“纯API返回(1)”提升为“宽松匹配(2)”
-            if (matchedAlias && matchType < 2) {
+            // 只有“可信 alias 命中”才提升 matchType（否则保持 1，后面强命中存在时会被过滤掉）
+            if (matchedAlias && canTrustAliasForDisplay && matchType < 2) {
               matchType = 2;
             }
 
