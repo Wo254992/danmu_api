@@ -9,7 +9,7 @@ let editingKey = null;
 let logs = [];
 let currentVersion = '';
 let latestVersion = '';
-let currentToken = 'globals.currentToken';
+let currentToken = '';
 let currentAdminToken = '';
 let originalToken = '87654321';
 
@@ -638,6 +638,11 @@ function copyApiEndpoint() {
    ======================================== */
 async function init() {
     try {
+        // 从 URL 获取 token
+        const urlPath = window.location.pathname;
+        const pathParts = urlPath.split('/').filter(part => part !== '');
+        currentToken = pathParts.length > 0 ? pathParts[0] : '';
+        
         // 初始化主题
         initTheme();
         
