@@ -161,16 +161,6 @@ export async function getRedisCaches() {
       globals.episodeIds = results[1].result ? JSON.parse(results[1].result) : globals.episodeIds;
       globals.episodeNum = results[2].result ? JSON.parse(results[2].result) : globals.episodeNum;
 
-      // 兼容旧缓存结构：episodeIds 可能没有 refCount，且 episodeNum 可能比 max(id) 小
-      if (Array.isArray(globals.episodeIds)) {
-        let maxId = 0;
-        globals.episodeIds = globals.episodeIds.map((ep) => {
-          maxId = Math.max(maxId, Number(ep?.id || 0));
-          return { ...ep, refCount: ep?.refCount ?? 1 };
-        });
-        globals.episodeNum = Math.max(Number(globals.episodeNum || 0), maxId);
-      }
-
       // 恢复 lastSelectMap 并转换为 Map 对象
       const lastSelectMapData = results[3].result ? JSON.parse(results[3].result) : null;
       if (lastSelectMapData && typeof lastSelectMapData === 'object') {
