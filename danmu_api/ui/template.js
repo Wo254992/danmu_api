@@ -22,6 +22,16 @@ export const HTML_TEMPLATE = /* html */ `
     <meta name="theme-color" content="#0A0F1E">
     <title>LogVar弹幕API - 现代化管理平台</title>
     <link rel="icon" type="image/jpg" href="https://i.mji.rip/2025/09/27/eedc7b701c0fa5c1f7c175b22f441ad9.jpeg">
+    <script>
+        (function () {
+            const storedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = storedTheme || (prefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.style.backgroundColor = theme === 'dark' ? '#0A0F1E' : '#ffffff';
+            document.documentElement.style.colorScheme = theme;
+        })();
+    </script>
     <style>${baseCssContent}</style>
     <style>${componentsCssContent}</style>
     <style>${formsCssContent}</style>
