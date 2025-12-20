@@ -221,7 +221,8 @@ function performSectionSwitch(section) {
     // 滚动到顶部
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
-    addLog(\`切换到\${titles[section]}模块 📍\`, 'info');
+    const sectionTitle = (titles && titles[section] && titles[section].main) ? titles[section].main : section;
+    addLog(\`切换到\${sectionTitle}模块 📍\`, 'info');
 }
 
 /* ========================================
