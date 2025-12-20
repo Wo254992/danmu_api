@@ -651,20 +651,18 @@ function fetchDanmuByUrl(videoUrl, title, format) {
         displayArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
 
-    const safeFormat = (String(format || '').toLowerCase() === 'xml') ? 'xml' : 'json';
-
-    const apiUrl = buildApiUrl('/api/v2/comment?url=' + encodeURIComponent(videoUrl) + '&format=' + safeFormat);
+    const apiUrl = buildApiUrl('/api/v2/comment?url=' + encodeURIComponent(videoUrl) + '&format=' + format);
 
     return fetch(apiUrl)
         .then(response => {
             if (!response.ok) throw new Error(\`HTTP error! status: \${response.status}\`);
-            return safeFormat === 'xml' ? response.text() : response.json();
+            return format === 'xml' ? response.text() : response.json();
         })
         .then(data => {
             currentDanmuRawResponse = data;
 
             let comments = null;
-            if (safeFormat === 'xml') {
+            if (format === 'xml') {
                 comments = parseDanmuXmlToComments(String(data || ''));
             } else {
                 comments = normalizeDanmuCommentsFromJson(data);
