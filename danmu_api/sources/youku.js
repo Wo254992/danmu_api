@@ -560,11 +560,35 @@ export default class YoukuSource extends BaseSource {
         retries: 1,
       });
 
+      // 优酷接口经常返回 JSONP 文本（utilityxxx({...})），httpPost 会将其作为 string 返回。
+      // 这里统一做一次解析，避免因为 dataType=jsonp 导致弹幕始终为空。
+      const parseYoukuResponse = (payload) => {
+        if (!payload) return null;
+        if (typeof payload === 'object') return payload;
+        if (typeof payload !== 'string') return null;
+        const text = payload.trim();
+
+        // JSONP: callback({...})
+        const m = text.match(/^[^(]*\((.*)\)\s*;?\s*$/s);
+        const jsonText = m ? m[1] : text;
+        try {
+          return JSON.parse(jsonText);
+        } catch (_e) {
+          return null;
+        }
+      };
+
+      const parsed = parseYoukuResponse(response.data);
       const results = [];
-      if (response.data?.data && response.data.data.result) {
-        const result = JSON.parse(response.data.data.result);
-        if (result.code !== "-1") {
-          results.push(...result.data.result);
+      const inner = parsed?.data?.result;
+      if (inner) {
+        try {
+          const result = typeof inner === 'string' ? JSON.parse(inner) : inner;
+          if (result?.code !== "-1" && result?.data?.result) {
+            results.push(...result.data.result);
+          }
+        } catch (e) {
+          log("warn", `[Youku] Failed to parse danmu result for mat=${mat}: ${e.message}`);
         }
       }
       return results;
