@@ -346,10 +346,14 @@ function customConfirm(message, title = '❓ 确认') {
    构建API URL
    ======================================== */
 function buildApiUrl(path, isSystemPath = false) {
-    if (isSystemPath && currentAdminToken && currentAdminToken.trim() !== '' && currentAdminToken.trim() !== '*'.repeat(currentAdminToken.length)) {
-        return '/' + currentAdminToken + path;
+    // 兼容用户输入的 token 带 / 的情况，避免出现 //token/api... 导致后端解析异常
+    const safeToken = currentToken ? String(currentToken).replace(/^\/+|\/+$/g, '') : '';
+    const safeAdminToken = currentAdminToken ? String(currentAdminToken).replace(/^\/+|\/+$/g, '') : '';
+
+    if (isSystemPath && safeAdminToken && safeAdminToken.trim() !== '*'.repeat(safeAdminToken.length)) {
+        return '/' + safeAdminToken + path;
     }
-    return (currentToken ? '/' + currentToken : "") + path;
+    return (safeToken ? '/' + safeToken : "") + path;
 }
 
 /* ========================================
