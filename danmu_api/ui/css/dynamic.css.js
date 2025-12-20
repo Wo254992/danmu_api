@@ -107,13 +107,12 @@ export const dynamicCssContent = /* css */ `
    配置预览组件
    ======================================== */
 .preview-hero-card {
-    background: var(--bg-primary);
-    backdrop-filter: var(--blur-md);
+    background: rgba(255, 255, 255, 1);
     border-radius: var(--radius-xl);
     padding: 2rem;
     margin-bottom: 2rem;
     border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-lg);
+    box-shadow: none;
 }
 /* 深色模式预览卡片增强 */
 [data-theme="dark"] .preview-hero-card {
@@ -203,8 +202,8 @@ export const dynamicCssContent = /* css */ `
 }
 
 .preview-stat-card {
-    background: var(--bg-secondary);
-    backdrop-filter: var(--blur-sm);
+    background: rgba(248, 250, 252, 1);
+    backdrop-filter: none;
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     border: 1px solid var(--border-color);
