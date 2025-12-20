@@ -17,8 +17,11 @@ let originalToken = '87654321';
    主题切换功能
    ======================================== */
 function initTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = localStorage.getItem('theme') || document.documentElement.getAttribute('data-theme') || (prefersDark ? 'dark' : 'light');
     document.documentElement.setAttribute('data-theme', savedTheme);
+    document.documentElement.style.backgroundColor = savedTheme === 'dark' ? '#0A0F1E' : '#ffffff';
+    document.documentElement.style.colorScheme = savedTheme;
     
     // 添加主题切换动画
     const themeToggle = document.getElementById('theme-toggle');
@@ -31,7 +34,6 @@ function initTheme() {
             themeToggle.style.transform = 'scale(1)';
         }, 300);
     }
-    
     addLog(\`已加载\${savedTheme === 'dark' ? '深色' : '浅色'}主题 ✨\`, 'info');
 }
 
