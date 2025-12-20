@@ -527,7 +527,12 @@ function getDanmuSelectedFormat() {
 
 function isProbablyUrl(input) {
     if (!input) return false;
-    return /^https?:\/\//i.test(String(input).trim());
+    const s = String(input).trim();
+    // 只将明确的 http(s) URL 视为链接，避免普通关键词被误判
+    if (!/^https?:\/\//i.test(s)) return false;
+    // 允许 localhost / IP / 正常域名
+    if (/^https?:\/\/(localhost|\d{1,3}(?:\.\d{1,3}){3})([:\/]|$)/i.test(s)) return true;
+    return /^https?:\/\/[^\s\/]+\.[^\s\/]+/i.test(s);
 }
 
 function switchDanmuEntryMode(mode) {
@@ -646,18 +651,20 @@ function fetchDanmuByUrl(videoUrl, title, format) {
         displayArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
 
-    const apiUrl = buildApiUrl('/api/v2/comment?url=' + encodeURIComponent(videoUrl) + '&format=' + format);
+    const safeFormat = (String(format || '').toLowerCase() === 'xml') ? 'xml' : 'json';
+
+    const apiUrl = buildApiUrl('/api/v2/comment?url=' + encodeURIComponent(videoUrl) + '&format=' + safeFormat);
 
     return fetch(apiUrl)
         .then(response => {
             if (!response.ok) throw new Error(\`HTTP error! status: \${response.status}\`);
-            return format === 'xml' ? response.text() : response.json();
+            return safeFormat === 'xml' ? response.text() : response.json();
         })
         .then(data => {
             currentDanmuRawResponse = data;
 
             let comments = null;
-            if (format === 'xml') {
+            if (safeFormat === 'xml') {
                 comments = parseDanmuXmlToComments(String(data || ''));
             } else {
                 comments = normalizeDanmuCommentsFromJson(data);
