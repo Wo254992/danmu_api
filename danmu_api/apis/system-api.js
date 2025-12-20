@@ -42,10 +42,10 @@ export function handleConfig(hasPermission = false) {
 
     categorizedVars[category].push({
       key: key,
-      value: previewEnvVars[key]?.value || previewEnvVars[key] || '', // 如果是新格式则取value字段，否则直接使用原值
-      type: previewEnvVars[key]?.type || varConfig.type || 'text', // 如果是新格式则取type字段，否则使用配置中的type或默认text
+      value: previewEnvVars[key]?.value ?? previewEnvVars[key] ?? '', // 如果是新格式则取value字段，否则直接使用原值
+      type: previewEnvVars[key]?.type ?? varConfig.type ?? 'text', // 如果是新格式则取type字段，否则使用配置中的type或默认text
       description: varConfig.description || '无描述',
-      options: previewEnvVars[key]?.options || varConfig.options // 如果是新格式则取options字段
+      options: previewEnvVars[key]?.options ?? varConfig.options // 如果是新格式则取options字段
     });
   });
 
