@@ -1012,8 +1012,7 @@ export async function getCommentByUrl(videoUrl, queryFormat) {
       }
       danmus = await bilibiliSource.getComments(url, "bilibili1");
     } else if (url.includes('.youku.com')) {
-      // fix: youkuSource 是 Source 实例，需要调用 getComments
-      danmus = await youkuSource.getComments(url, "youku");
+      danmus = await youkuSource(url, "youku");
     } else if (url.includes('.sohu.com') || url.includes('tv.sohu.com')) {
       // 处理搜狐视频
       danmus = await sohuSource.getComments(url, "sohu");
