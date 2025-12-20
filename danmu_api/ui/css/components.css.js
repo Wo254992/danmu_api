@@ -613,6 +613,13 @@ export const componentsCssContent = /* css */ `
     margin-bottom: 1rem;
 }
 
+.card-desc {
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
 /* ========================================
    模态框组件
    ======================================== */
