@@ -202,9 +202,52 @@ export default class HanjutvSource extends BaseSource {
 
             // alias 只有在“佐证字段也包含 query”时才可信
             // 额外兜底：alias 只有 1 个且就是 query，也可以认为较可信（减少漏掉真别名）
+            // 再额外兜底：当 alias 精确等于 query，且标题与 query 仅 1 个字差异（如 无用/没用），也允许改名
             const aliasOnlyQuery = (aliases.length === 1) && (normalizeSpaces(aliases[0]) === normalizedQueryTitle);
-            const canTrustAliasForDisplay = evidenceText.includes(normalizedQueryTitle) || aliasOnlyQuery;
 
+            const editDistanceLE1 = (a, b) => {
+              if (a === b) return true;
+              const la = a.length;
+              const lb = b.length;
+              if (Math.abs(la - lb) > 1) return false;
+
+              let i = 0;
+              let j = 0;
+              let diff = 0;
+
+              while (i < la && j < lb) {
+                if (a[i] === b[j]) {
+                  i++;
+                  j++;
+                  continue;
+                }
+                diff++;
+                if (diff > 1) return false;
+
+                if (la > lb) {
+                  i++;
+                } else if (lb > la) {
+                  j++;
+                } else {
+                  i++;
+                  j++;
+                }
+              }
+
+              if (i < la || j < lb) diff++;
+              return diff <= 1;
+            };
+
+            const nearTitleHit = (() => {
+              const nQuery = normalizedQueryTitle;
+              const nName1 = normalizeSpaces(anime.name);
+              const nName2 = normalizeSpaces(detail.name);
+              if (!nQuery) return false;
+              if (Math.min(nQuery.length, nName1.length, nName2.length) < 4) return false;
+              return editDistanceLE1(nName1, nQuery) || editDistanceLE1(nName2, nQuery);
+            })();
+
+            const canTrustAliasForDisplay = evidenceText.includes(normalizedQueryTitle) || aliasOnlyQuery || nearTitleHit;
             const isSafeAliasForDisplay = (aliasNorm, queryNorm) => {
               // 1) 完全相等：可能是真别名，但 alias 可能被污染，所以还要配合 canTrustAliasForDisplay
               if (aliasNorm === queryNorm) return true;
