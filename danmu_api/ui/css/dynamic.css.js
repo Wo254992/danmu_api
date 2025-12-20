@@ -1926,6 +1926,87 @@ export const dynamicCssContent = /* css */ `
     gap: 1.5rem;
 }
 
+/* ========================================
+   弹幕测试方式切换（避免两个输入框同时出现）
+   ======================================== */
+.danmu-method-switcher {
+    border: 2px solid var(--border-color);
+}
+
+.danmu-method-switcher-header {
+    margin-bottom: 1rem;
+}
+
+.danmu-method-tabs {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.danmu-method-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.danmu-method-tab:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.danmu-method-tab.active {
+    background: var(--gradient-primary);
+    border-color: var(--primary-color);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.danmu-method-tab .tab-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.danmu-method-empty {
+    padding: 1.25rem;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-secondary);
+    text-align: center;
+}
+
+.danmu-method-empty .empty-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.danmu-method-empty .empty-title {
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.danmu-method-empty .empty-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.danmu-method-panel {
+    margin-top: 0.75rem;
+}
+
 .danmu-test-methods {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -2317,8 +2398,15 @@ export const dynamicCssContent = /* css */ `
         height: 16px;
     }
 
-    .danmu-test-methods {
-        grid-template-columns: 1fr;
+    .danmu-method-tabs {
+        width: 100%;
+    }
+
+    .danmu-method-tab {
+        flex: 1;
+        justify-content: center;
+        padding: 0.625rem 0.875rem;
+        font-size: 0.875rem;
     }
 
     .danmu-info-header {
