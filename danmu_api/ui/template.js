@@ -352,6 +352,7 @@ export const HTML_TEMPLATE = /* html */ `
                             <option value="matchAnime">匹配动漫 - /api/v2/match</option>
                             <option value="getBangumi">获取番剧详情 - /api/v2/bangumi/:animeId</option>
                             <option value="getComment">获取弹幕 - /api/v2/comment/:commentId</option>
+                            <option value="getCommentByUrl">通过URL获取弹幕 - /api/v2/comment?url=...</option>
                         </select>
                     </div>
 
@@ -374,8 +375,44 @@ export const HTML_TEMPLATE = /* html */ `
 
                 <!-- 弹幕测试模式 -->
                 <div class="danmu-test-container" id="danmu-test-mode" style="display: none;">
+                    <div class="form-card">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+                            <div>
+                                <div class="api-mode-tabs" style="margin: 0;">
+                                    <button class="api-mode-tab active" data-danmu-mode="match" onclick="switchDanmuTestMode('match')">
+                                        <span>🎯</span>
+                                        <span>Match 自动匹配</span>
+                                    </button>
+                                    <button class="api-mode-tab" data-danmu-mode="anime" onclick="switchDanmuTestMode('anime')">
+                                        <span>🔍</span>
+                                        <span>Anime 搜索</span>
+                                    </button>
+                                    <button class="api-mode-tab" data-danmu-mode="url" onclick="switchDanmuTestMode('url')">
+                                        <span>🔗</span>
+                                        <span>URL 获取</span>
+                                    </button>
+                                </div>
+                                <small class="form-help" style="margin-top: 0.75rem;">
+                                    <span class="help-icon">💡</span>
+                                    支持自动识别链接：输入以 http(s):// 开头时，会自动使用 URL 获取接口。
+                                </small>
+                            </div>
+                            <div class="form-group" style="margin: 0; min-width: 180px;">
+                                <label class="form-label" style="margin-bottom: 0.35rem;">弹幕格式</label>
+                                <select class="form-select" id="danmu-format-select">
+                                    <option value="json" selected>json</option>
+                                    <option value="xml">xml</option>
+                                </select>
+                                <small class="form-help" style="margin-top: 0.5rem;">
+                                    <span class="help-icon">💡</span>
+                                    通过 &amp;format=json 或 &amp;format=xml 控制返回格式（优先级最高）
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="danmu-test-methods">
-                        <div class="form-card danmu-method-card">
+                        <div class="form-card danmu-method-card" id="danmu-mode-match">
                             <div class="method-header">
                                 <div class="method-icon-wrapper" style="background: var(--gradient-primary);">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -384,27 +421,27 @@ export const HTML_TEMPLATE = /* html */ `
                                 </div>
                                 <div class="method-info">
                                     <h3 class="method-title">🎯 自动匹配测试</h3>
-                                    <p class="method-desc">通过文件名自动匹配弹幕</p>
+                                    <p class="method-desc">通过 match 接口解析文件名，获取 commentId 再拉取弹幕</p>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">文件名</label>
+                                <label class="form-label">文件名 / 链接</label>
                                 <input type="text" class="form-input" id="auto-match-filename" 
-                                       placeholder="例如: 生万物 S02E08 或 无忧渡.S01E01.2160p.WEB-DL.H265.DDP.5.1">
+                                       placeholder="例如: 生万物 S02E08 或 https://example.com/video.mp4">
                                 <small class="form-help">
                                     <span class="help-icon">💡</span>
-                                    支持多种格式：季集格式、网盘命名、外语标题等
+                                    文件名会走 match；链接会自动走 /api/v2/comment?url=...（兼容第三方弹幕服务器）
                                 </small>
                             </div>
                             <button class="btn btn-primary btn-lg" onclick="autoMatchDanmu()">
                                 <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
-                                <span>开始匹配</span>
+                                <span>开始测试</span>
                             </button>
                         </div>
 
-                        <div class="form-card danmu-method-card">
+                        <div class="form-card danmu-method-card" id="danmu-mode-anime" style="display: none;">
                             <div class="method-header">
                                 <div class="method-icon-wrapper" style="background: var(--gradient-success);">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -414,17 +451,17 @@ export const HTML_TEMPLATE = /* html */ `
                                 </div>
                                 <div class="method-info">
                                     <h3 class="method-title">🔍 手动搜索测试</h3>
-                                    <p class="method-desc">搜索动漫并选择集数</p>
+                                    <p class="method-desc">search/anime → bangumi/:animeId → comment/:commentId</p>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">搜索关键词</label>
+                                <label class="form-label">搜索关键词 / 链接</label>
                                 <input type="text" class="form-input" id="manual-search-keyword" 
                                        placeholder="例如: 生万物"
                                        onkeypress="if(event.key==='Enter') manualSearchDanmu()">
                                 <small class="form-help">
                                     <span class="help-icon">💡</span>
-                                    输入动漫名称进行精确搜索
+                                    输入动漫名称进行精确搜索；如直接输入链接则自动改用 URL 获取接口
                                 </small>
                             </div>
                             <button class="btn btn-success btn-lg" onclick="manualSearchDanmu()">
@@ -433,6 +470,37 @@ export const HTML_TEMPLATE = /* html */ `
                                     <path d="m21 21-4.35-4.35"/>
                                 </svg>
                                 <span>开始搜索</span>
+                            </button>
+                        </div>
+
+                        <div class="form-card danmu-method-card" id="danmu-mode-url" style="display: none;">
+                            <div class="method-header">
+                                <div class="method-icon-wrapper" style="background: var(--gradient-warning);">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M10 13a5 5 0 007.07 0l1.41-1.41a5 5 0 00-7.07-7.07L10 4.93"/>
+                                        <path d="M14 11a5 5 0 01-7.07 0L5.52 9.59a5 5 0 017.07-7.07L14 3.93"/>
+                                    </svg>
+                                </div>
+                                <div class="method-info">
+                                    <h3 class="method-title">🔗 URL 获取弹幕</h3>
+                                    <p class="method-desc">通过 /api/v2/comment?url=... 直接获取弹幕（兼容第三方弹幕服务器格式）</p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">视频 URL</label>
+                                <input type="text" class="form-input" id="danmu-url-input" 
+                                       placeholder="例如: https://example.com/video.mp4"
+                                       onkeypress="if(event.key==='Enter') danmuFetchByUrl()">
+                                <small class="form-help">
+                                    <span class="help-icon">💡</span>
+                                    支持 JSON / XML 输出，格式由上方弹幕格式选择控制
+                                </small>
+                            </div>
+                            <button class="btn btn-warning btn-lg" onclick="danmuFetchByUrl()">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" stroke-width="2"/>
+                                </svg>
+                                <span>获取弹幕</span>
                             </button>
                         </div>
                     </div>
