@@ -177,40 +177,35 @@ export default class HanjutvSource extends BaseSource {
             // 提取别名信息（韩剧TV API返回的alias字段）
             const aliases = detail.alias || [];
 
-             // 别名处理：只有 alias[0]（第一个别名）与搜索标题匹配时才改名
-            // 其他位置的别名匹配只提升 matchType，不改名
+            // 别名过滤规则：只有 alias[0]（第一个别名）与搜索标题匹配时才接受该条目
+            // 其他别名匹配或标题不匹配时，直接过滤掉该条目
             const normalizedQueryTitle = normalizeSpaces(queryTitle);
             let matchedAlias = null;
             let shouldRenameByAlias = false;
 
-            // 检查第一个别名是否与搜索标题匹配
-            if (aliases.length > 0) {
-              const firstAlias = aliases[0];
-              const normalizedFirstAlias = normalizeSpaces(firstAlias);
-              
-              // 第一个别名精确匹配或包含搜索标题
-              if (normalizedFirstAlias === normalizedQueryTitle || normalizedFirstAlias.includes(normalizedQueryTitle)) {
-                matchedAlias = firstAlias;
-                shouldRenameByAlias = true;
-                // 提升 matchType
-                if (matchType < 2) {
+            // 如果标题本身已经匹配(matchType >= 2)，则保留该条目
+            if (matchType >= 2) {
+              // 标题匹配，不需要改名
+              shouldRenameByAlias = false;
+            } else {
+              // 标题不匹配时，检查第一个别名
+              if (aliases.length > 0) {
+                const firstAlias = aliases[0];
+                const normalizedFirstAlias = normalizeSpaces(firstAlias);
+                
+                // 第一个别名精确匹配或包含搜索标题
+                if (normalizedFirstAlias === normalizedQueryTitle || normalizedFirstAlias.includes(normalizedQueryTitle)) {
+                  matchedAlias = firstAlias;
+                  shouldRenameByAlias = true;
+                  // 提升 matchType
                   matchType = 2;
+                } else {
+                  // 第一个别名不匹配，且标题也不匹配，过滤掉该条目
+                  return null;
                 }
               } else {
-                // 第一个别名不匹配，检查其他别名（仅用于提升 matchType，不改名）
-                for (let i = 1; i < aliases.length; i++) {
-                  const alias = aliases[i];
-                  const normalizedAlias = normalizeSpaces(alias);
-                  
-                  if (normalizedAlias === normalizedQueryTitle || normalizedAlias.includes(normalizedQueryTitle)) {
-                    matchedAlias = alias;
-                    // 仅提升 matchType，不改名
-                    if (matchType < 2) {
-                      matchType = 2;
-                    }
-                    break;
-                  }
-                }
+                // 没有别名，且标题不匹配，过滤掉该条目
+                return null;
               }
             }
 
