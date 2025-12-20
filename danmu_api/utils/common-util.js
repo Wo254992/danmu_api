@@ -203,6 +203,73 @@ export function normalizeSpaces(str) {
 }
 
 /**
+ * 规范化标题中的标点符号（全角/半角统一 + 一些常见“看起来一样”的符号统一）
+ *
+ * 目的：让“宇宙Marry Me？” 与 “宇宙Marry Me?” 这类仅标点不同的标题可被识别为同一部剧。
+ *
+ * 注意：这里不做“去掉标点”的激进处理，只做“等价符号映射”，避免误把不同标题合并。
+ *
+ * @param {string} str - 输入字符串
+ * @returns {string} 规范化后的字符串
+ */
+export function normalizePunctuations(str) {
+  if (!str) return '';
+
+  const s = String(str);
+
+  // 全角 -> 半角（仅对常见标点做显式映射，避免改变字母/数字等）
+  const map = {
+    '？': '?',
+    '！': '!',
+    '：': ':',
+    '；': ';',
+    '（': '(',
+    '）': ')',
+    '【': '[',
+    '】': ']',
+    '「': '"',
+    '」': '"',
+    '『': '"',
+    '』': '"',
+    '“': '"',
+    '”': '"',
+    '‘': '\'',
+    '’': '\'',
+    '，': ',',
+    '。': '.',
+    '、': ',',
+    '～': '~',
+    '－': '-',
+    '—': '-',
+    '–': '-',
+    '·': '·', // 保留（中点容易影响标题识别，不与 '.' 合并）
+  };
+
+  return s.replace(/[？！？：；（）【】「」『』“”‘’，。、～－—–·]/g, (ch) => map[ch] ?? ch);
+}
+
+/**
+ * 用于标题匹配的规范化：
+ * 1) 去掉空格
+ * 2) 标点符号全角/半角等价归一
+ * 3) 英文小写化
+ */
+export function normalizeTitleForMatch(str) {
+  return normalizeSpaces(normalizePunctuations(str)).toLowerCase();
+}
+
+/**
+ * 判断两个标题是否“只存在等价标点差异”（或大小写/空格差异）
+ * @param {string} a
+ * @param {string} b
+ * @returns {boolean}
+ */
+export function equivalentTitleIgnorePunct(a, b) {
+  if (!a || !b) return false;
+  return normalizeTitleForMatch(a) === normalizeTitleForMatch(b);
+}
+
+/**
  * 严格标题匹配函数
  * @param {string} title - 动漫标题
  * @param {string} query - 搜索关键词
