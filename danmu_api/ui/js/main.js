@@ -221,12 +221,8 @@ function performSectionSwitch(section) {
     // 滚动到顶部
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
-    // 进入日志界面时自动刷新一次
-    if (section === 'logs' && typeof fetchRealLogs === 'function') {
-        fetchRealLogs();
-    }
-    
-    addLog(\`切换到\${titles[section] ? titles[section].main : section}模块 📍\`, 'info');
+    const sectionTitle = (titles && titles[section] && titles[section].main) ? titles[section].main : section;
+    addLog(\`切换到\${sectionTitle}模块 📍\`, 'info');
 }
 
 /* ========================================
