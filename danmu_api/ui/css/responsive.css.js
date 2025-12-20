@@ -577,6 +577,20 @@ export const responsiveCssContent = /* css */ `
     .success-message {
         font-size: 1.25rem;
     }
+
+
+    /* 弹幕测试/推送页面：搜索结果卡片标题在移动端允许自动换行，避免被截断 */
+    .anime-title {
+        overflow: visible;
+        text-overflow: clip;
+        display: block;
+        -webkit-line-clamp: initial;
+        -webkit-box-orient: initial;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
 }
 
 /* ========================================
