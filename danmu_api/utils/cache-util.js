@@ -88,34 +88,16 @@ export function setCommentCache(videoUrl, comments) {
 
 // 添加元素到 episodeIds：检查 url 是否存在，若不存在则以自增 id 添加
 export function addEpisode(url, title) {
-    // 说明：episodeIds 作为 “commentId -> {url,title}” 的索引会被多个 anime 复用。
-    // 如果简单去重（返回同一个 episode 对象），在 LRU 淘汰 anime 时直接按 URL 删除，
-    // 会导致其它仍在使用该 episode 的 anime 变成“悬空引用”，最终出现：
-    //   - findUrlById 找不到
-    //   - removeEpisodeByUrl 报 "No episode found..."
-    // 因此这里为 episode 增加 refCount，并在删除时做引用计数。
-
     // 检查是否已存在相同的 url 和 title
-    const existingEpisode = globals.episodeIds.find(
-      (episode) => episode.url === url && episode.title === title
-    );
+    const existingEpisode = globals.episodeIds.find(episode => episode.url === url && episode.title === title);
     if (existingEpisode) {
-      existingEpisode.refCount = (existingEpisode.refCount ?? 1) + 1;
-      log(
-        "info",
-        `Episode already exists, refCount=${existingEpisode.refCount}, url=${url}`
-      );
-      return existingEpisode;
+        log("info", `Episode with URL ${url} and title ${title} already exists in episodeIds, returning existing episode.`);
+        return existingEpisode; // 返回已存在的 episode
     }
 
     // 自增 episodeNum 并使用作为 id
     globals.episodeNum++;
-    const newEpisode = {
-      id: globals.episodeNum,
-      url: url,
-      title: title,
-      refCount: 1,
-    };
+    const newEpisode = { id: globals.episodeNum, url: url, title: title };
 
     // 添加新对象
     globals.episodeIds.push(newEpisode);
@@ -124,39 +106,17 @@ export function addEpisode(url, title) {
     return newEpisode; // 返回新添加的对象
 }
 
-// 通过 ID 删除 episode（引用计数 -1，归零才真正移除）
-export function removeEpisodeById(id) {
-  const idx = globals.episodeIds.findIndex((episode) => episode.id === id);
-  if (idx === -1) {
-    // 这类情况通常是历史缓存/去重逻辑造成的，不应作为 error 污染日志
-    log("warn", `No episode found in episodeIds with ID: ${id}`);
-    return false;
-  }
-
-  const ep = globals.episodeIds[idx];
-  ep.refCount = (ep.refCount ?? 1) - 1;
-  if (ep.refCount <= 0) {
-    globals.episodeIds.splice(idx, 1);
-    log("info", `Removed episode from episodeIds (refCount reached 0): id=${id}, url=${ep.url}`);
-  } else {
-    globals.episodeIds[idx] = ep;
-    log("info", `Decrement episode refCount: id=${id}, refCount=${ep.refCount}`);
-  }
-  return true;
-}
-
-// 删除指定 URL 的对象从 episodeIds（兼容旧逻辑；同 URL 可能有多个条目）
+// 删除指定 URL 的对象从 episodeIds
 export function removeEpisodeByUrl(url) {
-  const matches = globals.episodeIds.filter((episode) => episode.url === url);
-  if (matches.length === 0) {
-    log("warn", `No episode found in episodeIds with URL: ${url}`);
+    const initialLength = globals.episodeIds.length;
+    globals.episodeIds = globals.episodeIds.filter(episode => episode.url !== url);
+    const removedCount = initialLength - globals.episodeIds.length;
+    if (removedCount > 0) {
+        log("info", `Removed ${removedCount} episode(s) from episodeIds with URL: ${url}`);
+        return true;
+    }
+    log("error", `No episode found in episodeIds with URL: ${url}`);
     return false;
-  }
-  // 对所有匹配项做 -1（通常只会有 1 个）
-  for (const ep of matches) {
-    removeEpisodeById(ep.id);
-  }
-  return true;
 }
 
 // 根据 ID 查找 URL
@@ -254,13 +214,8 @@ export function removeEarliestAnime() {
     // 从 episodeIds 删除该 anime 的所有 links 中的 url
     if (removedAnime.links && Array.isArray(removedAnime.links)) {
         removedAnime.links.forEach(link => {
-            if (link?.id !== undefined && link?.id !== null) {
-              removeEpisodeById(link.id);
-              return;
-            }
-            if (link?.url) {
-              // 兼容旧缓存结构
-              removeEpisodeByUrl(link.url);
+            if (link.url) {
+                removeEpisodeByUrl(link.url);
             }
         });
     }
@@ -390,19 +345,6 @@ export async function getLocalCaches() {
       globals.animes = JSON.parse(readCacheFromFile('animes')) || globals.animes;
       globals.episodeIds = JSON.parse(readCacheFromFile('episodeIds')) || globals.episodeIds;
       globals.episodeNum = JSON.parse(readCacheFromFile('episodeNum')) || globals.episodeNum;
-
-      // 兼容旧缓存结构：为 episodeIds 补全 refCount，并修正 episodeNum（保证新增 id 不冲突）
-      if (Array.isArray(globals.episodeIds)) {
-        let maxId = 0;
-        globals.episodeIds = globals.episodeIds.map((ep) => {
-          maxId = Math.max(maxId, Number(ep?.id || 0));
-          return {
-            ...ep,
-            refCount: ep?.refCount ?? 1,
-          };
-        });
-        globals.episodeNum = Math.max(Number(globals.episodeNum || 0), maxId);
-      }
 
       // 恢复 lastSelectMap 并转换为 Map 对象
       const lastSelectMapData = readCacheFromFile('lastSelectMap');
