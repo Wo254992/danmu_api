@@ -177,21 +177,37 @@ export default class HanjutvSource extends BaseSource {
             // 提取别名信息（韩剧TV API返回的alias字段）
             const aliases = detail.alias || [];
 
-            // 保留“别名召回能力”：如果 query 命中 alias，则提升 matchType，
-            // 但绝不把 alias 当成主标题（避免不相关作品“伪装”为目标剧名）
+            // 目标：既保留“别名召回能力”（避免漏掉真别名），又避免不相关作品伪装成目标剧名
+            // 策略：只有“安全 alias”才允许用于改名/自动匹配；仅“提到关键词”的 alias（如“模范出租车剧组”）不算
             const normalizedQueryTitle = normalizeSpaces(queryTitle);
             let matchedAlias = null;
+            let displayName = anime.name;
+
+            const isSafeAliasForDisplay = (aliasNorm, queryNorm) => {
+              // 1) 完全相等：最安全（真别名/译名）
+              if (aliasNorm === queryNorm) return true;
+
+              // 2) 以 query 开头，后面只允许“季数/数字/常见季数写法”
+              //    例如：模范出租车2、模范出租车 2、模范出租车 第2季、模范出租车 S2
+              if (aliasNorm.startsWith(queryNorm)) {
+                const rest = aliasNorm.slice(queryNorm.length).trim();
+                if (rest === "") return true;
+                if (/^(\d+|第\d+季|s\d+|season\d+)$/i.test(rest)) return true;
+              }
+
+              return false;
+            };
 
             for (const alias of aliases) {
               const normalizedAlias = normalizeSpaces(alias);
-              // alias 精确匹配 / 包含匹配，都算“alias 命中”
-              if (normalizedAlias === normalizedQueryTitle || normalizedAlias.includes(normalizedQueryTitle)) {
+              if (isSafeAliasForDisplay(normalizedAlias, normalizedQueryTitle)) {
                 matchedAlias = alias;
+                displayName = alias; // 允许“安全改名”：让展示名可与搜索词一致，方便前端自动匹配
                 break;
               }
             }
 
-            // 如果标题没有匹配，但 alias 命中，则把它从“纯API返回(1)”提升为“宽松匹配(2)”
+            // 如果标题没有匹配，但命中了“安全 alias”，则把它从“纯API返回(1)”提升为“宽松匹配(2)”
             if (matchedAlias && matchType < 2) {
               matchType = 2;
             }
@@ -214,10 +230,11 @@ const yearForTitle = isValidYear(inferYear) ? inferYear : null;
 let transformedAnime = {
   animeId: anime.animeId,
   bangumiId: String(anime.animeId),
-  // 主标题永远使用 anime.name，避免 alias 伪装
+  // 使用 displayName：只有“安全 alias”才会改名，从而兼顾自动匹配与防伪装
   animeTitle: yearForTitle
-    ? `${anime.name}(${yearForTitle})【${getCategory(detail.category)}】from hanjutv`
-    : `${anime.name}【${getCategory(detail.category)}】from hanjutv`,
+    ? `${displayName}(${yearForTitle})【${getCategory(detail.category)}】from hanjutv`
+    : `${displayName}【${getCategory(detail.category)}】from hanjutv`,
+  originTitle: anime.name,
   type: getCategory(detail.category),
   typeDescription: getCategory(detail.category),
   imageUrl: anime.image.thumb,
@@ -229,7 +246,7 @@ let transformedAnime = {
   source: "hanjutv",
   matchType: matchType, // 添加匹配类型标记用于排序
   aliases: aliases, // 保存别名数组，用于自动匹配
-  matchedAlias: matchedAlias, // 仅记录命中的 alias（不改名）
+  matchedAlias: matchedAlias,
 };
 
 // 计算一个“质量分”，用于去重时挑选更靠谱的条目
@@ -240,7 +257,7 @@ const qualityScore = matchType * 100 + hasUpdateTime * 20 + nonEmptyEpTitleCount
 
 // 返回带匹配类型 & 去重Key 的结果，用于后续排序/去重
 // 去重 key 用“真实剧名”而不是 alias（因为 alias 不可靠）
-const dedupeKey = `${detail.category}|${normalizeSpaces(anime.name)}`;
+const dedupeKey = `${detail.category}|${normalizeSpaces(displayName)}`;
 return { anime: transformedAnime, links: links, matchType: matchType, qualityScore, dedupeKey };
           }
           return null; // 如果没有剧集则返回null
