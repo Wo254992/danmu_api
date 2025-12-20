@@ -1028,51 +1028,16 @@ export const responsiveCssContent = /* css */ `
    ======================================== */
 @media (max-width: 767px) {
     [data-theme="dark"] .mobile-header {
-        background: rgba(10, 15, 30, 0.85);
-        backdrop-filter: blur(24px) saturate(180%);
-        border: 1px solid rgba(99, 102, 241, 0.3);
-        border-top: none;
-        box-shadow: 
-            0 4px 32px rgba(0, 0, 0, 0.7),
-            0 0 60px rgba(99, 102, 241, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05),
-            inset 0 -1px 0 rgba(129, 140, 248, 0.1);
-        position: relative;
-        overflow: hidden;
+        background: rgba(10, 15, 30, 1);
+        backdrop-filter: none;
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
     }
 
-    [data-theme="dark"] .mobile-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(129, 140, 248, 0.05),
-            transparent
-        );
-        animation: headerShine 8s ease-in-out infinite;
-    }
-
+    [data-theme="dark"] .mobile-header::before,
     [data-theme="dark"] .mobile-header::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 5%;
-        right: 5%;
-        height: 1px;
-        background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(129, 140, 248, 0.5) 20%,
-            rgba(167, 139, 250, 0.5) 50%,
-            rgba(129, 140, 248, 0.5) 80%,
-            transparent
-        );
-        animation: headerGlow 3s ease-in-out infinite;
+        content: none;
     }
 
     @keyframes headerShine {
