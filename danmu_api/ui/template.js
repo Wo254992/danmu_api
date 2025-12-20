@@ -352,6 +352,7 @@ export const HTML_TEMPLATE = /* html */ `
                             <option value="matchAnime">匹配动漫 - /api/v2/match</option>
                             <option value="getBangumi">获取番剧详情 - /api/v2/bangumi/:animeId</option>
                             <option value="getComment">获取弹幕 - /api/v2/comment/:commentId</option>
+                            <option value="getCommentByUrl">通过URL获取弹幕 - /api/v2/comment?url=...&format=json</option>
                         </select>
                     </div>
 
@@ -374,9 +375,33 @@ export const HTML_TEMPLATE = /* html */ `
 
                 <!-- 弹幕测试模式 -->
                 <div class="danmu-test-container" id="danmu-test-mode" style="display: none;">
-                    <div class="danmu-test-methods">
-                        <div class="form-card danmu-method-card">
-                            <div class="method-header">
+                    <!-- 测试方式选择（避免两个输入框同时出现） -->
+                    <div class="form-card danmu-method-switcher">
+                        <div class="danmu-method-switcher-header">
+                            <h3 class="card-title">弹幕测试方式</h3>
+                            <p class="card-desc">请选择「自动匹配」或「手动搜索」开始调试</p>
+                        </div>
+                        <div class="danmu-method-tabs" role="tablist" aria-label="弹幕测试方式">
+                            <button class="danmu-method-tab" data-method="auto" onclick="switchDanmuTestMethod('auto')" aria-label="自动匹配">
+                                <span class="tab-icon">🎯</span>
+                                <span>自动匹配</span>
+                            </button>
+                            <button class="danmu-method-tab" data-method="manual" onclick="switchDanmuTestMethod('manual')" aria-label="手动搜索">
+                                <span class="tab-icon">🔍</span>
+                                <span>手动搜索</span>
+                            </button>
+                        </div>
+
+                        <!-- 未选择方式时的占位提示 -->
+                        <div id="danmu-method-empty" class="danmu-method-empty">
+                            <div class="empty-icon">💡</div>
+                            <div class="empty-title">先选择一种方式</div>
+                            <div class="empty-desc">自动匹配适合直接输入文件名；手动搜索适合精确选择剧集</div>
+                        </div>
+
+                        <!-- 自动匹配面板 -->
+                        <div id="danmu-method-auto" class="danmu-method-panel" style="display: none;">
+                            <div class="method-header" style="margin-top: 0;">
                                 <div class="method-icon-wrapper" style="background: var(--gradient-primary);">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
@@ -404,8 +429,9 @@ export const HTML_TEMPLATE = /* html */ `
                             </button>
                         </div>
 
-                        <div class="form-card danmu-method-card">
-                            <div class="method-header">
+                        <!-- 手动搜索面板 -->
+                        <div id="danmu-method-manual" class="danmu-method-panel" style="display: none;">
+                            <div class="method-header" style="margin-top: 0;">
                                 <div class="method-icon-wrapper" style="background: var(--gradient-success);">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <circle cx="11" cy="11" r="8"/>
