@@ -177,24 +177,43 @@ export default class HanjutvSource extends BaseSource {
             // 提取别名信息（韩剧TV API返回的alias字段）
             const aliases = detail.alias || [];
 
-            // 保留“别名召回能力”：如果 query 命中 alias，则提升 matchType，
-            // 但绝不把 alias 当成主标题（避免不相关作品“伪装”为目标剧名）
+             // 别名处理：只有 alias[0]（第一个别名）与搜索标题匹配时才改名
+            // 其他位置的别名匹配只提升 matchType，不改名
             const normalizedQueryTitle = normalizeSpaces(queryTitle);
             let matchedAlias = null;
+            let shouldRenameByAlias = false;
 
-            for (const alias of aliases) {
-              const normalizedAlias = normalizeSpaces(alias);
-              // alias 精确匹配 / 包含匹配，都算“alias 命中”
-              if (normalizedAlias === normalizedQueryTitle || normalizedAlias.includes(normalizedQueryTitle)) {
-                matchedAlias = alias;
-                break;
+            // 检查第一个别名是否与搜索标题匹配
+            if (aliases.length > 0) {
+              const firstAlias = aliases[0];
+              const normalizedFirstAlias = normalizeSpaces(firstAlias);
+              
+              // 第一个别名精确匹配或包含搜索标题
+              if (normalizedFirstAlias === normalizedQueryTitle || normalizedFirstAlias.includes(normalizedQueryTitle)) {
+                matchedAlias = firstAlias;
+                shouldRenameByAlias = true;
+                // 提升 matchType
+                if (matchType < 2) {
+                  matchType = 2;
+                }
+              } else {
+                // 第一个别名不匹配，检查其他别名（仅用于提升 matchType，不改名）
+                for (let i = 1; i < aliases.length; i++) {
+                  const alias = aliases[i];
+                  const normalizedAlias = normalizeSpaces(alias);
+                  
+                  if (normalizedAlias === normalizedQueryTitle || normalizedAlias.includes(normalizedQueryTitle)) {
+                    matchedAlias = alias;
+                    // 仅提升 matchType，不改名
+                    if (matchType < 2) {
+                      matchType = 2;
+                    }
+                    break;
+                  }
+                }
               }
             }
 
-            // 如果标题没有匹配，但 alias 命中，则把它从“纯API返回(1)”提升为“宽松匹配(2)”
-            if (matchedAlias && matchType < 2) {
-              matchType = 2;
-            }
 
 // 选择一个可靠的时间字段来推断年份（搜索结果的 updateTime 可能不存在）
 const inferYear = (() => {
@@ -214,10 +233,10 @@ const yearForTitle = isValidYear(inferYear) ? inferYear : null;
 let transformedAnime = {
   animeId: anime.animeId,
   bangumiId: String(anime.animeId),
-  // 主标题永远使用 anime.name，避免 alias 伪装
+  // 只有当第一个别名匹配时才改名，否则使用原始名称
   animeTitle: yearForTitle
-    ? `${anime.name}(${yearForTitle})【${getCategory(detail.category)}】from hanjutv`
-    : `${anime.name}【${getCategory(detail.category)}】from hanjutv`,
+    ? `${shouldRenameByAlias ? matchedAlias : anime.name}(${yearForTitle})【${getCategory(detail.category)}】from hanjutv`
+    : `${shouldRenameByAlias ? matchedAlias : anime.name}【${getCategory(detail.category)}】from hanjutv`,
   type: getCategory(detail.category),
   typeDescription: getCategory(detail.category),
   imageUrl: anime.image.thumb,
