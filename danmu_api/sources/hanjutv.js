@@ -189,25 +189,49 @@ export default class HanjutvSource extends BaseSource {
                 break;
               }
             }
-            
-            let transformedAnime = {
-              animeId: anime.animeId,
-              bangumiId: String(anime.animeId),
-              animeTitle: `${displayName}(${new Date(anime.updateTime).getFullYear()})【${getCategory(detail.category)}】from hanjutv`,
-              type: getCategory(detail.category),
-              typeDescription: getCategory(detail.category),
-              imageUrl: anime.image.thumb,
-              startDate: generateValidStartDate(new Date(anime.updateTime).getFullYear()),
-              episodeCount: links.length,
-              rating: detail.rank,
-              isFavorited: true,
-              source: "hanjutv",
-              matchType: matchType, // 添加匹配类型标记用于排序
-              aliases: aliases, // 保存别名数组，用于自动匹配
-            };
+// 选择一个可靠的时间字段来推断年份（搜索结果的 updateTime 可能不存在）
+const inferYear = (() => {
+  const t =
+    anime.updateTime ??
+    detail.updateTime ??
+    detail.publishTime ??
+    (eps && eps.length > 0 ? eps[0].publishTime : null);
+  if (!t) return null;
+  const y = new Date(t).getFullYear();
+  return Number.isFinite(y) ? y : null;
+})();
 
-            // 返回带匹配类型的结果，用于后续排序
-            return { anime: transformedAnime, links: links, matchType: matchType };
+const isValidYear = (y) => Number.isFinite(y) && y >= 1900 && y <= 2100;
+const yearForTitle = isValidYear(inferYear) ? inferYear : null;
+
+let transformedAnime = {
+  animeId: anime.animeId,
+  bangumiId: String(anime.animeId),
+  animeTitle: yearForTitle
+    ? `${displayName}(${yearForTitle})【${getCategory(detail.category)}】from hanjutv`
+    : `${displayName}【${getCategory(detail.category)}】from hanjutv`,
+  type: getCategory(detail.category),
+  typeDescription: getCategory(detail.category),
+  imageUrl: anime.image.thumb,
+  // 如果年份不可用，使用 1900 作为兜底（避免被误认为“当前年份”）
+  startDate: generateValidStartDate(yearForTitle ?? 1900),
+  episodeCount: links.length,
+  rating: detail.rank,
+  isFavorited: true,
+  source: "hanjutv",
+  matchType: matchType, // 添加匹配类型标记用于排序
+  aliases: aliases, // 保存别名数组，用于自动匹配
+};
+
+// 计算一个“质量分”，用于去重时挑选更靠谱的条目
+const nonEmptyEpTitleCount = eps.filter(ep => ep.title && ep.title.trim() !== "").length;
+const hasUpdateTime = (anime.updateTime ?? detail.updateTime) ? 1 : 0;
+const rankScore = Number.isFinite(Number(detail.rank)) ? Number(detail.rank) : 0;
+const qualityScore = matchType * 100 + hasUpdateTime * 20 + nonEmptyEpTitleCount + rankScore / 10;
+
+// 返回带匹配类型 & 去重Key 的结果，用于后续排序/去重
+const dedupeKey = `${detail.category}|${normalizeSpaces(displayName)}`;
+return { anime: transformedAnime, links: links, matchType: matchType, qualityScore, dedupeKey };
           }
           return null; // 如果没有剧集则返回null
         } catch (error) {
@@ -222,18 +246,38 @@ export default class HanjutvSource extends BaseSource {
     
     // 按匹配类型排序：严格匹配(3) > 宽松匹配(2) > API返回(1)
     validResults.sort((a, b) => b.matchType - a.matchType);
-    
-    // 提取动漫信息和添加到缓存
-    for (const result of validResults) {
-      tmpAnimes.push(result.anime);
-      addAnime({...result.anime, links: result.links});
-      
-      if (globals.animes.length > globals.MAX_ANIMES) removeEarliestAnime();
-    }
+// ==============
+// 去重：韩剧TV 同名条目经常会返回多个 sid（同一部剧的不同版本/索引）
+// 规则：同一 (category + 标题) 只保留“质量分”更高的那个
+// ==============
+const bestByKey = new Map();
+for (const result of validResults) {
+  const key = result.dedupeKey ?? `${result.anime.type}|${result.anime.animeTitle}`;
+  const prev = bestByKey.get(key);
+  if (!prev || (result.qualityScore ?? 0) > (prev.qualityScore ?? 0)) {
+    bestByKey.set(key, result);
+  }
+}
 
-    this.sortAndPushAnimesByYear(tmpAnimes, curAnimes);
+const dedupedResults = Array.from(bestByKey.values());
 
-    return processHanjutvAnimes;
+// 再次排序：严格匹配(3) > 宽松匹配(2) > API返回(1)，同一匹配类型下按质量分
+dedupedResults.sort((a, b) => {
+  if (b.matchType !== a.matchType) return b.matchType - a.matchType;
+  return (b.qualityScore ?? 0) - (a.qualityScore ?? 0);
+});
+
+// 提取动漫信息和添加到缓存（使用去重后的结果）
+for (const result of dedupedResults) {
+  tmpAnimes.push(result.anime);
+  addAnime({ ...result.anime, links: result.links });
+
+  if (globals.animes.length > globals.MAX_ANIMES) removeEarliestAnime();
+}
+
+this.sortAndPushAnimesByYear(tmpAnimes, curAnimes);
+
+return processHanjutvAnimes;
   }
 
   async getEpisodeDanmu(id) {
