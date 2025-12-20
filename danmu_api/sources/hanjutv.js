@@ -247,9 +247,35 @@ export default class HanjutvSource extends BaseSource {
               return editDistanceLE1(nName1, nQuery) || editDistanceLE1(nName2, nQuery);
             })();
 
-            const canTrustAliasForDisplay = evidenceText.includes(normalizedQueryTitle) || aliasOnlyQuery || nearTitleHit;
+            const isNoisyAlias = (s) => {
+              const t = String(s || "");
+              // 典型“话题词/人物词/营销词”黑名单（可以按你日志继续加）
+              // 这些词出现在 alias 里，基本不可能是“剧名别名”
+              if (/(剧组|主演|演员|吻戏|花絮|预告|中字|高清|合集|cut|ost|主题曲|片尾曲|金所泫|黄旼炫|李帝勋)/i.test(t)) return true;
+              // 太短的词（1字）很容易误伤；2字也容易是泛词，谨慎点：只允许>=2，但配合其他规则
+              return false;
+            };
+
+            const looksLikeTitle = (s) => {
+              const t = String(s || "").trim();
+              if (!t) return false;
+              // 纯数字、纯符号不算标题
+              if (/^[\d\W_]+$/.test(t)) return false;
+              // 太长也可能是营销句，不像标题（这里给个上限，避免“冬季治愈风🍃...”这种）
+              if (t.length > 20) return false;
+              return true;
+            };
+
+            // 可信策略：
+            // 1) 佐证字段包含 query 或 aliasOnlyQuery 或 nearTitleHit：一律可信（你原来的）
+            // 2) 若 alias 中存在“精确等于 query”的项，并且 query 看起来像标题且不是噪声词：也可信
+            const hasExactAliasHit = aliases.some(a => normalizeSpaces(a) === normalizedQueryTitle);
+            const exactAliasLooksSafe = hasExactAliasHit && looksLikeTitle(queryTitle) && !isNoisyAlias(queryTitle);
+
+            const canTrustAliasForDisplay = evidenceText.includes(normalizedQueryTitle) || aliasOnlyQuery || nearTitleHit || exactAliasLooksSafe;
+
             const isSafeAliasForDisplay = (aliasNorm, queryNorm) => {
-              // 1) 完全相等：可能是真别名，但 alias 可能被污染，所以还要配合 canTrustAliasForDisplay
+              // 1) 完全相等：允许（是否改名由 canTrustAliasForDisplay 决定）
               if (aliasNorm === queryNorm) return true;
 
               // 2) 以 query 开头，后面只允许“季数/数字/常见季数写法”
@@ -261,7 +287,6 @@ export default class HanjutvSource extends BaseSource {
 
               return false;
             };
-
             for (const alias of aliases) {
               const normalizedAlias = normalizeSpaces(alias);
               if (isSafeAliasForDisplay(normalizedAlias, normalizedQueryTitle)) {
