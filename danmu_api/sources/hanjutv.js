@@ -176,38 +176,72 @@ export default class HanjutvSource extends BaseSource {
           if (links.length > 0) {
             // 提取别名信息（韩剧TV API返回的alias字段）
             const aliases = detail.alias || [];
-            
-            // 检查查询词是否匹配别名，如果匹配则使用别名作为主标题
-            let displayName = anime.name;
+
+            // 保留“别名召回能力”：如果 query 命中 alias，则提升 matchType，
+            // 但绝不把 alias 当成主标题（避免不相关作品“伪装”为目标剧名）
             const normalizedQueryTitle = normalizeSpaces(queryTitle);
-            
-            // 遍历别名，找到最匹配的那个
+            let matchedAlias = null;
+
             for (const alias of aliases) {
               const normalizedAlias = normalizeSpaces(alias);
+              // alias 精确匹配 / 包含匹配，都算“alias 命中”
               if (normalizedAlias === normalizedQueryTitle || normalizedAlias.includes(normalizedQueryTitle)) {
-                displayName = alias; // 使用匹配的别名作为显示名称
+                matchedAlias = alias;
                 break;
               }
             }
-            
-            let transformedAnime = {
-              animeId: anime.animeId,
-              bangumiId: String(anime.animeId),
-              animeTitle: `${displayName}(${new Date(anime.updateTime).getFullYear()})【${getCategory(detail.category)}】from hanjutv`,
-              type: getCategory(detail.category),
-              typeDescription: getCategory(detail.category),
-              imageUrl: anime.image.thumb,
-              startDate: generateValidStartDate(new Date(anime.updateTime).getFullYear()),
-              episodeCount: links.length,
-              rating: detail.rank,
-              isFavorited: true,
-              source: "hanjutv",
-              matchType: matchType, // 添加匹配类型标记用于排序
-              aliases: aliases, // 保存别名数组，用于自动匹配
-            };
 
-            // 返回带匹配类型的结果，用于后续排序
-            return { anime: transformedAnime, links: links, matchType: matchType };
+            // 如果标题没有匹配，但 alias 命中，则把它从“纯API返回(1)”提升为“宽松匹配(2)”
+            if (matchedAlias && matchType < 2) {
+              matchType = 2;
+            }
+
+// 选择一个可靠的时间字段来推断年份（搜索结果的 updateTime 可能不存在）
+const inferYear = (() => {
+  const t =
+    anime.updateTime ??
+    detail.updateTime ??
+    detail.publishTime ??
+    (eps && eps.length > 0 ? eps[0].publishTime : null);
+  if (!t) return null;
+  const y = new Date(t).getFullYear();
+  return Number.isFinite(y) ? y : null;
+})();
+
+const isValidYear = (y) => Number.isFinite(y) && y >= 1900 && y <= 2100;
+const yearForTitle = isValidYear(inferYear) ? inferYear : null;
+
+let transformedAnime = {
+  animeId: anime.animeId,
+  bangumiId: String(anime.animeId),
+  // 主标题永远使用 anime.name，避免 alias 伪装
+  animeTitle: yearForTitle
+    ? `${anime.name}(${yearForTitle})【${getCategory(detail.category)}】from hanjutv`
+    : `${anime.name}【${getCategory(detail.category)}】from hanjutv`,
+  type: getCategory(detail.category),
+  typeDescription: getCategory(detail.category),
+  imageUrl: anime.image.thumb,
+  // 如果年份不可用，使用 1900 作为兜底（避免被误认为“当前年份”）
+  startDate: generateValidStartDate(yearForTitle ?? 1900),
+  episodeCount: links.length,
+  rating: detail.rank,
+  isFavorited: true,
+  source: "hanjutv",
+  matchType: matchType, // 添加匹配类型标记用于排序
+  aliases: aliases, // 保存别名数组，用于自动匹配
+  matchedAlias: matchedAlias, // 仅记录命中的 alias（不改名）
+};
+
+// 计算一个“质量分”，用于去重时挑选更靠谱的条目
+const nonEmptyEpTitleCount = eps.filter(ep => ep.title && ep.title.trim() !== "").length;
+const hasUpdateTime = (anime.updateTime ?? detail.updateTime) ? 1 : 0;
+const rankScore = Number.isFinite(Number(detail.rank)) ? Number(detail.rank) : 0;
+const qualityScore = matchType * 100 + hasUpdateTime * 20 + nonEmptyEpTitleCount + rankScore / 10;
+
+// 返回带匹配类型 & 去重Key 的结果，用于后续排序/去重
+// 去重 key 用“真实剧名”而不是 alias（因为 alias 不可靠）
+const dedupeKey = `${detail.category}|${normalizeSpaces(anime.name)}`;
+return { anime: transformedAnime, links: links, matchType: matchType, qualityScore, dedupeKey };
           }
           return null; // 如果没有剧集则返回null
         } catch (error) {
@@ -219,21 +253,53 @@ export default class HanjutvSource extends BaseSource {
 
     // 过滤掉 null 值并按匹配类型排序
     const validResults = processHanjutvAnimes.filter(result => result !== null);
-    
+
     // 按匹配类型排序：严格匹配(3) > 宽松匹配(2) > API返回(1)
     validResults.sort((a, b) => b.matchType - a.matchType);
-    
-    // 提取动漫信息和添加到缓存
+
+    // ==============
+    // 去重：韩剧TV 同名条目经常会返回多个 sid（同一部剧的不同版本/索引）
+    // 规则：同一 (category + 标题) 只保留“质量分”更高的那个
+    // ==============
+    const bestByKey = new Map();
     for (const result of validResults) {
+      const key = result.dedupeKey ?? `${result.anime.type}|${result.anime.animeTitle}`;
+      const prev = bestByKey.get(key);
+      if (!prev || (result.qualityScore ?? 0) > (prev.qualityScore ?? 0)) {
+        bestByKey.set(key, result);
+      }
+    }
+
+    const dedupedResults = Array.from(bestByKey.values());
+
+    // 再次排序：严格匹配(3) > 宽松匹配(2) > API返回(1)，同一匹配类型下按质量分
+    dedupedResults.sort((a, b) => {
+      if (b.matchType !== a.matchType) return b.matchType - a.matchType;
+      return (b.qualityScore ?? 0) - (a.qualityScore ?? 0);
+    });
+
+    // ==============
+    // 两全其美：强命中存在时，过滤弱相关（避免“模范出租车”搜出“姐妹茶馆”等话题关联综艺）
+    // 规则：如果去重后存在 matchType>=2 的结果，则丢弃 matchType==1 的弱相关
+    // 这样既不会漏掉“真别名命中”（因为 alias 命中已提升到 2），也能挡住“伪装/话题关联”
+    // ==============
+    const hasStrongMatch = dedupedResults.some(r => (r.matchType ?? 1) >= 2);
+    const finalResults = hasStrongMatch
+      ? dedupedResults.filter(r => (r.matchType ?? 1) >= 2)
+      : dedupedResults;
+
+    // 提取动漫信息和添加到缓存（使用最终结果）
+    for (const result of finalResults) {
       tmpAnimes.push(result.anime);
-      addAnime({...result.anime, links: result.links});
-      
+      addAnime({ ...result.anime, links: result.links });
+
       if (globals.animes.length > globals.MAX_ANIMES) removeEarliestAnime();
     }
 
     this.sortAndPushAnimesByYear(tmpAnimes, curAnimes);
 
-    return processHanjutvAnimes;
+    // 返回最终的 anime 列表（不要返回 processHanjutvAnimes，否则会把去重/过滤成果丢掉）
+    return tmpAnimes;
   }
 
   async getEpisodeDanmu(id) {
