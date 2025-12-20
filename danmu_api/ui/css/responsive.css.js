@@ -65,8 +65,8 @@ export const responsiveCssContent = /* css */ `
         align-items: center;
         justify-content: space-between;
         padding: 1.25rem 0.75rem;
-        background: var(--bg-primary);
-        backdrop-filter: var(--blur-md);
+        background: rgba(255, 255, 255, 1);
+        backdrop-filter: none;
         border-radius: 0;
         margin-left: -0.75rem;
         margin-right: -0.75rem;
