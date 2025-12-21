@@ -6,6 +6,14 @@ export const apitestJsContent = /* javascript */ `
 let currentDanmuData = null;
 let filteredDanmuData = null;
 let currentEpisodeId = null;
+let danmuLoadSeq = 0;
+let activeDanmuLoadSeq = 0;
+
+// 热力图交互状态
+let heatmapState = null;
+let heatmapSelectedIndex = null;
+let heatmapTooltipEl = null;
+let heatmapInteractionInited = false;
 
 /* ========================================
    弹幕列表分页配置
@@ -943,33 +951,62 @@ function displayEpisodeList(animeTitle, episodes) {
    ======================================== */
 function loadDanmuData(episodeId, title) {
     addLog(\`💬 开始加载弹幕: \${title} (ID: \${episodeId})\`, 'info');
-    
+
+    // 生成本次加载序号，用于防止并发/快速切换导致旧数据覆盖
+    const mySeq = ++danmuLoadSeq;
+    activeDanmuLoadSeq = mySeq;
+
     // 显示弹幕展示区域
     const displayArea = document.getElementById('danmu-display-area');
     displayArea.style.display = 'block';
-    
+
     // 更新标题
     document.getElementById('danmu-title').textContent = title;
     document.getElementById('danmu-subtitle').textContent = '正在加载弹幕数据...';
-    
-    // 清空之前的数据
+
+    // 立即清空旧数据（避免加载过程中显示旧统计/旧热力图）
+    currentDanmuData = null;
+    filteredDanmuData = null;
+    currentDanmuPage = 0;
+    heatmapState = null;
+    heatmapSelectedIndex = null;
+
+    // 统计信息占位
+    document.getElementById('danmu-total-count').textContent = '--';
+    document.getElementById('danmu-duration').textContent = '--:--';
+    document.getElementById('danmu-density').textContent = '--';
+    document.getElementById('danmu-peak-time').textContent = '--:--';
+
+    // 清空热力图并显示加载提示
+    drawHeatmapMessage('加载弹幕中...');
+    updateHeatmapNodeInfo('正在加载弹幕数据...');
+
+    // 禁用导出按钮，避免导出旧数据
+    setDanmuExportEnabled(false);
+
+    // 清空之前的列表
     document.getElementById('danmu-list-container').innerHTML = \`
         <div class="loading-state" style="padding: 2rem;">
             <div class="loading-spinner" style="margin: 0 auto;"></div>
             <p style="margin-top: 1rem; color: var(--text-secondary);">加载弹幕中...</p>
         </div>
     \`;
-    
+
+    // 使用全局遮罩（更明显的“正在加载中”提示）
+    if (typeof showLoading === 'function') {
+        showLoading('💬 正在加载弹幕...', title);
+    }
+
     // 滚动到显示区域
     setTimeout(() => {
         displayArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
-    
+
     // 保存当前 episodeId 用于导出
     currentEpisodeId = episodeId;
-    
+
     const commentUrl = buildApiUrl('/api/v2/comment/' + episodeId + '?format=json');
-    
+
     fetch(commentUrl)
         .then(response => {
             if (!response.ok) {
@@ -978,14 +1015,19 @@ function loadDanmuData(episodeId, title) {
             return response.json();
         })
         .then(data => {
+            // 如果期间又触发了新的加载，直接丢弃本次结果
+            if (mySeq !== activeDanmuLoadSeq) {
+                return;
+            }
+
             // 兼容多种返回格式
             // 格式1: {count: 123, comments: [{p: "...", m: "..."}, ...]}
             // 格式2: {success: true, comments: [...]}
             // 格式3: 直接是数组 [{p: "...", m: "..."}, ...]
             // 格式4: {code: 0, data: [...]}
-            
+
             let comments = null;
-            
+
             if (Array.isArray(data)) {
                 // 直接是数组格式
                 comments = data;
@@ -999,7 +1041,7 @@ function loadDanmuData(episodeId, title) {
                 // {success: true, comments: [...]} 格式
                 comments = data.comments;
             }
-            
+
             if (comments && Array.isArray(comments)) {
                 // 标准化弹幕格式，确保每条弹幕都有 p 和 m 属性
                 currentDanmuData = comments.map(item => {
@@ -1012,17 +1054,27 @@ function loadDanmuData(episodeId, title) {
                         m: item.m || item.text || item.content || ''
                     };
                 });
+
                 addLog(\`✅ 成功加载 \${currentDanmuData.length} 条弹幕\`, 'success');
+                setDanmuExportEnabled(true);
                 displayDanmuData(title, currentDanmuData);
             } else {
                 throw new Error('弹幕数据格式错误或无弹幕数据');
             }
         })
         .catch(error => {
+            // 如果期间又触发了新的加载，直接丢弃本次错误
+            if (mySeq !== activeDanmuLoadSeq) {
+                return;
+            }
+
             console.error('加载弹幕失败:', error);
             addLog(\`❌ 加载弹幕失败: \${error.message}\`, 'error');
             customAlert('加载弹幕失败: ' + error.message, '❌ 加载失败');
-            
+
+            drawHeatmapMessage('加载失败');
+            updateHeatmapNodeInfo('加载失败：请重试或检查接口返回');
+
             document.getElementById('danmu-list-container').innerHTML = \`
                 <div class="search-error">
                     <div class="error-icon">❌</div>
@@ -1030,8 +1082,21 @@ function loadDanmuData(episodeId, title) {
                     <p>\${escapeHtml(error.message)}</p>
                 </div>
             \`;
+        })
+        .finally(() => {
+            if (mySeq !== activeDanmuLoadSeq) return;
+
+            if (typeof hideLoading === 'function') {
+                hideLoading();
+            }
+
+            // 加载完成后更新 subtitle（成功场景会在 displayDanmuData 中覆盖为真实数量）
+            if (!currentDanmuData) {
+                document.getElementById('danmu-subtitle').textContent = '加载完成（无可用弹幕数据）';
+            }
         });
 }
+
 
 /* ========================================
    显示弹幕数据
@@ -1126,92 +1191,333 @@ function formatTime(seconds) {
     }
 }
 
+
+/* ========================================
+   热力图辅助工具
+   ======================================== */
+function getCssVarColor(varName, fallback) {
+    try {
+        const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        return value || fallback;
+    } catch (e) {
+        return fallback;
+    }
+}
+
+function setDanmuExportEnabled(enabled) {
+    const jsonBtn = document.getElementById('btn-export-json');
+    const xmlBtn = document.getElementById('btn-export-xml');
+
+    [jsonBtn, xmlBtn].forEach(btn => {
+        if (!btn) return;
+        btn.disabled = !enabled;
+        if (enabled) {
+            btn.classList.remove('disabled');
+        } else {
+            btn.classList.add('disabled');
+        }
+    });
+}
+
+function drawHeatmapMessage(message) {
+    const canvas = document.getElementById('danmu-heatmap-canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth;
+    canvas.height = 150;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    ctx.clearRect(0, 0, width, height);
+
+    const textColor = getCssVarColor('--text-secondary', '#6b7280');
+    ctx.fillStyle = textColor;
+    ctx.font = '14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(message, width / 2, height / 2);
+}
+
+function updateHeatmapNodeInfo(text) {
+    const infoEl = document.getElementById('heatmap-node-info');
+    if (!infoEl) return;
+    infoEl.innerHTML = text;
+}
+
+function ensureHeatmapTooltip() {
+    if (heatmapTooltipEl) return heatmapTooltipEl;
+
+    const card = document.querySelector('.danmu-heatmap-card');
+    if (!card) return null;
+
+    const tooltip = document.createElement('div');
+    tooltip.className = 'heatmap-tooltip';
+    tooltip.id = 'heatmap-tooltip';
+    tooltip.innerHTML = '';
+    card.appendChild(tooltip);
+
+    heatmapTooltipEl = tooltip;
+    return tooltip;
+}
+
+function showHeatmapTooltip(x, y, html) {
+    const tooltip = ensureHeatmapTooltip();
+    if (!tooltip) return;
+
+    tooltip.innerHTML = html;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = y + 'px';
+    tooltip.classList.add('visible');
+}
+
+function hideHeatmapTooltip() {
+    if (!heatmapTooltipEl) return;
+    heatmapTooltipEl.classList.remove('visible');
+}
+
+function getHeatmapSegmentIndexByEvent(canvas, event) {
+    if (!heatmapState || !canvas) return null;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    // label 区域不响应（避免误触）
+    if (y > heatmapState.barAreaHeight) return null;
+
+    const index = Math.floor((x / rect.width) * heatmapState.segments);
+    if (index < 0 || index >= heatmapState.segments) return null;
+    return index;
+}
+
+function formatHeatmapRangeText(start, end) {
+    if (end <= 0) return '0:00';
+    if (Math.floor(start) === Math.floor(end)) return formatTime(start);
+    return formatTime(start) + ' - ' + formatTime(end);
+}
+
+/* ========================================
+   初始化热力图交互
+   ======================================== */
+function initDanmuHeatmapInteraction() {
+    if (heatmapInteractionInited) return;
+    heatmapInteractionInited = true;
+
+    const canvas = document.getElementById('danmu-heatmap-canvas');
+    if (!canvas) return;
+
+    canvas.addEventListener('mousemove', function(e) {
+        if (!heatmapState) return;
+
+        const index = getHeatmapSegmentIndexByEvent(canvas, e);
+        if (index === null) {
+            hideHeatmapTooltip();
+            return;
+        }
+
+        const start = index * heatmapState.segmentDuration;
+        const end = Math.min((index + 1) * heatmapState.segmentDuration, heatmapState.maxTime);
+        const count = heatmapState.counts[index] || 0;
+
+        const rect = canvas.getBoundingClientRect();
+        const localX = e.clientX - rect.left;
+        const localY = e.clientY - rect.top;
+
+        // tooltip 在 card 内定位，需要加上 canvas 在 card 内的偏移
+        const canvasOffsetLeft = canvas.offsetLeft;
+        const canvasOffsetTop = canvas.offsetTop;
+
+        const tooltipX = Math.min(canvasOffsetLeft + localX + 12, (canvasOffsetLeft + canvas.clientWidth) - 20);
+        const tooltipY = Math.max(canvasOffsetTop + localY - 40, 8);
+
+        showHeatmapTooltip(tooltipX, tooltipY, \`<div><strong>\${formatHeatmapRangeText(start, end)}</strong></div><div>弹幕数：<strong>\${count}</strong></div>\`);
+    });
+
+    canvas.addEventListener('mouseleave', function() {
+        hideHeatmapTooltip();
+    });
+
+    canvas.addEventListener('click', function(e) {
+        if (!heatmapState) return;
+
+        const index = getHeatmapSegmentIndexByEvent(canvas, e);
+        if (index === null) return;
+
+        heatmapSelectedIndex = index;
+        drawHeatmap(heatmapState.originalComments, heatmapState.maxTime);
+
+        const start = index * heatmapState.segmentDuration;
+        const end = Math.min((index + 1) * heatmapState.segmentDuration, heatmapState.maxTime);
+        const count = heatmapState.counts[index] || 0;
+
+        updateHeatmapNodeInfo(\`已选区间：<strong>\${formatHeatmapRangeText(start, end)}</strong>，弹幕数：<strong>\${count}</strong>\`);
+    });
+
+    // 处理窗口尺寸变化（避免缩放后坐标错位）
+    window.addEventListener('resize', function() {
+        if (!heatmapState || !heatmapState.originalComments) return;
+        drawHeatmap(heatmapState.originalComments, heatmapState.maxTime);
+    });
+}
+
 /* ========================================
    绘制热力图
    ======================================== */
 function drawHeatmap(comments, maxTime) {
     const canvas = document.getElementById('danmu-heatmap-canvas');
+    if (!canvas) return;
+
     const ctx = canvas.getContext('2d');
-    
-    // 设置canvas尺寸
+
+    // 设置 canvas 尺寸（同时提升时间标记可读性，预留 label 区域）
     canvas.width = canvas.offsetWidth;
-    canvas.height = 120;
-    
+    canvas.height = 150;
+
     const width = canvas.width;
     const height = canvas.height;
-    
+
+    const labelAreaHeight = 26;
+    const barAreaHeight = height - labelAreaHeight;
+
     // 清空画布
     ctx.clearRect(0, 0, width, height);
-    
+
+    // 解析主题色（canvas 不支持直接使用 var(--xx)）
+    const borderColor = getCssVarColor('--border-color', '#e5e7eb');
+    const textColor = getCssVarColor('--text-secondary', '#6b7280');
+    const textStrong = getCssVarColor('--text-primary', '#111827');
+    const bgSecondary = getCssVarColor('--bg-secondary', '#f3f4f6');
+    const primaryColor = getCssVarColor('--primary-color', '#3b82f6');
+
     // 如果没有弹幕，显示提示
-    if (comments.length === 0) {
-        ctx.fillStyle = 'var(--text-tertiary)';
+    if (!comments || comments.length === 0) {
+        ctx.fillStyle = textColor;
         ctx.font = '14px sans-serif';
         ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         ctx.fillText('暂无弹幕数据', width / 2, height / 2);
+
+        heatmapState = null;
+        heatmapSelectedIndex = null;
+        updateHeatmapNodeInfo('暂无弹幕数据');
         return;
     }
-    
-    // 将时间轴分成若干段
-    const segments = Math.min(Math.ceil(width / 5), 200);
-    const segmentDuration = maxTime / segments;
+
+    // 将时间轴分成若干段（段数跟随宽度变化，保持可读性）
+    const safeMaxTime = Math.max(parseFloat(maxTime) || 0, 1);
+    const segments = Math.min(Math.ceil(width / 6), 240);
+    const segmentDuration = safeMaxTime / segments;
     const counts = new Array(segments).fill(0);
-    
+
     // 统计每段的弹幕数量
     comments.forEach(comment => {
-        const time = parseFloat(comment.p.split(',')[0]);
-        const index = Math.min(Math.floor(time / segmentDuration), segments - 1);
+        const t = parseFloat((comment.p || '0').split(',')[0]) || 0;
+        const index = Math.min(Math.floor(t / segmentDuration), segments - 1);
         counts[index]++;
     });
-    
+
     // 找出最大值用于归一化
     const maxCount = Math.max(...counts, 1);
-    
-    // 绘制热力图
+
+    // 绘制 label 区域背景（提升时间标记可读性）
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    ctx.fillStyle = bgSecondary;
+    ctx.fillRect(0, barAreaHeight, width, labelAreaHeight);
+    ctx.restore();
+
+    // 绘制热力柱
     const segmentWidth = width / segments;
-    
+
     counts.forEach((count, index) => {
         const ratio = count / maxCount;
-        const barHeight = Math.max(ratio * height, 2);
+        const barHeight = Math.max(ratio * (barAreaHeight - 8), 2);
         const x = index * segmentWidth;
-        const y = height - barHeight;
-        
-        // 根据密度选择颜色
+        const y = barAreaHeight - barHeight;
+
+        // 根据密度选择颜色（保持原逻辑但提升对比度）
         let color;
         if (ratio < 0.25) {
-            color = \`rgba(59, 130, 246, \${0.2 + ratio * 0.8})\`;
+            color = \`rgba(59, 130, 246, \${0.25 + ratio * 0.75})\`;
         } else if (ratio < 0.5) {
-            color = \`rgba(139, 92, 246, \${0.3 + ratio * 0.7})\`;
+            color = \`rgba(139, 92, 246, \${0.35 + ratio * 0.65})\`;
         } else if (ratio < 0.75) {
-            color = \`rgba(236, 72, 153, \${0.4 + ratio * 0.6})\`;
+            color = \`rgba(236, 72, 153, \${0.45 + ratio * 0.55})\`;
         } else {
-            color = \`rgba(239, 68, 68, \${0.5 + ratio * 0.5})\`;
+            color = \`rgba(239, 68, 68, \${0.55 + ratio * 0.45})\`;
         }
-        
+
         ctx.fillStyle = color;
         ctx.fillRect(x, y, segmentWidth, barHeight);
+
+        // 选中高亮
+        if (heatmapSelectedIndex === index) {
+            ctx.strokeStyle = primaryColor;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x + 0.5, y + 0.5, Math.max(segmentWidth - 1, 1), Math.max(barHeight - 1, 1));
+        }
     });
-    
-    // 绘制时间轴刻度
-    ctx.strokeStyle = 'var(--border-color)';
+
+    // 绘制基准线
+    ctx.strokeStyle = borderColor;
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(0, height - 1);
-    ctx.lineTo(width, height - 1);
+    ctx.moveTo(0, barAreaHeight + 0.5);
+    ctx.lineTo(width, barAreaHeight + 0.5);
     ctx.stroke();
-    
-    // 添加时间标记
-    ctx.fillStyle = 'var(--text-tertiary)';
-    ctx.font = '10px sans-serif';
+
+    // 添加时间标记（根据宽度自适应，避免重叠）
+    const minLabelGap = 70;
+    const timeMarkers = Math.max(4, Math.min(8, Math.floor(width / minLabelGap)));
+
+    ctx.fillStyle = textColor;
+    ctx.font = '12px sans-serif';
     ctx.textAlign = 'center';
-    
-    const timeMarkers = 5;
+    ctx.textBaseline = 'alphabetic';
+
     for (let i = 0; i <= timeMarkers; i++) {
         const x = (width / timeMarkers) * i;
-        const time = (maxTime / timeMarkers) * i;
-        ctx.fillText(formatTime(time), x, height - 5);
+        const time = (safeMaxTime / timeMarkers) * i;
+
+        // 刻度线
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x + 0.5, barAreaHeight);
+        ctx.lineTo(x + 0.5, barAreaHeight + 6);
+        ctx.stroke();
+
+        // 文本（更清晰）
+        ctx.fillStyle = textColor;
+        ctx.fillText(formatTime(time), x, barAreaHeight + 20);
+    }
+
+    // 更新热力图状态（用于交互）
+    heatmapState = {
+        originalComments: comments,
+        counts,
+        segments,
+        segmentDuration,
+        maxTime: safeMaxTime,
+        barAreaHeight
+    };
+
+    // 初始化交互
+    initDanmuHeatmapInteraction();
+
+    // 默认提示
+    if (heatmapSelectedIndex === null) {
+        updateHeatmapNodeInfo(\`提示：鼠标悬停可查看区间；点击柱状条可锁定。每个节点约 <strong>\${Math.max(Math.round(segmentDuration), 1)}</strong> 秒\`);
+    } else {
+        const start = heatmapSelectedIndex * segmentDuration;
+        const end = Math.min((heatmapSelectedIndex + 1) * segmentDuration, safeMaxTime);
+        const selectedCount = counts[heatmapSelectedIndex] || 0;
+        updateHeatmapNodeInfo(\`已选区间：<strong>\${formatHeatmapRangeText(start, end)}</strong>，弹幕数：<strong>\${selectedCount}</strong>\`);
     }
 }
+
 
 /* ========================================
    渲染弹幕列表（分页优化版）
