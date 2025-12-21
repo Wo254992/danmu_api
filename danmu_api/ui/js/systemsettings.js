@@ -642,6 +642,8 @@ function deleteEnv(index) {
         if (confirmed) {
             const deleteButton = event.target.closest('.btn');
             const originalText = deleteButton.innerHTML;
+            const envItem = deleteButton.closest('.env-item');
+            
             deleteButton.innerHTML = '<span class="loading-spinner-small"></span>';
             deleteButton.disabled = true;
 
@@ -657,26 +659,33 @@ function deleteEnv(index) {
             .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    // 添加删除动画
-                    const envItem = deleteButton.closest('.env-item');
-                    envItem.style.animation = 'fadeOutRight 0.4s ease-out';
+                    // 添加删除动画（在元素还存在时）
+                    if (envItem && envItem.style) {
+                        envItem.style.animation = 'fadeOutRight 0.4s ease-out';
+                    }
                     
                     setTimeout(() => {
                         envVariables[currentCategory].splice(index, 1);
                         renderEnvList();
-                        renderPreview();
+                        if (typeof renderPreview === 'function') {
+                            renderPreview();
+                        }
                         addLog(\`✅ 成功删除配置项: \${key}\`, 'success');
                     }, 400);
                 } else {
-                    deleteButton.innerHTML = originalText;
-                    deleteButton.disabled = false;
+                    if (deleteButton && deleteButton.innerHTML) {
+                        deleteButton.innerHTML = originalText;
+                        deleteButton.disabled = false;
+                    }
                     addLog(\`❌ 删除配置项失败: \${result.message}\`, 'error');
                     customAlert('删除配置项失败: ' + result.message, '❌ 删除失败');
                 }
             })
             .catch(error => {
-                deleteButton.innerHTML = originalText;
-                deleteButton.disabled = false;
+                if (deleteButton && deleteButton.innerHTML) {
+                    deleteButton.innerHTML = originalText;
+                    deleteButton.disabled = false;
+                }
                 addLog(\`❌ 删除配置项失败: \${error.message}\`, 'error');
                 customAlert('删除配置项失败: ' + error.message, '❌ 网络错误');
             });
