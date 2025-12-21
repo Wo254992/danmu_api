@@ -88,6 +88,202 @@ function toggleTheme() {
     addLog(\`已切换到\${newTheme === 'dark' ? '深色' : '浅色'}主题 🎨\`, 'success');
 }
 
+
+/* ========================================
+   部署平台环境变量状态指示器
+   ======================================== */
+let deployEnvStatus = {
+    platform: 'node',
+    platformLabel: 'Node.js',
+    requiredVars: [],
+    missingVars: [],
+    lastUpdated: 0
+};
+
+function getDeployPlatformLabel(platform) {
+    const p = (platform || 'node').toString().toLowerCase();
+    const map = {
+        vercel: 'Vercel',
+        netlify: 'Netlify',
+        edgeone: 'EdgeOne (腾讯云 Pages)',
+        cloudflare: 'Cloudflare',
+        docker: 'Docker',
+        node: 'Node.js',
+        nodejs: 'Node.js'
+    };
+    return map[p] || (platform || 'Unknown');
+}
+
+function getDeployRequiredVars(platform) {
+    const p = (platform || 'node').toString().toLowerCase();
+    if (p === 'vercel' || p === 'edgeone') {
+        return ['DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'];
+    }
+    if (p === 'netlify' || p === 'cloudflare') {
+        return ['DEPLOY_PLATFROM_ACCOUNT', 'DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'];
+    }
+    // Node.js / Docker 不需要额外部署变量
+    return [];
+}
+
+function readEnvValue(config, key) {
+    try {
+        if (config && config.originalEnvVars && Object.prototype.hasOwnProperty.call(config.originalEnvVars, key)) {
+            return config.originalEnvVars[key];
+        }
+        if (config && config.envs && Object.prototype.hasOwnProperty.call(config.envs, key)) {
+            return config.envs[key];
+        }
+    } catch (e) {}
+    return '';
+}
+
+function computeDeployEnvStatus(config) {
+    const platformRaw = (config && config.envs && (config.envs.deployPlatform || config.envs.DEPLOY_PLATFORM)) || 'node';
+    const platform = (platformRaw || 'node').toString().toLowerCase();
+    const requiredVars = getDeployRequiredVars(platform);
+    const missingVars = requiredVars.filter(v => {
+        const val = readEnvValue(config, v);
+        return !val || (typeof val === 'string' && val.trim() === '');
+    });
+
+    return {
+        platform,
+        platformLabel: getDeployPlatformLabel(platform),
+        requiredVars,
+        missingVars
+    };
+}
+
+function applyDeployEnvStatusToBadge(status) {
+    const badge = document.getElementById('mobile-status');
+    const dot = document.getElementById('deploy-env-status-dot') || (badge ? badge.querySelector('.status-dot') : null);
+    if (!badge || !dot) return;
+
+    const ok = !status.missingVars || status.missingVars.length === 0;
+
+    dot.classList.remove('status-running', 'status-warning', 'status-error');
+    dot.classList.add(ok ? 'status-running' : 'status-error');
+
+    const titleOk = '部署平台 ' + status.platformLabel + '：所需环境变量已配置';
+    const titleBad = '部署平台 ' + status.platformLabel + '：缺少 ' + (status.missingVars ? status.missingVars.length : 0) + ' 项必需环境变量';
+    badge.title = ok ? titleOk : titleBad;
+
+    badge.setAttribute('data-deploy-ok', ok ? '1' : '0');
+}
+
+function updateDeployEnvStatusBadgeFromConfig(config) {
+    const status = computeDeployEnvStatus(config || {});
+    deployEnvStatus = Object.assign({}, deployEnvStatus, status, { lastUpdated: Date.now() });
+    applyDeployEnvStatusToBadge(deployEnvStatus);
+}
+
+async function refreshDeployEnvStatusBadge(force = false) {
+    try {
+        const now = Date.now();
+        if (!force && deployEnvStatus.lastUpdated && (now - deployEnvStatus.lastUpdated) < 5000) {
+            applyDeployEnvStatusToBadge(deployEnvStatus);
+            return deployEnvStatus;
+        }
+
+        const response = await fetch(buildApiUrl('/api/config'));
+        const config = await response.json();
+        const status = computeDeployEnvStatus(config);
+
+        deployEnvStatus = Object.assign({}, deployEnvStatus, status, { lastUpdated: now });
+        applyDeployEnvStatusToBadge(deployEnvStatus);
+        return deployEnvStatus;
+    } catch (e) {
+        console.error('获取部署平台环境变量状态失败:', e);
+        // 网络异常时显示红色
+        deployEnvStatus = Object.assign({}, deployEnvStatus, { missingVars: ['UNKNOWN'], lastUpdated: Date.now() });
+        applyDeployEnvStatusToBadge(deployEnvStatus);
+        return deployEnvStatus;
+    }
+}
+
+function closeDeployEnvStatusModal() {
+    const modal = document.getElementById('deploy-env-status-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+async function openDeployEnvStatusModal() {
+    const modal = document.getElementById('deploy-env-status-modal');
+    const body = document.getElementById('deploy-env-status-body');
+    if (!modal || !body) return;
+
+    const status = await refreshDeployEnvStatusBadge(true);
+    const ok = !status.missingVars || status.missingVars.length === 0;
+
+    const iconSvgOk = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+        '<path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '</svg>';
+
+    const iconSvgBad = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+        '<path d="M12 9v4" stroke-linecap="round"/>' +
+        '<path d="M12 17h.01" stroke-linecap="round"/>' +
+        '<path d="M10.29 3.86l-7.4 12.82A2 2 0 004.62 20h14.76a2 2 0 001.73-3.32l-7.4-12.82a2 2 0 00-3.42 0z" stroke-linejoin="round"/>' +
+    '</svg>';
+
+    const heroClass = ok ? 'deploy-env-status-hero success' : 'deploy-env-status-hero error';
+    const heroTitle = ok ? '所需环境变量已配置' : '存在未配置的必需环境变量';
+    const heroSubtitle = ok
+        ? ('当前部署平台为 ' + status.platformLabel + '，按钮显示绿色表示部署平台所需变量已满足。')
+        : ('当前部署平台为 ' + status.platformLabel + '，请补全以下必需变量后再尝试重新部署或相关管理操作。');
+
+    let varsHtml = '';
+    if (!status.requiredVars || status.requiredVars.length === 0) {
+        varsHtml = '<div class="deploy-env-status-hint">该部署平台无需额外配置 <span class="deploy-env-code">DEPLOY_PLATFROM_*</span> 相关变量。</div>';
+    } else {
+        varsHtml = '<div class="deploy-env-status-grid">' +
+            status.requiredVars.map(function(k) {
+                const missing = status.missingVars && status.missingVars.indexOf(k) !== -1;
+                return '<div class="deploy-env-var-item">' +
+                        '<div class="deploy-env-var-name">' + k + '</div>' +
+                        '<div class="deploy-env-var-status ' + (missing ? 'missing' : 'ok') + '">' +
+                            (missing ? '未配置' : '已配置') +
+                        '</div>' +
+                    '</div>';
+            }).join('') +
+        '</div>';
+    }
+
+    let missingHint = '';
+    if (!ok && status.missingVars && status.missingVars.length > 0 && status.missingVars[0] !== 'UNKNOWN') {
+        missingHint = '<div class="deploy-env-status-hint">缺失项：' +
+            status.missingVars.map(function(v) { return '<span class="deploy-env-code">' + v + '</span>'; }).join(' ') +
+        '</div>';
+    }
+
+    if (!ok && status.missingVars && status.missingVars.length > 0 && status.missingVars[0] === 'UNKNOWN') {
+        missingHint = '<div class="deploy-env-status-hint">当前无法获取配置状态，请检查网络或 API 端点是否可访问。</div>';
+    }
+
+    body.innerHTML =
+        '<div class="' + heroClass + '">' +
+            '<div class="deploy-env-status-hero-content">' +
+                '<div class="deploy-env-status-hero-icon">' + (ok ? iconSvgOk : iconSvgBad) + '</div>' +
+                '<div>' +
+                    '<p class="deploy-env-status-hero-title">' + heroTitle + '</p>' +
+                    '<div class="deploy-env-status-hero-subtitle">' + heroSubtitle + '</div>' +
+                    '<div class="deploy-env-status-chip">' +
+                        '<span>平台：</span><strong>' + status.platformLabel + '</strong>' +
+                        '<span style="margin-left: 8px;">状态：</span><strong>' + (ok ? '✅ 正常' : '❌ 异常') + '</strong>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+        varsHtml +
+        missingHint;
+
+    modal.classList.add('active');
+
+    const modalContainer = modal.querySelector('.modal-container');
+    if (modalContainer) {
+        modalContainer.style.animation = 'modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    }
+}
+
 /* ========================================
    侧边栏切换
    ======================================== */
@@ -650,6 +846,7 @@ async function init() {
         updateCurrentModeDisplay();
         getDockerVersion();
         const config = await fetchAndSetConfig();
+        updateDeployEnvStatusBadgeFromConfig(config);
         setDefaultPushUrl(config);
         checkAndHandleAdminToken();
         loadEnvVariables();
