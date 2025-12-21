@@ -665,12 +665,19 @@ function deleteEnv(index) {
                     }
                     
                     setTimeout(() => {
+                        // 从本地数据中删除
                         envVariables[currentCategory].splice(index, 1);
-                        renderEnvList();
-                        if (typeof renderPreview === 'function') {
-                            renderPreview();
-                        }
+                        
                         addLog(\`✅ 成功删除配置项: \${key}\`, 'success');
+                        
+                        // 显示删除成功提示
+                        customAlert(
+                            \`✅ 删除成功！\\n\\n配置项 "\${key}" 已删除\\n\\n刷新配置中...\`,
+                            '🎉 删除成功'
+                        ).then(() => {
+                            // 用户点击确认后，重新获取配置并刷新显示
+                            refreshConfigAfterDelete();
+                        });
                     }, 400);
                 } else {
                     if (deleteButton && deleteButton.innerHTML) {
@@ -691,6 +698,40 @@ function deleteEnv(index) {
             });
         }
     });
+}
+
+/* ========================================
+   删除后刷新配置
+   ======================================== */
+async function refreshConfigAfterDelete() {
+    try {
+        showLoading('🔄 刷新配置中...', '正在获取最新配置');
+        
+        // 重新获取配置
+        const config = await fetch(buildApiUrl('/api/config', true)).then(response => response.json());
+        
+        // 重新解析环境变量
+        await parseEnvVariables(config);
+        
+        // 刷新显示
+        renderEnvList();
+        
+        // 刷新预览
+        if (typeof renderPreview === 'function') {
+            renderPreview();
+        }
+        
+        hideLoading();
+        
+        addLog('✅ 配置刷新完成，已恢复默认值', 'success');
+        
+        // 显示成功动画
+        showSuccessAnimation('配置已刷新');
+    } catch (error) {
+        hideLoading();
+        addLog(\`❌ 刷新配置失败: \${error.message}\`, 'error');
+        customAlert('刷新配置失败: ' + error.message, '❌ 刷新失败');
+    }
 }
 
 /* ========================================
