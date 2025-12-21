@@ -353,6 +353,266 @@ function buildApiUrl(path, isSystemPath = false) {
     return (currentToken ? '/' + currentToken : "") + path;
 }
 
+
+/* ========================================
+   部署平台环境变量检查（顶栏按钮）
+   ======================================== */
+const deployPlatformRequiredVars = {
+    vercel: ['DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'],
+    netlify: ['DEPLOY_PLATFROM_ACCOUNT', 'DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'],
+    edgeone: ['DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'],
+    cloudflare: ['DEPLOY_PLATFROM_ACCOUNT', 'DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'],
+    node: [],
+    docker: []
+};
+
+function normalizeDeployPlatformName(platform) {
+    if (!platform) return 'node';
+    const p = String(platform).trim().toLowerCase();
+    return p || 'node';
+}
+
+function isMaskedValue(value) {
+    if (value === null || value === undefined) return false;
+    if (typeof value !== 'string') return false;
+    const v = value.trim();
+    return v !== '' && /^\*+$/.test(v);
+}
+
+function isEnvVarConfigured(value) {
+    if (!value && value !== 0) return false;
+    const v = String(value).trim();
+    if (v === '' || v === 'globals.currentToken') return false;
+    // 被遮罩（全*）也视为已配置
+    return true;
+}
+
+function formatEnvVarPreview(key, value, ok) {
+    if (!ok) return '—';
+    if (value === null || value === undefined) return '—';
+    const v = String(value).trim();
+    if (v === '' || v === 'globals.currentToken') return '—';
+
+    // 服务器可能会对敏感字段做遮罩（全*）
+    if (isMaskedValue(v)) {
+        return v;
+    }
+
+    // token/secret 类字段尽量不明文展示
+    if (String(key).toUpperCase().includes('TOKEN')) {
+        return '**********';
+    }
+
+    // 其他字段做简短展示，避免弹窗太长
+    if (v.length > 24) {
+        return v.slice(0, 8) + '...' + v.slice(-4);
+    }
+    return v;
+}
+
+async function fetchDeployConfigStatus() {
+    const response = await fetch(buildApiUrl('/api/config', true));
+    if (!response.ok) {
+        throw new Error('HTTP error! status: ' + response.status);
+    }
+
+    const config = await response.json();
+    const rawPlatform = config.envs?.deployPlatform || 'node';
+    const deployPlatform = normalizeDeployPlatformName(rawPlatform);
+
+    const requiredVars = deployPlatformRequiredVars[deployPlatform] || ['DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'];
+    const originalEnvVars = config.originalEnvVars || {};
+
+    const items = requiredVars.map((key) => {
+        const value = originalEnvVars[key];
+        const ok = isEnvVarConfigured(value);
+        return {
+            key,
+            ok,
+            valuePreview: formatEnvVarPreview(key, value, ok)
+        };
+    });
+
+    const missing = items.filter(i => !i.ok).map(i => i.key);
+
+    return {
+        deployPlatform,
+        rawPlatform,
+        requiredVars,
+        items,
+        missing
+    };
+}
+
+function createDeployConfigModal() {
+    if (document.getElementById('deploy-config-overlay')) {
+        return;
+    }
+
+    const modalHTML = \`
+        <div class="modal-overlay" id="deploy-config-overlay">
+            <div class="modal-container" style="max-width: 560px;">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="deploy-config-title">⚙️ 部署平台配置</h3>
+                    <button class="modal-close" id="deploy-config-close">×</button>
+                </div>
+                <div class="modal-body">
+                    <div id="deploy-config-content" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+                </div>
+                <div class="modal-footer modal-footer-compact">
+                    <button class="btn btn-secondary btn-modal" id="deploy-config-refresh">
+                        <span class="btn-icon">🔄</span>
+                        <span>刷新</span>
+                    </button>
+                    <button class="btn btn-primary btn-modal" id="deploy-config-ok">
+                        <span class="btn-icon">✅</span>
+                        <span>关闭</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    \`;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    const overlay = document.getElementById('deploy-config-overlay');
+    const closeBtn = document.getElementById('deploy-config-close');
+    const okBtn = document.getElementById('deploy-config-ok');
+    const refreshBtn = document.getElementById('deploy-config-refresh');
+
+    function closeModal() {
+        overlay.classList.remove('active');
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    okBtn.addEventListener('click', closeModal);
+    refreshBtn.addEventListener('click', () => {
+        openDeployConfigModal(true);
+    });
+
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+            closeModal();
+        }
+    });
+}
+
+async function refreshDeployConfigIndicator() {
+    const mobileStatus = document.getElementById('mobile-status');
+    if (!mobileStatus) return;
+
+    const statusDot = mobileStatus.querySelector('.status-dot');
+    if (!statusDot) return;
+
+    try {
+        const status = await fetchDeployConfigStatus();
+        const isOk = status.missing.length === 0;
+
+        statusDot.classList.remove('status-running', 'status-warning', 'status-error');
+        statusDot.classList.add(isOk ? 'status-running' : 'status-error');
+
+        if (status.requiredVars.length === 0) {
+            mobileStatus.title = \`部署平台：\${status.rawPlatform || status.deployPlatform}（无需额外变量）\`;
+        } else if (isOk) {
+            mobileStatus.title = \`部署平台：\${status.rawPlatform || status.deployPlatform}（变量已配置）\`;
+        } else {
+            mobileStatus.title = \`部署平台：\${status.rawPlatform || status.deployPlatform}（缺少 \${status.missing.length} 项）\`;
+        }
+    } catch (error) {
+        console.error('刷新部署配置指示器失败:', error);
+        statusDot.classList.remove('status-running', 'status-warning');
+        statusDot.classList.add('status-error');
+        mobileStatus.title = '部署配置检查失败';
+    }
+}
+
+async function openDeployConfigModal(skipOverlayAnimation = false) {
+    createDeployConfigModal();
+
+    const overlay = document.getElementById('deploy-config-overlay');
+    const content = document.getElementById('deploy-config-content');
+    const title = document.getElementById('deploy-config-title');
+
+    if (!content || !overlay) return;
+
+    content.innerHTML = \`
+        <div style="text-align: center; padding: 1.25rem 0.5rem;">
+            <div class="loading-spinner" style="margin: 0 auto;"></div>
+            <p style="margin-top: 0.75rem; color: var(--text-secondary); font-weight: 500;">正在检查部署配置...</p>
+        </div>
+    \`;
+
+    if (!overlay.classList.contains('active')) {
+        overlay.classList.add('active');
+    }
+
+    try {
+        const status = await fetchDeployConfigStatus();
+        const platformText = status.rawPlatform || status.deployPlatform;
+        const isOk = status.missing.length === 0;
+
+        title.textContent = isOk ? '✅ 部署平台配置已就绪' : '⚠️ 部署平台配置未完成';
+
+        if (status.requiredVars.length === 0) {
+            content.innerHTML = \`
+                <p style="margin: 0; color: var(--text-secondary); line-height: 1.7;">
+                    当前部署平台为 <strong>\${platformText}</strong>，无需额外配置部署平台环境变量。
+                </p>
+            \`;
+            await refreshDeployConfigIndicator();
+            return;
+        }
+
+        const listHTML = status.items.map((item) => {
+            const badgeClass = item.ok ? 'deploy-config-badge ok' : 'deploy-config-badge bad';
+            const badgeText = item.ok ? '已配置' : '未配置';
+            const valueText = item.valuePreview ? item.valuePreview : '—';
+            const valueTitle = item.ok ? '当前值已做脱敏展示' : '未检测到有效值';
+
+            return \`
+                <li class="deploy-config-item">
+                    <div class="deploy-config-left">
+                        <div class="deploy-config-name">\${item.key}</div>
+                        <div class="deploy-config-value" title="\${valueTitle}">\${valueText}</div>
+                    </div>
+                    <span class="\${badgeClass}">\${badgeText}</span>
+                </li>
+            \`;
+        }).join('');
+
+        const summaryHTML = isOk
+            ? \`<div class="deploy-config-summary ok">🎉 必填变量已全部配置</div>\`
+            : \`<div class="deploy-config-summary bad">缺失：\${status.missing.map(v => ' ' + v).join('、')}</div>\`;
+
+        content.innerHTML = \`
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <div class="deploy-config-platform">
+                    <div class="deploy-config-platform-title">当前部署平台</div>
+                    <div class="deploy-config-platform-value">\${platformText}</div>
+                </div>
+                \${summaryHTML}
+                <div class="modal-desc" style="margin-top: 0;">当前平台必须配置以下环境变量：</div>
+                <ul class="deploy-config-list">
+                    \${listHTML}
+                </ul>
+                <div class="deploy-config-note">提示：变量名来自 README 的平台对照表（DEPLOY_PLATFROM_*）。</div>
+            </div>
+        \`;
+
+        await refreshDeployConfigIndicator();
+    } catch (error) {
+        console.error('打开部署配置弹窗失败:', error);
+        title.textContent = '❌ 部署配置检查失败';
+        content.innerHTML = \`
+            <div class="modal-alert" style="margin: 0;">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">无法获取部署配置</div>
+                <div style="color: var(--text-secondary); line-height: 1.7;">\${error.message}</div>
+            </div>
+        \`;
+        await refreshDeployConfigIndicator();
+    }
+}
+
 /* ========================================
    加载环境变量
    ======================================== */
@@ -646,6 +906,7 @@ async function init() {
         updateCurrentModeDisplay();
         getDockerVersion();
         const config = await fetchAndSetConfig();
+        await refreshDeployConfigIndicator();
         setDefaultPushUrl(config);
         checkAndHandleAdminToken();
         loadEnvVariables();
