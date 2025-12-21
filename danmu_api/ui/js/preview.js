@@ -318,8 +318,6 @@ function updateSystemStatusUI(status, text) {
     };
     
     addLog('🔍 系统状态: ' + text, logTypes[status] || 'info');
-    // 同步更新移动端状态指示器
-    updateMobileStatusIndicator(status);
 }
 
 /* ========================================
