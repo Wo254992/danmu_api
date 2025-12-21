@@ -158,9 +158,9 @@ export const HTML_TEMPLATE = /* html */ `
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                         </svg>
                     </button>
-                    <button class="mobile-status-indicator" id="mobile-status" onclick="openDeployConfigModal()" title="部署配置检查">
+                    <div class="mobile-status-indicator" id="mobile-status" title="系统运行正常">
                         <span class="status-dot status-running"></span>
-                    </button>
+                    </div>
                 </div>
             </div>
 
