@@ -644,17 +644,9 @@ function copyApiEndpoint() {
    初始化
    ======================================== */
 async function init() {
-    // 立即恢复上次访问的页面状态，避免闪烁
-    const savedSection = localStorage.getItem('activeSection');
-    if (savedSection && savedSection !== 'preview') {
-        // 直接执行切换逻辑，跳过动画和侧边栏触发
-        performSectionSwitch(savedSection, true);
-    }
+    // 页面状态和主题已在 DOMContentLoaded 中优先处理
 
     try {
-        // 初始化主题
-        initTheme();
-        
         await updateApiEndpoint();
         updateCurrentModeDisplay();
         getDockerVersion();
@@ -685,6 +677,17 @@ async function init() {
    ======================================== */
 document.addEventListener('DOMContentLoaded', function() {
     createCustomAlert();
+    
+    // 1. 优先初始化主题 (同步执行，防止颜色闪烁)
+    initTheme();
+
+    // 2. 立即恢复上次访问的页面状态 (同步执行，防止页面跳变)
+    const savedSection = localStorage.getItem('activeSection');
+    if (savedSection && savedSection !== 'preview') {
+        performSectionSwitch(savedSection, true);
+    }
+    
+    // 3. 执行其余异步初始化逻辑
     init();
 });
 
