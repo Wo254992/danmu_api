@@ -644,8 +644,7 @@ function copyApiEndpoint() {
    初始化
    ======================================== */
 async function init() {
-    // 页面状态和主题已在 DOMContentLoaded 中优先处理
-
+    // 注意：页面恢复逻辑已移至 DOMContentLoaded 以消除闪烁
     try {
         await updateApiEndpoint();
         updateCurrentModeDisplay();
@@ -664,12 +663,12 @@ async function init() {
         fetchRealLogs();
     }
     // 初始化弹幕测试相关功能
-        if (document.getElementById('danmu-heatmap-canvas')) {
-            // 预加载画布
-            const canvas = document.getElementById('danmu-heatmap-canvas');
-            canvas.width = canvas.offsetWidth;
-            canvas.height = 120;
-        }
+    if (document.getElementById('danmu-heatmap-canvas')) {
+        // 预加载画布
+        const canvas = document.getElementById('danmu-heatmap-canvas');
+        canvas.width = canvas.offsetWidth;
+        canvas.height = 120;
+    }
 }
 
 /* ========================================
@@ -678,16 +677,47 @@ async function init() {
 document.addEventListener('DOMContentLoaded', function() {
     createCustomAlert();
     
-    // 1. 优先初始化主题 (同步执行，防止颜色闪烁)
+    // 1. 优先初始化主题 (防止颜色闪烁)
     initTheme();
 
-    // 2. 立即恢复上次访问的页面状态 (同步执行，防止页面跳变)
+    // 2. 无闪烁页面恢复逻辑 (核心优化)
     const savedSection = localStorage.getItem('activeSection');
+    // 如果保存的页面存在且不是默认的 'preview'
     if (savedSection && savedSection !== 'preview') {
+        // [关键步骤 A] 临时注入样式，强制禁用所有过渡动画，防止"淡出淡入"的视觉残留
+        const noTransitionStyle = document.createElement('style');
+        noTransitionStyle.id = 'temp-no-transition';
+        noTransitionStyle.innerHTML = '* { transition: none !important; animation: none !important; }';
+        document.head.appendChild(noTransitionStyle);
+
+        // [关键步骤 B] 暴力移除所有默认 active 状态，防止主页露头
+        document.querySelectorAll('.content-section.active').forEach(el => {
+            el.classList.remove('active');
+            el.style.display = 'none'; // 强制隐藏默认页面
+        });
+        document.querySelectorAll('.nav-item.active').forEach(el => {
+            el.classList.remove('active');
+        });
+
+        // [关键步骤 C] 立即渲染目标页面
         performSectionSwitch(savedSection, true);
+
+        // [关键步骤 D] 下一帧恢复动画和布局
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                // 移除禁用动画的样式
+                const style = document.getElementById('temp-no-transition');
+                if (style) style.remove();
+                
+                // 清理强制添加的 display: none，交还给 CSS 类控制
+                document.querySelectorAll('.content-section').forEach(el => {
+                    el.style.display = ''; 
+                });
+            }, 50); // 极短的延迟确保渲染完成
+        });
     }
-    
-    // 3. 执行其余异步初始化逻辑
+
+    // 3. 执行数据加载等异步逻辑
     init();
 });
 
