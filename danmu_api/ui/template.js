@@ -158,9 +158,9 @@ export const HTML_TEMPLATE = /* html */ `
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                         </svg>
                     </button>
-                    <div class="mobile-status-indicator" id="mobile-status" title="系统运行正常">
-                        <span class="status-dot status-running"></span>
-                    </div>
+                    <button class="mobile-status-indicator" id="mobile-status" title="部署平台环境变量状态" onclick="openDeployEnvStatusModal()" type="button">
+                        <span class="status-dot status-running" id="deploy-env-status-dot"></span>
+                    </button>
                 </div>
             </div>
 
@@ -770,6 +770,28 @@ export const HTML_TEMPLATE = /* html */ `
                         <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                     <span>确认部署</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 模态框：部署平台环境变量 -->
+    <div class="modal-overlay" id="deploy-env-status-modal">
+        <div class="modal-container modal-lg deploy-env-status-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">部署平台环境变量</h3>
+                <button class="modal-close" onclick="closeDeployEnvStatusModal()">×</button>
+            </div>
+            <div class="modal-body" id="deploy-env-status-body">
+                <!-- 动态内容由 JS 渲染 -->
+            </div>
+            <div class="modal-footer modal-footer-compact">
+                <button class="btn btn-primary btn-modal" onclick="closeDeployEnvStatusModal()">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span>关闭</span>
                 </button>
             </div>
         </div>
