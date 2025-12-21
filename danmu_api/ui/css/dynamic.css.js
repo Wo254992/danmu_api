@@ -2523,4 +2523,202 @@ export const dynamicCssContent = /* css */ `
     color: var(--text-tertiary);
     font-size: 0.875rem;
 }
+
+/* ========================================
+   部署平台环境变量状态 - 顶栏指示器 & 模态框
+   ======================================== */
+.mobile-status-indicator[data-deploy-ok="0"] {
+    border-color: rgba(239, 68, 68, 0.35);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.06);
+}
+
+.mobile-status-indicator[data-deploy-ok="1"] {
+    border-color: rgba(34, 197, 94, 0.35);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.06);
+}
+
+[data-theme="dark"] .mobile-status-indicator[data-deploy-ok="0"] {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
+}
+
+[data-theme="dark"] .mobile-status-indicator[data-deploy-ok="1"] {
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.08);
+}
+
+.deploy-env-status-modal .modal-body {
+    padding-top: 0.75rem;
+}
+
+.deploy-env-status-hero {
+    position: relative;
+    padding: 1.25rem 1.25rem 1.1rem;
+    border-radius: var(--radius-lg);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.deploy-env-status-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-primary);
+    opacity: 0.08;
+    pointer-events: none;
+}
+
+[data-theme="dark"] .deploy-env-status-hero::before {
+    opacity: 0.12;
+}
+
+.deploy-env-status-hero.success::before {
+    background: radial-gradient(circle at 30% 20%, rgba(34, 197, 94, 0.35), transparent 55%),
+                radial-gradient(circle at 80% 70%, rgba(129, 140, 248, 0.25), transparent 55%);
+    opacity: 0.9;
+}
+
+.deploy-env-status-hero.error::before {
+    background: radial-gradient(circle at 30% 20%, rgba(239, 68, 68, 0.35), transparent 55%),
+                radial-gradient(circle at 80% 70%, rgba(192, 132, 252, 0.25), transparent 55%);
+    opacity: 0.9;
+}
+
+.deploy-env-status-hero-content {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+}
+
+.deploy-env-status-hero-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    flex: 0 0 auto;
+}
+
+.deploy-env-status-hero-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.deploy-env-status-hero-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.deploy-env-status-hero-subtitle {
+    margin-top: 0.35rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.deploy-env-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.55rem;
+    width: fit-content;
+}
+
+.deploy-env-status-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.deploy-env-var-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.deploy-env-var-item:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.deploy-env-var-name {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.deploy-env-var-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.28rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    border: 1px solid transparent;
+    font-weight: 600;
+}
+
+.deploy-env-var-status.ok {
+    color: var(--success-color);
+    border-color: rgba(34, 197, 94, 0.25);
+    background: rgba(34, 197, 94, 0.08);
+}
+
+.deploy-env-var-status.missing {
+    color: var(--danger-color);
+    border-color: rgba(239, 68, 68, 0.25);
+    background: rgba(239, 68, 68, 0.08);
+}
+
+[data-theme="dark"] .deploy-env-var-status.ok {
+    border-color: rgba(34, 197, 94, 0.35);
+    background: rgba(34, 197, 94, 0.12);
+}
+
+[data-theme="dark"] .deploy-env-var-status.missing {
+    border-color: rgba(239, 68, 68, 0.35);
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.deploy-env-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.82rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.deploy-env-status-hint {
+    margin-top: 0.9rem;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
 `;
