@@ -176,7 +176,7 @@ function switchSection(section) {
     performSectionSwitch(section);
 }
 
-function performSectionSwitch(section) {
+function performSectionSwitch(section, isInitialLoad = false) {
     // 移除所有active类
     document.querySelectorAll('.content-section').forEach(s => {
         s.classList.remove('active');
@@ -186,12 +186,11 @@ function performSectionSwitch(section) {
     
     // 添加active类
     const targetSection = document.getElementById(section + '-section');
-    targetSection.classList.add('active');
-    
-    // 淡入动画
-    setTimeout(() => {
-        targetSection.style.opacity = '1';
-    }, 50);
+    if (targetSection) {
+        targetSection.classList.add('active');
+        // 如果是初始化加载，直接显示，不走淡入动画避免闪烁
+        targetSection.style.opacity = isInitialLoad ? '1' : '1'; 
+    }
     
     const activeNav = document.querySelector(\`[data-section="\${section}"]\`);
     if (activeNav) activeNav.classList.add('active');
@@ -213,16 +212,20 @@ function performSectionSwitch(section) {
         }
     }
     
-    // 关闭移动端侧边栏
-    if (window.innerWidth <= 768) {
+    // 只有在非初始化加载且是移动端时才触发侧边栏切换
+    if (!isInitialLoad && window.innerWidth <= 768) {
         toggleSidebar();
     }
     
     // 滚动到顶部
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!isInitialLoad) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
     
     const sectionTitle = (titles && titles[section] && titles[section].main) ? titles[section].main : section;
-    addLog(\`切换到\${sectionTitle}模块 📍\`, 'info');
+    if (!isInitialLoad) {
+        addLog(\`切换到\${sectionTitle}模块 📍\`, 'info');
+    }
     
     // 保存当前页面到本地存储，以便刷新后恢复
     localStorage.setItem('activeSection', section);
@@ -641,6 +644,13 @@ function copyApiEndpoint() {
    初始化
    ======================================== */
 async function init() {
+    // 立即恢复上次访问的页面状态，避免闪烁
+    const savedSection = localStorage.getItem('activeSection');
+    if (savedSection && savedSection !== 'preview') {
+        // 直接执行切换逻辑，跳过动画和侧边栏触发
+        performSectionSwitch(savedSection, true);
+    }
+
     try {
         // 初始化主题
         initTheme();
@@ -668,15 +678,6 @@ async function init() {
             canvas.width = canvas.offsetWidth;
             canvas.height = 120;
         }
-        
-    // 刷新后恢复上次访问的页面
-    const savedSection = localStorage.getItem('activeSection');
-    if (savedSection && savedSection !== 'preview') {
-        // 使用 setTimeout 确保在 DOM 完全就绪后触发切换
-        setTimeout(() => {
-            switchSection(savedSection);
-        }, 100);
-    }
 }
 
 /* ========================================
