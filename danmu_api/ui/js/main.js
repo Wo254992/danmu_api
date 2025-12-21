@@ -222,8 +222,6 @@ function performSectionSwitch(section) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
     const sectionTitle = (titles && titles[section] && titles[section].main) ? titles[section].main : section;
-    // 记录当前页面，以便刷新后恢复
-    localStorage.setItem('lastActiveSection', section);
     addLog(\`切换到\${sectionTitle}模块 📍\`, 'info');
 }
 
@@ -916,13 +914,6 @@ async function init() {
         renderPreview();
         addLog('🎉 系统初始化完成', 'success');
         fetchRealLogs();
-
-        // 尝试恢复上次页面
-        const savedSection = localStorage.getItem('lastActiveSection');
-        if (savedSection && savedSection !== 'preview') {
-            // 使用 performSectionSwitch 避开初始加载时的 Token 检查干扰
-            setTimeout(() => performSectionSwitch(savedSection), 200);
-        }
     } catch (error) {
         console.error('初始化失败:', error);
         addLog('❌ 系统初始化失败: ' + error.message, 'error');
