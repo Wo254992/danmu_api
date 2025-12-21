@@ -667,7 +667,12 @@ async function init() {
         // 预加载画布
         const canvas = document.getElementById('danmu-heatmap-canvas');
         canvas.width = canvas.offsetWidth;
-        canvas.height = 120;
+        canvas.height = 150;
+
+        // 初始化热力图交互（鼠标提示 / 点击查看区间弹幕数）
+        if (typeof initDanmuHeatmapInteraction === 'function') {
+            initDanmuHeatmapInteraction();
+        }
     }
 }
 
