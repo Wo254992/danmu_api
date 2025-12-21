@@ -2114,6 +2114,13 @@ export const dynamicCssContent = /* css */ `
     flex-wrap: wrap;
 }
 
+.danmu-actions .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
 .danmu-stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -2164,6 +2171,7 @@ export const dynamicCssContent = /* css */ `
    弹幕热力图
    ======================================== */
 .danmu-heatmap-card {
+    position: relative;
     border: 1px solid rgba(139, 92, 246, 0.2);
 }
 
@@ -2210,10 +2218,47 @@ export const dynamicCssContent = /* css */ `
 
 #danmu-heatmap-canvas {
     width: 100%;
-    height: 120px;
+    height: 150px;
     border-radius: var(--radius-md);
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
+    cursor: pointer;
+}
+
+.heatmap-node-info {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.heatmap-node-info strong {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.heatmap-tooltip {
+    position: absolute;
+    z-index: 10;
+    pointer-events: none;
+    display: none;
+    max-width: 260px;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    backdrop-filter: var(--blur-md);
+}
+
+.heatmap-tooltip.visible {
+    display: block;
 }
 
 /* ========================================
