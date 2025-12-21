@@ -223,6 +223,9 @@ function performSectionSwitch(section) {
     
     const sectionTitle = (titles && titles[section] && titles[section].main) ? titles[section].main : section;
     addLog(\`切换到\${sectionTitle}模块 📍\`, 'info');
+    
+    // 保存当前页面到本地存储，以便刷新后恢复
+    localStorage.setItem('activeSection', section);
 }
 
 /* ========================================
@@ -665,6 +668,15 @@ async function init() {
             canvas.width = canvas.offsetWidth;
             canvas.height = 120;
         }
+        
+    // 刷新后恢复上次访问的页面
+    const savedSection = localStorage.getItem('activeSection');
+    if (savedSection && savedSection !== 'preview') {
+        // 使用 setTimeout 确保在 DOM 完全就绪后触发切换
+        setTimeout(() => {
+            switchSection(savedSection);
+        }, 100);
+    }
 }
 
 /* ========================================
