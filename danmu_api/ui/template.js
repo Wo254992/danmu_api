@@ -476,13 +476,13 @@ export const HTML_TEMPLATE = /* html */ `
                                     <span class="danmu-subtitle" id="danmu-subtitle">加载中...</span>
                                 </div>
                                 <div class="danmu-actions">
-                                    <button class="btn btn-primary" onclick="exportDanmu('json')">
+                                    <button class="btn btn-primary" id="btn-export-json" onclick="exportDanmu('json')">
                                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                             <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                         </svg>
                                         <span>导出 JSON</span>
                                     </button>
-                                    <button class="btn btn-success" onclick="exportDanmu('xml')">
+                                    <button class="btn btn-success" id="btn-export-xml" onclick="exportDanmu('xml')">
                                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                             <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                         </svg>
@@ -541,6 +541,7 @@ export const HTML_TEMPLATE = /* html */ `
                                 </div>
                             </div>
                             <canvas id="danmu-heatmap-canvas"></canvas>
+                            <div class="heatmap-node-info" id="heatmap-node-info">点击热力图柱状条，可查看该时间段弹幕数</div>
                         </div>
 
                         <!-- 弹幕列表 -->
