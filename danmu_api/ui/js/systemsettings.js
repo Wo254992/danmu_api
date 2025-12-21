@@ -667,18 +667,8 @@ function deleteEnv(index) {
                     setTimeout(() => {
                         addLog(\`✅ 成功删除配置项: \${key}\`, 'success');
                         
-                        // 显示删除成功提示
-                        customAlert(
-                            \`✅ 删除成功！\\n\\n配置项 "\${key}" 已删除\\n\\n点击确认后将刷新页面以显示最新配置\`,
-                            '🎉 删除成功'
-                        ).then(() => {
-                            // 用户点击确认后直接刷新页面
-                            showLoading('🔄 刷新页面中...', '即将显示最新配置');
-                            addLog('🔄 刷新页面以显示最新配置', 'info');
-                            setTimeout(() => {
-                                location.reload();
-                            }, 500);
-                        });
+                        // 显示删除成功提示并设置刷新回调
+                        showDeleteSuccessAndRefresh(key);
                     }, 400);
                 } else {
                     if (deleteButton && deleteButton.innerHTML) {
@@ -697,6 +687,126 @@ function deleteEnv(index) {
                 addLog(\`❌ 删除配置项失败: \${error.message}\`, 'error');
                 customAlert('删除配置项失败: ' + error.message, '❌ 网络错误');
             });
+        }
+    });
+}
+
+/* ========================================
+   显示删除成功提示并刷新
+   ======================================== */
+function showDeleteSuccessAndRefresh(key) {
+    // 创建自定义弹窗
+    const overlay = document.createElement('div');
+    overlay.className = 'custom-dialog-overlay';
+    overlay.style.zIndex = '10001';
+    overlay.innerHTML = \`
+        <div class="custom-dialog-container" style="animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <div class="custom-dialog-header">
+                <h3>🎉 删除成功</h3>
+            </div>
+            <div class="custom-dialog-body">
+                <p>✅ 删除成功！</p>
+                <p>配置项 "\${escapeHtml(key)}" 已删除</p>
+                <p>点击确认后将刷新页面以显示最新配置</p>
+            </div>
+            <div class="custom-dialog-actions">
+                <button type="button" class="btn btn-primary" id="confirm-refresh-btn" style="width: 100%;">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <polyline points="20 6 9 17 4 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>确认</span>
+                </button>
+            </div>
+        </div>
+    \`;
+    
+    document.body.appendChild(overlay);
+    
+    // 绑定确认按钮事件
+    const confirmBtn = overlay.querySelector('#confirm-refresh-btn');
+    confirmBtn.addEventListener('click', function() {
+        // 关闭弹窗
+        const container = overlay.querySelector('.custom-dialog-container');
+        container.style.animation = 'modalSlideOut 0.3s ease-out';
+        
+        setTimeout(() => {
+            overlay.remove();
+            
+            // 显示加载状态
+            showLoading('🔄 刷新页面中...', '即将显示最新配置');
+            addLog('🔄 刷新页面以显示最新配置', 'info');
+            
+            // 延迟刷新页面
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        }, 300);
+    });
+    
+    // 点击背景关闭
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+            confirmBtn.click();
+        }
+    });
+}
+
+/* ========================================
+   显示删除成功提示并刷新
+   ======================================== */
+function showDeleteSuccessAndRefresh(key) {
+    // 创建自定义弹窗
+    const overlay = document.createElement('div');
+    overlay.className = 'custom-dialog-overlay';
+    overlay.style.zIndex = '10001';
+    overlay.innerHTML = \`
+        <div class="custom-dialog-container" style="animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <div class="custom-dialog-header">
+                <h3>🎉 删除成功</h3>
+            </div>
+            <div class="custom-dialog-body">
+                <p>✅ 删除成功！</p>
+                <p>配置项 "\${escapeHtml(key)}" 已删除</p>
+                <p>点击确认后将刷新页面以显示最新配置</p>
+            </div>
+            <div class="custom-dialog-actions">
+                <button type="button" class="btn btn-primary" id="confirm-refresh-btn" style="width: 100%;">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <polyline points="20 6 9 17 4 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>确认</span>
+                </button>
+            </div>
+        </div>
+    \`;
+    
+    document.body.appendChild(overlay);
+    
+    // 绑定确认按钮事件
+    const confirmBtn = overlay.querySelector('#confirm-refresh-btn');
+    confirmBtn.addEventListener('click', function() {
+        // 关闭弹窗
+        const container = overlay.querySelector('.custom-dialog-container');
+        container.style.animation = 'modalSlideOut 0.3s ease-out';
+        
+        setTimeout(() => {
+            overlay.remove();
+            
+            // 显示加载状态
+            showLoading('🔄 刷新页面中...', '即将显示最新配置');
+            addLog('🔄 刷新页面以显示最新配置', 'info');
+            
+            // 延迟刷新页面
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        }, 300);
+    });
+    
+    // 点击背景关闭
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+            confirmBtn.click();
         }
     });
 }
