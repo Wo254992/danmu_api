@@ -594,6 +594,23 @@ export const responsiveCssContent = /* css */ `
         max-width: 100%;
         box-sizing: border-box;
     }
+
+    /* 主界面总览卡片（重新设计） */
+    .preview-overview-panel {
+        padding: 1rem;
+    }
+
+    .overview-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-extras {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-metric {
+        min-height: auto;
+    }
     /* 成功动画 */
     .success-icon {
         font-size: 4rem;
