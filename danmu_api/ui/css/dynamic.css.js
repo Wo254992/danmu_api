@@ -238,6 +238,7 @@ export const dynamicCssContent = /* css */ `
     padding: 1rem 1.125rem;
     transition: all var(--transition-fast);
     display: flex;
+    min-width: 0;
     flex-direction: column;
     gap: 0.85rem;
     min-height: 104px;
@@ -355,7 +356,7 @@ export const dynamicCssContent = /* css */ `
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-.metric-value-status {
+.metric-value.metric-value-status {
     font-size: 1rem;
     font-weight: 800;
     letter-spacing: 0;
@@ -2926,5 +2927,86 @@ export const dynamicCssContent = /* css */ `
     font-size: 0.875rem;
     line-height: 1.6;
 }
+
+
+
+/* ========================================
+   主界面总览卡片：移动端强制修复（放在 dynamic 末尾覆盖顺序）
+   说明：由于模板中 responsiveCssContent 在 dynamicCssContent 之前插入，
+   因此此处必须再次声明移动端覆盖规则，避免被后续基础规则覆盖。
+   ======================================== */
+@media (max-width: 767px) {
+    .preview-overview-panel {
+        padding: 1rem;
+    }
+
+    .overview-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .overview-metric-status {
+        grid-column: 1 / -1;
+    }
+
+    .overview-extras {
+        grid-template-columns: 1fr;
+    }
+
+    /* 运营状态文案：一行显示（空间不足时省略） */
+    .metric-value.metric-value-status {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+@media (max-width: 479px) {
+    .overview-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-metric-status {
+        grid-column: auto;
+    }
+}
+
+/* ========================================
+   运营状态呼吸效果（不影响布局）
+   ======================================== */
+.overview-metric-status {
+    position: relative;
+    overflow: hidden;
+}
+
+.overview-metric-status::after {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background: radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.16), rgba(16, 185, 129, 0.00) 55%);
+    opacity: 0;
+    transform: scale(0.98);
+    pointer-events: none;
+}
+
+.overview-metric-status.status-running::after {
+    animation: statusBreath 2.4s ease-in-out infinite;
+}
+
+.overview-metric-status.status-warning::after {
+    background: radial-gradient(circle at 30% 30%, rgba(245, 158, 11, 0.16), rgba(245, 158, 11, 0.00) 55%);
+    animation: statusBreath 2.8s ease-in-out infinite;
+}
+
+.overview-metric-status.status-error::after {
+    background: radial-gradient(circle at 30% 30%, rgba(239, 68, 68, 0.14), rgba(239, 68, 68, 0.00) 55%);
+    animation: statusBreath 3.0s ease-in-out infinite;
+}
+
+@keyframes statusBreath {
+    0%   { opacity: 0.15; transform: scale(0.98); }
+    45%  { opacity: 0.55; transform: scale(1.02); }
+    100% { opacity: 0.15; transform: scale(0.98); }
+}
+
 
 `;
