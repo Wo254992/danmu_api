@@ -8,7 +8,7 @@ import {
     updateLocalCaches
 } from "../utils/cache-util.js";
 import { formatDanmuResponse } from "../utils/danmu-util.js";
-import { extractEpisodeTitle, convertChineseNumber, parseFileName, createDynamicPlatformOrder, normalizeSpaces, computeTitleMatchScore, normalizeTitleForMatch } from "../utils/common-util.js";
+import { extractEpisodeTitle, convertChineseNumber, parseFileName, createDynamicPlatformOrder, normalizeSpaces, sortAnimesByMatchScore } from "../utils/common-util.js";
 import { getTMDBChineseTitle } from "../utils/tmdb-util.js";
 import Kan360Source from "../sources/kan360.js";
 import VodSource from "../sources/vod.js";
@@ -76,63 +76,6 @@ function matchSeason(anime, queryTitle, season) {
     return false;
   }
 }
-
-
-function getTitleVariantsForMatch(animeTitle) {
-  if (!animeTitle) return [];
-  const variants = [];
-
-  variants.push(animeTitle);
-
-  // 去掉常见的来源后缀："... from xxx"
-  variants.push(animeTitle.replace(/\s*from\s+[a-z0-9_-]+\s*$/i, '').trim());
-
-  // 去掉年份括号内容（仅用于匹配）
-  variants.push(animeTitle.replace(/\([^)]*\)/g, '').trim());
-
-  // 去掉【...】后缀（部分来源会把来源信息放在这里）
-  const idx1 = animeTitle.indexOf('【');
-  if (idx1 !== -1) {
-    variants.push(animeTitle.slice(0, idx1).trim());
-  }
-
-  // 去掉[...]后缀
-  const idx2 = animeTitle.indexOf('[');
-  if (idx2 !== -1) {
-    variants.push(animeTitle.slice(0, idx2).trim());
-  }
-
-  return [...new Set(variants.filter(Boolean))];
-}
-
-function sortAnimeSegmentByTitleMatch(curAnimes, startIndex, queryTitle) {
-  const endIndex = curAnimes.length;
-  if (endIndex <= startIndex) return;
-
-  const segment = curAnimes.slice(startIndex, endIndex);
-
-  const scored = segment.map((anime, idx) => {
-    const title = (anime && anime.animeTitle) ? anime.animeTitle : "";
-    let bestScore = 0;
-
-    for (const v of getTitleVariantsForMatch(title)) {
-      const s = computeTitleMatchScore(v, queryTitle);
-      if (s > bestScore) bestScore = s;
-      if (bestScore >= 1000) break;
-    }
-
-    return { anime, idx, score: bestScore };
-  });
-
-  scored.sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    return a.idx - b.idx; // 保持稳定排序
-  });
-
-  const sortedSegment = scored.map(x => x.anime);
-  curAnimes.splice(startIndex, segment.length, ...sortedSegment);
-}
-
 
 // Extracted function for GET /api/v2/search/anime
 export async function searchAnime(url, preferAnimeId = null, preferSource = null) {
@@ -260,7 +203,6 @@ export async function searchAnime(url, preferAnimeId = null, preferSource = null
 
     // 按顺序处理每个来源的结果
     for (const key of globals.sourceOrderArr) {
-      const beforeLen = curAnimes.length;
       if (key === '360') {
         // 等待处理360来源
         await kan360Source.handleAnimes(animes360, queryTitle, curAnimes);
@@ -313,32 +255,15 @@ export async function searchAnime(url, preferAnimeId = null, preferSource = null
         // 🔥 新增：等待处理Letv来源
         await letvSource.handleAnimes(animesLetv, queryTitle, curAnimes);
       }
-
-      sortAnimeSegmentByTitleMatch(curAnimes, beforeLen, queryTitle);
     }
   } catch (error) {
     log("error", "发生错误:", error);
   }
 
-  // 全局按标题匹配度稳定排序：完全匹配 > 标题+数字(如2/3) > 其他包含 > 相似
-  if (curAnimes.length > 1) {
-    const qNorm = normalizeTitleForMatch(queryTitle);
-    const scored = curAnimes.map((anime, idx) => ({
-      anime,
-      idx,
-      score: computeTitleMatchScore(anime.animeTitle, queryTitle, qNorm)
-    }));
-
-    scored.sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      return a.idx - b.idx; // 同分保持原顺序（稳定）
-    });
-
-    curAnimes.length = 0;
-    curAnimes.push(...scored.map(x => x.anime));
-  }
-
   storeAnimeIdsToMap(curAnimes, queryTitle);
+
+  // 按匹配度对结果进行排序
+  sortAnimesByMatchScore(curAnimes, queryTitle);
 
   // 如果启用了集标题过滤，则为每个动漫添加过滤后的 episodes
   if (globals.enableEpisodeFilter) {
