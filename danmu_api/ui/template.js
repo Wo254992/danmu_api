@@ -180,80 +180,61 @@ export const HTML_TEMPLATE = /* html */ `
                                 <p class="preview-hero-subtitle">实时生效的系统环境变量配置</p>
                             </div>
                         </div>
-                        <div class="preview-overview-panel" id="preview-stats-grid">
-                            <div class="overview-metrics">
-                                <div class="overview-metric" data-tone="primary">
-                                    <div class="metric-top">
-                                        <div class="metric-icon" aria-hidden="true">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-                                            </svg>
-                                        </div>
-                                        <div class="metric-meta">
-                                            <div class="metric-label">配置项</div>
-                                            <div class="metric-hint">当前已加载</div>
-                                        </div>
-                                    </div>
-                                    <div class="metric-bottom">
-                                        <div class="metric-value" id="total-configs">-</div>
-                                    </div>
+                        <div class="preview-stats-grid" id="preview-stats-grid">
+                            <div class="preview-stat-card stat-card-compact">
+                                <div class="stat-icon-wrapper stat-icon-primary">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                                    </svg>
                                 </div>
-                                <div class="overview-metric" data-tone="success">
-                                    <div class="metric-top">
-                                        <div class="metric-icon" aria-hidden="true">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-                                            </svg>
-                                        </div>
-                                        <div class="metric-meta">
-                                            <div class="metric-label">配置类别</div>
-                                            <div class="metric-hint">按分类聚合</div>
-                                        </div>
-                                    </div>
-                                    <div class="metric-bottom">
-                                        <div class="metric-value" id="total-categories">-</div>
-                                    </div>
-                                </div>
-                                <div class="overview-metric overview-metric-status" id="system-status-card" data-tone="status">
-                                    <div class="metric-top">
-                                        <div class="metric-icon metric-icon-status" id="status-icon-wrapper" aria-hidden="true">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                                            </svg>
-                                        </div>
-                                        <div class="metric-meta">
-                                            <div class="metric-label">运营状态</div>
-                                            <div class="metric-hint">服务健康度</div>
-                                        </div>
-                                    </div>
-                                    <div class="metric-bottom">
-                                        <div class="metric-value metric-value-status" id="system-status">检测中</div>
-                                    </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="total-configs">-</div>
+                                    <div class="stat-label">配置项</div>
                                 </div>
                             </div>
-                            <div class="overview-extras">
-                                <div class="overview-chip" data-tone="warning">
-                                    <div class="chip-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </div>
-                                    <div class="chip-text">
-                                        <div class="chip-label">已配置</div>
-                                        <div class="chip-value" id="manual-configs">-</div>
-                                    </div>
+                            <div class="preview-stat-card stat-card-compact">
+                                <div class="stat-icon-wrapper stat-icon-success">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                                    </svg>
                                 </div>
-                                <div class="overview-chip" id="mode-card" data-tone="mode">
-                                    <div class="chip-icon chip-icon-mode" id="mode-icon-wrapper" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-                                            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                    </div>
-                                    <div class="chip-text">
-                                        <div class="chip-label">当前模式</div>
-                                        <div class="chip-value" id="current-mode">检测中...</div>
-                                    </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="total-categories">-</div>
+                                    <div class="stat-label">配置类别</div>
+                                </div>
+                            </div>
+                            <div class="preview-stat-card stat-card-compact">
+                                <div class="stat-icon-wrapper stat-icon-warning">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="manual-configs">-</div>
+                                    <div class="stat-label">已配置</div>
+                                </div>
+                            </div>
+                            <div class="preview-stat-card stat-card-compact" id="system-status-card">
+                                <div class="stat-icon-wrapper stat-icon-status" id="status-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value stat-value-status" id="system-status">检测中</div>
+                                    <div class="stat-label">系统状态</div>
+                                </div>
+                            </div>
+                            <div class="preview-stat-card stat-card-compact" id="mode-card">
+                                <div class="stat-icon-wrapper stat-icon-mode" id="mode-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                                        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value stat-value-text" id="current-mode">检测中...</div>
+                                    <div class="stat-label">当前模式</div>
                                 </div>
                             </div>
                         </div>
