@@ -1485,6 +1485,48 @@ export const dynamicCssContent = /* css */ `
     color: var(--text-tertiary);
 }
 
+/* 深色模式 - 推送弹幕卡片增强（快速预设 / 局域网扫描） */
+[data-theme="dark"] .push-presets-section,
+[data-theme="dark"] .lan-scan-section {
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.75), rgba(31, 41, 55, 0.55));
+    border: 1px solid rgba(129, 140, 248, 0.18);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35),
+                0 0 0 1px rgba(129, 140, 248, 0.06) inset;
+}
+
+[data-theme="dark"] .preset-btn.btn-secondary {
+    background: rgba(10, 15, 30, 0.55);
+    border-color: rgba(129, 140, 248, 0.22);
+}
+
+[data-theme="dark"] .preset-btn.btn-secondary:hover:not(:disabled) {
+    background: rgba(17, 24, 39, 0.75);
+    border-color: rgba(129, 140, 248, 0.45);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45),
+                0 0 30px rgba(129, 140, 248, 0.12);
+}
+
+[data-theme="dark"] .scan-progress-bar {
+    background: rgba(10, 15, 30, 0.55);
+    border: 1px solid rgba(129, 140, 248, 0.12);
+}
+
+[data-theme="dark"] .lan-device-card {
+    background: rgba(10, 15, 30, 0.65);
+    border-color: rgba(129, 140, 248, 0.18);
+}
+
+[data-theme="dark"] .lan-device-card:hover {
+    background: rgba(17, 24, 39, 0.85);
+    border-color: rgba(129, 140, 248, 0.55);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55),
+                0 0 40px rgba(129, 140, 248, 0.12);
+}
+
+[data-theme="dark"] .device-select-icon {
+    color: rgba(226, 232, 240, 0.55);
+}
+
 .search-results-header {
     margin-bottom: 1.5rem;
 }
