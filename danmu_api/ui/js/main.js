@@ -497,8 +497,20 @@ function performSectionSwitch(section, isInitialLoad = false) {
         addLog(\`切换到\${sectionTitle}模块 📍\`, 'info');
     }
     
-    // 保存当前页面到本地存储，以便刷新后恢复
-    localStorage.setItem('activeSection', section);
+    // 保存当前页面到存储，以便刷新后恢复
+    // 安全优化：受 TOKEN/ADMIN_TOKEN 保护的页面仅使用 sessionStorage 记忆，避免关闭页面后仍“卡在管理页”
+    const protectedSections = ['logs', 'api', 'env', 'push'];
+    try {
+        if (protectedSections.includes(section)) {
+            sessionStorage.setItem('activeSection', section);
+            localStorage.removeItem('activeSection');
+        } else {
+            localStorage.setItem('activeSection', section);
+            sessionStorage.setItem('activeSection', section);
+        }
+    } catch (e) {
+        // 忽略存储异常（隐私模式/禁用存储等）
+    }
 }
 
 /* ========================================
@@ -960,7 +972,20 @@ document.addEventListener('DOMContentLoaded', function() {
     initTheme();
 
     // 2. 无闪烁页面恢复逻辑 (核心优化)
-    const savedSection = localStorage.getItem('activeSection');
+    let savedSection = sessionStorage.getItem('activeSection') || localStorage.getItem('activeSection');
+    // 没有 URL token 时，避免恢复到受保护页面（例如 /ADMIN_TOKEN 进入后直接关闭导致下次仍停留在管理页）
+    const urlPath = window.location.pathname;
+    const pathParts = urlPath.split('/').filter(part => part !== '');
+    const urlToken = pathParts.length > 0 ? pathParts[0] : '';
+    const protectedSections = ['logs', 'api', 'env', 'push'];
+    if (!urlToken && savedSection && protectedSections.includes(savedSection)) {
+        try {
+            sessionStorage.removeItem('activeSection');
+            localStorage.removeItem('activeSection');
+        } catch (e) {}
+        savedSection = null;
+    }
+
     // 如果保存的页面存在且不是默认的 'preview'
     if (savedSection && savedSection !== 'preview') {
         // [关键步骤 A] 临时注入样式，强制禁用所有过渡动画，防止"淡出淡入"的视觉残留
