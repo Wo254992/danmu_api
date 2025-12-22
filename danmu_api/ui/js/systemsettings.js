@@ -188,21 +188,22 @@ function confirmDeploySystem() {
                 const deployPlatform = config.envs.deployPlatform || 'node';
                 addLog(\`📋 检测到部署平台: \${deployPlatform}\`, 'info');
 
-                if (deployPlatform.toLowerCase() === 'node') {
-                    updateLoadingText('⚙️ Node 部署模式', '环境变量自动生效中...');
+                const platform = deployPlatform.toLowerCase();
+                if (platform === 'node' || platform === 'nodejs' || platform === 'docker') {
+                    updateLoadingText('⚙️ 本地/Docker 部署模式', '环境变量自动生效中...');
                     
                     setTimeout(() => {
                         hideLoading();
                         deploymentInProgress = false;
                         
                         addLog('========================================', 'success');
-                        addLog('✅ Node部署模式，环境变量已生效', 'success');
+                        addLog('✅ 本地/Docker 部署模式，环境变量已生效', 'success');
                         addLog('========================================', 'success');
                         
                         showSuccessAnimation('配置已生效');
                         
                         customAlert(
-                            '✅ Node部署模式\\n\\n在Node部署模式下，环境变量修改后会自动生效，无需重新部署。系统已更新配置！',
+                            '✅ 本地/Docker 部署模式\\n\\n在本地或 Docker 部署模式下，环境变量修改后会自动生效，无需重新部署。系统已更新配置！',
                             '🎉 配置成功'
                         );
                     }, 1500);
@@ -469,8 +470,9 @@ async function checkDeployPlatformConfig() {
         const config = await response.json();
         const deployPlatform = config.envs.deployPlatform || 'node';
         
-        if (deployPlatform.toLowerCase() === 'node') {
-            return { success: true, message: 'Node部署平台，仅需配置ADMIN_TOKEN' };
+        const platform = deployPlatform.toLowerCase();
+        if (platform === 'node' || platform === 'nodejs' || platform === 'docker') {
+            return { success: true, message: '本地/Docker 部署平台，仅需配置ADMIN_TOKEN' };
         }
         
         const missingVars = [];
