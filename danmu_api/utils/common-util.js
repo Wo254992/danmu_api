@@ -270,6 +270,86 @@ export function equivalentTitleIgnorePunct(a, b) {
 }
 
 /**
+ * 计算“标题 vs 搜索词”的匹配度分数（分数越高越靠前）
+ * 目标：完全匹配一定排第一，其次 标题+纯数字（如2/3/4），再到其他包含/相似
+ *
+ * @param {string} title - 动漫标题
+ * @param {string} query - 搜索关键词
+ * @param {string} qNormPrecomputed - 预先算好的 normalizeTitleForMatch(query)，可选
+ * @returns {number} score
+ */
+export function computeTitleMatchScore(title, query, qNormPrecomputed = null) {
+  if (!title || !query) return 0;
+
+  const tRaw = String(title);
+  const qRaw = String(query);
+
+  const tNorm = normalizeTitleForMatch(tRaw);
+  const qNorm = qNormPrecomputed ?? normalizeTitleForMatch(qRaw);
+
+  // 1) 完全匹配（含空格/标点等价）最高分
+  if (tNorm === qNorm) return 1000000;
+
+  // 2) 标题以关键词开头：优先“关键词+纯数字”（如2/3/4）
+  if (tNorm.startsWith(qNorm)) {
+    const rest = tNorm.slice(qNorm.length);
+    if (/^\d+$/.test(rest)) {
+      // 关键词+纯数字：排在完全匹配后面
+      return 900000 - rest.length;
+    }
+    // 关键词+其他后缀（如 关键词越南语版）
+    return 800000 - Math.min(rest.length, 1000);
+  }
+
+  // 3) 包含匹配：出现越靠前越优先
+  const idx = tNorm.indexOf(qNorm);
+  if (idx !== -1) {
+    return 700000 - Math.min(idx, 5000);
+  }
+
+  // 4) 兜底相似度（bigram）
+  const sim = bigramSimilarity(tNorm, qNorm);
+  return Math.floor(sim * 1000);
+}
+
+/**
+ * bigram 相似度：用于兜底排序
+ */
+function bigramSimilarity(a, b) {
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+
+  const aBigrams = toBigrams(a);
+  const bBigrams = toBigrams(b);
+  if (aBigrams.length === 0 || bBigrams.length === 0) return 0;
+
+  const bCount = new Map();
+  for (const x of bBigrams) {
+    bCount.set(x, (bCount.get(x) ?? 0) + 1);
+  }
+
+  let hit = 0;
+  for (const x of aBigrams) {
+    const c = bCount.get(x) ?? 0;
+    if (c > 0) {
+      hit += 1;
+      bCount.set(x, c - 1);
+    }
+  }
+
+  // Dice coefficient
+  return (2 * hit) / (aBigrams.length + bBigrams.length);
+}
+
+function toBigrams(s) {
+  const arr = [];
+  for (let i = 0; i < s.length - 1; i++) {
+    arr.push(s.slice(i, i + 2));
+  }
+  return arr;
+}
+
+/**
  * 严格标题匹配函数
  * @param {string} title - 动漫标题
  * @param {string} query - 搜索关键词
