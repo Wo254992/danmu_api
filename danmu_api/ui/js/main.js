@@ -14,6 +14,80 @@ let currentAdminToken = '';
 let originalToken = '87654321';
 
 /* ========================================
+   移动端 viewport/软键盘兼容
+   - 修复：输入框聚焦后按钮被“挤出视口”看起来像消失
+   - 修复：部分移动端浏览器/内置 WebView 偶发重绘导致按钮/头部不显示
+   ======================================== */
+function syncAppViewportHeight() {
+    try {
+        const vv = window.visualViewport;
+        const height = (vv && vv.height) ? vv.height : window.innerHeight;
+        if (!height) return;
+        document.documentElement.style.setProperty('--app-vh', (height * 0.01) + 'px');
+    } catch (e) {}
+}
+
+function initMobileViewportFixes() {
+    // 首次同步
+    syncAppViewportHeight();
+
+    // 监听软键盘弹出/收起（visualViewport 更准确）
+    try {
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', syncAppViewportHeight);
+            window.visualViewport.addEventListener('scroll', syncAppViewportHeight);
+        }
+    } catch (e) {}
+
+    window.addEventListener('resize', syncAppViewportHeight);
+
+    // 聚焦输入框时，尽量把对应的操作按钮保持在可视区域内（尤其是“开始匹配/搜索”等按钮）
+    document.addEventListener('focusin', function(e) {
+        // 仅移动端启用，避免桌面端滚动干扰
+        if (window.innerWidth > 767) return;
+
+        const target = e.target;
+        if (!target) return;
+
+        const tag = (target.tagName || '').toUpperCase();
+        if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') return;
+
+        requestAnimationFrame(() => {
+            try {
+                syncAppViewportHeight();
+
+                const vv = window.visualViewport;
+                const viewportHeight = (vv && vv.height) ? vv.height : window.innerHeight;
+                const padding = 16;
+
+                // 优先在弹幕测试面板/搜索输入组内找按钮
+                const scope = target.closest('.danmu-method-panel') ||
+                              target.closest('.search-input-group') ||
+                              target.closest('.input-group') ||
+                              target.closest('.form-card') ||
+                              target.parentElement;
+
+                let btn = null;
+                if (scope) {
+                    // 先找大按钮（开始匹配/搜索），再降级
+                    btn = scope.querySelector('button.btn.btn-lg') || scope.querySelector('button.btn');
+                }
+
+                const checkEl = btn || target;
+                const rect = checkEl.getBoundingClientRect();
+                const bottomLimit = viewportHeight - padding;
+
+                if (rect.bottom > bottomLimit) {
+                    const delta = rect.bottom - bottomLimit;
+                    window.scrollBy({ top: delta, left: 0, behavior: 'smooth' });
+                }
+            } catch (err) {}
+        });
+    }, true);
+}
+
+
+/* ========================================
    主题切换功能
    ======================================== */
 function initTheme() {
@@ -501,6 +575,7 @@ function createCustomAlert() {
 
 function customAlert(message, title = '💡 提示') {
     createCustomAlert();
+    initMobileViewportFixes();
     const overlay = document.getElementById('custom-alert-overlay');
     const titleElement = document.getElementById('custom-alert-title');
     const messageElement = document.getElementById('custom-alert-message');
@@ -513,6 +588,7 @@ function customAlert(message, title = '💡 提示') {
 function customConfirm(message, title = '❓ 确认') {
     return new Promise((resolve) => {
         createCustomAlert();
+    initMobileViewportFixes();
         const overlay = document.getElementById('custom-alert-overlay');
         const titleElement = document.getElementById('custom-alert-title');
         const messageElement = document.getElementById('custom-alert-message');
@@ -878,6 +954,7 @@ async function init() {
    ======================================== */
 document.addEventListener('DOMContentLoaded', function() {
     createCustomAlert();
+    initMobileViewportFixes();
     
     // 1. 优先初始化主题 (防止颜色闪烁)
     initTheme();
