@@ -255,7 +255,7 @@ body {
    ======================================== */
 .app-container {
     display: flex;
-    min-height: 100vh;
+    min-height: calc(var(--app-vh, 1vh) * 100);
     position: relative;
     max-width: 100vw;
     overflow-x: hidden;
