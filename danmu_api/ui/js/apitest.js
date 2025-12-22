@@ -1719,8 +1719,8 @@ function filterDanmuList(type) {
    格式化弹幕文件名
    ======================================== */
 function formatDanmuFilename(rawTitle, format) {
-    // 原始格式示例: 奇迹(2025)【电视剧】from tencent - 【qq】 01_闯南关(上)_01
-    // 目标格式示例: 奇迹(2025)-01_闯南关(上).xml
+    // 原始格式示例: 奇迹(2025)【电视剧】from tencent - 【qq】 01闯南关(上)_01
+    // 目标格式示例: 奇迹(2025) - 01 - 闯南关(上).xml
     
     // 移除来源信息（from xxx - 【xxx】）
     let cleaned = rawTitle.replace(/\\s*from\\s+[^-]+\\s*-\\s*【[^】]+】\\s*/g, '');
@@ -1729,38 +1729,58 @@ function formatDanmuFilename(rawTitle, format) {
     cleaned = cleaned.replace(/【[^】]*剧[^】]*】/g, '');
     cleaned = cleaned.replace(/【电影】/g, '');
     
-    // 提取剧名、年份和集数信息
-    // 匹配模式: 剧名(年份) 集数_集标题 或 剧名(年份)_集数_集标题
-    const pattern1 = /^(.+?)\\(\\d{4}\\)\\s+(.*)$/; // 剧名(年份) 剩余部分
-    const pattern2 = /^(.+?)\\(\\d{4}\\)_(.*)$/;    // 剧名(年份)_剩余部分
-    
-    let match = cleaned.match(pattern1) || cleaned.match(pattern2);
-    
-    if (match) {
-        const nameWithYear = match[1] + '(' + cleaned.match(/\\((\\d{4})\\)/)[1] + ')';
-        let episodeInfo = match[2];
-        
-        // 清理集数信息中的重复数字和下划线
-        // 例如: 01_闯南关(上)_01 -> 01_闯南关(上)
-        episodeInfo = episodeInfo.replace(/_\\d+$/, ''); // 移除末尾的 _数字
-        episodeInfo = episodeInfo.trim();
-        
-        // 组合最终文件名
-        if (episodeInfo) {
-            return \`\${nameWithYear}-\${episodeInfo}.\${format}\`;
-        } else {
-            return \`\${nameWithYear}.\${format}\`;
-        }
+    // 提取剧名(年份)
+    const nameYearMatch = cleaned.match(/^(.+?)\\((\\d{4})\\)/);
+    if (!nameYearMatch) {
+        // 如果无法解析年份，使用简化的清理逻辑
+        cleaned = cleaned.replace(/\\s+/g, '_');
+        cleaned = cleaned.replace(/[\\\\/:*?"<>|]/g, '');
+        cleaned = cleaned.replace(/_+/g, '_');
+        cleaned = cleaned.replace(/^_|_$/g, '');
+        return \`\${cleaned}.\${format}\`;
     }
     
-    // 如果无法解析，使用简化的清理逻辑
-    cleaned = cleaned.replace(/\\s+/g, '_'); // 空格转下划线
-    cleaned = cleaned.replace(/[\\\\/:*?"<>|]/g, ''); // 移除非法字符
-    cleaned = cleaned.replace(/_+/g, '_'); // 多个下划线合并为一个
-    cleaned = cleaned.replace(/^_|_$/g, ''); // 移除首尾下划线
+    const animeName = nameYearMatch[1].trim();
+    const year = nameYearMatch[2];
+    const nameWithYear = \`\${animeName}(\${year})\`;
     
-    return \`\${cleaned}.\${format}\`;
+    // 移除剧名(年份)部分，获取剩余内容
+    let remaining = cleaned.substring(nameYearMatch[0].length).trim();
+    remaining = remaining.replace(/^[_\\s-]+/, ''); // 移除开头的分隔符
+    
+    if (!remaining) {
+        return \`\${nameWithYear}.\${format}\`;
+    }
+    
+    // 提取集数（第一个连续的数字）
+    const episodeMatch = remaining.match(/^(\\d+)/);
+    if (!episodeMatch) {
+        // 没有集数，直接返回
+        const cleaned2 = remaining.replace(/[\\\\/:*?"<>|]/g, '').replace(/_+/g, '_').replace(/^_|_$/g, '');
+        return \`\${nameWithYear} - \${cleaned2}.\${format}\`;
+    }
+    
+    const episodeNum = episodeMatch[1];
+    
+    // 移除集数部分，获取集标题
+    let episodeTitle = remaining.substring(episodeNum.length).trim();
+    episodeTitle = episodeTitle.replace(/^[_\\s-]+/, ''); // 移除开头的分隔符
+    
+    // 移除集标题末尾重复的集数（如 _01, _1 等）
+    episodeTitle = episodeTitle.replace(/_\\d+$/, '');
+    episodeTitle = episodeTitle.trim();
+    
+    // 清理集标题中的非法文件名字符
+    episodeTitle = episodeTitle.replace(/[\\\\/:*?"<>|]/g, '');
+    
+    // 组合最终文件名
+    if (episodeTitle) {
+        return \`\${nameWithYear} - \${episodeNum} - \${episodeTitle}.\${format}\`;
+    } else {
+        return \`\${nameWithYear} - \${episodeNum}.\${format}\`;
+    }
 }
+
 /* ========================================
    导出弹幕
    ======================================== */
