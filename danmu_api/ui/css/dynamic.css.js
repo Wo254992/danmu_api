@@ -226,6 +226,9 @@ export const dynamicCssContent = /* css */ `
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1rem;
+
+    align-items: stretch;
+    grid-auto-rows: 1fr;
 }
 
 .overview-metric {
@@ -339,6 +342,8 @@ export const dynamicCssContent = /* css */ `
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
+
+    margin-top: auto;
 }
 
 .metric-value {
@@ -355,6 +360,10 @@ export const dynamicCssContent = /* css */ `
     font-weight: 800;
     letter-spacing: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .metric-value-status.status-running {
