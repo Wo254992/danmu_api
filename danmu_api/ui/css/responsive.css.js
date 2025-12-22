@@ -594,27 +594,6 @@ export const responsiveCssContent = /* css */ `
         max-width: 100%;
         box-sizing: border-box;
     }
-
-    /* 主界面总览卡片（重新设计） */
-    .preview-overview-panel {
-        padding: 1rem;
-    }
-
-    .overview-metrics {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .overview-metric-status {
-        grid-column: 1 / -1;
-    }
-
-    .overview-extras {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .overview-metric {
-        min-height: auto;
-    }
     /* 成功动画 */
     .success-icon {
         font-size: 4rem;
@@ -650,19 +629,6 @@ export const responsiveCssContent = /* css */ `
     .main-content {
         padding: 0 0.75rem 0.75rem;
     }
-
-    .overview-metrics {
-        grid-template-columns: 1fr;
-    }
-
-    .overview-metric-status {
-        grid-column: auto;
-    }
-
-    .overview-extras {
-        grid-template-columns: 1fr;
-    }
-
 
     .mobile-header {
         padding: 1.15rem 0.75rem;
