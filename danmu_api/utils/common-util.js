@@ -270,86 +270,6 @@ export function equivalentTitleIgnorePunct(a, b) {
 }
 
 /**
- * 计算“标题 vs 搜索词”的匹配度分数（分数越高越靠前）
- * 目标：完全匹配一定排第一，其次 标题+纯数字（如2/3/4），再到其他包含/相似
- *
- * @param {string} title - 动漫标题
- * @param {string} query - 搜索关键词
- * @param {string} qNormPrecomputed - 预先算好的 normalizeTitleForMatch(query)，可选
- * @returns {number} score
- */
-export function computeTitleMatchScore(title, query, qNormPrecomputed = null) {
-  if (!title || !query) return 0;
-
-  const tRaw = String(title);
-  const qRaw = String(query);
-
-  const tNorm = normalizeTitleForMatch(tRaw);
-  const qNorm = qNormPrecomputed ?? normalizeTitleForMatch(qRaw);
-
-  // 1) 完全匹配（含空格/标点等价）最高分
-  if (tNorm === qNorm) return 1000000;
-
-  // 2) 标题以关键词开头：优先“关键词+纯数字”（如2/3/4）
-  if (tNorm.startsWith(qNorm)) {
-    const rest = tNorm.slice(qNorm.length);
-    if (/^\d+$/.test(rest)) {
-      // 关键词+纯数字：排在完全匹配后面
-      return 900000 - rest.length;
-    }
-    // 关键词+其他后缀（如 关键词越南语版）
-    return 800000 - Math.min(rest.length, 1000);
-  }
-
-  // 3) 包含匹配：出现越靠前越优先
-  const idx = tNorm.indexOf(qNorm);
-  if (idx !== -1) {
-    return 700000 - Math.min(idx, 5000);
-  }
-
-  // 4) 兜底相似度（bigram）
-  const sim = bigramSimilarity(tNorm, qNorm);
-  return Math.floor(sim * 1000);
-}
-
-/**
- * bigram 相似度：用于兜底排序
- */
-function bigramSimilarity(a, b) {
-  if (!a || !b) return 0;
-  if (a === b) return 1;
-
-  const aBigrams = toBigrams(a);
-  const bBigrams = toBigrams(b);
-  if (aBigrams.length === 0 || bBigrams.length === 0) return 0;
-
-  const bCount = new Map();
-  for (const x of bBigrams) {
-    bCount.set(x, (bCount.get(x) ?? 0) + 1);
-  }
-
-  let hit = 0;
-  for (const x of aBigrams) {
-    const c = bCount.get(x) ?? 0;
-    if (c > 0) {
-      hit += 1;
-      bCount.set(x, c - 1);
-    }
-  }
-
-  // Dice coefficient
-  return (2 * hit) / (aBigrams.length + bBigrams.length);
-}
-
-function toBigrams(s) {
-  const arr = [];
-  for (let i = 0; i < s.length - 1; i++) {
-    arr.push(s.slice(i, i + 2));
-  }
-  return arr;
-}
-
-/**
  * 严格标题匹配函数
  * @param {string} title - 动漫标题
  * @param {string} query - 搜索关键词
@@ -391,93 +311,6 @@ export function titleMatches(title, query) {
 }
 
 /**
- * 计算标题与搜索关键词的匹配分数（用于排序：分数越高越靠前）
- * 规则（从高到低）：
- * 1) 完全等价匹配（忽略空格/大小写/等价标点）
- * 2) 前缀匹配：关键词后紧跟纯数字（常见为第 N 季/编号）
- * 3) 前缀匹配：关键词后续其他内容（如“特别篇/国语版/越南语版”等）
- * 4) 包含匹配：关键词出现在标题中更靠前位置者优先
- * 5) 兜底：基于 bigram 的相似度
- * @param {string} title - 动漫标题
- * @param {string} query - 搜索关键词
- * @returns {number} 匹配分数
- */
-export function computeTitleMatchScore(title, query) {
-  if (!title || !query) return 0;
-
-  const t = normalizeTitleForMatch(title);
-  const q = normalizeTitleForMatch(query);
-
-  if (!t || !q) return 0;
-
-  // 完全匹配
-  if (t === q) return 1000;
-
-  // 前缀匹配
-  if (t.startsWith(q)) {
-    const rest = t.slice(q.length);
-
-    // 关键词后紧跟纯数字（常见：第2/第3...）
-    if (/^\d+(?:$|[\(\[\{].*)/.test(rest)) {
-      return 930 - Math.min(rest.length, 30);
-    }
-
-    // 关键词后续其他内容（如语言版本/特别篇等）
-    return 900 - Math.min(rest.length, 60);
-  }
-
-  // 包含匹配（越靠前越好，越短越好）
-  const idx = t.indexOf(q);
-  if (idx !== -1) {
-    const extra = t.length - q.length;
-    return 800 - Math.min(idx, 50) - Math.min(extra, 80);
-  }
-
-  // 兜底：bigram 相似度（0~1）
-  const sim = bigramSimilarity(t, q);
-  return Math.floor(500 * sim);
-}
-
-function bigramSimilarity(a, b) {
-  if (!a || !b) return 0;
-  if (a === b) return 1;
-
-  // 长度过短时退化为字符集合
-  if (a.length < 2 || b.length < 2) {
-    const setA = new Set(a.split(''));
-    const setB = new Set(b.split(''));
-    let inter = 0;
-    for (const ch of setA) {
-      if (setB.has(ch)) inter++;
-    }
-    const denom = setA.size + setB.size;
-    return denom === 0 ? 0 : (2 * inter) / denom;
-  }
-
-  const gramsA = new Map();
-  for (let i = 0; i < a.length - 1; i++) {
-    const g = a.slice(i, i + 2);
-    gramsA.set(g, (gramsA.get(g) || 0) + 1);
-  }
-
-  let inter = 0;
-  let countB = 0;
-  for (let i = 0; i < b.length - 1; i++) {
-    const g = b.slice(i, i + 2);
-    countB++;
-    const n = gramsA.get(g) || 0;
-    if (n > 0) {
-      inter++;
-      gramsA.set(g, n - 1);
-    }
-  }
-
-  const countA = a.length - 1;
-  const denom = countA + countB;
-  return denom === 0 ? 0 : (2 * inter) / denom;
-}
-
-/**
  * 数据类型校验
  * @param {string} value - 值
  * @param {string} expectedType - 期望类型
@@ -492,4 +325,91 @@ export function validateType(value, expectedType) {
   } else if (typeof value !== expectedType) {
     throw new TypeError(`${value} 必须是 ${expectedType}，但传入的是 ${fieldName}`);
   }
+}
+
+/**
+ * 计算标题与搜索词的匹配分数
+ * @param {string} title - 动漫标题
+ * @param {string} query - 搜索关键词
+ * @returns {number} 匹配分数（越高越匹配）
+ */
+export function calculateMatchScore(title, query) {
+  if (!title || !query) return 0;
+
+  const normalizedTitle = normalizeSpaces(title);
+  const normalizedQuery = normalizeSpaces(query);
+
+  // 完全匹配（最高分）
+  if (normalizedTitle === normalizedQuery) {
+    return 1000;
+  }
+
+  // 忽略标点符号的完全匹配
+  if (equivalentTitleIgnorePunct(title, query)) {
+    return 950;
+  }
+
+  // 标题等于搜索词（去除括号内容后）
+  const titleWithoutBrackets = normalizedTitle.split(/[(\(（]/)[0].trim();
+  if (titleWithoutBrackets === normalizedQuery) {
+    return 900;
+  }
+
+  // 标题以搜索词开头
+  if (normalizedTitle.startsWith(normalizedQuery)) {
+    // 计算额外字符的长度（越短越好）
+    const extraLength = normalizedTitle.length - normalizedQuery.length;
+    return 800 - Math.min(extraLength, 100);
+  }
+
+  // 搜索词是标题的开头部分（忽略数字/季度信息）
+  const titleBase = titleWithoutBrackets.replace(/[0-9一二三四五六七八九十壹贰叁肆伍陆柒捌玖拾第季部]+$/, '').trim();
+  if (titleBase === normalizedQuery) {
+    return 750;
+  }
+
+  // 标题包含搜索词
+  if (normalizedTitle.includes(normalizedQuery)) {
+    // 根据搜索词在标题中的位置给分（越靠前越好）
+    const position = normalizedTitle.indexOf(normalizedQuery);
+    const positionScore = Math.max(0, 100 - position);
+    return 500 + positionScore;
+  }
+
+  // 搜索词包含在标题中（部分匹配）
+  const queryChars = normalizedQuery.split('');
+  let matchCount = 0;
+  for (const char of queryChars) {
+    if (normalizedTitle.includes(char)) {
+      matchCount++;
+    }
+  }
+  const partialScore = (matchCount / queryChars.length) * 200;
+  return partialScore;
+}
+
+/**
+ * 按匹配度对动漫列表进行排序
+ * @param {Array} animes - 动漫列表
+ * @param {string} queryTitle - 搜索关键词
+ */
+export function sortAnimesByMatchScore(animes, queryTitle) {
+  if (!animes || !Array.isArray(animes) || animes.length === 0) {
+    return;
+  }
+
+  animes.sort((a, b) => {
+    const scoreA = calculateMatchScore(a.animeTitle, queryTitle);
+    const scoreB = calculateMatchScore(b.animeTitle, queryTitle);
+
+    // 分数高的排在前面
+    if (scoreB !== scoreA) {
+      return scoreB - scoreA;
+    }
+
+    // 分数相同时，保持原有顺序（稳定排序）
+    return 0;
+  });
+
+  log("info", `Sorted ${animes.length} animes by match score for query: ${queryTitle}`);
 }
