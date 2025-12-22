@@ -138,71 +138,9 @@ function readEnvValue(config, key) {
     return '';
 }
 
-function normalizeDeployPlatformValue(value) {
-    const raw = (value || '').toString().trim().toLowerCase();
-    if (!raw) return '';
-
-    // 兼容常见写法
-    if (raw === 'nodejs' || raw === 'node.js' || raw === 'node_js' || raw === 'node-js' || raw === 'node js') {
-        return 'node';
-    }
-    if (raw === 'docker-compose' || raw === 'docker compose' || raw === 'docker_compose') {
-        return 'docker';
-    }
-    return raw;
-}
-
-function hasAnyTruthyKey(obj, keys) {
-    try {
-        return keys.some(k => {
-            if (!obj || !Object.prototype.hasOwnProperty.call(obj, k)) return false;
-            const v = obj[k];
-            return v !== undefined && v !== null && String(v).trim() !== '';
-        });
-    } catch (e) {
-        return false;
-    }
-}
-
-function inferDeployPlatform(config) {
-    const envs = (config && config.envs) || {};
-    const original = (config && config.originalEnvVars) || {};
-
-    // 通过常见平台标识做兜底推断（后端不一定会暴露这些变量，但尽量兼容）
-    if (hasAnyTruthyKey(envs, ['VERCEL', 'VERCEL_URL', 'VERCEL_ENV']) || hasAnyTruthyKey(original, ['VERCEL', 'VERCEL_URL', 'VERCEL_ENV'])) {
-        return 'vercel';
-    }
-    if (hasAnyTruthyKey(envs, ['NETLIFY', 'NETLIFY_SITE_ID', 'NETLIFY_IMAGES_CDN_DOMAIN']) || hasAnyTruthyKey(original, ['NETLIFY', 'NETLIFY_SITE_ID', 'NETLIFY_IMAGES_CDN_DOMAIN'])) {
-        return 'netlify';
-    }
-    if (hasAnyTruthyKey(envs, ['CF_PAGES', 'CF_PAGES_URL', 'CLOUDFLARE', 'CF_WORKER']) || hasAnyTruthyKey(original, ['CF_PAGES', 'CF_PAGES_URL', 'CLOUDFLARE', 'CF_WORKER'])) {
-        return 'cloudflare';
-    }
-    if (hasAnyTruthyKey(envs, ['EDGEONE', 'EDGEONE_PAGES', 'TENCENTCLOUD_PAGES']) || hasAnyTruthyKey(original, ['EDGEONE', 'EDGEONE_PAGES', 'TENCENTCLOUD_PAGES'])) {
-        return 'edgeone';
-    }
-    if (hasAnyTruthyKey(envs, ['DOCKER', 'DOCKER_CONTAINER', 'DOCKER_IMAGE', 'CONTAINER', 'RUNNING_IN_DOCKER']) || hasAnyTruthyKey(original, ['DOCKER', 'DOCKER_CONTAINER', 'DOCKER_IMAGE', 'CONTAINER', 'RUNNING_IN_DOCKER'])) {
-        return 'docker';
-    }
-
-    return '';
-}
-
-function readDeployPlatformFromConfig(config) {
-    // 优先读取后端归一化字段，同时兼容历史拼写（deployPlatfrom / DEPLOY_PLATFROM）
-    const envs = (config && config.envs) || {};
-    const raw = envs.deployPlatform || envs.deployPlatfrom || envs.DEPLOY_PLATFORM || envs.DEPLOY_PLATFROM ||
-        readEnvValue(config, 'DEPLOY_PLATFORM') || readEnvValue(config, 'DEPLOY_PLATFROM');
-
-    const normalized = normalizeDeployPlatformValue(raw);
-    if (normalized) return normalized;
-
-    const inferred = inferDeployPlatform(config);
-    return inferred || 'node';
-}
-
 function computeDeployEnvStatus(config) {
-    const platform = readDeployPlatformFromConfig(config || {});
+    const platformRaw = (config && config.envs && (config.envs.deployPlatform || config.envs.DEPLOY_PLATFORM)) || 'node';
+    const platform = (platformRaw || 'node').toString().toLowerCase();
     const requiredVars = getDeployRequiredVars(platform);
     const missingVars = requiredVars.filter(v => {
         const val = readEnvValue(config, v);
