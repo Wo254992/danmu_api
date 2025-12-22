@@ -8,7 +8,7 @@ import {
     updateLocalCaches
 } from "../utils/cache-util.js";
 import { formatDanmuResponse } from "../utils/danmu-util.js";
-import {extractEpisodeTitle, convertChineseNumber, parseFileName, createDynamicPlatformOrder, normalizeSpaces, computeTitleMatchScore } from "../utils/common-util.js";
+import { extractEpisodeTitle, convertChineseNumber, parseFileName, createDynamicPlatformOrder, normalizeSpaces, computeTitleMatchScore, normalizeTitleForMatch } from "../utils/common-util.js";
 import { getTMDBChineseTitle } from "../utils/tmdb-util.js";
 import Kan360Source from "../sources/kan360.js";
 import VodSource from "../sources/vod.js";
@@ -318,6 +318,24 @@ export async function searchAnime(url, preferAnimeId = null, preferSource = null
     }
   } catch (error) {
     log("error", "发生错误:", error);
+  }
+
+  // 全局按标题匹配度稳定排序：完全匹配 > 标题+数字(如2/3) > 其他包含 > 相似
+  if (curAnimes.length > 1) {
+    const qNorm = normalizeTitleForMatch(queryTitle);
+    const scored = curAnimes.map((anime, idx) => ({
+      anime,
+      idx,
+      score: computeTitleMatchScore(anime.animeTitle, queryTitle, qNorm)
+    }));
+
+    scored.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return a.idx - b.idx; // 同分保持原顺序（稳定）
+    });
+
+    curAnimes.length = 0;
+    curAnimes.push(...scored.map(x => x.anime));
   }
 
   storeAnimeIdsToMap(curAnimes, queryTitle);
