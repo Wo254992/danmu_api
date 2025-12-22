@@ -601,11 +601,15 @@ export const responsiveCssContent = /* css */ `
     }
 
     .overview-metrics {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .overview-metric-status {
+        grid-column: 1 / -1;
     }
 
     .overview-extras {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .overview-metric {
@@ -646,6 +650,19 @@ export const responsiveCssContent = /* css */ `
     .main-content {
         padding: 0 0.75rem 0.75rem;
     }
+
+    .overview-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-metric-status {
+        grid-column: auto;
+    }
+
+    .overview-extras {
+        grid-template-columns: 1fr;
+    }
+
 
     .mobile-header {
         padding: 1.15rem 0.75rem;
