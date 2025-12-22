@@ -1715,7 +1715,52 @@ function filterDanmuList(type) {
     
     addLog(\`🔍 筛选弹幕: \${type} (\${filtered.length}条)\`, 'info');
 }
-
+/* ========================================
+   格式化弹幕文件名
+   ======================================== */
+function formatDanmuFilename(rawTitle, format) {
+    // 原始格式示例: 奇迹(2025)【电视剧】from tencent - 【qq】 01_闯南关(上)_01
+    // 目标格式示例: 奇迹(2025)-01_闯南关(上).xml
+    
+    // 移除来源信息（from xxx - 【xxx】）
+    let cleaned = rawTitle.replace(/\\s*from\\s+[^-]+\\s*-\\s*【[^】]+】\\s*/g, '');
+    
+    // 移除【电视剧】【电影】等类型标签
+    cleaned = cleaned.replace(/【[^】]*剧[^】]*】/g, '');
+    cleaned = cleaned.replace(/【电影】/g, '');
+    
+    // 提取剧名、年份和集数信息
+    // 匹配模式: 剧名(年份) 集数_集标题 或 剧名(年份)_集数_集标题
+    const pattern1 = /^(.+?)\\(\\d{4}\\)\\s+(.*)$/; // 剧名(年份) 剩余部分
+    const pattern2 = /^(.+?)\\(\\d{4}\\)_(.*)$/;    // 剧名(年份)_剩余部分
+    
+    let match = cleaned.match(pattern1) || cleaned.match(pattern2);
+    
+    if (match) {
+        const nameWithYear = match[1] + '(' + cleaned.match(/\\((\\d{4})\\)/)[1] + ')';
+        let episodeInfo = match[2];
+        
+        // 清理集数信息中的重复数字和下划线
+        // 例如: 01_闯南关(上)_01 -> 01_闯南关(上)
+        episodeInfo = episodeInfo.replace(/_\\d+$/, ''); // 移除末尾的 _数字
+        episodeInfo = episodeInfo.trim();
+        
+        // 组合最终文件名
+        if (episodeInfo) {
+            return \`\${nameWithYear}-\${episodeInfo}.\${format}\`;
+        } else {
+            return \`\${nameWithYear}.\${format}\`;
+        }
+    }
+    
+    // 如果无法解析，使用简化的清理逻辑
+    cleaned = cleaned.replace(/\\s+/g, '_'); // 空格转下划线
+    cleaned = cleaned.replace(/[\\\\/:*?"<>|]/g, ''); // 移除非法字符
+    cleaned = cleaned.replace(/_+/g, '_'); // 多个下划线合并为一个
+    cleaned = cleaned.replace(/^_|_$/g, ''); // 移除首尾下划线
+    
+    return \`\${cleaned}.\${format}\`;
+}
 /* ========================================
    导出弹幕
    ======================================== */
@@ -1723,8 +1768,7 @@ function exportDanmu(format) {
     // 如果有 episodeId，优先从后端直接获取对应格式
     if (currentEpisodeId) {
         const title = document.getElementById('danmu-title').textContent;
-        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-        const filename = \`\${title}_\${timestamp}.\${format}\`;
+        const filename = formatDanmuFilename(title, format);
         
         addLog(\`📥 开始导出弹幕: \${filename}\`, 'info');
         
@@ -1738,21 +1782,8 @@ function exportDanmu(format) {
                 return response.text();
             })
             .then(content => {
-                let finalContent = content;
-                
-                // JSON 导出：后端如果返回的是压缩一行，这里做标准化缩进
-                if (format === 'json') {
-                    try {
-                        const parsed = JSON.parse(content);
-                        finalContent = JSON.stringify(parsed, null, 2);
-                    } catch (e) {
-                        // 如果后端返回的不是合法 JSON（或包含奇怪前缀），保持原样不影响导出
-                        finalContent = content;
-                    }
-                }
-                
                 const mimeType = format === 'xml' ? 'application/xml' : 'application/json';
-                const blob = new Blob([finalContent], { type: mimeType + ';charset=utf-8' });
+                const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -1788,8 +1819,7 @@ function exportDanmuFromLocal(format) {
     }
     
     const title = document.getElementById('danmu-title').textContent;
-    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-    const filename = \`\${title}_\${timestamp}.\${format}\`;
+    const filename = formatDanmuFilename(title, format);
     
     let content = '';
     let mimeType = '';
