@@ -185,10 +185,15 @@ function confirmDeploySystem() {
         fetch(buildApiUrl('/api/config', true))
             .then(response => response.json())
             .then(config => {
-                const deployPlatform = config.envs.deployPlatform || 'node';
-                addLog(\`📋 检测到部署平台: \${deployPlatform}\`, 'info');
+                const deployPlatform = (typeof readDeployPlatformFromConfig === 'function')
+                    ? readDeployPlatformFromConfig(config)
+                    : ((config && config.envs && (config.envs.deployPlatform || config.envs.deployPlatfrom || config.envs.DEPLOY_PLATFORM || config.envs.DEPLOY_PLATFROM)) || 'node');
+                const deployPlatformLabel = (typeof getDeployPlatformLabel === 'function') ? getDeployPlatformLabel(deployPlatform) : deployPlatform;
+                const dp = (deployPlatform || 'node').toString().trim().toLowerCase();
 
-                if (deployPlatform.toLowerCase() === 'node') {
+                addLog(\`📋 检测到部署平台: \${deployPlatformLabel}\`, 'info');
+
+                if (dp === 'node') {
                     updateLoadingText('⚙️ Node 部署模式', '环境变量自动生效中...');
                     
                     setTimeout(() => {
@@ -204,6 +209,24 @@ function confirmDeploySystem() {
                         customAlert(
                             '✅ Node部署模式\\n\\n在Node部署模式下，环境变量修改后会自动生效，无需重新部署。系统已更新配置！',
                             '🎉 配置成功'
+                        );
+                    }, 1500);
+                } else if (dp === 'docker') {
+                    updateLoadingText('🐳 Docker 部署模式', '已更新配置，请按需重启容器/服务');
+                    
+                    setTimeout(() => {
+                        hideLoading();
+                        deploymentInProgress = false;
+                        
+                        addLog('========================================', 'success');
+                        addLog('✅ Docker部署模式，配置已更新', 'success');
+                        addLog('========================================', 'success');
+                        
+                        showSuccessAnimation('配置已更新');
+                        
+                        customAlert(
+                            '🐳 Docker部署模式\\n\\n已更新配置。\\n\\n⚠️ 提示：Docker 场景下如果你是通过容器环境变量注入配置，通常需要重启容器/服务才能生效。\\n如果刷新页面或调用接口仍未生效，请重启容器后再试。',
+                            '✅ 配置已更新'
                         );
                     }, 1500);
                 } else {
@@ -467,40 +490,28 @@ async function checkDeployPlatformConfig() {
         }
         
         const config = await response.json();
-        const deployPlatform = config.envs.deployPlatform || 'node';
-        
-        if (deployPlatform.toLowerCase() === 'node') {
+        const status = (typeof computeDeployEnvStatus === 'function') ? computeDeployEnvStatus(config) : null;
+        const deployPlatform = (status && status.platform) ? status.platform : ((typeof readDeployPlatformFromConfig === 'function') ? readDeployPlatformFromConfig(config) : 'node');
+        const dp = (deployPlatform || 'node').toString().trim().toLowerCase();
+        const deployPlatformLabel = (typeof getDeployPlatformLabel === 'function') ? getDeployPlatformLabel(dp) : dp;
+
+        if (dp === 'node') {
             return { success: true, message: 'Node部署平台，仅需配置ADMIN_TOKEN' };
         }
         
-        const missingVars = [];
-        const deployPlatformProject = config.originalEnvVars.DEPLOY_PLATFROM_PROJECT;
-        const deployPlatformToken = config.originalEnvVars.DEPLOY_PLATFROM_TOKEN;
-        const deployPlatformAccount = config.originalEnvVars.DEPLOY_PLATFROM_ACCOUNT;
-        
-        if (!deployPlatformProject || deployPlatformProject.trim() === '') {
-            missingVars.push('DEPLOY_PLATFROM_PROJECT');
+        if (dp === 'docker') {
+            return { success: true, message: 'Docker部署平台，仅需配置ADMIN_TOKEN（如配置未生效，请重启容器/服务）' };
         }
         
-        if (!deployPlatformToken || deployPlatformToken.trim() === '') {
-            missingVars.push('DEPLOY_PLATFROM_TOKEN');
-        }
-        
-        if (deployPlatform.toLowerCase() === 'netlify' || deployPlatform.toLowerCase() === 'cloudflare') {
-            if (!deployPlatformAccount || deployPlatformAccount.trim() === '') {
-                missingVars.push('DEPLOY_PLATFROM_ACCOUNT');
-            }
-        }
-        
+        const missingVars = (status && status.missingVars) ? status.missingVars : [];
         if (missingVars.length > 0) {
-            const missingVarsStr = missingVars.join('、');
-            return { 
-                success: false, 
-                message: \`⚙️ 配置不完整！\\n\\n部署平台为 \${deployPlatform}，请配置以下缺失的环境变量：\\n\\n\${missingVars.map(v => '• ' + v).join('\\n')}\`
+            return {
+                success: false,
+                message: \`⚙️ 配置不完整！\\n\\n部署平台为 \${deployPlatformLabel}，请配置以下缺失的环境变量：\\n\\n\${missingVars.map(v => '• ' + v).join('\\n')}\`
             };
         }
         
-        return { success: true, message: deployPlatform + '部署平台配置完整' };
+        return { success: true, message: deployPlatformLabel + '部署平台配置完整' };
     } catch (error) {
         console.error('检查部署平台配置失败:', error);
         return { 
