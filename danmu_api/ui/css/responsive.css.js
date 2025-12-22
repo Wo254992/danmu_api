@@ -365,6 +365,31 @@ export const responsiveCssContent = /* css */ `
         max-width: 100%;
         box-sizing: border-box;
     }
+
+    /* 修复移动端键盘/viewport变化导致的元素偶发“消失”问题（Chrome/部分WebView） */
+    .section-header,
+    .header-actions,
+    .danmu-method-panel,
+    .danmu-method-switcher,
+    .input-group {
+        transform: translateZ(0);
+        backface-visibility: hidden;
+    }
+
+    /* 让浏览器自动滚动聚焦输入框时，预留底部空间，避免把“搜索/匹配”按钮挤出视口 */
+    .form-input,
+    .form-select,
+    .form-textarea {
+        scroll-margin-bottom: 240px;
+    }
+
+    /* 深色模式下输入框 focus 的 transform 在移动端可能触发重绘异常 */
+    [data-theme="dark"] .form-input:focus,
+    [data-theme="dark"] .form-select:focus,
+    [data-theme="dark"] .form-textarea:focus {
+        transform: none;
+    }
+
 /* 搜索输入组在移动端保持横向布局 */
     .input-group.search-input-group {
         flex-direction: row;
