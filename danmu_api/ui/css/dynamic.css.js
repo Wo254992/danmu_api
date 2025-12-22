@@ -123,6 +123,21 @@ export const dynamicCssContent = /* css */ `
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
+[data-theme="dark"] .preview-stat-card {
+    background: rgba(17, 24, 39, 0.7);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .preview-stat-card:hover {
+    border-color: rgba(129, 140, 248, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(129, 140, 248, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transform: translateY(-6px);
+}
+
 [data-theme="dark"] .preview-category {
     background: rgba(17, 24, 39, 0.7);
     border: 1px solid rgba(99, 102, 241, 0.2);
@@ -180,294 +195,90 @@ export const dynamicCssContent = /* css */ `
     font-size: 1rem;
 }
 
-/* ========================================
-   主界面总览卡片（重新设计）
-   ======================================== */
-.preview-overview-panel {
-    background: linear-gradient(
-        180deg,
-        rgba(99, 102, 241, 0.10) 0%,
-        rgba(99, 102, 241, 0.02) 70%,
-        rgba(99, 102, 241, 0.00) 100%
-    ),
-    var(--bg-secondary);
-    border: 1px solid rgba(99, 102, 241, 0.18);
-    border-radius: var(--radius-xl);
-    padding: 1.25rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.preview-overview-panel::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(800px circle at 10% -20%, rgba(99, 102, 241, 0.18), transparent 55%),
-                radial-gradient(700px circle at 90% 0%, rgba(236, 72, 153, 0.10), transparent 60%);
-    pointer-events: none;
-}
-
-[data-theme="dark"] .preview-overview-panel {
-    background: linear-gradient(
-        180deg,
-        rgba(129, 140, 248, 0.14) 0%,
-        rgba(129, 140, 248, 0.06) 60%,
-        rgba(129, 140, 248, 0.00) 100%
-    ),
-    rgba(17, 24, 39, 0.75);
-    border: 1px solid rgba(129, 140, 248, 0.22);
-    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45),
-                0 0 40px rgba(129, 140, 248, 0.12),
-                inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.overview-metrics {
-    position: relative;
+.preview-stats-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 1rem;
-
-    align-items: stretch;
-    grid-auto-rows: 1fr;
 }
 
-.overview-metric {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
+.preview-stat-card {
+    background: rgba(248, 250, 252, 1);
+    backdrop-filter: none;
     border-radius: var(--radius-lg);
-    padding: 1rem 1.125rem;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
     transition: all var(--transition-fast);
     display: flex;
-    min-width: 0;
-    flex-direction: column;
-    gap: 0.85rem;
-    min-height: 104px;
+    align-items: center;
+    gap: 1rem;
 }
 
-[data-theme="dark"] .overview-metric {
-    background: rgba(15, 23, 42, 0.55);
-    border: 1px solid rgba(129, 140, 248, 0.16);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.overview-metric:hover {
+.preview-stat-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-md);
-    border-color: rgba(99, 102, 241, 0.35);
+    border-color: var(--primary-color);
 }
 
-[data-theme="dark"] .overview-metric:hover {
-    border-color: rgba(129, 140, 248, 0.32);
-    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5),
-                0 0 34px rgba(129, 140, 248, 0.18),
-                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+.stat-card-compact {
+    padding: 1.25rem;
 }
 
-.metric-top {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.metric-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
+.stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: var(--primary-color);
-    background: rgba(99, 102, 241, 0.12);
-    border: 1px solid rgba(99, 102, 241, 0.22);
 }
 
-.metric-icon svg {
-    width: 20px;
-    height: 20px;
+.stat-icon-wrapper svg {
+    width: 24px;
+    height: 24px;
+    color: white;
     stroke-width: 2;
 }
 
-.overview-metric[data-tone="success"] .metric-icon {
-    color: var(--success-color);
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.22);
+.stat-icon-primary {
+    background: var(--gradient-primary);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.overview-metric[data-tone="primary"] .metric-icon {
-    color: var(--primary-color);
-    background: rgba(99, 102, 241, 0.12);
-    border: 1px solid rgba(99, 102, 241, 0.22);
+.stat-icon-success {
+    background: var(--gradient-success);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
-.metric-icon-status {
-    color: var(--success-color);
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.22);
+.stat-icon-warning {
+    background: var(--gradient-warning);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.stat-icon-deploy {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.stat-icon-status {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     transition: all var(--transition-fast);
 }
 
-.metric-icon-status.status-warning {
-    color: var(--warning-color);
-    background: rgba(245, 158, 11, 0.14);
-    border: 1px solid rgba(245, 158, 11, 0.26);
+.stat-icon-status.status-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
-.metric-icon-status.status-error {
-    color: var(--danger-color);
-    background: rgba(239, 68, 68, 0.14);
-    border: 1px solid rgba(239, 68, 68, 0.26);
+.stat-icon-status.status-error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
-.metric-meta {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.metric-label {
-    font-size: 0.8125rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.1;
-}
-
-.metric-hint {
-    margin-top: 0.25rem;
-    font-size: 0.75rem;
-    color: var(--text-tertiary);
-    line-height: 1.2;
-}
-
-.metric-bottom {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-
-    margin-top: auto;
-}
-
-.metric-value {
-    font-size: 1.85rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--text-primary);
-    line-height: 1.1;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-
-.metric-value.metric-value-status {
-    font-size: 1rem;
-    font-weight: 800;
-    letter-spacing: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.metric-value-status.status-running {
-    color: var(--success-color);
-}
-
-.metric-value-status.status-warning {
-    color: var(--warning-color);
-}
-
-.metric-value-status.status-error {
-    color: var(--danger-color);
-}
-
-.overview-extras {
-    position: relative;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.overview-chip {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
-    border-radius: var(--radius-lg);
-    background: rgba(255, 255, 255, 0.65);
-    border: 1px dashed rgba(148, 163, 184, 0.55);
-    transition: all var(--transition-fast);
-    overflow: hidden;
-}
-
-[data-theme="dark"] .overview-chip {
-    background: rgba(15, 23, 42, 0.45);
-    border: 1px dashed rgba(129, 140, 248, 0.22);
-}
-
-.overview-chip:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-    border-style: solid;
-}
-
-.chip-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: var(--text-primary);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-}
-
-.chip-icon svg {
-    width: 18px;
-    height: 18px;
-    stroke-width: 2;
-}
-
-.chip-icon.mode-preview {
-    color: #64748b;
-    background: rgba(148, 163, 184, 0.16);
-    border: 1px solid rgba(148, 163, 184, 0.28);
-}
-
-.chip-icon.mode-user {
-    color: #3b82f6;
-    background: rgba(59, 130, 246, 0.14);
-    border: 1px solid rgba(59, 130, 246, 0.26);
-}
-
-.chip-icon.mode-admin {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.14);
-    border: 1px solid rgba(239, 68, 68, 0.26);
-}
-
-.chip-text {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.chip-label {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    font-weight: 700;
-    line-height: 1.1;
-}
-
-.chip-value {
-    margin-top: 0.25rem;
-    font-size: 0.9375rem;
-    color: var(--text-primary);
-    font-weight: 800;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.stat-icon-mode {
+    background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
 }
 
 .stat-content {
@@ -481,6 +292,15 @@ export const dynamicCssContent = /* css */ `
     color: var(--text-primary);
     line-height: 1.2;
     font-family: 'Courier New', monospace;
+}
+
+.stat-value-text {
+    font-size: 1rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.stat-value-status {
+    font-size: 0.875rem;
 }
 
 .stat-label {
@@ -1320,6 +1140,21 @@ export const dynamicCssContent = /* css */ `
 
 .status-error {
     animation: shake 0.5s ease-in-out;
+}
+
+/* ========================================
+   模式徽章样式
+   ======================================== */
+.mode-preview .stat-icon-wrapper {
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+}
+
+.mode-user .stat-icon-wrapper {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.mode-admin .stat-icon-wrapper {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
 
 /* ========================================
@@ -2927,86 +2762,5 @@ export const dynamicCssContent = /* css */ `
     font-size: 0.875rem;
     line-height: 1.6;
 }
-
-
-
-/* ========================================
-   主界面总览卡片：移动端强制修复（放在 dynamic 末尾覆盖顺序）
-   说明：由于模板中 responsiveCssContent 在 dynamicCssContent 之前插入，
-   因此此处必须再次声明移动端覆盖规则，避免被后续基础规则覆盖。
-   ======================================== */
-@media (max-width: 767px) {
-    .preview-overview-panel {
-        padding: 1rem;
-    }
-
-    .overview-metrics {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .overview-metric-status {
-        grid-column: 1 / -1;
-    }
-
-    .overview-extras {
-        grid-template-columns: 1fr;
-    }
-
-    /* 运营状态文案：一行显示（空间不足时省略） */
-    .metric-value.metric-value-status {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-}
-
-@media (max-width: 479px) {
-    .overview-metrics {
-        grid-template-columns: 1fr;
-    }
-
-    .overview-metric-status {
-        grid-column: auto;
-    }
-}
-
-/* ========================================
-   运营状态呼吸效果（不影响布局）
-   ======================================== */
-.overview-metric-status {
-    position: relative;
-    overflow: hidden;
-}
-
-.overview-metric-status::after {
-    content: "";
-    position: absolute;
-    inset: -40%;
-    background: radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.16), rgba(16, 185, 129, 0.00) 55%);
-    opacity: 0;
-    transform: scale(0.98);
-    pointer-events: none;
-}
-
-.overview-metric-status.status-running::after {
-    animation: statusBreath 2.4s ease-in-out infinite;
-}
-
-.overview-metric-status.status-warning::after {
-    background: radial-gradient(circle at 30% 30%, rgba(245, 158, 11, 0.16), rgba(245, 158, 11, 0.00) 55%);
-    animation: statusBreath 2.8s ease-in-out infinite;
-}
-
-.overview-metric-status.status-error::after {
-    background: radial-gradient(circle at 30% 30%, rgba(239, 68, 68, 0.14), rgba(239, 68, 68, 0.00) 55%);
-    animation: statusBreath 3.0s ease-in-out infinite;
-}
-
-@keyframes statusBreath {
-    0%   { opacity: 0.15; transform: scale(0.98); }
-    45%  { opacity: 0.55; transform: scale(1.02); }
-    100% { opacity: 0.15; transform: scale(0.98); }
-}
-
 
 `;
