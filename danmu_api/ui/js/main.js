@@ -107,9 +107,9 @@ function getDeployPlatformLabel(platform) {
         netlify: 'Netlify',
         edgeone: 'EdgeOne (腾讯云 Pages)',
         cloudflare: 'Cloudflare',
-        docker: 'Docker',
-        node: 'Node.js',
-        nodejs: 'Node.js'
+        docker: '本地/Docker',
+        node: '本地/Docker',
+        nodejs: '本地/Docker'
     };
     return map[p] || (platform || 'Unknown');
 }
@@ -122,7 +122,7 @@ function getDeployRequiredVars(platform) {
     if (p === 'netlify' || p === 'cloudflare') {
         return ['DEPLOY_PLATFROM_ACCOUNT', 'DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'];
     }
-    // Node.js / Docker 不需要额外部署变量
+    // 本地/Docker 部署不需要额外部署变量，修改配置后自动生效
     return [];
 }
 
