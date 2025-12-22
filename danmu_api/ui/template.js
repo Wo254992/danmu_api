@@ -1,4 +1,5 @@
 import { globals } from "../configs/globals.js";
+import { tokensCssContent } from "./css/tokens.css.js";
 import { baseCssContent } from "./css/base.css.js";
 import { componentsCssContent } from "./css/components.css.js";
 import { formsCssContent } from "./css/forms.css.js";
@@ -32,13 +33,14 @@ export const HTML_TEMPLATE = /* html */ `
             document.documentElement.style.colorScheme = theme;
         })();
     </script>
+    <style>${tokensCssContent}</style>
     <style>${baseCssContent}</style>
+    <style>${colorsCssContent}</style>
     <style>${componentsCssContent}</style>
     <style>${formsCssContent}</style>
-    <style>${responsiveCssContent}</style>
-    <style>${dynamicCssContent}</style>
     <style>${modeBadgeCssContent}</style>
-    <style>${colorsCssContent}</style>
+    <style>${dynamicCssContent}</style>
+    <style>${responsiveCssContent}</style>
 </head>
 
 <body>
