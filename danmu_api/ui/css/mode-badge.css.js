@@ -1,583 +1,513 @@
 // language=CSS
 export const modeBadgeCssContent = /* css */ `
 /* ========================================
-   模式徽章系统
+   模式徽章 - Mode Badge
+   管理员模式、用户模式、预览模式的视觉标识
    ======================================== */
 
-/* 基础徽章样式 */
+/* ========== 模式徽章基础样式 ========== */
+.mode-badge {
+    position: fixed;
+    bottom: var(--spacing-lg);
+    right: var(--spacing-lg);
+    z-index: var(--z-fixed);
+    pointer-events: none;
+}
+
+.mode-badge-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-full);
+    box-shadow: var(--glass-shadow), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    animation: modeBadgeSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modeBadgeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.mode-badge-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.mode-badge-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.mode-badge-label {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-weight: var(--font-medium);
+    line-height: 1;
+}
+
+.mode-badge-mode {
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+/* 管理员模式样式 */
+.mode-badge.admin .mode-badge-icon {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+}
+
+.mode-badge.admin .mode-badge-mode {
+    color: #f59e0b;
+}
+
+/* 用户模式样式 */
+.mode-badge.user .mode-badge-icon {
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+}
+
+.mode-badge.user .mode-badge-mode {
+    color: #3b82f6;
+}
+
+/* 预览模式样式 */
+.mode-badge.preview .mode-badge-icon {
+    background: linear-gradient(135deg, #10b981, #14b8a6);
+}
+
+.mode-badge.preview .mode-badge-mode {
+    color: #10b981;
+}
+
+/* ========== 状态指示器 ========== */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    transition: all var(--transition-fast);
+}
+
+.status-indicator-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.2);
+    }
+}
+
+/* 成功状态 */
+.status-indicator.success {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success-color);
+}
+
+.status-indicator.success .status-indicator-dot {
+    background: var(--success-color);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+/* 警告状态 */
+.status-indicator.warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning-color);
+}
+
+.status-indicator.warning .status-indicator-dot {
+    background: var(--warning-color);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+/* 错误状态 */
+.status-indicator.error {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger-color);
+}
+
+.status-indicator.error .status-indicator-dot {
+    background: var(--danger-color);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+/* 信息状态 */
+.status-indicator.info {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--primary-color);
+}
+
+.status-indicator.info .status-indicator-dot {
+    background: var(--primary-color);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+}
+
+/* 进行中状态 */
+.status-indicator.processing {
+    background: rgba(139, 92, 246, 0.15);
+    color: #8b5cf6;
+}
+
+.status-indicator.processing .status-indicator-dot {
+    background: #8b5cf6;
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+    animation: statusSpin 1s linear infinite;
+}
+
+@keyframes statusSpin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========== 加载指示器 ========== */
+.loading-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 0.5rem 0.875rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    box-shadow: var(--shadow-sm);
+}
+
+.loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: loadingSpin 0.8s linear infinite;
+}
+
+@keyframes loadingSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========== 徽章组合样式 ========== */
 .badge {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    padding: 0.375rem 0.875rem;
-    border-radius: var(--radius-md);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    transition: all var(--transition-fast);
-    border: 1px solid transparent;
-}
-
-.badge-sm {
     padding: 0.25rem 0.625rem;
-    font-size: 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    line-height: 1.4;
 }
 
-.badge-lg {
-    padding: 0.5rem 1.125rem;
-    font-size: 0.9375rem;
+/* 主要徽章 */
+.badge.primary {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--primary-color);
 }
 
-/* ========================================
-   模式徽章变体
-   ======================================== */
-
-/* 预览模式 */
-.mode-badge-preview {
-    background: linear-gradient(135deg, rgba(148, 163, 184, 0.15), rgba(100, 116, 139, 0.15));
-    color: var(--gray-600);
-    border-color: var(--gray-400);
+/* 次要徽章 */
+.badge.secondary {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
 }
 
-[data-theme="dark"] .mode-badge-preview {
-    background: linear-gradient(135deg, rgba(148, 163, 184, 0.2), rgba(100, 116, 139, 0.2));
-    color: var(--gray-300);
-    border-color: var(--gray-500);
+/* 成功徽章 */
+.badge.success {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success-color);
 }
 
-/* 用户模式 */
-.mode-badge-user {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.15));
-    color: var(--primary-600);
-    border-color: var(--primary-400);
+/* 警告徽章 */
+.badge.warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning-color);
 }
 
-[data-theme="dark"] .mode-badge-user {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.2));
-    color: var(--primary-300);
-    border-color: var(--primary-500);
+/* 错误徽章 */
+.badge.danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger-color);
 }
 
-/* 管理员模式 */
-.mode-badge-admin {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15));
-    color: var(--danger-600);
-    border-color: var(--danger-400);
-    animation: pulse 2s ease-in-out infinite;
+/* 信息徽章 */
+.badge.info {
+    background: rgba(14, 165, 233, 0.15);
+    color: #0ea5e9;
 }
 
-[data-theme="dark"] .mode-badge-admin {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
-    color: var(--danger-300);
-    border-color: var(--danger-500);
-}
-
-/* ========================================
-   状态指示器
-   ======================================== */
-
-/* 运行中状态 */
-.status-badge-running {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15));
-    color: var(--success-600);
-    border-color: var(--success-400);
-}
-
-.status-badge-running::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    background: var(--success-500);
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-}
-
-[data-theme="dark"] .status-badge-running {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2));
-    color: var(--success-300);
-    border-color: var(--success-500);
-}
-
-/* 警告状态 */
-.status-badge-warning {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.15));
-    color: var(--warning-600);
-    border-color: var(--warning-400);
-}
-
-.status-badge-warning::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    background: var(--warning-500);
-    border-radius: 50%;
-    animation: blink 1.5s ease-in-out infinite;
-}
-
-[data-theme="dark"] .status-badge-warning {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.2));
-    color: var(--warning-300);
-    border-color: var(--warning-500);
-}
-
-/* 错误状态 */
-.status-badge-error {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15));
-    color: var(--danger-600);
-    border-color: var(--danger-400);
-}
-
-.status-badge-error::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    background: var(--danger-500);
-    border-radius: 50%;
-    animation: shake 0.5s ease-in-out infinite;
-}
-
-[data-theme="dark"] .status-badge-error {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
-    color: var(--danger-300);
-    border-color: var(--danger-500);
-}
-
-/* ========================================
-   部署平台徽章
-   ======================================== */
-
-/* Node.js */
-.deploy-badge-node {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15));
-    color: var(--success-600);
-    border-color: var(--success-400);
-}
-
-[data-theme="dark"] .deploy-badge-node {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2));
-    color: var(--success-300);
-}
-
-/* Vercel */
-.deploy-badge-vercel {
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(67, 67, 67, 0.1));
-    color: var(--gray-900);
-    border-color: var(--gray-400);
-}
-
-[data-theme="dark"] .deploy-badge-vercel {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(245, 245, 245, 0.1));
-    color: var(--gray-100);
-    border-color: var(--gray-600);
-}
-
-/* Netlify */
-.deploy-badge-netlify {
-    background: linear-gradient(135deg, rgba(0, 199, 183, 0.15), rgba(0, 168, 150, 0.15));
-    color: #00a896;
-    border-color: #00c7b7;
-}
-
-[data-theme="dark"] .deploy-badge-netlify {
-    background: linear-gradient(135deg, rgba(0, 199, 183, 0.2), rgba(0, 168, 150, 0.2));
-    color: #00c7b7;
-}
-
-/* Cloudflare */
-.deploy-badge-cloudflare {
-    background: linear-gradient(135deg, rgba(243, 128, 32, 0.15), rgba(246, 130, 31, 0.15));
-    color: #f38020;
-    border-color: #f6821f;
-}
-
-[data-theme="dark"] .deploy-badge-cloudflare {
-    background: linear-gradient(135deg, rgba(243, 128, 32, 0.2), rgba(246, 130, 31, 0.2));
-    color: #f6821f;
-}
-
-/* EdgeOne */
-.deploy-badge-edgeone {
-    background: linear-gradient(135deg, rgba(0, 110, 255, 0.15), rgba(0, 82, 204, 0.15));
-    color: #006eff;
-    border-color: #0052cc;
-}
-
-[data-theme="dark"] .deploy-badge-edgeone {
-    background: linear-gradient(135deg, rgba(0, 110, 255, 0.2), rgba(0, 82, 204, 0.2));
-    color: #4d9eff;
-}
-
-/* Docker */
-.deploy-badge-docker {
-    background: linear-gradient(135deg, rgba(36, 150, 237, 0.15), rgba(29, 127, 193, 0.15));
-    color: #2496ed;
-    border-color: #1d7fc1;
-}
-
-[data-theme="dark"] .deploy-badge-docker {
-    background: linear-gradient(135deg, rgba(36, 150, 237, 0.2), rgba(29, 127, 193, 0.2));
-    color: #4daef5;
-}
-
-/* ========================================
-   徽章图标
-   ======================================== */
+/* 徽章图标 */
 .badge-icon {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
+    font-size: var(--text-sm);
+    line-height: 1;
 }
 
-.badge-icon-pulse {
-    animation: pulse 2s ease-in-out infinite;
-}
-
-/* ========================================
-   徽章动画
-   ======================================== */
-
-/* 闪烁动画 */
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-}
-
-/* 呼吸动画 */
-@keyframes breathe {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.05); opacity: 0.8; }
-}
-
-/* 抖动动画 */
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
-    20%, 40%, 60%, 80% { transform: translateX(2px); }
-}
-
-/* ========================================
-   交互式徽章
-   ======================================== */
-.badge-interactive {
-    cursor: pointer;
-    user-select: none;
-}
-
-.badge-interactive:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-}
-
-.badge-interactive:active {
-    transform: translateY(0);
-}
-
-/* ========================================
-   徽章组
-   ======================================== */
-.badge-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.badge-group-compact {
-    gap: 0.375rem;
-}
-
-.badge-group-loose {
-    gap: 0.75rem;
-}
-
-/* ========================================
-   徽章计数器
-   ======================================== */
-.badge-counter {
-    position: relative;
-}
-
-.badge-counter::after {
-    content: attr(data-count);
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 4px;
-    background: var(--danger-500);
-    color: white;
-    font-size: 0.6875rem;
-    font-weight: 700;
-    border-radius: 9px;
-    display: flex;
+/* ========== 计数徽章 ========== */
+.count-badge {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 0.375rem;
+    background: var(--danger-color);
+    color: white;
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: var(--font-bold);
+    line-height: 1;
+}
+
+.count-badge.empty {
+    display: none;
+}
+
+/* ========== 新功能徽章 ========== */
+.new-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    background: linear-gradient(135deg, #ec4899, #f97316);
+    color: white;
+    border-radius: var(--radius-full);
+    font-size: 10px;
+    font-weight: var(--font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+    animation: newBadgePulse 2s ease-in-out infinite;
+}
+
+@keyframes newBadgePulse {
+    0%, 100% {
+        box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+    }
+    50% {
+        box-shadow: 0 4px 16px rgba(236, 72, 153, 0.6);
+    }
+}
+
+.new-badge::before {
+    content: '✨';
+    font-size: 10px;
+}
+
+/* ========== 在线状态徽章 ========== */
+.online-badge {
+    position: relative;
+    display: inline-block;
+}
+
+.online-badge::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background: var(--success-color);
     border: 2px solid var(--bg-primary);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* ========================================
-   徽章状态点
-   ======================================== */
-.badge-dot {
-    position: relative;
-    padding-left: 1.5rem;
-}
-
-.badge-dot::before {
-    content: '';
-    position: absolute;
-    left: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
     border-radius: 50%;
-    background: currentColor;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
 }
 
-.badge-dot-pulse::before {
-    animation: pulse 2s ease-in-out infinite;
+.online-badge.offline::after {
+    background: var(--text-tertiary);
+    box-shadow: none;
 }
 
-.badge-dot-blink::before {
-    animation: blink 1.5s ease-in-out infinite;
+.online-badge.busy::after {
+    background: var(--warning-color);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
 }
 
-/* ========================================
-   徽章轮廓样式
-   ======================================== */
-.badge-outline {
-    background: transparent;
-    border-width: 2px;
+/* ========== 进度徽章 ========== */
+.progress-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 0.375rem 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
 }
 
-.badge-outline.badge-primary {
-    color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.badge-outline.badge-success {
-    color: var(--success-color);
-    border-color: var(--success-color);
-}
-
-.badge-outline.badge-warning {
-    color: var(--warning-color);
-    border-color: var(--warning-color);
-}
-
-.badge-outline.badge-danger {
-    color: var(--danger-color);
-    border-color: var(--danger-color);
-}
-
-/* ========================================
-   徽章渐变样式
-   ======================================== */
-.badge-gradient-primary {
-    background: var(--gradient-primary);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-.badge-gradient-success {
-    background: var(--gradient-success);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-.badge-gradient-warning {
-    background: var(--gradient-warning);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-}
-
-.badge-gradient-danger {
-    background: var(--gradient-danger);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-/* ========================================
-   徽章特殊效果
-   ======================================== */
-
-/* 发光徽章 */
-.badge-glow {
-    position: relative;
-    overflow: visible;
-}
-
-.badge-glow::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    background: inherit;
-    border-radius: inherit;
-    filter: blur(8px);
-    opacity: 0.5;
-    z-index: -1;
-    animation: breathe 2s ease-in-out infinite;
-}
-
-/* 闪光徽章 */
-.badge-shine {
-    position: relative;
+.progress-bar-mini {
+    width: 60px;
+    height: 4px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
     overflow: hidden;
 }
 
-.badge-shine::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
+.progress-bar-mini-fill {
     height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent
-    );
-    animation: shine 3s ease-in-out infinite;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: var(--radius-full);
+    transition: width var(--transition-base);
 }
 
-@keyframes shine {
-    0% { left: -100%; }
-    20%, 100% { left: 100%; }
+.progress-text {
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
 }
 
-/* ========================================
-   响应式徽章
-   ======================================== */
-@media (max-width: 767px) {
-    .badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.75rem;
-    }
-
-    .badge-sm {
-        font-size: 0.6875rem;
-        padding: 0.1875rem 0.5rem;
-    }
-
-    .badge-lg {
-        font-size: 0.875rem;
-        padding: 0.375rem 1rem;
-    }
-
-    .badge-icon {
-        width: 12px;
-        height: 12px;
-    }
-}
-/* ========================================
-   徽章高级效果 - 新增
-   ======================================== */
-
-/* 彩虹边框效果 */
-[data-theme="dark"] .badge {
-    position: relative;
-    background-clip: padding-box;
+/* ========== 验证徽章 ========== */
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.1));
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    color: var(--primary-color);
 }
 
-[data-theme="dark"] .badge::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-        135deg,
-        rgba(129, 140, 248, 0.4),
-        rgba(167, 139, 250, 0.4),
-        rgba(192, 132, 252, 0.4),
-        rgba(236, 72, 153, 0.4)
-    );
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
-
-[data-theme="dark"] .badge:hover::before {
-    opacity: 1;
-}
-
-/* 管理员徽章特殊动画 */
-[data-theme="dark"] .mode-badge-admin {
-    animation: adminPulse 2s ease-in-out infinite;
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-}
-
-[data-theme="dark"] .mode-badge-admin::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: inherit;
-    background: inherit;
-    filter: blur(10px);
-    opacity: 0.5;
-    z-index: -1;
-    animation: adminGlow 2s ease-in-out infinite;
-}
-
-@keyframes adminPulse {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-    }
-    50% {
-        transform: scale(1.05);
-        box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
-    }
-}
-
-@keyframes adminGlow {
-    0%, 100% {
-        opacity: 0.3;
-    }
-    50% {
-        opacity: 0.6;
-    }
-}
-
-/* 运行状态呼吸灯 */
-[data-theme="dark"] .status-badge-running::before {
-    box-shadow: 
-        0 0 10px var(--success-500),
-        0 0 20px rgba(16, 185, 129, 0.5);
-}
-
-[data-theme="dark"] .status-badge-running::after {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    background: var(--success-500);
+.verified-badge::before {
+    content: '✓';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    background: var(--primary-color);
+    color: white;
     border-radius: 50%;
-    left: 0.875rem;
-    filter: blur(6px);
-    opacity: 0.6;
-    animation: breathingGlow 2s ease-in-out infinite;
+    font-size: 10px;
+    font-weight: var(--font-bold);
 }
 
-@keyframes breathingGlow {
+/* ========== 热门徽章 ========== */
+.hot-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(249, 115, 22, 0.1));
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    color: var(--danger-color);
+    animation: hotBadgeShake 2s ease-in-out infinite;
+}
+
+@keyframes hotBadgeShake {
     0%, 100% {
-        transform: scale(0.8);
-        opacity: 0.4;
+        transform: rotate(0deg);
     }
-    50% {
-        transform: scale(1.2);
-        opacity: 0.8;
+    10%, 30%, 50%, 70%, 90% {
+        transform: rotate(-2deg);
+    }
+    20%, 40%, 60%, 80% {
+        transform: rotate(2deg);
+    }
+}
+
+.hot-badge::before {
+    content: '🔥';
+    font-size: 12px;
+}
+
+/* ========== 响应式优化 ========== */
+@media (max-width: 768px) {
+    .mode-badge {
+        bottom: var(--spacing-md);
+        right: var(--spacing-md);
+    }
+    
+    .mode-badge-content {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+    
+    .mode-badge-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+    }
+    
+    .mode-badge-label {
+        font-size: 10px;
+    }
+    
+    .mode-badge-mode {
+        font-size: var(--text-xs);
+    }
+}
+
+@media (max-width: 480px) {
+    .mode-badge {
+        bottom: var(--spacing-sm);
+        right: var(--spacing-sm);
+    }
+    
+    .mode-badge-content {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        gap: var(--spacing-sm);
+    }
+    
+    .mode-badge-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+    }
+    
+    .mode-badge-text {
+        display: none;
+    }
+}
+
+/* ========== 打印样式 ========== */
+@media print {
+    .mode-badge,
+    .loading-indicator,
+    .status-indicator {
+        display: none !important;
     }
 }
 `;
