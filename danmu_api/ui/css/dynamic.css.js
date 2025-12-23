@@ -654,6 +654,149 @@ export const dynamicCssContent = /* css */ `
     }
 }
 
+/* ========== 配置预览模块 ========== */
+.preview-hero-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--glass-shadow);
+}
+
+.preview-hero-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.preview-hero-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-xl);
+    color: var(--text-inverse);
+    flex-shrink: 0;
+}
+
+.preview-hero-icon svg {
+    width: 32px;
+    height: 32px;
+    stroke-width: 2;
+}
+
+.preview-hero-titles {
+    flex: 1;
+}
+
+.preview-hero-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs) 0;
+}
+
+.preview-hero-subtitle {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.preview-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.preview-stat-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    transition: all var(--transition-fast);
+}
+
+.preview-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card-compact {
+    padding: var(--spacing-md);
+}
+
+.stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    flex-shrink: 0;
+}
+
+.stat-icon-wrapper svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2;
+}
+
+.stat-icon-primary {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(99, 102, 241, 0.1));
+    color: var(--primary-color);
+}
+
+.stat-icon-success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(52, 211, 153, 0.1));
+    color: var(--success-color);
+}
+
+.stat-icon-warning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.1));
+    color: var(--warning-color);
+}
+
+.stat-icon-status {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+.stat-icon-mode {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+.stat-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.stat-value {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.stat-value-status,
+.stat-value-text {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+}
+
+.stat-label {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
 
 /* 状态颜色 */
 .status-running .stat-icon-wrapper {
