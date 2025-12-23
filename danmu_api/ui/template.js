@@ -168,159 +168,123 @@ export const HTML_TEMPLATE = /* html */ `
 
             <!-- 配置预览 -->
             <section class="content-section active" id="preview-section">
-                <div class="preview-hero-card">
-                    <div class="preview-hero-background">
-                        <div class="hero-glow hero-glow-1"></div>
-                        <div class="hero-glow hero-glow-2"></div>
-                        <div class="hero-glow hero-glow-3"></div>
-                        <div class="hero-grid-pattern"></div>
+                <div class="preview-hero-card-redesign">
+                    <div class="hero-card-background">
+                        <div class="hero-gradient-orb hero-orb-1"></div>
+                        <div class="hero-gradient-orb hero-orb-2"></div>
+                        <div class="hero-gradient-orb hero-orb-3"></div>
                     </div>
-                    <div class="preview-hero-content">
-                        <div class="preview-hero-header">
-                            <div class="preview-hero-icon-wrapper">
-                                <div class="preview-hero-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    <div class="preview-hero-content-redesign">
+                        <div class="preview-hero-header-redesign">
+                            <div class="hero-icon-badge">
+                                <div class="icon-badge-inner">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                        <path d="M2 17l10 5 10-5"/>
+                                        <path d="M2 12l10 5 10-5"/>
+                                    </svg>
+                                </div>
+                                <div class="icon-badge-glow"></div>
+                            </div>
+                            <div class="hero-titles-redesign">
+                                <h2 class="hero-title-main">
+                                    <span class="title-text">环境配置总览</span>
+                                    <span class="title-decoration"></span>
+                                </h2>
+                                <p class="hero-subtitle-main">实时生效的系统环境变量配置</p>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-stats-grid-redesign" id="preview-stats-grid">
+                            <div class="stat-card-redesign stat-card-primary">
+                                <div class="stat-card-glow"></div>
+                                <div class="stat-icon-redesign">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
                                         <path d="M9 12h6m-6 4h6"/>
                                     </svg>
                                 </div>
-                                <div class="hero-icon-ring hero-icon-ring-1"></div>
-                                <div class="hero-icon-ring hero-icon-ring-2"></div>
-                            </div>
-                            <div class="preview-hero-titles">
-                                <h2 class="preview-hero-title">
-                                    <span class="title-gradient">环境配置总览</span>
-                                    <span class="title-shine"></span>
-                                </h2>
-                                <p class="preview-hero-subtitle">
-                                    <svg class="subtitle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <polyline points="12 6 12 12 16 14"/>
-                                    </svg>
-                                    <span>实时生效的系统环境变量配置</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="preview-stats-grid" id="preview-stats-grid">
-                            <div class="preview-stat-card stat-card-enhanced">
-                                <div class="stat-card-glow"></div>
-                                <div class="stat-icon-wrapper stat-icon-primary">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-                                    </svg>
-                                    <div class="icon-particles">
-                                        <span class="particle"></span>
-                                        <span class="particle"></span>
-                                        <span class="particle"></span>
+                                <div class="stat-info-redesign">
+                                    <div class="stat-value-redesign" id="total-configs">
+                                        <span class="stat-number">-</span>
                                     </div>
+                                    <div class="stat-label-redesign">配置项</div>
                                 </div>
-                                <div class="stat-content">
-                                    <div class="stat-value-wrapper">
-                                        <div class="stat-value" id="total-configs">-</div>
-                                        <div class="stat-trend">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div class="stat-label">配置项总数</div>
+                                <div class="stat-trend">
+                                    <span class="trend-icon">↗</span>
                                 </div>
                             </div>
-                            <div class="preview-stat-card stat-card-enhanced">
+                            
+                            <div class="stat-card-redesign stat-card-success">
                                 <div class="stat-card-glow"></div>
-                                <div class="stat-icon-wrapper stat-icon-success">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <div class="stat-icon-redesign">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
                                     </svg>
-                                    <div class="icon-particles">
-                                        <span class="particle"></span>
-                                        <span class="particle"></span>
-                                        <span class="particle"></span>
-                                    </div>
                                 </div>
-                                <div class="stat-content">
-                                    <div class="stat-value-wrapper">
-                                        <div class="stat-value" id="total-categories">-</div>
-                                        <div class="stat-trend">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-                                            </svg>
-                                        </div>
+                                <div class="stat-info-redesign">
+                                    <div class="stat-value-redesign" id="total-categories">
+                                        <span class="stat-number">-</span>
                                     </div>
-                                    <div class="stat-label">配置类别</div>
+                                    <div class="stat-label-redesign">配置类别</div>
+                                </div>
+                                <div class="stat-trend">
+                                    <span class="trend-icon">●</span>
                                 </div>
                             </div>
-                            <div class="preview-stat-card stat-card-enhanced">
+                            
+                            <div class="stat-card-redesign stat-card-warning">
                                 <div class="stat-card-glow"></div>
-                                <div class="stat-icon-wrapper stat-icon-warning">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                <div class="stat-icon-redesign">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"/>
+                                        <path d="M18 2l4 4-9 9-4 1 1-4 9-9z"/>
                                     </svg>
-                                    <div class="icon-particles">
-                                        <span class="particle"></span>
-                                        <span class="particle"></span>
-                                        <span class="particle"></span>
-                                    </div>
                                 </div>
-                                <div class="stat-content">
-                                    <div class="stat-value-wrapper">
-                                        <div class="stat-value" id="manual-configs">-</div>
-                                        <div class="stat-trend stat-trend-up">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                                                <polyline points="17 6 23 6 23 12"/>
-                                            </svg>
-                                        </div>
+                                <div class="stat-info-redesign">
+                                    <div class="stat-value-redesign" id="manual-configs">
+                                        <span class="stat-number">-</span>
                                     </div>
-                                    <div class="stat-label">已配置项</div>
+                                    <div class="stat-label-redesign">已配置</div>
+                                </div>
+                                <div class="stat-trend">
+                                    <span class="trend-icon">✓</span>
                                 </div>
                             </div>
-                            <div class="preview-stat-card stat-card-enhanced" id="system-status-card">
+                            
+                            <div class="stat-card-redesign stat-card-status" id="system-status-card">
                                 <div class="stat-card-glow"></div>
-                                <div class="stat-icon-wrapper stat-icon-status" id="status-icon-wrapper">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                                <div class="stat-icon-redesign" id="status-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 6v6l4 2"/>
                                     </svg>
-                                    <div class="icon-particles">
-                                        <span class="particle"></span>
-                                        <span class="particle"></span>
-                                        <span class="particle"></span>
-                                    </div>
                                 </div>
-                                <div class="stat-content">
-                                    <div class="stat-value-wrapper">
-                                        <div class="stat-value stat-value-status" id="system-status">检测中</div>
-                                        <div class="stat-status-indicator">
-                                            <span class="status-pulse"></span>
-                                        </div>
+                                <div class="stat-info-redesign">
+                                    <div class="stat-value-redesign stat-value-status-redesign" id="system-status">
+                                        <span class="stat-text">检测中</span>
                                     </div>
-                                    <div class="stat-label">系统状态</div>
+                                    <div class="stat-label-redesign">系统状态</div>
                                 </div>
+                                <div class="status-indicator-pulse"></div>
                             </div>
-                            <div class="preview-stat-card stat-card-enhanced" id="mode-card">
+                            
+                            <div class="stat-card-redesign stat-card-mode" id="mode-card">
                                 <div class="stat-card-glow"></div>
-                                <div class="stat-icon-wrapper stat-icon-mode" id="mode-icon-wrapper">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <div class="stat-icon-redesign" id="mode-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-                                        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        <path d="M12 4v1m0 14v1m8-8h-1M5 12H4"/>
+                                        <path d="m16.5 7.5-.707.707M8.207 16.793l-.707.707m9-9l.707.707M7.5 16.5l-.707-.707"/>
                                     </svg>
-                                    <div class="icon-particles">
-                                        <span class="particle"></span>
-                                        <span class="particle"></span>
-                                        <span class="particle"></span>
-                                    </div>
                                 </div>
-                                <div class="stat-content">
-                                    <div class="stat-value-wrapper">
-                                        <div class="stat-value stat-value-text" id="current-mode">检测中...</div>
-                                        <div class="mode-badge-indicator">
-                                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66z"/>
-                                            </svg>
-                                        </div>
+                                <div class="stat-info-redesign">
+                                    <div class="stat-value-redesign stat-value-mode-redesign" id="current-mode">
+                                        <span class="stat-text">检测中</span>
                                     </div>
-                                    <div class="stat-label">当前模式</div>
+                                    <div class="stat-label-redesign">当前模式</div>
                                 </div>
+                                <div class="mode-badge-indicator"></div>
                             </div>
                         </div>
                     </div>
