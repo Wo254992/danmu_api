@@ -8,7 +8,7 @@ import {
     updateLocalCaches
 } from "../utils/cache-util.js";
 import { formatDanmuResponse } from "../utils/danmu-util.js";
-import { extractEpisodeTitle, convertChineseNumber, parseFileName, createDynamicPlatformOrder, normalizeSpaces, sortAnimesByMatchScore } from "../utils/common-util.js";
+import { extractEpisodeTitle, convertChineseNumber, parseFileName, createDynamicPlatformOrder, normalizeSpaces } from "../utils/common-util.js";
 import { getTMDBChineseTitle } from "../utils/tmdb-util.js";
 import Kan360Source from "../sources/kan360.js";
 import VodSource from "../sources/vod.js";
@@ -261,9 +261,6 @@ export async function searchAnime(url, preferAnimeId = null, preferSource = null
   }
 
   storeAnimeIdsToMap(curAnimes, queryTitle);
-
-  // 按匹配度对结果进行排序
-  sortAnimesByMatchScore(curAnimes, queryTitle);
 
   // 如果启用了集标题过滤，则为每个动漫添加过滤后的 episodes
   if (globals.enableEpisodeFilter) {
