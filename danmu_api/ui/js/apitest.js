@@ -33,11 +33,11 @@ const apiConfigs = {
         params: [
             { 
                 name: 'keyword', 
-                label: '关键词', 
+                label: '关键词 或 播放链接URL', 
                 type: 'text', 
                 required: true, 
-                placeholder: '示例: 生万物',
-                description: '输入动漫名称进行搜索'
+                placeholder: '示例: 生万物 或 http://v.qq.com/x/cover/rjae621myqca41h/j0032ubhl9s.html',
+                description: '输入动漫名称，或直接输入播放链接URL进行解析'
             }
         ]
     },
@@ -116,6 +116,15 @@ const apiConfigs = {
                 options: ['json', 'xml'],
                 default: 'json',
                 description: '选择返回数据的格式'
+            },
+            { 
+                name: 'segmentflag', 
+                label: '分片标志', 
+                type: 'select', 
+                required: false, 
+                placeholder: '可选: true或false', 
+                options: ['true', 'false'],
+                description: '是否启用分片弹幕（部分源支持）'
             }
         ]
     },
@@ -145,6 +154,27 @@ const apiConfigs = {
                 description: '建议使用 json 便于查看；如需 xml 可切换'
             }
         ]
+    },
+    getSegmentComment: {
+        name: '获取分片弹幕',
+        icon: '🧩',
+        method: 'POST',
+        path: '/api/v2/segmentcomment',
+        description: '通过请求体获取分片弹幕（用于分段/区间弹幕）',
+        params: [
+            { 
+                name: 'format', 
+                label: '格式', 
+                type: 'select', 
+                required: false, 
+                placeholder: '默认: json', 
+                options: ['json', 'xml'],
+                default: 'json',
+                description: '选择返回数据的格式'
+            }
+        ],
+        hasBody: true,
+        bodyType: 'json'
     }
 };
 
@@ -190,7 +220,11 @@ function loadApiParams() {
         </div>
     \`;
 
-    if (config.params.length === 0) {
+    const hasParams = config.params && config.params.length > 0;
+    const hasBody = !!config.hasBody;
+
+    // 没有查询参数且没有请求体
+    if (!hasParams && !hasBody) {
         formDiv.innerHTML = apiInfoHTML + \`
             <div class="no-params-message">
                 <span class="message-icon">ℹ️</span>
@@ -200,54 +234,84 @@ function loadApiParams() {
         return;
     }
 
-    formDiv.innerHTML = apiInfoHTML + config.params.map((param, index) => {
-        let inputHTML = '';
-        
-        if (param.type === 'select') {
-            // 支持默认值：如果配置了 default，则不强制用户再手动选择
-            let optionsHtml = param.default ? '' : '<option value="">-- 请选择 --</option>';
-            if (param.options) {
-                optionsHtml += param.options.map(opt => {
-                    const selected = (param.default !== undefined && String(param.default) === String(opt)) ? 'selected' : '';
-                    return \`<option value="\${opt}" \${selected}>\${opt}</option>\`;
-                }).join('');
+    let formHtml = apiInfoHTML;
+
+    // 渲染查询参数
+    if (hasParams) {
+        formHtml += config.params.map((param, index) => {
+            let inputHTML = '';
+            
+            if (param.type === 'select') {
+                // 支持默认值：如果配置了 default，则不强制用户再手动选择
+                let optionsHtml = param.default ? '' : '<option value="">-- 请选择 --</option>';
+                if (param.options) {
+                    optionsHtml += param.options.map(opt => {
+                        const selected = (param.default !== undefined && String(param.default) === String(opt)) ? 'selected' : '';
+                        return \`<option value="\${opt}" \${selected}>\${opt}</option>\`;
+                    }).join('');
+                }
+                inputHTML = \`
+                    <select class="form-select" id="param-\${param.name}" \${param.required ? 'required' : ''}>
+                        \${optionsHtml}
+                    </select>
+                \`;
+            } else {
+                const placeholder = param.placeholder || "请输入" + param.label;
+                const defaultAttr = (param.default !== undefined && param.default !== null) ? \`value="\${String(param.default).replace(/\"/g, '&quot;')}"\` : '';
+                inputHTML = \`
+                    <input 
+                        type="\${param.type}" 
+                        class="form-input" 
+                        id="param-\${param.name}" 
+                        placeholder="\${placeholder}" 
+                        \${defaultAttr}
+                        \${param.required ? 'required' : ''}
+                    >
+                \`;
             }
-            inputHTML = \`
-                <select class="form-select" id="param-\${param.name}" \${param.required ? 'required' : ''}>
-                    \${optionsHtml}
-                </select>
+            
+            return \`
+                <div class="form-group" style="animation: fadeInUp 0.3s ease-out \${index * 0.1}s backwards;">
+                    <label class="form-label \${param.required ? 'required' : ''}">
+                        <span class="param-icon">🔸</span>
+                        \${param.label}
+                    </label>
+                    \${inputHTML}
+                    \${param.description ? \`
+                        <small class="form-help">
+                            <span class="help-icon">💡</span>
+                            \${param.description}
+                        </small>
+                    \` : ''}
+                </div>
             \`;
-        } else {
-            const placeholder = param.placeholder || "请输入" + param.label;
-            const defaultAttr = (param.default !== undefined && param.default !== null) ? \`value="\${String(param.default).replace(/\"/g, '&quot;')}"\` : '';
-            inputHTML = \`
-                <input 
-                    type="\${param.type}" 
-                    class="form-input" 
-                    id="param-\${param.name}" 
-                    placeholder="\${placeholder}" 
-                    \${defaultAttr}
-                    \${param.required ? 'required' : ''}
-                >
-            \`;
-        }
-        
-        return \`
-            <div class="form-group" style="animation: fadeInUp 0.3s ease-out \${index * 0.1}s backwards;">
-                <label class="form-label \${param.required ? 'required' : ''}">
-                    <span class="param-icon">🔸</span>
-                    \${param.label}
+        }).join('');
+    }
+
+    // 渲染请求体（上游更新点）
+    if (hasBody) {
+        formHtml += \`
+            <div class="form-group" style="margin-top: 1rem;">
+                <label class="form-label required">
+                    <span class="param-icon">🧾</span>
+                    请求体内容 (JSON)
                 </label>
-                \${inputHTML}
-                \${param.description ? \`
-                    <small class="form-help">
-                        <span class="help-icon">💡</span>
-                        \${param.description}
-                    </small>
-                \` : ''}
+                <textarea 
+                    class="form-textarea" 
+                    id="body-content" 
+                    rows="6" 
+                    placeholder='输入JSON格式的请求体，例如：{"type":"qq","segment_start":0,"segment_end":30000,"url":"https://dm.video.qq.com/barrage/segment/j0032ubhl9s/t/v1/0/30000"}'
+                    required
+                ></textarea>
+                <small class="form-help">
+                    <span class="help-icon">💡</span>
+                    该接口为 POST，请在此处填写请求体 JSON
+                </small>
             </div>
         \`;
-    }).join('');
+    }
+
+    formDiv.innerHTML = formHtml;
 }
 
 /* ========================================
@@ -334,10 +398,30 @@ function testApi() {
         }
     };
 
-    if (config.method === 'POST') {
+    // 处理请求体（上游更新点）
+    if (config.hasBody) {
+        const bodyEl = document.getElementById('body-content');
+        const bodyContent = bodyEl ? bodyEl.value.trim() : '';
+
+        if (!bodyContent) {
+            sendButton.innerHTML = originalText;
+            sendButton.disabled = false;
+            customAlert('请填写请求体内容 (JSON)', '⚠️ 参数错误');
+            return;
+        }
+
+        try {
+            const bodyData = JSON.parse(bodyContent);
+            requestOptions.body = JSON.stringify(bodyData);
+        } catch (e) {
+            sendButton.innerHTML = originalText;
+            sendButton.disabled = false;
+            customAlert('请求体JSON格式错误: ' + e.message, '⚠️ 参数错误');
+            return;
+        }
+    } else if (config.method === 'POST') {
         requestOptions.body = JSON.stringify(params);
     }
-
     fetch(buildApiUrl(url), requestOptions)
         .then(response => {
             const endTime = performance.now();
