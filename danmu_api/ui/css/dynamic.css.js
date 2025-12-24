@@ -107,35 +107,68 @@ export const dynamicCssContent = /* css */ `
    配置预览组件
    ======================================== */
 .preview-hero-card {
-    background: rgba(255, 255, 255, 1);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 1) 100%);
     border-radius: var(--radius-xl);
     padding: 2rem;
     margin-bottom: 2rem;
     border: 1px solid var(--border-color);
-    box-shadow: none;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.preview-hero-card::before {
+    content: "";
+    position: absolute;
+    top: -120px;
+    right: -160px;
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(99, 102, 241, 0) 60%);
+    pointer-events: none;
+}
+
+.preview-hero-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+    opacity: 0.9;
+    pointer-events: none;
 }
 /* 深色模式预览卡片增强 */
 [data-theme="dark"] .preview-hero-card {
-    background: rgba(17, 24, 39, 0.8);
+    background: rgba(17, 24, 39, 0.78);
     border: 1px solid rgba(99, 102, 241, 0.25);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6),
-                0 0 60px rgba(99, 102, 241, 0.1),
+    box-shadow: 0 10px 44px rgba(0, 0, 0, 0.6),
+                0 0 70px rgba(99, 102, 241, 0.12),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .preview-hero-card::before {
+    background: radial-gradient(circle, rgba(129, 140, 248, 0.22) 0%, rgba(129, 140, 248, 0) 60%);
+}
+
+[data-theme="dark"] .preview-hero-card::after {
+    opacity: 0.75;
 }
 
 [data-theme="dark"] .preview-stat-card {
-    background: rgba(17, 24, 39, 0.7);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background: rgba(17, 24, 39, 0.68);
+    border: 1px solid rgba(99, 102, 241, 0.22);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 [data-theme="dark"] .preview-stat-card:hover {
-    border-color: rgba(129, 140, 248, 0.4);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
-                0 0 40px rgba(129, 140, 248, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    transform: translateY(-6px);
+    border-color: rgba(129, 140, 248, 0.38);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
+                0 0 36px rgba(129, 140, 248, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transform: translateY(-3px);
 }
 
 [data-theme="dark"] .preview-category {
@@ -152,31 +185,33 @@ export const dynamicCssContent = /* css */ `
 .preview-hero-content {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 .preview-hero-header {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 
 .preview-hero-icon {
     width: 64px;
     height: 64px;
-    background: var(--gradient-primary);
     border-radius: var(--radius-lg);
+    background: var(--gradient-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+    flex-shrink: 0;
+    box-shadow: 0 10px 22px rgba(59, 130, 246, 0.22);
 }
 
 .preview-hero-icon svg {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     color: white;
     stroke-width: 2;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.18));
 }
 
 .preview-hero-titles {
@@ -185,137 +220,80 @@ export const dynamicCssContent = /* css */ `
 
 .preview-hero-title {
     font-size: 1.75rem;
-    font-weight: 700;
+    font-weight: 750;
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.35rem;
+    letter-spacing: -0.02em;
 }
 
 .preview-hero-subtitle {
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 .preview-stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 1rem;
+}
+
+@media (max-width: 1024px) {
+    .preview-stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .preview-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .preview-stats-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .preview-stat-card {
-    background: rgba(248, 250, 252, 1);
-    backdrop-filter: none;
+    position: relative;
+    background: rgba(255, 255, 255, 0.9);
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
+    padding: 1.25rem 1.25rem;
     border: 1px solid var(--border-color);
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     display: flex;
     align-items: center;
     gap: 1rem;
+    min-height: 84px;
 }
 
 .preview-stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.10);
+    border-color: rgba(99, 102, 241, 0.35);
 }
 
 .stat-card-compact {
-    padding: 1.25rem;
+    padding: 1.1rem 1.15rem;
 }
 
-/* ========================================
-   主页统计卡片 - 配置项数量（重新设计）
-   ======================================== */
-.stat-card-configs {
-    align-items: flex-start;
-    gap: 1rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.stat-card-configs::before {
-    content: '';
-    position: absolute;
-    right: -48px;
-    top: -48px;
-    width: 160px;
-    height: 160px;
-    border-radius: 9999px;
-    background: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.35) 0%, rgba(139, 92, 246, 0.18) 45%, rgba(236, 72, 153, 0) 70%);
-    pointer-events: none;
-}
-
-.stat-content-configs {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-}
-
-.stat-content-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
-
-.stat-label-top {
-    margin-top: 0;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-}
-
-.stat-value-large {
-    font-size: 2.25rem;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-.stat-subtext {
-    font-size: 0.75rem;
-    color: var(--text-tertiary);
-    margin-top: 0.1rem;
-}
-
-.stat-status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem 0.55rem;
-    border-radius: 9999px;
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.25);
-    color: rgba(5, 150, 105, 1);
-    flex-shrink: 0;
-}
-
-.config-status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 9999px;
-    background: #10b981;
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45);
-}
-
-[data-theme="dark"] .stat-card-configs::before {
-    opacity: 0.3;
-}
-
-[data-theme="dark"] .stat-status-pill {
-    background: rgba(16, 185, 129, 0.14);
-    border-color: rgba(16, 185, 129, 0.28);
-    color: rgba(110, 231, 183, 1);
-}
 .stat-icon-wrapper {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius-md);
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+}
+
+.stat-icon-wrapper svg {
+    width: 22px;
+    height: 22px;
+    color: white;
+    stroke-width: 2;
 }
 
 .stat-icon-wrapper svg {
@@ -372,27 +350,33 @@ export const dynamicCssContent = /* css */ `
 }
 
 .stat-value {
-    font-size: 1.75rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--text-primary);
-    line-height: 1.2;
-    font-family: 'Courier New', monospace;
+    line-height: 1.15;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.015em;
 }
 
 .stat-value-text {
-    font-size: 1rem;
+    font-size: 0.98rem;
+    font-weight: 600;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .stat-value-status {
-    font-size: 0.875rem;
+    font-size: 0.9rem;
+    font-weight: 650;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .stat-label {
-    font-size: 0.8125rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
     margin-top: 0.25rem;
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: 0.01em;
 }
 
 .preview-grid {
