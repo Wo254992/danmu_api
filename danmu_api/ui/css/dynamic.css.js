@@ -651,6 +651,172 @@ export const dynamicCssContent = /* css */ `
     }
 }
 
+.category-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.category-badge {
+    margin-left: auto;
+    padding: 0.25rem 0.75rem;
+    background: var(--bg-tertiary);
+    backdrop-filter: var(--blur-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.preview-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.preview-item {
+    padding: 1rem;
+    background: var(--bg-secondary);
+    backdrop-filter: var(--blur-sm);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-fast);
+}
+
+.preview-item:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--primary-color);
+    transform: translateX(4px);
+}
+
+.preview-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    gap: 1rem;
+}
+
+.preview-key {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.key-icon {
+    font-size: 1rem;
+}
+
+.preview-type-badge {
+    padding: 0.25rem 0.625rem;
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.preview-value-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.preview-value {
+    flex: 1;
+    padding: 0.75rem;
+    background: var(--bg-tertiary);
+    backdrop-filter: var(--blur-sm);
+    border-radius: var(--radius-sm);
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    word-break: break-all;
+}
+
+.preview-copy-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    background: var(--bg-primary);
+    backdrop-filter: var(--blur-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+}
+
+.preview-copy-btn:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    transform: scale(1.1);
+}
+
+.preview-copy-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.preview-desc {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    line-height: 1.6;
+}
+
+.desc-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.preview-empty,
+.preview-error {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-icon,
+.error-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.preview-empty h3,
+.preview-error h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.preview-empty p,
+.preview-error p {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+}
+
 /* ========================================
    日志查看组件
    ======================================== */
