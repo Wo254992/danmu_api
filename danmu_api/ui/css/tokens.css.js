@@ -1,218 +1,262 @@
 // language=CSS
 export const tokensCssContent = /* css */ `
 /* ========================================
-   Design Tokens - 全局变量（统一维护入口）
-   说明：
-   1) 颜色色阶（primary/gray/success/warning/danger 等）
-   2) 语义变量（bg/text/border/primary-color...）
-   3) 阴影/模糊/过渡/圆角等基础 Token
-   主题切换：
-   - 默认：浅色（:root）
-   - 深色：通过 [data-theme="dark"] 覆盖
+   设计令牌 - Design Tokens
+   现代化玻璃拟态风格的基础变量系统
    ======================================== */
 
 :root {
-    /* Primary 蓝色系 - 优化深色模式显示 */
-    --primary-50: #eff6ff;
-    --primary-100: #dbeafe;
-    --primary-200: #bfdbfe;
-    --primary-300: #93c5fd;
-    --primary-400: #60a5fa;
-    --primary-500: #3b82f6;
-    --primary-600: #2563eb;
-    --primary-700: #1d4ed8;
-    --primary-800: #1e40af;
-    --primary-900: #1e3a8a;
-    --primary-light: #a78bfa; /* 更柔和的紫蓝色 */
-    --primary-glow: rgba(99, 102, 241, 0.4); /* 发光效果 */
+    /* ========== 颜色系统 - 亮色模式 ========== */
+    
+    /* 主色调 - 渐变蓝紫 */
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-light: #60a5fa;
+    --primary-dark: #1e40af;
+    
+    /* 成功色 - 翠绿 */
+    --success-color: #10b981;
+    --success-hover: #059669;
+    --success-light: #34d399;
+    
+    /* 警告色 - 琥珀 */
+    --warning-color: #f59e0b;
+    --warning-hover: #d97706;
+    --warning-light: #fbbf24;
+    
+    /* 危险色 - 玫红 */
+    --danger-color: #ef4444;
+    --danger-hover: #dc2626;
+    --danger-light: #f87171;
+    
+    /* 信息色 - 青色 */
+    --info-color: #06b6d4;
+    --info-hover: #0891b2;
+    --info-light: #22d3ee;
+    
+    /* 背景层级 - 玻璃拟态 */
+    --bg-base: #ffffff;
+    --bg-primary: rgba(255, 255, 255, 0.85);
+    --bg-secondary: rgba(249, 250, 251, 0.8);
+    --bg-tertiary: rgba(243, 244, 246, 0.7);
+    --bg-hover: rgba(243, 244, 246, 0.9);
+    --bg-active: rgba(229, 231, 235, 0.95);
+    
+    /* 文字颜色 */
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-tertiary: #9ca3af;
+    --text-inverse: #ffffff;
+    
+    /* 边框颜色 */
+    --border-color: rgba(229, 231, 235, 0.6);
+    --border-hover: rgba(209, 213, 219, 0.8);
+    --border-active: rgba(156, 163, 175, 0.9);
+    
+    /* 阴影系统 */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+    --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.15);
+    
+    /* 玻璃效果 */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+    --glass-blur: 12px;
 
-    /* Success 绿色系 */
-    --success-50: #ecfdf5;
-    --success-100: #d1fae5;
-    --success-200: #a7f3d0;
-    --success-300: #6ee7b7;
-    --success-400: #34d399;
-    --success-500: #10b981;
-    --success-600: #059669;
-    --success-700: #047857;
-    --success-800: #065f46;
-    --success-900: #064e3b;
-
-    /* Warning 橙色系 */
-    --warning-50: #fffbeb;
-    --warning-100: #fef3c7;
-    --warning-200: #fde68a;
-    --warning-300: #fcd34d;
-    --warning-400: #fbbf24;
-    --warning-500: #f59e0b;
-    --warning-600: #d97706;
-    --warning-700: #b45309;
-    --warning-800: #92400e;
-    --warning-900: #78350f;
-
-    /* Danger 红色系 */
-    --danger-50: #fef2f2;
-    --danger-100: #fee2e2;
-    --danger-200: #fecaca;
-    --danger-300: #fca5a5;
-    --danger-400: #f87171;
-    --danger-500: #ef4444;
-    --danger-600: #dc2626;
-    --danger-700: #b91c1c;
-    --danger-800: #991b1b;
-    --danger-900: #7f1d1d;
-
-    /* Gray 灰色系 */
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-400: #9ca3af;
-    --gray-500: #6b7280;
-    --gray-600: #4b5563;
-    --gray-700: #374151;
-    --gray-800: #1f2937;
-    --gray-900: #111827;
-
-    /* Purple 紫色系 */
-    --purple-50: #faf5ff;
-    --purple-100: #f3e8ff;
-    --purple-200: #e9d5ff;
-    --purple-300: #d8b4fe;
-    --purple-400: #c084fc;
-    --purple-500: #a855f7;
-    --purple-600: #9333ea;
-    --purple-700: #7e22ce;
-    --purple-800: #6b21a8;
-    --purple-900: #581c87;
-
-    /* Pink 粉色系 */
-    --pink-50: #fdf2f8;
-    --pink-100: #fce7f3;
-    --pink-200: #fbcfe8;
-    --pink-300: #f9a8d4;
-    --pink-400: #f472b6;
-    --pink-500: #ec4899;
-    --pink-600: #db2777;
-    --pink-700: #be185d;
-    --pink-800: #9f1239;
-    --pink-900: #831843;
-
-    /* Teal 青色系 */
-    --teal-50: #f0fdfa;
-    --teal-100: #ccfbf1;
-    --teal-200: #99f6e4;
-    --teal-300: #5eead4;
-    --teal-400: #2dd4bf;
-    --teal-500: #14b8a6;
-    --teal-600: #0d9488;
-    --teal-700: #0f766e;
-    --teal-800: #115e59;
-    --teal-900: #134e4a;
-
-    /* Indigo 靛蓝系 */
-    --indigo-50: #eef2ff;
-    --indigo-100: #e0e7ff;
-    --indigo-200: #c7d2fe;
-    --indigo-300: #a5b4fc;
-    --indigo-400: #818cf8;
-    --indigo-500: #6366f1;
-    --indigo-600: #4f46e5;
-    --indigo-700: #4338ca;
-    --indigo-800: #3730a3;
-    --indigo-900: #312e81;
-
-    /* ----------------------------------------
-       语义 Token（主题 + 交互）
-       ---------------------------------------- */
-    /* 浅色模式颜色 - 引用色阶系统 */
-    --bg-primary: rgba(255, 255, 255, 0.95);
-    --bg-secondary: rgba(248, 250, 252, 0.9);
-    --bg-tertiary: rgba(241, 245, 249, 0.85);
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --text-tertiary: #94a3b8;
-    --border-color: rgba(226, 232, 240, 0.8);
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+    /* 统一的模糊强度（供 backdrop-filter 使用） */
     --blur-sm: blur(8px);
     --blur-md: blur(12px);
     --blur-lg: blur(16px);
     
-    /* 功能色 - 引用色阶 */
-    --primary-color: var(--primary-500);
-    --primary-hover: var(--primary-600);
-    --success-color: var(--success-500);
-    --success-hover: var(--success-600);
-    --warning-color: var(--warning-500);
-    --warning-hover: var(--warning-600);
-    --danger-color: var(--danger-500);
-    --danger-hover: var(--danger-600);
-    
     /* 渐变色 */
     --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --gradient-success: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    --gradient-danger: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-info: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-dark: linear-gradient(135deg, #434343 0%, #000000 100%);
     
-    /* 过渡效果 */
-    --transition-fast: 0.15s ease;
-    --transition-base: 0.3s ease;
-    --transition-slow: 0.5s ease;
+    /* 间距系统 */
+    --spacing-xs: 0.25rem;    /* 4px */
+    --spacing-sm: 0.5rem;     /* 8px */
+    --spacing-md: 1rem;       /* 16px */
+    --spacing-lg: 1.5rem;     /* 24px */
+    --spacing-xl: 2rem;       /* 32px */
+    --spacing-2xl: 3rem;      /* 48px */
+    --spacing-3xl: 4rem;      /* 64px */
     
-    /* 圆角 */
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 20px;
+    /* 圆角系统 */
+    --radius-sm: 0.375rem;    /* 6px */
+    --radius-md: 0.5rem;      /* 8px */
+    --radius-lg: 0.75rem;     /* 12px */
+    --radius-xl: 1rem;        /* 16px */
+    --radius-2xl: 1.5rem;     /* 24px */
+    --radius-full: 9999px;
+    
+    /* 字体系统 */
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+    
+    /* 字号系统 */
+    --text-xs: 0.75rem;       /* 12px */
+    --text-sm: 0.875rem;      /* 14px */
+    --text-base: 1rem;        /* 16px */
+    --text-lg: 1.125rem;      /* 18px */
+    --text-xl: 1.25rem;       /* 20px */
+    --text-2xl: 1.5rem;       /* 24px */
+    --text-3xl: 1.875rem;     /* 30px */
+    --text-4xl: 2.25rem;      /* 36px */
+    
+    /* 字重系统 */
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    
+    /* 行高系统 */
+    --leading-none: 1;
+    --leading-tight: 1.25;
+    --leading-snug: 1.375;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.625;
+    --leading-loose: 2;
+    
+    /* 过渡动画 */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    /* Z-index 层级 */
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+    
+    /* 滚动条 */
+    --scrollbar-width: 8px;
+    --scrollbar-bg: rgba(0, 0, 0, 0.05);
+    --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
 }
 
+/* ========== 暗色模式 - Dark Mode ========== */
 [data-theme="dark"] {
-    /* 背景色 - 更深邃的黑色调，带有微妙的蓝色底色 */
-    --bg-primary: rgba(10, 15, 30, 0.97);
-    --bg-secondary: rgba(17, 24, 39, 0.92);
-    --bg-tertiary: rgba(31, 41, 55, 0.88);
+    /* 主色调 - 提高亮度 */
+    --primary-color: #60a5fa;
+    --primary-hover: #3b82f6;
+    --primary-light: #93c5fd;
+    --primary-dark: #2563eb;
     
-    /* 文本色 - 更柔和的白色，减少眼睛疲劳 */
-    --text-primary: #e2e8f0;
-    --text-secondary: #a0aec0;
-    --text-tertiary: #718096;
-    
-    /* 边框色 - 带有微妙的发光效果 */
-    --border-color: rgba(99, 102, 241, 0.15);
-    
-    /* 阴影 - 更深邃，带有微妙的彩色光晕 */
-    --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(99, 102, 241, 0.1);
-    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(99, 102, 241, 0.15);
-    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.7), 0 4px 16px rgba(99, 102, 241, 0.2);
-    
-    /* 模糊效果增强 */
-    --blur-sm: blur(12px);
-    --blur-md: blur(16px);
-    --blur-lg: blur(24px);
-    
-    /* 功能色 - 更亮，更有活力 */
-    --primary-color: #818cf8;
-    --primary-hover: #a78bfa;
+    /* 成功色 */
     --success-color: #34d399;
-    --success-hover: #6ee7b7;
+    --success-hover: #10b981;
+    --success-light: #6ee7b7;
+    
+    /* 警告色 */
     --warning-color: #fbbf24;
-    --warning-hover: #fcd34d;
+    --warning-hover: #f59e0b;
+    --warning-light: #fcd34d;
+    
+    /* 危险色 */
     --danger-color: #f87171;
-    --danger-hover: #fca5a5;
+    --danger-hover: #ef4444;
+    --danger-light: #fca5a5;
     
-    /* 渐变色 - 更鲜明的对比 */
-    --gradient-primary: linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #c084fc 100%);
-    --gradient-success: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-    --gradient-warning: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-    --gradient-danger: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+    /* 信息色 */
+    --info-color: #22d3ee;
+    --info-hover: #06b6d4;
+    --info-light: #67e8f9;
     
-    /* 特殊效果 */
-    --glow-primary: 0 0 20px rgba(129, 140, 248, 0.3);
-    --glow-success: 0 0 20px rgba(52, 211, 153, 0.3);
-    --glow-warning: 0 0 20px rgba(251, 191, 36, 0.3);
-    --glow-danger: 0 0 20px rgba(248, 113, 113, 0.3);
+    /* 背景层级 - 深色玻璃拟态 */
+    --bg-base: #0A0F1E;
+    --bg-primary: rgba(15, 23, 42, 0.85);
+    --bg-secondary: rgba(30, 41, 59, 0.8);
+    --bg-tertiary: rgba(51, 65, 85, 0.7);
+    --bg-hover: rgba(51, 65, 85, 0.9);
+    --bg-active: rgba(71, 85, 105, 0.95);
+    
+    /* 文字颜色 */
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    --text-inverse: #0f172a;
+    
+    /* 边框颜色 */
+    --border-color: rgba(71, 85, 105, 0.6);
+    --border-hover: rgba(100, 116, 139, 0.8);
+    --border-active: rgba(148, 163, 184, 0.9);
+    
+    /* 阴影系统 - 深色模式增强 */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.6), 0 4px 6px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.7), 0 10px 10px rgba(0, 0, 0, 0.5);
+    --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.8);
+    
+    /* 玻璃效果 */
+    --glass-bg: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(148, 163, 184, 0.1);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --glass-blur: 16px;
+
+    /* 统一的模糊强度（供 backdrop-filter 使用） */
+    --blur-sm: blur(10px);
+    --blur-md: blur(16px);
+    --blur-lg: blur(22px);
+    
+    /* 渐变色 - 暗色模式优化 */
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-success: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    --gradient-danger: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-info: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-dark: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    
+    /* 滚动条 - 暗色 */
+    --scrollbar-bg: rgba(255, 255, 255, 0.05);
+    --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
 }
 
+/* ========== 响应式断点 ========== */
+/* 这些变量主要在 JS 中使用，CSS 中通过媒体查询实现 */
+:root {
+    --breakpoint-xs: 0;
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1536px;
+}
+
+/* ========== 动画时间函数 ========== */
+:root {
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ========== 性能优化 ========== */
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+
+/* 优化字体渲染 */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
 `;
