@@ -107,53 +107,35 @@ export const dynamicCssContent = /* css */ `
    配置预览组件
    ======================================== */
 .preview-hero-card {
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 1) 100%);
+    background: rgba(255, 255, 255, 1);
     border-radius: var(--radius-xl);
     padding: 2rem;
     margin-bottom: 2rem;
     border: 1px solid var(--border-color);
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    box-shadow: none;
 }
-
-.preview-hero-card::before {
-    content: "";
-    position: absolute;
-    top: -120px;
-    right: -160px;
-    width: 420px;
-    height: 420px;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(99, 102, 241, 0) 60%);
-    pointer-events: none;
-}
-
 /* 深色模式预览卡片增强 */
 [data-theme="dark"] .preview-hero-card {
-    background: rgba(17, 24, 39, 0.78);
+    background: rgba(17, 24, 39, 0.8);
     border: 1px solid rgba(99, 102, 241, 0.25);
-    box-shadow: 0 10px 44px rgba(0, 0, 0, 0.6),
-                0 0 70px rgba(99, 102, 241, 0.12),
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6),
+                0 0 60px rgba(99, 102, 241, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-[data-theme="dark"] .preview-hero-card::before {
-    background: radial-gradient(circle, rgba(129, 140, 248, 0.22) 0%, rgba(129, 140, 248, 0) 60%);
-}
-
-[data-theme="dark"] [data-theme="dark"] .preview-stat-card {
-    background: rgba(17, 24, 39, 0.68);
-    border: 1px solid rgba(99, 102, 241, 0.22);
-    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35),
-                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+[data-theme="dark"] .preview-stat-card {
+    background: rgba(17, 24, 39, 0.7);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 [data-theme="dark"] .preview-stat-card:hover {
-    border-color: rgba(129, 140, 248, 0.38);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
-                0 0 36px rgba(129, 140, 248, 0.18),
-                inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    transform: translateY(-3px);
+    border-color: rgba(129, 140, 248, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(129, 140, 248, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transform: translateY(-6px);
 }
 
 [data-theme="dark"] .preview-category {
@@ -170,33 +152,31 @@ export const dynamicCssContent = /* css */ `
 .preview-hero-content {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2rem;
 }
 
 .preview-hero-header {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1.5rem;
 }
 
 .preview-hero-icon {
     width: 64px;
     height: 64px;
-    border-radius: var(--radius-lg);
     background: var(--gradient-primary);
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    box-shadow: 0 10px 22px rgba(59, 130, 246, 0.22);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
 }
 
 .preview-hero-icon svg {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     color: white;
     stroke-width: 2;
-    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.18));
 }
 
 .preview-hero-titles {
@@ -205,80 +185,52 @@ export const dynamicCssContent = /* css */ `
 
 .preview-hero-title {
     font-size: 1.75rem;
-    font-weight: 750;
+    font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 0.35rem;
-    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
 }
 
 .preview-hero-subtitle {
     color: var(--text-secondary);
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 .preview-stats-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 1rem;
-}
-
-@media (max-width: 1024px) {
-    .preview-stats-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 640px) {
-    .preview-stats-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.75rem;
-    }
-}
-
-@media (max-width: 420px) {
-    .preview-stats-grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 .preview-stat-card {
-    position: relative;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(248, 250, 252, 1);
+    backdrop-filter: none;
     border-radius: var(--radius-lg);
-    padding: 1.25rem 1.25rem;
+    padding: 1.5rem;
     border: 1px solid var(--border-color);
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+    transition: all var(--transition-fast);
     display: flex;
     align-items: center;
     gap: 1rem;
-    min-height: 84px;
 }
 
 .preview-stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.10);
-    border-color: rgba(99, 102, 241, 0.35);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
 }
 
 .stat-card-compact {
-    padding: 1.1rem 1.15rem;
+    padding: 1.25rem;
 }
 
 .stat-icon-wrapper {
-    width: 46px;
-    height: 46px;
-    border-radius: 14px;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-}
-
-.stat-icon-wrapper svg {
-    width: 22px;
-    height: 22px;
-    color: white;
-    stroke-width: 2;
 }
 
 .stat-icon-wrapper svg {
@@ -335,33 +287,27 @@ export const dynamicCssContent = /* css */ `
 }
 
 .stat-value {
-    font-size: 1.6rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: var(--text-primary);
-    line-height: 1.15;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.015em;
+    line-height: 1.2;
+    font-family: 'Courier New', monospace;
 }
 
 .stat-value-text {
-    font-size: 0.98rem;
-    font-weight: 600;
+    font-size: 1rem;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .stat-value-status {
-    font-size: 0.9rem;
-    font-weight: 650;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.875rem;
 }
 
 .stat-label {
-    font-size: 0.8rem;
+    font-size: 0.8125rem;
     color: var(--text-secondary);
     margin-top: 0.25rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
+    font-weight: 500;
 }
 
 .preview-grid {
