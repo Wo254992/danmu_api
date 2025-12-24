@@ -18,7 +18,20 @@ export const dynamicCssContent = /* css */ `
     justify-content: space-between;
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
-    border-bottom: 2px solid var(--border-color);
+    position: relative;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.section-header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0), rgba(99, 102, 241, 0.42), rgba(168, 85, 247, 0.32), rgba(99, 102, 241, 0));
+    opacity: 0.55;
+    pointer-events: none;
 }
 
 .section-title {
@@ -494,7 +507,7 @@ export const dynamicCssContent = /* css */ `
     background: var(--bg-tertiary);
     backdrop-filter: var(--blur-sm);
     border-radius: var(--radius-sm);
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.875rem;
     color: var(--text-primary);
     border: 1px solid var(--border-color);
@@ -634,15 +647,27 @@ export const dynamicCssContent = /* css */ `
 }
 
 .log-terminal {
-    background: var(--bg-primary);
+    position: relative;
+    overflow: hidden;
+    background: var(--glass-bg);
     backdrop-filter: var(--blur-md);
-    border-radius: var(--radius-lg);
+    -webkit-backdrop-filter: var(--blur-md);
+    border-radius: var(--radius-xl);
     padding: 1.5rem;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-md);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
     max-height: 600px;
     overflow-y: auto;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-mono);
+}
+
+.log-terminal::before {
+    content: '';
+    position: absolute;
+    inset: -40% -30% auto -30%;
+    height: 200px;
+    background: radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.18), transparent 60%);
+    pointer-events: none;
 }
 
 .log-entry {
@@ -650,16 +675,19 @@ export const dynamicCssContent = /* css */ `
     gap: 1rem;
     padding: 0.875rem;
     margin-bottom: 0.5rem;
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.06);
     backdrop-filter: var(--blur-sm);
+    -webkit-backdrop-filter: var(--blur-sm);
     border-radius: var(--radius-md);
+    border: 1px solid rgba(148, 163, 184, 0.22);
     border-left: 3px solid var(--border-color);
     transition: all var(--transition-fast);
     animation: fadeInUp 0.3s ease-out;
 }
 
 .log-entry:hover {
-    background: var(--bg-tertiary);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(99, 102, 241, 0.28);
     transform: translateX(4px);
 }
 
@@ -916,7 +944,7 @@ export const dynamicCssContent = /* css */ `
     background: var(--bg-secondary);
     backdrop-filter: var(--blur-sm);
     border-radius: var(--radius-md);
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.875rem;
     color: var(--text-primary);
     border: 1px solid var(--border-color);
@@ -963,17 +991,31 @@ export const dynamicCssContent = /* css */ `
    响应式JSON显示
    ======================================== */
 .response-card {
-    background: var(--bg-primary);
+    position: relative;
+    overflow: hidden;
+    background: var(--glass-bg);
     backdrop-filter: var(--blur-md);
-    border-radius: var(--radius-lg);
+    -webkit-backdrop-filter: var(--blur-md);
+    border-radius: var(--radius-xl);
     padding: 1.5rem;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
     margin-top: 1.5rem;
+}
+
+.response-card::before {
+    content: '';
+    position: absolute;
+    inset: -50% -30% auto -30%;
+    height: 220px;
+    background: radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.16), transparent 60%);
+    pointer-events: none;
 }
 
 .response-header {
     display: flex;
+    position: relative;
+    z-index: 1;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
@@ -1023,17 +1065,21 @@ export const dynamicCssContent = /* css */ `
 }
 
 .response-content {
+    position: relative;
+    z-index: 1;
     padding: 1.5rem;
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.06);
     backdrop-filter: var(--blur-sm);
-    border-radius: var(--radius-md);
-    font-family: 'Courier New', monospace;
+    -webkit-backdrop-filter: var(--blur-sm);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    font-family: var(--font-mono);
     font-size: 0.875rem;
     line-height: 1.8;
     overflow-x: auto;
     max-height: 600px;
     overflow-y: auto;
-    border: 1px solid var(--border-color);
+    /* 上方 border 已设置，避免重复 */
     white-space: pre-wrap;
     word-break: break-word;
 }
@@ -1304,7 +1350,7 @@ export const dynamicCssContent = /* css */ `
     background: var(--bg-tertiary);
     backdrop-filter: var(--blur-sm);
     border-radius: var(--radius-sm);
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.875rem;
     color: var(--text-primary);
     border: 1px solid var(--border-color);
@@ -1505,7 +1551,7 @@ export const dynamicCssContent = /* css */ `
 }
 
 .device-ip {
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-primary);
@@ -2448,7 +2494,7 @@ export const dynamicCssContent = /* css */ `
 }
 
 .danmu-item-time {
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--primary-color);
