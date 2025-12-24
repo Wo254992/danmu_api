@@ -179,21 +179,20 @@ export const colorsCssContent = /* css */ `
     width: 40px;
     height: 40px;
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(99, 102, 241, 0.18);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all var(--transition-fast);
     cursor: pointer;
     flex-shrink: 0;
-    box-shadow: var(--shadow-sm);
 }
 
 .mobile-status-indicator:hover {
-    border-color: rgba(99, 102, 241, 0.32);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
+    transform: scale(1.05);
 }
 
 .mobile-status-indicator:active {
