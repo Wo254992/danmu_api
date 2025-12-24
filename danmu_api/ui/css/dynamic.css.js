@@ -223,6 +223,91 @@ export const dynamicCssContent = /* css */ `
     padding: 1.25rem;
 }
 
+/* ========================================
+   主页统计卡片 - 配置项数量（重新设计）
+   ======================================== */
+.stat-card-configs {
+    align-items: flex-start;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card-configs::before {
+    content: '';
+    position: absolute;
+    right: -48px;
+    top: -48px;
+    width: 160px;
+    height: 160px;
+    border-radius: 9999px;
+    background: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.35) 0%, rgba(139, 92, 246, 0.18) 45%, rgba(236, 72, 153, 0) 70%);
+    pointer-events: none;
+}
+
+.stat-content-configs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.stat-content-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.stat-label-top {
+    margin-top: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.stat-value-large {
+    font-size: 2.25rem;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.stat-subtext {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 0.1rem;
+}
+
+.stat-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 9999px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: rgba(5, 150, 105, 1);
+    flex-shrink: 0;
+}
+
+.config-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: #10b981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45);
+}
+
+[data-theme="dark"] .stat-card-configs::before {
+    opacity: 0.3;
+}
+
+[data-theme="dark"] .stat-status-pill {
+    background: rgba(16, 185, 129, 0.14);
+    border-color: rgba(16, 185, 129, 0.28);
+    color: rgba(110, 231, 183, 1);
+}
 .stat-icon-wrapper {
     width: 48px;
     height: 48px;
