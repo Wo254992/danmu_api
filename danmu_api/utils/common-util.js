@@ -203,73 +203,6 @@ export function normalizeSpaces(str) {
 }
 
 /**
- * 规范化标题中的标点符号（全角/半角统一 + 一些常见“看起来一样”的符号统一）
- *
- * 目的：让“宇宙Marry Me？” 与 “宇宙Marry Me?” 这类仅标点不同的标题可被识别为同一部剧。
- *
- * 注意：这里不做“去掉标点”的激进处理，只做“等价符号映射”，避免误把不同标题合并。
- *
- * @param {string} str - 输入字符串
- * @returns {string} 规范化后的字符串
- */
-export function normalizePunctuations(str) {
-  if (!str) return '';
-
-  const s = String(str);
-
-  // 全角 -> 半角（仅对常见标点做显式映射，避免改变字母/数字等）
-  const map = {
-    '？': '?',
-    '！': '!',
-    '：': ':',
-    '；': ';',
-    '（': '(',
-    '）': ')',
-    '【': '[',
-    '】': ']',
-    '「': '"',
-    '」': '"',
-    '『': '"',
-    '』': '"',
-    '“': '"',
-    '”': '"',
-    '‘': '\'',
-    '’': '\'',
-    '，': ',',
-    '。': '.',
-    '、': ',',
-    '～': '~',
-    '－': '-',
-    '—': '-',
-    '–': '-',
-    '·': '·', // 保留（中点容易影响标题识别，不与 '.' 合并）
-  };
-
-  return s.replace(/[？！？：；（）【】「」『』“”‘’，。、～－—–·]/g, (ch) => map[ch] ?? ch);
-}
-
-/**
- * 用于标题匹配的规范化：
- * 1) 去掉空格
- * 2) 标点符号全角/半角等价归一
- * 3) 英文小写化
- */
-export function normalizeTitleForMatch(str) {
-  return normalizeSpaces(normalizePunctuations(str)).toLowerCase();
-}
-
-/**
- * 判断两个标题是否“只存在等价标点差异”（或大小写/空格差异）
- * @param {string} a
- * @param {string} b
- * @returns {boolean}
- */
-export function equivalentTitleIgnorePunct(a, b) {
-  if (!a || !b) return false;
-  return normalizeTitleForMatch(a) === normalizeTitleForMatch(b);
-}
-
-/**
  * 严格标题匹配函数
  * @param {string} title - 动漫标题
  * @param {string} query - 搜索关键词
@@ -322,94 +255,12 @@ export function validateType(value, expectedType) {
     if (!Array.isArray(value)) {
       throw new TypeError(`${value} 必须是一个数组，但传入的是 ${fieldName}`);
     }
+  } else if (expectedType === "boolean") {
+    // 对于 boolean 类型，允许任何可转换为布尔值的类型（number, boolean）
+    if (typeof value !== "boolean" && typeof value !== "number") {
+      throw new TypeError(`${value} 必须是 boolean 或 number，但传入的是 ${fieldName}`);
+    }
   } else if (typeof value !== expectedType) {
     throw new TypeError(`${value} 必须是 ${expectedType}，但传入的是 ${fieldName}`);
   }
-}
-
-/**
- * 计算标题与搜索词的匹配分数
- * @param {string} title - 动漫标题
- * @param {string} query - 搜索关键词
- * @returns {number} 匹配分数（越高越匹配）
- */
-export function calculateMatchScore(title, query) {
-  if (!title || !query) return 0;
-
-  const normalizedTitle = normalizeSpaces(title);
-  const normalizedQuery = normalizeSpaces(query);
-
-  // 完全匹配（最高分）
-  if (normalizedTitle === normalizedQuery) {
-    return 1000;
-  }
-
-  // 忽略标点符号的完全匹配
-  if (equivalentTitleIgnorePunct(title, query)) {
-    return 950;
-  }
-
-  // 标题等于搜索词（去除括号内容后）
-  const titleWithoutBrackets = normalizedTitle.split(/[(\(（]/)[0].trim();
-  if (titleWithoutBrackets === normalizedQuery) {
-    return 900;
-  }
-
-  // 标题以搜索词开头
-  if (normalizedTitle.startsWith(normalizedQuery)) {
-    // 计算额外字符的长度（越短越好）
-    const extraLength = normalizedTitle.length - normalizedQuery.length;
-    return 800 - Math.min(extraLength, 100);
-  }
-
-  // 搜索词是标题的开头部分（忽略数字/季度信息）
-  const titleBase = titleWithoutBrackets.replace(/[0-9一二三四五六七八九十壹贰叁肆伍陆柒捌玖拾第季部]+$/, '').trim();
-  if (titleBase === normalizedQuery) {
-    return 750;
-  }
-
-  // 标题包含搜索词
-  if (normalizedTitle.includes(normalizedQuery)) {
-    // 根据搜索词在标题中的位置给分（越靠前越好）
-    const position = normalizedTitle.indexOf(normalizedQuery);
-    const positionScore = Math.max(0, 100 - position);
-    return 500 + positionScore;
-  }
-
-  // 搜索词包含在标题中（部分匹配）
-  const queryChars = normalizedQuery.split('');
-  let matchCount = 0;
-  for (const char of queryChars) {
-    if (normalizedTitle.includes(char)) {
-      matchCount++;
-    }
-  }
-  const partialScore = (matchCount / queryChars.length) * 200;
-  return partialScore;
-}
-
-/**
- * 按匹配度对动漫列表进行排序
- * @param {Array} animes - 动漫列表
- * @param {string} queryTitle - 搜索关键词
- */
-export function sortAnimesByMatchScore(animes, queryTitle) {
-  if (!animes || !Array.isArray(animes) || animes.length === 0) {
-    return;
-  }
-
-  animes.sort((a, b) => {
-    const scoreA = calculateMatchScore(a.animeTitle, queryTitle);
-    const scoreB = calculateMatchScore(b.animeTitle, queryTitle);
-
-    // 分数高的排在前面
-    if (scoreB !== scoreA) {
-      return scoreB - scoreA;
-    }
-
-    // 分数相同时，保持原有顺序（稳定排序）
-    return 0;
-  });
-
-  log("info", `Sorted ${animes.length} animes by match score for query: ${queryTitle}`);
 }
