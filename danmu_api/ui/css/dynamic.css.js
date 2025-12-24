@@ -128,17 +128,6 @@ export const dynamicCssContent = /* css */ `
     pointer-events: none;
 }
 
-.preview-hero-card::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 3px;
-    background: var(--gradient-primary);
-    opacity: 0.9;
-    pointer-events: none;
-}
 /* 深色模式预览卡片增强 */
 [data-theme="dark"] .preview-hero-card {
     background: rgba(17, 24, 39, 0.78);
@@ -152,11 +141,7 @@ export const dynamicCssContent = /* css */ `
     background: radial-gradient(circle, rgba(129, 140, 248, 0.22) 0%, rgba(129, 140, 248, 0) 60%);
 }
 
-[data-theme="dark"] .preview-hero-card::after {
-    opacity: 0.75;
-}
-
-[data-theme="dark"] .preview-stat-card {
+[data-theme="dark"] [data-theme="dark"] .preview-stat-card {
     background: rgba(17, 24, 39, 0.68);
     border: 1px solid rgba(99, 102, 241, 0.22);
     box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35),
