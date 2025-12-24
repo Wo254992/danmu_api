@@ -183,25 +183,17 @@ export const HTML_TEMPLATE = /* html */ `
                             </div>
                         </div>
                         <div class="preview-stats-grid" id="preview-stats-grid">
-                            <div class="preview-stat-card stat-card-compact stat-card-configs" id="config-count-card">
+                            <div class="preview-stat-card stat-card-compact">
                                 <div class="stat-icon-wrapper stat-icon-primary">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
                                     </svg>
                                 </div>
-                                <div class="stat-content stat-content-configs">
-                                    <div class="stat-content-head">
-                                        <div class="stat-label stat-label-top">配置项数量</div>
-                                        <div class="stat-status-pill" id="configs-status-pill">
-                                            <span class="config-status-dot status-running"></span>
-                                            <span class="stat-status-text">正在运行</span>
-                                        </div>
-                                    </div>
-                                    <div class="stat-value stat-value-large" id="total-configs">-</div>
-                                    <div class="stat-subtext">已加载到运行环境</div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="total-configs">-</div>
+                                    <div class="stat-label">配置项</div>
                                 </div>
                             </div>
-
                             <div class="preview-stat-card stat-card-compact">
                                 <div class="stat-icon-wrapper stat-icon-success">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
