@@ -13,7 +13,7 @@ import {
   normalizeTitleForMatch,
   equivalentTitleIgnorePunct,
 } from "../utils/common-util.js";
-
+import { SegmentListResponse } from '../models/dandan-model.js';
 // =====================
 // 获取韩剧TV弹幕
 // =====================
@@ -381,7 +381,23 @@ return { anime: transformedAnime, links: links, matchType: matchType, qualitySco
       return allDanmus; // 返回已收集的 episodes
     }
   }
+  async getEpisodeDanmuSegments(id) {
+    log("info", "获取韩剧TV弹幕分段列表...", id);
 
+    return new SegmentListResponse({
+      "type": "hanjutv",
+      "segmentList": [{
+        "type": "hanjutv",
+        "segment_start": 0,
+        "segment_end": 30000,
+        "url": id
+      }]
+    });
+  }
+
+  async getEpisodeSegmentDanmu(segment) {
+    return this.getEpisodeDanmu(segment.url);
+  }
   formatComments(comments) {
     return comments.map(c => ({
       cid: Number(c.did),
