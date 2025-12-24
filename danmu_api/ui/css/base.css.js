@@ -32,8 +32,6 @@ body {
     transition: background-color var(--transition-base), color var(--transition-base);
     min-height: 100vh;
     position: relative;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
 /* 背景纹理效果（可选） */
@@ -348,40 +346,12 @@ input, textarea, select {
     position: sticky;
     top: 0;
     z-index: var(--z-sticky);
-    /* 与「环境配置总览」卡片同一气质：上方轻渐变 + 玻璃质感 */
-    background: linear-gradient(
-        180deg,
-        rgba(99, 102, 241, 0.14) 0%,
-        var(--glass-bg) 55%,
-        var(--glass-bg) 100%
-    );
+    background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
-    border-bottom: 1px solid rgba(99, 102, 241, 0.14);
-    padding: 0.875rem var(--spacing-lg);
-    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
-}
-
-.mobile-header::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(circle at 18% 20%, rgba(99, 102, 241, 0.22), transparent 56%),
-        radial-gradient(circle at 88% 18%, rgba(168, 85, 247, 0.12), transparent 48%);
-    pointer-events: none;
-    opacity: 0.85;
-}
-
-.mobile-header::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 1px;
-    background: linear-gradient(90deg, rgba(99, 102, 241, 0), rgba(99, 102, 241, 0.38), rgba(168, 85, 247, 0.28), rgba(99, 102, 241, 0));
-    pointer-events: none;
+    border-bottom: 1px solid var(--glass-border);
+    padding: var(--spacing-md) var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
 }
 
 .mobile-header-left {
@@ -389,42 +359,26 @@ input, textarea, select {
     align-items: center;
     gap: var(--spacing-md);
     flex: 1;
-    position: relative;
-    z-index: 1;
 }
 
 .mobile-header-right {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
-    position: relative;
-    z-index: 1;
 }
 
 .mobile-menu-btn {
     width: 40px;
     height: 40px;
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(99, 102, 241, 0.18);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 4px;
     flex-shrink: 0;
-    box-shadow: var(--shadow-sm);
-    transition: all var(--transition-fast);
-}
-
-.mobile-menu-btn:hover {
-    transform: translateY(-1px);
-    border-color: rgba(99, 102, 241, 0.32);
-    box-shadow: var(--shadow-md);
-}
-
-.mobile-menu-btn:active {
-    transform: translateY(0) scale(0.96);
 }
 
 .menu-line {
@@ -477,20 +431,18 @@ input, textarea, select {
     width: 40px;
     height: 40px;
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(99, 102, 241, 0.18);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all var(--transition-fast);
     flex-shrink: 0;
-    box-shadow: var(--shadow-sm);
 }
 
 .mobile-action-btn:hover {
-    border-color: rgba(99, 102, 241, 0.32);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
 }
 
 .mobile-action-icon {
