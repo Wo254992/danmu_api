@@ -169,13 +169,16 @@ export const HTML_TEMPLATE = /* html */ `
             <!-- 配置预览 -->
             <section class="content-section active" id="preview-section">
                 <div class="preview-hero-card">
+                    <div class="preview-hero-backdrop"></div>
                     <div class="preview-hero-content">
                         <div class="preview-hero-header">
-                            <div class="preview-hero-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                                    <path d="M9 12h6m-6 4h6"/>
-                                </svg>
+                            <div class="preview-hero-icon-group">
+                                <div class="preview-hero-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                        <path d="M9 12h6m-6 4h6"/>
+                                    </svg>
+                                </div>
                             </div>
                             <div class="preview-hero-titles">
                                 <h2 class="preview-hero-title">环境配置总览</h2>
@@ -218,6 +221,7 @@ export const HTML_TEMPLATE = /* html */ `
                             </div>
                             <div class="preview-stat-card stat-card-compact" id="system-status-card">
                                 <div class="stat-icon-wrapper stat-icon-status" id="status-icon-wrapper">
+                                    <div class="status-pulse-ring"></div>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                                     </svg>
