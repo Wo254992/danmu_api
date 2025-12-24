@@ -5,34 +5,21 @@ import { httpGet } from "../utils/http-util.js";
 import { convertToAsciiSum } from "../utils/codec-util.js";
 import { generateValidStartDate } from "../utils/time-util.js";
 import { addAnime, removeEarliestAnime } from "../utils/cache-util.js";
-import {
-  titleMatches,
-  strictTitleMatch,
-  normalizeSpaces,
-  normalizePunctuations,
-  normalizeTitleForMatch,
-  equivalentTitleIgnorePunct,
-} from "../utils/common-util.js";
+import { titleMatches } from "../utils/common-util.js";
 import { SegmentListResponse } from '../models/dandan-model.js';
+
 // =====================
 // 获取韩剧TV弹幕
 // =====================
 export default class HanjutvSource extends BaseSource {
   async search(keyword) {
     try {
-      // 韩剧TV 官方 App 在搜索时会对一些全角标点做“半角化/等价归一”。
-      // 例如：用户输入“宇宙Marry Me？”也能搜到返回名为“宇宙Marry Me?”的条目。
-      // 这里我们做同样的处理，并对 keyword 进行 URL 编码，避免 '?' 等字符破坏查询串。
-      const fixedKeyword = normalizePunctuations(keyword);
-      const resp = await httpGet(
-        `https://hxqapi.hiyun.tv/wapi/search/aggregate/search?keyword=${encodeURIComponent(fixedKeyword)}&scope=101&page=1`,
-        {
+      const resp = await httpGet(`https://hxqapi.hiyun.tv/wapi/search/aggregate/search?keyword=${keyword}&scope=101&page=1`, {
         headers: {
           "Content-Type": "application/json",
           "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
         },
-        }
-      );
+      });
 
       // 判断 resp 和 resp.data 是否存在
       if (!resp || !resp.data) {
@@ -156,27 +143,9 @@ export default class HanjutvSource extends BaseSource {
     }
 
     // 使用 map 和 async 时需要返回 Promise 数组，并等待所有 Promise 完成
-    // 对于韩剧TV，完全信任其搜索API，不做标题过滤（因为韩剧TV可能使用不同译名）
-    // 但在结果中标记匹配类型用于排序：严格匹配的排前面
     const processHanjutvAnimes = await Promise.all(sourceAnimes
+      .filter(s => titleMatches(s.name, queryTitle))
       .map(async (anime) => {
-        // 计算匹配类型用于排序：严格匹配 > 宽松匹配 > API返回
-        // 这里要把全角/半角标点视为等价（例如 “？” vs “?”），否则会被别名过滤逻辑误杀。
-        const normalizedAnimeName = normalizeTitleForMatch(anime.name);
-        const normalizedQueryTitle = normalizeTitleForMatch(queryTitle);
-        
-        let matchType = 1; // 默认为1（API返回的结果）
-        
-        // 如果标题匹配度更高，则提升优先级
-        // 1) 传统严格匹配
-        // 2) 仅标点(全角/半角)或大小写/空格差异也视为严格匹配
-        if (strictTitleMatch(anime.name, queryTitle) || equivalentTitleIgnorePunct(anime.name, queryTitle)) {
-          matchType = 3; // 严格匹配，最高优先级
-        } else if (normalizedAnimeName.includes(normalizedQueryTitle)) {
-          matchType = 2; // 宽松匹配，中等优先级
-        }
-        // 否则保持 matchType = 1（API返回但标题不直接匹配，如不同译名）
-        
         try {
           const detail = await this.getDetail(anime.sid);
           const eps = await this.getEpisodes(anime.sid);
@@ -191,155 +160,35 @@ export default class HanjutvSource extends BaseSource {
           }
 
           if (links.length > 0) {
-            // 提取别名信息（韩剧TV API返回的alias字段）
-            const aliases = detail.alias || [];
+            let transformedAnime = {
+              animeId: anime.animeId,
+              bangumiId: String(anime.animeId),
+              animeTitle: `${anime.name}(${new Date(anime.updateTime).getFullYear()})【${getCategory(detail.category)}】from hanjutv`,
+              type: getCategory(detail.category),
+              typeDescription: getCategory(detail.category),
+              imageUrl: anime.image.thumb,
+              startDate: generateValidStartDate(new Date(anime.updateTime).getFullYear()),
+              episodeCount: links.length,
+              rating: detail.rank,
+              isFavorited: true,
+              source: "hanjutv",
+            };
 
-            // 别名过滤规则：只有 alias[0]（第一个别名）与搜索标题匹配时才接受该条目
-            // 其他别名匹配或标题不匹配时，直接过滤掉该条目
-            const normalizedQueryTitle = normalizeTitleForMatch(queryTitle);
-            let matchedAlias = null;
-            let shouldRenameByAlias = false;
+            tmpAnimes.push(transformedAnime);
 
-            // 如果标题本身已经匹配(matchType >= 2)，则保留该条目
-            if (matchType >= 2) {
-              // 标题匹配，不需要改名
-              shouldRenameByAlias = false;
-            } else {
-              // 标题不匹配时，检查第一个别名
-              if (aliases.length > 0) {
-                const firstAlias = aliases[0];
-                const normalizedFirstAlias = normalizeTitleForMatch(firstAlias);
-                
-                // 第一个别名精确匹配或包含搜索标题
-                if (
-                  normalizedFirstAlias === normalizedQueryTitle ||
-                  normalizedFirstAlias.includes(normalizedQueryTitle)
-                ) {
-                  matchedAlias = firstAlias;
-                  shouldRenameByAlias = true;
-                  // 提升 matchType
-                  matchType = 2;
-                } else {
-                  // 第一个别名不匹配，且标题也不匹配，过滤掉该条目
-                  return null;
-                }
-              } else {
-                // 没有别名，且标题不匹配，过滤掉该条目
-                return null;
-              }
-            }
-// 选择一个可靠的时间字段来推断年份（搜索结果的 updateTime 可能不存在）
-const inferYear = (() => {
-  const t =
-    anime.updateTime ??
-    detail.updateTime ??
-    detail.publishTime ??
-    (eps && eps.length > 0 ? eps[0].publishTime : null);
-  if (!t) return null;
-  const y = new Date(t).getFullYear();
-  return Number.isFinite(y) ? y : null;
-})();
+            addAnime({...transformedAnime, links: links});
 
-const isValidYear = (y) => Number.isFinite(y) && y >= 1900 && y <= 2100;
-const yearForTitle = isValidYear(inferYear) ? inferYear : null;
-
-            // 如果“只差等价标点/空格/大小写”，则用用户搜索标题作为展示名，确保弹幕匹配不被标点卡住。
-            // 注意：仅在等价（normalizeTitleForMatch 相同）时才替换，避免把不同译名强行改成搜索词。
-            const shouldFormatAsQueryTitle = equivalentTitleIgnorePunct(anime.name, queryTitle);
-            const displayBaseName = shouldRenameByAlias
-              ? matchedAlias
-              : (shouldFormatAsQueryTitle ? String(queryTitle).trim() : anime.name);
-
-let transformedAnime = {
-  animeId: anime.animeId,
-  bangumiId: String(anime.animeId),
-  // 只有当第一个别名匹配时才改名，否则使用原始名称
-  animeTitle: yearForTitle
-    ? `${displayBaseName}(${yearForTitle})【${getCategory(detail.category)}】from hanjutv`
-    : `${displayBaseName}【${getCategory(detail.category)}】from hanjutv`,
-  type: getCategory(detail.category),
-  typeDescription: getCategory(detail.category),
-  imageUrl: anime.image.thumb,
-  // 如果年份不可用，使用 1900 作为兜底（避免被误认为“当前年份”）
-  startDate: generateValidStartDate(yearForTitle ?? 1900),
-  episodeCount: links.length,
-  rating: detail.rank,
-  isFavorited: true,
-  source: "hanjutv",
-  matchType: matchType, // 添加匹配类型标记用于排序
-  aliases: aliases, // 保存别名数组，用于自动匹配
-  matchedAlias: matchedAlias, // 仅记录命中的 alias（不改名）
-};
-
-// 计算一个“质量分”，用于去重时挑选更靠谱的条目
-const nonEmptyEpTitleCount = eps.filter(ep => ep.title && ep.title.trim() !== "").length;
-const hasUpdateTime = (anime.updateTime ?? detail.updateTime) ? 1 : 0;
-const rankScore = Number.isFinite(Number(detail.rank)) ? Number(detail.rank) : 0;
-const qualityScore = matchType * 100 + hasUpdateTime * 20 + nonEmptyEpTitleCount + rankScore / 10;
-
-// 返回带匹配类型 & 去重Key 的结果，用于后续排序/去重
-// 去重 key 用“真实剧名”而不是 alias（因为 alias 不可靠）
-// 同时把全角/半角标点视为等价，避免同一部剧因为“？”/“?”导致重复。
-const dedupeKey = `${detail.category}|${normalizeTitleForMatch(anime.name)}`;
-return { anime: transformedAnime, links: links, matchType: matchType, qualityScore, dedupeKey };
+            if (globals.animes.length > globals.MAX_ANIMES) removeEarliestAnime();
           }
-          return null; // 如果没有剧集则返回null
         } catch (error) {
           log("error", `[Hanjutv] Error processing anime: ${error.message}`);
-          return null;
         }
       })
     );
 
-    // 过滤掉 null 值并按匹配类型排序
-    const validResults = processHanjutvAnimes.filter(result => result !== null);
-
-    // 按匹配类型排序：严格匹配(3) > 宽松匹配(2) > API返回(1)
-    validResults.sort((a, b) => b.matchType - a.matchType);
-
-    // ==============
-    // 去重：韩剧TV 同名条目经常会返回多个 sid（同一部剧的不同版本/索引）
-    // 规则：同一 (category + 标题) 只保留“质量分”更高的那个
-    // ==============
-    const bestByKey = new Map();
-    for (const result of validResults) {
-      const key = result.dedupeKey ?? `${result.anime.type}|${result.anime.animeTitle}`;
-      const prev = bestByKey.get(key);
-      if (!prev || (result.qualityScore ?? 0) > (prev.qualityScore ?? 0)) {
-        bestByKey.set(key, result);
-      }
-    }
-
-    const dedupedResults = Array.from(bestByKey.values());
-
-    // 再次排序：严格匹配(3) > 宽松匹配(2) > API返回(1)，同一匹配类型下按质量分
-    dedupedResults.sort((a, b) => {
-      if (b.matchType !== a.matchType) return b.matchType - a.matchType;
-      return (b.qualityScore ?? 0) - (a.qualityScore ?? 0);
-    });
-
-    // ==============
-    // 两全其美：强命中存在时，过滤弱相关（避免“模范出租车”搜出“姐妹茶馆”等话题关联综艺）
-    // 规则：如果去重后存在 matchType>=2 的结果，则丢弃 matchType==1 的弱相关
-    // 这样既不会漏掉“真别名命中”（因为 alias 命中已提升到 2），也能挡住“伪装/话题关联”
-    // ==============
-    const hasStrongMatch = dedupedResults.some(r => (r.matchType ?? 1) >= 2);
-    const finalResults = hasStrongMatch
-      ? dedupedResults.filter(r => (r.matchType ?? 1) >= 2)
-      : dedupedResults;
-
-    // 提取动漫信息和添加到缓存（使用最终结果）
-    for (const result of finalResults) {
-      tmpAnimes.push(result.anime);
-      addAnime({ ...result.anime, links: result.links });
-
-      if (globals.animes.length > globals.MAX_ANIMES) removeEarliestAnime();
-    }
-
     this.sortAndPushAnimesByYear(tmpAnimes, curAnimes);
 
-    // 返回最终的 anime 列表（不要返回 processHanjutvAnimes，否则会把去重/过滤成果丢掉）
-    return tmpAnimes;
+    return processHanjutvAnimes;
   }
 
   async getEpisodeDanmu(id) {
@@ -381,6 +230,7 @@ return { anime: transformedAnime, links: links, matchType: matchType, qualitySco
       return allDanmus; // 返回已收集的 episodes
     }
   }
+
   async getEpisodeDanmuSegments(id) {
     log("info", "获取韩剧TV弹幕分段列表...", id);
 
@@ -398,6 +248,7 @@ return { anime: transformedAnime, links: links, matchType: matchType, qualitySco
   async getEpisodeSegmentDanmu(segment) {
     return this.getEpisodeDanmu(segment.url);
   }
+
   formatComments(comments) {
     return comments.map(c => ({
       cid: Number(c.did),
