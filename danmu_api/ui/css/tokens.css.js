@@ -66,11 +66,6 @@ export const tokensCssContent = /* css */ `
     --glass-border: rgba(255, 255, 255, 0.2);
     --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
     --glass-blur: 12px;
-
-    /* 统一的模糊强度（供 backdrop-filter 使用） */
-    --blur-sm: blur(8px);
-    --blur-md: blur(12px);
-    --blur-lg: blur(16px);
     
     /* 渐变色 */
     --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -207,11 +202,6 @@ export const tokensCssContent = /* css */ `
     --glass-border: rgba(148, 163, 184, 0.1);
     --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     --glass-blur: 16px;
-
-    /* 统一的模糊强度（供 backdrop-filter 使用） */
-    --blur-sm: blur(10px);
-    --blur-md: blur(16px);
-    --blur-lg: blur(22px);
     
     /* 渐变色 - 暗色模式优化 */
     --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
