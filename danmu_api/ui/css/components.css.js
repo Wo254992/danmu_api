@@ -81,15 +81,14 @@ export const componentsCssContent = /* css */ `
 
 /* 主要按钮 */
 .btn-primary {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     color: var(--text-inverse);
-    border-color: rgba(99, 102, 241, 0.22);
-    box-shadow: var(--shadow-sm), 0 0 0 1px rgba(99, 102, 241, 0.12);
+    box-shadow: var(--shadow-sm), 0 0 0 1px rgba(59, 130, 246, 0.1);
 }
 
 .btn-primary:hover {
-    filter: brightness(1.03) saturate(1.05);
-    box-shadow: var(--shadow-md), 0 0 0 1px rgba(99, 102, 241, 0.22);
+    background: var(--primary-hover);
+    box-shadow: var(--shadow-md), 0 0 0 1px rgba(59, 130, 246, 0.2);
     transform: translateY(-1px);
 }
 
