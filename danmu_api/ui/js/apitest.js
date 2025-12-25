@@ -124,6 +124,7 @@ const apiConfigs = {
                 required: false, 
                 placeholder: '默认: 不启用（完整弹幕）', 
                 options: ['true', 'false'],
+                default: 'false',
                 description: '是否启用分片弹幕（部分源支持）。不选择时获取完整弹幕列表'
             }
         ]
