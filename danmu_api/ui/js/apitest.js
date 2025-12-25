@@ -124,7 +124,6 @@ const apiConfigs = {
                 required: false, 
                 placeholder: '默认: 不启用（完整弹幕）', 
                 options: ['true', 'false'],
-                default: 'false',
                 description: '是否启用分片弹幕（部分源支持）。不选择时获取完整弹幕列表'
             }
         ]
@@ -356,6 +355,13 @@ function testApi() {
         sendButton.disabled = false;
         customAlert('请填写所有必填参数', '⚠️ 参数错误');
         return;
+    }
+
+    // segmentflag 兼容：只有显式选择 true 才传给后端；否则按“完整弹幕”处理
+    if (apiKey === 'getComment') {
+        if (params.segmentflag !== 'true') {
+            delete params.segmentflag;
+        }
     }
 
     addLog(\`🚀 调用接口: \${config.name} (\${config.method} \${config.path})\`, 'info');
