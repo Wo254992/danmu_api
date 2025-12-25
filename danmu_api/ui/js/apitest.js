@@ -112,7 +112,7 @@ const apiConfigs = {
                 label: '格式', 
                 type: 'select', 
                 required: false, 
-                placeholder: '可选: json或xml', 
+                placeholder: '默认: json', 
                 options: ['json', 'xml'],
                 default: 'json',
                 description: '选择返回数据的格式'
@@ -122,9 +122,9 @@ const apiConfigs = {
                 label: '分片标志', 
                 type: 'select', 
                 required: false, 
-                placeholder: '可选: true或false', 
+                placeholder: '默认: 不启用（完整弹幕）', 
                 options: ['true', 'false'],
-                description: '是否启用分片弹幕（部分源支持）'
+                description: '是否启用分片弹幕（部分源支持）。不选择时获取完整弹幕列表'
             }
         ]
     },
@@ -1089,7 +1089,9 @@ function loadDanmuData(episodeId, title) {
     // 保存当前 episodeId 用于导出
     currentEpisodeId = episodeId;
 
-    const commentUrl = buildApiUrl('/api/v2/comment/' + episodeId + '?format=json');
+    // 构建查询参数：默认 format=json，如果有其他参数也一并携带
+    const queryParams = new URLSearchParams({ format: 'json' });
+    const commentUrl = buildApiUrl('/api/v2/comment/' + episodeId + '?' + queryParams.toString());
 
     fetch(commentUrl)
         .then(response => {
