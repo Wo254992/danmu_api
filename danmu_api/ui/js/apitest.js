@@ -1096,20 +1096,10 @@ function loadDanmuData(episodeId, title) {
     // 保存当前 episodeId 用于导出
     currentEpisodeId = episodeId;
 
-    // 构建查询参数：默认 format=json；segmentflag 只有显式为 true 才传（否则后端应返回完整弹幕）
+    // 构建查询参数：默认 format=json，如果有其他参数也一并携带
     const queryParams = new URLSearchParams({ format: 'json' });
-
-    // 兼容两种入口：
-    // 1) 接口调试面板里的 param-segmentflag
-    // 2) 如果你在弹幕测试面板单独做了一个选择器，可用 danmu-segmentflag
-    const segEl = document.getElementById('danmu-segmentflag') || document.getElementById('param-segmentflag');
-    const segVal = segEl ? String(segEl.value || '').trim() : '';
-
-    if (segVal === 'true') {
-        queryParams.set('segmentflag', 'true');
-    }
-
     const commentUrl = buildApiUrl('/api/v2/comment/' + episodeId + '?' + queryParams.toString());
+
     fetch(commentUrl)
         .then(response => {
             if (!response.ok) {
