@@ -16,7 +16,7 @@ export function handleUI() {
 export function handleConfig(hasPermission = false) {
   // 获取环境变量配置
   const envVarConfig = globals.envVarConfig;
-
+  
   // 分类环境变量
   const categorizedVars = {
     api: [],
@@ -26,7 +26,7 @@ export function handleConfig(hasPermission = false) {
     cache: [],
     system: []
   };
-
+  
   // 获取所有环境变量 - 这是用于配置预览的
   const previewEnvVars = {
     ...globals.accessedEnvVars,
@@ -34,25 +34,25 @@ export function handleConfig(hasPermission = false) {
     redisValid: globals.redisValid,
     deployPlatform: globals.deployPlatform
   };
-
-  // 将环境变量按分类组织 - 只遍历 envVarConfig 中定义的环境变量
-  Object.keys(envVarConfig).forEach(key => {
-    const varConfig = envVarConfig[key];
+  
+  // 将环境变量按分类组织 - 使用原始环境变量进行分类，但保持预览格式
+  Object.keys(previewEnvVars).forEach(key => {
+    const varConfig = envVarConfig[key] || { category: 'system', type: 'text', description: '未分类配置项' };
     const category = varConfig.category || 'system';
-
+    
     categorizedVars[category].push({
       key: key,
-      value: previewEnvVars[key]?.value ?? previewEnvVars[key] ?? '', // 如果是新格式则取value字段，否则直接使用原值
-      type: previewEnvVars[key]?.type ?? varConfig.type ?? 'text', // 如果是新格式则取type字段，否则使用配置中的type或默认text
+      value: previewEnvVars[key].value || previewEnvVars[key], // 如果是新格式则取value字段，否则直接使用原值
+      type: previewEnvVars[key].type || varConfig.type || 'text', // 如果是新格式则取type字段，否则使用配置中的type或默认text
       description: varConfig.description || '无描述',
-      options: previewEnvVars[key]?.options ?? varConfig.options // 如果是新格式则取options字段
+      options: previewEnvVars[key].options || varConfig.options // 如果是新格式则取options字段
     });
   });
-
+  
   // 检查是否配置了ADMIN_TOKEN
   const adminToken = globals.adminToken || '';
   const hasAdminToken = adminToken.trim() !== '';
-
+  
   // 准备原始环境变量，无权限时也需要脱敏
   let originalEnvVars = { ...globals.originalEnvVars };
   if (!hasPermission || globals.currentToken !== globals.adminToken) {
@@ -64,7 +64,7 @@ export function handleConfig(hasPermission = false) {
       }
     });
   }
-
+  
   return jsonResponse({
     message: "Welcome to the LogVar Danmu API server",
     version: globals.VERSION,
@@ -87,20 +87,20 @@ export async function handleDeploy() {
   try {
     const deployPlatform = globals.deployPlatform;
     log("info", `[server] Deployment request received for platform: ${deployPlatform}`);
-
+    
     // 如果是 Node 部署，直接返回成功，因为 Node 环境不需要重新部署
     if (deployPlatform.toLowerCase() === 'node') {
       log("info", `[server] Node/Docker deployment - no redeployment needed, config changes take effect automatically`);
       return jsonResponse({ success: true, message: "Node/Docker deployment - configuration changes take effect automatically" }, 200);
     }
-
+    
     // 对于其他平台（如 Cloudflare、Vercel、Netlify 等），使用相应的 Handler 触发部署
     const handler = await HandlerFactory.getHandler(deployPlatform);
     if (!handler) {
       log("error", `[server] No handler found for platform: ${deployPlatform}`);
       return jsonResponse({ success: false, message: `No handler found for platform: ${deployPlatform}` }, 400);
     }
-
+    
     // 调用 handler 的 deploy 方法
     const deployResult = await handler.deploy();
     if (deployResult) {
@@ -150,14 +150,14 @@ export async function handleClearCache() {
     globals.episodeIds = [];
     globals.episodeNum = 10001; // 重置为初始值
     globals.lastSelectMap = new Map(); // 重新创建 Map 对象
-
+    
     // 清理搜索和弹幕缓存
     globals.searchCache = new Map();
     globals.commentCache = new Map();
     globals.requestHistory = new Map();
-
+    
     log("info", `[server] Memory cache cleared successfully`);
-
+    
     // 同步清理本地缓存和Redis缓存
     try {
       // 如果本地缓存有效，更新本地缓存
@@ -169,7 +169,7 @@ export async function handleClearCache() {
     } catch (localError) {
       log("warn", `[server] Local cache may not be available: ${localError.message}`);
     }
-
+    
     try {
       // 如果Redis有效，更新Redis缓存
       if (globals.redisValid) {
@@ -180,7 +180,7 @@ export async function handleClearCache() {
     } catch (redisError) {
       log("warn", `[server] Redis may not be available: ${redisError.message}`);
     }
-
+    
     log("info", `[server] All caches cleared successfully`);
     return jsonResponse({ success: true, message: "Cache cleared successfully", clearedItems: {
       animes: 0,
