@@ -332,8 +332,13 @@ function createServer() {
         body: body || undefined, // 对于 GET/HEAD 等请求，body 为 undefined
       });
 
-      // 调用核心处理函数，并标识平台为 "node"
-      const webResponse = await handleRequest(webRequest, process.env, "node", clientIp);
+      // 调用核心处理函数，并标识部署平台
+      // - Zeabur 属于 Node 运行环境，但需要平台标识来启用“环境变量管理/重新部署”等能力
+      // - 推荐在 Zeabur 平台设置：DEPLOY_PLATFORM=zeabur
+      const platformFromEnv = (process.env.DEPLOY_PLATFORM || process.env.DEPLOY_PLATFROM_PLATFORM || '').toString().toLowerCase();
+      const detectedPlatform = platformFromEnv || (process.env.ZEABUR ? 'zeabur' : 'node');
+
+      const webResponse = await handleRequest(webRequest, process.env, detectedPlatform, clientIp);
 
       // 将 Web API Response 对象转换为 Node.js 响应
       res.statusCode = webResponse.status;
