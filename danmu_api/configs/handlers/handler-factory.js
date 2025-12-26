@@ -4,9 +4,6 @@
 export class HandlerFactory {
   static async getHandler(deployPlatform) {
     switch (deployPlatform?.toLowerCase()) {
-      case 'zeabur':
-        const { ZeaburHandler } = await import('./zeabur-handler.js');
-        return new ZeaburHandler();
       case 'cloudflare':
         const { CloudflareHandler } = await import('./cloudflare-handler.js');
         return new CloudflareHandler();
@@ -33,6 +30,6 @@ export class HandlerFactory {
    * 获取所有支持的平台列表
    */
   static getSupportedPlatforms() {
-    return ['zeabur', 'cloudflare', 'vercel', 'netlify', 'edgeone', 'node'];
+    return ['cloudflare', 'vercel', 'netlify', 'edgeone', 'node'];
   }
 }
