@@ -177,6 +177,7 @@ let deployEnvStatus = {
 function getDeployPlatformLabel(platform) {
     const p = (platform || 'node').toString().toLowerCase();
     const map = {
+        zeabur: 'Zeabur',
         vercel: 'Vercel',
         netlify: 'Netlify',
         edgeone: 'EdgeOne (腾讯云 Pages)',
@@ -190,6 +191,9 @@ function getDeployPlatformLabel(platform) {
 
 function getDeployRequiredVars(platform) {
     const p = (platform || 'node').toString().toLowerCase();
+    if (p === 'zeabur') {
+        return ['DEPLOY_PLATFROM_ACCOUNT', 'DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'];
+    }
     if (p === 'vercel' || p === 'edgeone') {
         return ['DEPLOY_PLATFROM_PROJECT', 'DEPLOY_PLATFROM_TOKEN'];
     }
