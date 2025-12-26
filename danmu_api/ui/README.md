@@ -17,6 +17,7 @@
     - [2. Netlify 平台](#2-netlify-平台)
     - [3. EdgeOne (腾讯云 Pages) 平台](#3-edgeone-腾讯云-pages-平台)
     - [4. Cloudflare 平台](#4-cloudflare-平台)
+    - [5. Zeabur 平台](#5-zeabur-平台)
   - [常见问题](#常见问题)
 - [API 端点](#api-端点)
 - [故障排除](#故障排除)
@@ -119,6 +120,7 @@ UI 系统需要通过在 URL 中添加 TOKEN 来访问，以确保安全性：
 - Node.js
 - Vercel
 - Netlify
+- Zeabur
 - Cloudflare
 - Docker
 - EdgeOne
@@ -135,8 +137,15 @@ UI 系统需要通过在 URL 中添加 TOKEN 来访问，以确保安全性：
 | Netlify | ✅ | ✅ | ✅ |
 | EdgeOne | ❌ | ✅ | ✅ |
 | Cloudflare | ✅ | ✅ | ✅ |
+| Zeabur | ✅ | ✅ | ✅ |
 | Node.js | ❌ | ❌ | ❌ |
 | Docker | ❌ | ❌ | ❌ |
+
+> Zeabur 约定：
+> - `DEPLOY_PLATFROM_PROJECT` 填 **Service ID**
+> - `DEPLOY_PLATFROM_ACCOUNT` 填 **Environment ID**
+> - `DEPLOY_PLATFROM_TOKEN` 填 **API Key**
+> - 并建议额外设置：`DEPLOY_PLATFORM=zeabur`（用于让服务识别当前运行在 Zeabur 上）
 
 ---
 
@@ -274,6 +283,37 @@ UI 系统需要通过在 URL 中添加 TOKEN 来访问，以确保安全性：
 7. 点击 **Continue to summary**
 8. 确认后点击 **Create Token**
 9. **立即复制并保存** Token(只显示一次)
+
+---
+
+### 5. Zeabur 平台
+
+#### 需要的变量
+- `DEPLOY_PLATFROM_ACCOUNT`: Environment ID（环境 ID）
+- `DEPLOY_PLATFROM_PROJECT`: Service ID（服务 ID）
+- `DEPLOY_PLATFROM_TOKEN`: API Key（Zeabur API Key）
+
+> 建议额外设置：`DEPLOY_PLATFORM=zeabur`（Zeabur 属于 Node 运行环境，默认会被识别为 node；设置该变量后才能启用 Zeabur 的“环境变量管理 / 重新部署”能力）
+
+#### 获取步骤
+
+**获取 Service ID (`DEPLOY_PLATFROM_PROJECT`)**
+
+1. 登录 Zeabur 控制台（https://zeabur.com）
+2. 进入 **Projects**，选择你的项目
+3. 点击需要管理的 **Service**
+4. 在浏览器地址栏 URL 中复制 Service ID（一般会出现在服务详情页 URL 中）
+
+**获取 Environment ID (`DEPLOY_PLATFROM_ACCOUNT`)**
+
+1. 在项目内切换到对应的 Environment（如 Production / Preview）
+2. 在浏览器地址栏 URL 中复制 Environment ID（一般会出现在环境相关页面 URL 中）
+
+**获取 API Key (`DEPLOY_PLATFROM_TOKEN`)**
+
+1. 在 Zeabur 控制台右上角进入 **Settings / API Keys**（或个人/团队设置中的 API Key 管理）
+2. 创建一个新的 API Key
+3. **立即复制并保存**（通常只显示一次）
 
 ---
 
