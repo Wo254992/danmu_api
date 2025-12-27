@@ -24,6 +24,8 @@ import MangoSource from "../sources/mango.js";
 import BilibiliSource from "../sources/bilibili.js";
 import YoukuSource from "../sources/youku.js";
 import OtherSource from "../sources/other.js";
+import SohuSource from "../sources/sohu.js";
+import LetvSource from "../sources/letv.js";
 import { Anime, AnimeMatch, Episodes, Bangumi } from "../models/dandan-model.js";
 
 // =====================
@@ -42,6 +44,8 @@ const iqiyiSource = new IqiyiSource();
 const mangoSource = new MangoSource();
 const bilibiliSource = new BilibiliSource();
 const otherSource = new OtherSource();
+const sohuSource = new SohuSource();
+const letvSource = new LetvSource();
 const doubanSource = new DoubanSource(tencentSource, iqiyiSource, youkuSource, bilibiliSource);
 const tmdbSource = new TmdbSource(doubanSource);
 
@@ -189,6 +193,8 @@ export async function searchAnime(url, preferAnimeId = null, preferSource = null
       if (source === "iqiyi") return iqiyiSource.search(queryTitle);
       if (source === "imgo") return mangoSource.search(queryTitle);
       if (source === "bilibili") return bilibiliSource.search(queryTitle);
+      if (source === "sohu") return sohuSource.search(queryTitle);
+      if (source === "letv") return letvSource.search(queryTitle);
     });
 
     // 执行所有请求并等待结果
@@ -206,7 +212,7 @@ export async function searchAnime(url, preferAnimeId = null, preferSource = null
     const {
       vod: animesVodResults, 360: animes360, tmdb: animesTmdb, douban: animesDouban, renren: animesRenren,
       hanjutv: animesHanjutv, bahamut: animesBahamut, dandan: animesDandan, tencent: animesTencent, youku: animesYouku,
-      iqiyi: animesIqiyi, imgo: animesImgo, bilibili: animesBilibili
+      iqiyi: animesIqiyi, imgo: animesImgo, bilibili: animesBilibili, sohu: animesSohu, letv: animesLetv
     } = resultData;
 
     // 按顺序处理每个来源的结果
@@ -256,6 +262,12 @@ export async function searchAnime(url, preferAnimeId = null, preferSource = null
       } else if (key === 'bilibili') {
         // 等待处理Bilibili来源
         await bilibiliSource.handleAnimes(animesBilibili, queryTitle, curAnimes);
+      } else if (key === 'sohu') {
+        // 等待处理Sohu来源
+        await sohuSource.handleAnimes(animesSohu, queryTitle, curAnimes);
+      } else if (key === 'letv') {
+        // 等待处理Letv来源
+        await letvSource.handleAnimes(animesLetv, queryTitle, curAnimes);
       }
     }
   } catch (error) {
@@ -922,6 +934,10 @@ export async function getComment(path, queryFormat, segmentFlag) {
     danmus = await bilibiliSource.getComments(url, plat, segmentFlag);
   } else if (url.includes('.youku.com')) {
     danmus = await youkuSource.getComments(url, plat, segmentFlag);
+  } else if (url.includes('.tv.sohu.com')) {
+    danmus = await sohuSource.getComments(url, plat, segmentFlag);
+  } else if (url.includes('.le.com')) {
+    danmus = await letvSource.getComments(url, plat, segmentFlag);
   }
 
   // 请求其他平台弹幕
@@ -1018,6 +1034,10 @@ export async function getCommentByUrl(videoUrl, queryFormat, segmentFlag) {
       danmus = await bilibiliSource.getComments(url, "bilibili1", segmentFlag);
     } else if (url.includes('.youku.com')) {
       danmus = await youkuSource.getComments(url, "youku", segmentFlag);
+    } else if (url.includes('.tv.sohu.com')) {
+      danmus = await sohuSource.getComments(url, "sohu", segmentFlag);
+    } else if (url.includes('.le.com')) {
+      danmus = await letvSource.getComments(url, "letv", segmentFlag);
     } else {
       // 如果不是已知平台，尝试第三方弹幕服务器
       const urlPattern = /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,})(\/.*)?$/i;
@@ -1105,6 +1125,10 @@ export async function getSegmentComment(segment, queryFormat) {
       danmus = await renrenSource.getSegmentComments(segment);
     } else if (platform === "dandan") {
       danmus = await dandanSource.getSegmentComments(segment);
+    } else if (platform === "sohu") {
+      danmus = await sohuSource.getSegmentComments(segment);
+    } else if (platform === "letv") {
+      danmus = await letvSource.getSegmentComments(segment);
     } else if (platform === "other_server") {
       danmus = await otherSource.getSegmentComments(segment);
     }
