@@ -438,7 +438,24 @@ function testApi() {
                 throw new Error(\`HTTP error! status: \${response.status}\`);
             }
             
-            const formatParam = params.format || 'json';
+            // 🛠️ 修复：从请求体或查询参数中正确获取format参数
+            let formatParam = 'json'; // 默认json
+            
+            if (config.hasBody) {
+                // 对于POST请求体，从bodyData中获取format
+                try {
+                    const bodyEl = document.getElementById('body-content');
+                    if (bodyEl && bodyEl.value.trim()) {
+                        const bodyData = JSON.parse(bodyEl.value.trim());
+                        formatParam = bodyData.format || 'json';
+                    }
+                } catch (e) {
+                    // 解析失败则使用默认值
+                }
+            } else {
+                // 对于GET请求，从params中获取format
+                formatParam = params.format || 'json';
+            }
             
             if (formatParam.toLowerCase() === 'xml') {
                 return response.text().then(text => ({
