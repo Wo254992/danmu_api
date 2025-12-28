@@ -18,6 +18,7 @@ import RenrenSource from "../sources/renren.js";
 import HanjutvSource from "../sources/hanjutv.js";
 import BahamutSource from "../sources/bahamut.js";
 import DandanSource from "../sources/dandan.js";
+import CustomSource from "../sources/custom.js";
 import TencentSource from "../sources/tencent.js";
 import IqiyiSource from "../sources/iqiyi.js";
 import MangoSource from "../sources/mango.js";
@@ -38,6 +39,7 @@ const renrenSource = new RenrenSource();
 const hanjutvSource = new HanjutvSource();
 const bahamutSource = new BahamutSource();
 const dandanSource = new DandanSource();
+const customSource = new CustomSource();
 const tencentSource = new TencentSource();
 const youkuSource = new YoukuSource();
 const iqiyiSource = new IqiyiSource();
@@ -188,6 +190,7 @@ export async function searchAnime(url, preferAnimeId = null, preferSource = null
       if (source === "hanjutv") return hanjutvSource.search(queryTitle);
       if (source === "bahamut") return bahamutSource.search(queryTitle);
       if (source === "dandan") return dandanSource.search(queryTitle);
+      if (source === "custom") return customSource.search(queryTitle);
       if (source === "tencent") return tencentSource.search(queryTitle);
       if (source === "youku") return youkuSource.search(queryTitle);
       if (source === "iqiyi") return iqiyiSource.search(queryTitle);
@@ -211,7 +214,8 @@ export async function searchAnime(url, preferAnimeId = null, preferSource = null
     // 解构出返回的结果
     const {
       vod: animesVodResults, 360: animes360, tmdb: animesTmdb, douban: animesDouban, renren: animesRenren,
-      hanjutv: animesHanjutv, bahamut: animesBahamut, dandan: animesDandan, tencent: animesTencent, youku: animesYouku,
+      hanjutv: animesHanjutv, bahamut: animesBahamut, dandan: animesDandan, custom: animesCustom, 
+      tencent: animesTencent, youku: animesYouku, iqiyi: animesIqiyi, imgo: animesImgo, bilibili: animesBilibili
       iqiyi: animesIqiyi, imgo: animesImgo, bilibili: animesBilibili, sohu: animesSohu, letv: animesLetv
     } = resultData;
 
@@ -247,6 +251,9 @@ export async function searchAnime(url, preferAnimeId = null, preferSource = null
       } else if (key === 'dandan') {
         // 等待处理弹弹play来源
         await dandanSource.handleAnimes(animesDandan, queryTitle, curAnimes);
+      } else if (key === 'custom') {
+        // 等待处理自定义弹幕源来源
+        await customSource.handleAnimes(animesCustom, queryTitle, curAnimes);
       } else if (key === 'tencent') {
         // 等待处理Tencent来源
         await tencentSource.handleAnimes(animesTencent, queryTitle, curAnimes);
@@ -951,6 +958,8 @@ export async function getComment(path, queryFormat, segmentFlag) {
       danmus = await bahamutSource.getComments(url, plat, segmentFlag);
     } else if (plat === "dandan") {
       danmus = await dandanSource.getComments(url, plat, segmentFlag);
+    } else if (plat === "custom") {
+      danmus = await customSource.getComments(url, plat, segmentFlag);
     }
   }
 
@@ -1128,7 +1137,9 @@ export async function getSegmentComment(segment, queryFormat) {
     } else if (platform === "sohu") {
       danmus = await sohuSource.getSegmentComments(segment);
     } else if (platform === "letv") {
-      danmus = await letvSource.getSegmentComments(segment);
+      danmus = await letvSource.getSegmentComments(segment);      
+    } else if (platform === "custom") {
+      danmus = await customSource.getSegmentComments(segment);
     } else if (platform === "other_server") {
       danmus = await otherSource.getSegmentComments(segment);
     }
