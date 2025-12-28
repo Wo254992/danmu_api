@@ -215,8 +215,8 @@ export async function searchAnime(url, preferAnimeId = null, preferSource = null
     const {
       vod: animesVodResults, 360: animes360, tmdb: animesTmdb, douban: animesDouban, renren: animesRenren,
       hanjutv: animesHanjutv, bahamut: animesBahamut, dandan: animesDandan, custom: animesCustom, 
-      tencent: animesTencent, youku: animesYouku, iqiyi: animesIqiyi, imgo: animesImgo, bilibili: animesBilibili
-      iqiyi: animesIqiyi, imgo: animesImgo, bilibili: animesBilibili, sohu: animesSohu, letv: animesLetv
+      tencent: animesTencent, youku: animesYouku, iqiyi: animesIqiyi, imgo: animesImgo, bilibili: animesBilibili,
+      sohu: animesSohu, letv: animesLetv
     } = resultData;
 
     // 按顺序处理每个来源的结果
