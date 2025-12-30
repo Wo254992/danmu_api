@@ -168,6 +168,18 @@ export const HTML_TEMPLATE = /* html */ `
 
             <!-- 配置预览 -->
             <section class="content-section active" id="preview-section">
+                <div id="proxy-config-container" style="display: none; background: var(--warning-bg, #fff3cd); border: 1px solid var(--warning-border, #ffeeba); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="color: var(--warning-text, #856404); margin-top: 0; font-size: 16px;">⚠️ 获取配置失败</h3>
+                    <p style="color: var(--warning-text, #856404); margin-bottom: 10px; font-size: 14px;">
+                        检测到无法获取配置。如果您使用了复杂的反向代理：例如将 <code>http://{ip}:9321/</code> 代理到了 <code>http://{ip}:9321/danmu_api/</code>，请在此处手动输入完整的反代后链接（不包含TOKEN和ADMIN_TOKEN的）
+                    </p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <input type="text" id="custom-base-url" class="form-input" placeholder="例如: http://192.168.8.1:2333/danmu_api/ (留空保存即恢复默认)" style="flex: 1; min-width: 200px;">
+                        <button class="btn btn-primary" onclick="saveBaseUrl()">保存并刷新</button>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 12px; margin-top: 8px;">* 设置将保存在浏览器本地存储中，清除网页的'本地存储空间'或者输入框中留空并保存可恢复默认</p>
+                </div>
+
                 <div class="preview-hero-card">
                     <div class="preview-hero-content">
                         <div class="preview-hero-header">
