@@ -13,6 +13,36 @@ let currentToken = 'globals.currentToken';
 let currentAdminToken = '';
 let originalToken = '87654321';
 
+// 反向代理/API基础路径配置
+// 从LocalStorage获取用户自定义的Base URL
+let customBaseUrl = localStorage.getItem('logvar_api_base_url') || '';
+
+// 保存自定义Base URL (为空则清除)
+function saveBaseUrl() {
+    const input = document.getElementById('custom-base-url').value.trim();
+    if (input) {
+        // 确保URL不以斜杠结尾，方便后续拼接
+        let formattedUrl = input;
+        if (formattedUrl.endsWith('/')) {
+            formattedUrl = formattedUrl.slice(0, -1);
+        }
+        localStorage.setItem('logvar_api_base_url', formattedUrl);
+        customBaseUrl = formattedUrl;
+        customAlert('API地址配置已保存，即将刷新页面。', '保存成功');
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    } else {
+        // 输入为空，视为清除配置/重置为默认
+        localStorage.removeItem('logvar_api_base_url');
+        customBaseUrl = '';
+        customAlert('配置已重置为默认状态，即将刷新页面。', '操作成功');
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+}
+
 /* ========================================
    移动端 viewport/软键盘兼容
    - 修复：输入框聚焦后按钮被“挤出视口”看起来像消失
@@ -416,15 +446,56 @@ function toggleSidebar() {
 function switchSection(section) {
     // 检查是否尝试访问受token保护的section
     if (section === 'logs' || section === 'api' || section === 'env' || section === 'push') {
-        const urlPath = window.location.pathname;
+        let _reverseProxy = customBaseUrl; // 使用全局配置
+
+        // 获取URL路径并提取token
+        let urlPath = window.location.pathname;
+        if(_reverseProxy) {
+            // 严谨地移除BaseUrl中的path部分
+            try {
+                // 如果_reverseProxy包含完整URL，提取pathname
+                // 如果只是相对路径，直接使用
+                let proxyPath = _reverseProxy.startsWith('http') 
+                    ? new URL(_reverseProxy).pathname 
+                    : _reverseProxy;
+                
+                // 确保移除尾部斜杠，防止匹配失败
+                if (proxyPath.endsWith('/')) {
+                    proxyPath = proxyPath.slice(0, -1);
+                }
+                
+                if(proxyPath && urlPath.startsWith(proxyPath)) {
+                    urlPath = urlPath.substring(proxyPath.length);
+                }
+            } catch(e) {
+                console.error("解析反代路径失败", e);
+            }
+        }
+        
         const pathParts = urlPath.split('/').filter(part => part !== '');
         const urlToken = pathParts.length > 0 ? pathParts[0] : '';
         
         if (!urlToken && originalToken !== "87654321") {
             setTimeout(() => {
+                // 获取当前页面的协议、主机和端口
                 const protocol = window.location.protocol;
                 const host = window.location.host;
-                customAlert('请在URL中配置相应的TOKEN以访问此功能！\\n\\n访问方式：' + protocol + '//' + host + '/{TOKEN}', '🔒 需要认证');
+                
+                // 构造显示的BaseUrl，确保是绝对路径
+                let displayBase;
+                if (_reverseProxy) {
+                    displayBase = _reverseProxy.startsWith('http') 
+                        ? _reverseProxy 
+                        : (protocol + '//' + host + _reverseProxy);
+                } else {
+                    displayBase = protocol + '//' + host;
+                }
+                
+                if (displayBase.endsWith('/')) {
+                    displayBase = displayBase.slice(0, -1);
+                }
+                
+                customAlert('请在URL中配置相应的TOKEN以访问此功能！\\n\\n访问方式：' + displayBase + '/{TOKEN}', '🔒 需要认证');
             }, 100);
             return;
         }
@@ -637,10 +708,23 @@ function customConfirm(message, title = '❓ 确认') {
    构建API URL
    ======================================== */
 function buildApiUrl(path, isSystemPath = false) {
+    let res;
+    // 如果是系统管理路径且有admin token,则使用admin token
     if (isSystemPath && currentAdminToken && currentAdminToken.trim() !== '' && currentAdminToken.trim() !== '*'.repeat(currentAdminToken.length)) {
-        return '/' + currentAdminToken + path;
+        res = '/' + currentAdminToken + path;
+    } else {
+        // 否则使用普通token
+        res = (currentToken ? '/' + currentToken : "") + path;
     }
-    return (currentToken ? '/' + currentToken : "") + path;
+    
+    // 如果配置了自定义基础URL (解决反代问题)
+    if (customBaseUrl) {
+        // 确保路径以/开头
+        const cleanPath = res.startsWith('/') ? res : '/' + res;
+        return customBaseUrl + cleanPath;
+    }
+
+    return res;
 }
 
 /* ========================================
@@ -722,50 +806,126 @@ function showErrorMessage(containerId, message) {
    更新API端点信息
    ======================================== */
 function updateApiEndpoint() {
-    return fetch(buildApiUrl('/api/config', true))
-        .then(response => response.json())
-        .then(config => {
-            const protocol = window.location.protocol;
-            const host = window.location.host;
-            const token = config.originalEnvVars?.TOKEN || '87654321';
-            const adminToken = config.originalEnvVars?.ADMIN_TOKEN;
+  return fetch(buildApiUrl('/api/config', true))
+    .then(response => {
+        // 检查ContentType，如果是HTML说明可能是404页面或反代错误页面
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") === -1) {
+             throw new Error("Received HTML instead of JSON. Possible 404 or Proxy Error.");
+        }
+        if (!response.ok) {
+            throw new Error(\`HTTP error! status: \${response.status}\`);
+        }
+        return response.json();
+    })
+    .then(config => {
+      let _reverseProxy = customBaseUrl; // 使用全局配置
 
-            originalToken = token;
-            currentAdminToken = adminToken || '';
+      // 获取当前页面的协议、主机和端口
+      const protocol = window.location.protocol;
+      const host = window.location.host;
+      const token = config.originalEnvVars?.TOKEN || '87654321'; // 默认token值
+      const adminToken = config.originalEnvVars?.ADMIN_TOKEN;
 
-            const urlPath = window.location.pathname;
-            const pathParts = urlPath.split('/').filter(part => part !== '');
-            const urlToken = pathParts.length > 0 ? pathParts[0] : '';
-            
-            let apiEndpoint;
-            
-            if (token === '87654321') {
-                apiEndpoint = protocol + '//' + host;
-            } else {
-                let apiToken = '********';
-                if (urlToken === token || (adminToken !== "" && urlToken === adminToken)) {
-                    apiToken = token;
-                }
-                apiEndpoint = protocol + '//' + host + '/' + apiToken;
-            }
-            
-            const apiEndpointElement = document.getElementById('api-endpoint');
-            if (apiEndpointElement) {
-                apiEndpointElement.textContent = apiEndpoint;
-            }
-            return config;
-        })
-        .catch(error => {
-            console.error('获取配置信息失败:', error);
-            const protocol = window.location.protocol;
-            const host = window.location.host;
-            const apiEndpoint = protocol + '//' + host + '/********';
-            const apiEndpointElement = document.getElementById('api-endpoint');
-            if (apiEndpointElement) {
-                apiEndpointElement.textContent = apiEndpoint;
-            }
-            throw error;
-        });
+      originalToken = token;
+      currentAdminToken = adminToken || '';
+
+      // 获取URL路径并提取token
+      let urlPath = window.location.pathname;
+      if(_reverseProxy) {
+          try {
+              let proxyPath = _reverseProxy.startsWith('http') 
+                  ? new URL(_reverseProxy).pathname 
+                  : _reverseProxy;
+              
+              if (proxyPath.endsWith('/')) {
+                  proxyPath = proxyPath.slice(0, -1);
+              }
+              if(proxyPath && urlPath.startsWith(proxyPath)) {
+                  urlPath = urlPath.substring(proxyPath.length);
+              }
+          } catch(e) { /* ignore */ }
+      }
+
+      const pathParts = urlPath.split('/').filter(part => part !== '');
+      const urlToken = pathParts.length > 0 ? pathParts[0] : '';
+      let apiToken = '********';
+      
+      // 判断是否使用默认token
+      if (token === '87654321') {
+        // 如果是默认token，则显示真实token
+        apiToken = token;
+      } else {
+        // 如果不是默认token，则检查URL中的token是否匹配，匹配则显示真实token，否则显示星号
+        if (urlToken === token || (adminToken !== "" && urlToken === adminToken)) {
+          apiToken = token; // 更新全局token变量
+        }
+      }
+      
+      // 构造API端点URL
+      let baseUrlStr;
+      if (_reverseProxy) {
+          // 如果配置了反代，且是相对路径，则补全协议和主机，确保显示为绝对路径
+          baseUrlStr = _reverseProxy.startsWith('http') 
+              ? _reverseProxy 
+              : (protocol + '//' + host + _reverseProxy);
+      } else {
+          baseUrlStr = protocol + '//' + host;
+      }
+
+      // 确保 baseUrlStr 不以斜杠结尾
+      let cleanBaseUrl = baseUrlStr;
+      if (cleanBaseUrl.endsWith('/')) {
+          cleanBaseUrl = cleanBaseUrl.slice(0, -1);
+      }
+      const apiEndpoint = cleanBaseUrl + '/' + apiToken;
+      
+      const apiEndpointElement = document.getElementById('api-endpoint');
+      if (apiEndpointElement) {
+        apiEndpointElement.textContent = apiEndpoint;
+      }
+      return config; // 返回配置信息，以便链式调用
+    })
+    .catch(error => {
+      console.error('获取配置信息失败:', error);
+      // 出错时显示默认值
+      const protocol = window.location.protocol;
+      const host = window.location.host;
+      let _reverseProxy = customBaseUrl;
+      
+      // 构造显示用的BaseUrl
+      let baseUrlStr;
+      if (_reverseProxy) {
+          baseUrlStr = _reverseProxy.startsWith('http') 
+              ? _reverseProxy 
+              : (protocol + '//' + host + _reverseProxy);
+      } else {
+          baseUrlStr = protocol + '//' + host;
+      }
+
+      let cleanBaseUrl = baseUrlStr;
+      if (cleanBaseUrl.endsWith('/')) {
+          cleanBaseUrl = cleanBaseUrl.slice(0, -1);
+      }
+      const apiEndpoint = cleanBaseUrl + '/********';
+      
+      const apiEndpointElement = document.getElementById('api-endpoint');
+      if (apiEndpointElement) {
+        apiEndpointElement.textContent = apiEndpoint;
+      }
+      
+      // 如果是因为反代导致的问题，显示输入框
+      const proxyContainer = document.getElementById('proxy-config-container');
+      if(proxyContainer) {
+          proxyContainer.style.display = 'block';
+          // 填充当前输入框（如果有值）
+          if(customBaseUrl) {
+              document.getElementById('custom-base-url').value = customBaseUrl;
+          }
+      }
+      
+      throw error; // 抛出错误，以便调用者可以处理
+    });
 }
 
 /* ========================================
@@ -945,6 +1105,17 @@ async function init() {
     } catch (error) {
         console.error('初始化失败:', error);
         addLog('❌ 系统初始化失败: ' + error.message, 'error');
+        
+        // 确保反代配置框显示
+        const proxyContainer = document.getElementById('proxy-config-container');
+        if(proxyContainer) {
+            proxyContainer.style.display = 'block';
+            if(customBaseUrl) {
+                document.getElementById('custom-base-url').value = customBaseUrl;
+            }
+        }
+        
+        // 即使初始化失败，也要尝试获取日志
         fetchRealLogs();
     }
     // 初始化弹幕测试相关功能
