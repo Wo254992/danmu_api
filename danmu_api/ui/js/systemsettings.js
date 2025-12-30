@@ -441,10 +441,37 @@ function showSuccessAnimation(message) {
    检查管理员令牌
    ======================================== */
 function checkAdminToken() {
-    const urlPath = window.location.pathname;
-    const pathParts = urlPath.split('/').filter(part => part !== '');
-    const urlToken = pathParts.length > 0 ? pathParts[0] : currentToken;
+    let _reverseProxy = customBaseUrl; // 使用全局变量 customBaseUrl
+
+    // 获取URL路径并提取token
+    let urlPath = window.location.pathname;
     
+    // 如果配置了反代路径，必须先剥离它
+    if(_reverseProxy) {
+        try {
+            // 解析配置中的路径部分，例如 http://192.168.8.1:2333/danmu_api => /danmu_api
+            let proxyPath = _reverseProxy.startsWith('http') 
+                ? new URL(_reverseProxy).pathname 
+                : _reverseProxy;
+            
+            // 确保移除尾部斜杠
+            if (proxyPath.endsWith('/')) {
+                proxyPath = proxyPath.slice(0, -1);
+            }
+            
+            // 如果当前URL包含此前缀，则移除它
+            if(proxyPath && urlPath.startsWith(proxyPath)) {
+                urlPath = urlPath.substring(proxyPath.length);
+            }
+        } catch(e) {
+            console.error("解析反代路径失败", e);
+        }
+    }
+
+    const pathParts = urlPath.split('/').filter(part => part !== '');
+    const urlToken = pathParts.length > 0 ? pathParts[0] : currentToken; // 如果没有路径段，使用默认token
+    
+    // 检查是否配置了ADMIN_TOKEN且URL中的token等于currentAdminToken
     return currentAdminToken && currentAdminToken.trim() !== '' && urlToken === currentAdminToken;
 }
 
@@ -453,11 +480,26 @@ function checkAdminToken() {
    ======================================== */
 async function checkDeployPlatformConfig() {
     if (!checkAdminToken()) {
+        // 获取当前页面的协议、主机和端口
         const protocol = window.location.protocol;
         const host = window.location.host;
+        
+        let displayBase;
+        if (customBaseUrl) {
+            displayBase = customBaseUrl.startsWith('http') 
+                ? customBaseUrl 
+                : (protocol + '//' + host + customBaseUrl);
+        } else {
+            displayBase = protocol + '//' + host;
+        }
+
+        if (displayBase.endsWith('/')) {
+            displayBase = displayBase.slice(0, -1);
+        }
+        
         return { 
             success: false, 
-            message: \`🔒 需要管理员权限！\\n\\n请先配置 ADMIN_TOKEN 环境变量并使用正确的 token 访问以启用系统管理功能。\\n\\n访问方式：\${protocol}//\${host}/{ADMIN_TOKEN}\`
+            message: \`🔒 需要管理员权限！\\n\\n请先配置 ADMIN_TOKEN 环境变量并使用正确的 token 访问以启用系统管理功能。\\n\\n访问方式：\${displayBase}/{ADMIN_TOKEN}\`
         };
     }
     
