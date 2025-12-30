@@ -5,15 +5,32 @@ export const previewJsContent = /* javascript */ `
    ======================================== */
 function renderPreview() {
     const preview = document.getElementById('preview-area');
+    const proxyConfigContainer = document.getElementById('proxy-config-container');
     
     // 显示加载状态
     showLoadingIndicator('preview-area');
     
-    fetch('/api/config')
-        .then(response => response.json())
+    fetch(buildApiUrl('/api/config'))
+        .then(response => {
+             const contentType = response.headers.get("content-type");
+             if (contentType && contentType.indexOf("application/json") === -1) {
+                  // 返回文本以便后续处理（例如显示HTML错误的前几个字符）
+                  return response.text().then(text => {
+                      throw new Error('Expected JSON, got ' + contentType + '. Content: ' + text.substring(0, 50) + '...');
+                  });
+             }
+             if (!response.ok) {
+                throw new Error('HTTP error! status: ' + response.status);
+             }
+             return response.json();
+        })
         .then(config => {
-            const categorizedVars = config.categorizedEnvVars || {};
-            
+            // 成功加载，隐藏反代配置框
+            if(proxyConfigContainer) {
+                proxyConfigContainer.style.display = 'none';
+            }
+
+            const categorizedVars = config.categorizedEnvVars || {};            
             let html = '';
             
             // 按类别顺序排列
@@ -110,6 +127,17 @@ function renderPreview() {
         })
         .catch(error => {
             console.error('Failed to load config for preview:', error);
+            
+            // 显示反代配置框
+            if(proxyConfigContainer) {
+                proxyConfigContainer.style.display = 'block';
+                // 如果有已保存的URL，填充它
+                const savedUrl = localStorage.getItem('logvar_api_base_url');
+                if(savedUrl) {
+                    document.getElementById('custom-base-url').value = savedUrl;
+                }
+            }
+            
             preview.innerHTML = \`
                 <div class="preview-error">
                     <div class="error-icon">⚠️</div>
