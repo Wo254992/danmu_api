@@ -42,7 +42,7 @@ export class NodeHandler extends BaseHandler {
           if (trimmed && !trimmed.startsWith('#')) {
             const match = trimmed.match(/^([^=]+)=/);
             if (match && match[1].trim() === key) {
-              lines[i] = `${key}=${value}`;
+              lines[i] = `${key}=${JSON.stringify(String(value))}`;
               keyFound = true;
               break;
             }
@@ -54,9 +54,8 @@ export class NodeHandler extends BaseHandler {
           if (lines[lines.length - 1] !== '') {
             lines.push('');
           }
-          lines.push(`${key}=${value}`);
+          lines.push(`${key}=${JSON.stringify(String(value))}`);
         }
-
         fs.writeFileSync(envPath, lines.join('\n'), 'utf8');
         log("info", `[server] Updated ${key} in .env`);
         updated = true;
@@ -86,11 +85,11 @@ export class NodeHandler extends BaseHandler {
             } else if (value === 'false') {
               formattedValue = false;
             } else {
-              // 字符串值需要引号，并转义特殊字符
-              formattedValue = `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
-            }
+            // 字符串值需要引号，并转义特殊字符
+            formattedValue = JSON.stringify(String(value));
+          }
             
-            lines[i] = `${key}: ${formattedValue}`;
+          lines[i] = `${key}: ${formattedValue}`;
             keyFound = true;
             break;
           }
@@ -111,7 +110,7 @@ export class NodeHandler extends BaseHandler {
             formattedValue = false;
           } else {
             // 字符串值需要引号，并转义特殊字符
-            formattedValue = `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+            formattedValue = JSON.stringify(String(value));
           }
           lines.push(`${key}: ${formattedValue}`);
         }
