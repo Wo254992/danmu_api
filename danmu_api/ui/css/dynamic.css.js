@@ -851,6 +851,10 @@ export const dynamicCssContent = /* css */ `
     background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
 }
 
+.value-type-badge.map {
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+}
+
 .env-value {
     display: block;
     padding: 0.75rem;
