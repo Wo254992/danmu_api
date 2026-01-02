@@ -86,8 +86,8 @@ export class NodeHandler extends BaseHandler {
             } else if (value === 'false') {
               formattedValue = false;
             } else {
-              // 字符串值需要引号
-              formattedValue = `"${value}"`;
+              // 字符串值需要引号，并转义特殊字符
+              formattedValue = `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
             }
             
             lines[i] = `${key}: ${formattedValue}`;
@@ -110,8 +110,8 @@ export class NodeHandler extends BaseHandler {
           } else if (value === 'false') {
             formattedValue = false;
           } else {
-            // 字符串值需要引号
-            formattedValue = `"${value}"`;
+            // 字符串值需要引号，并转义特殊字符
+            formattedValue = `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
           }
           lines.push(`${key}: ${formattedValue}`);
         }
