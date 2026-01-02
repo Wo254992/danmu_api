@@ -598,9 +598,11 @@ function renderEnvList() {
                          item.type === 'number' ? 'num' :
                          item.type === 'select' ? 'select' :
                          item.type === 'multi-select' ? 'multi' :
+                         item.type === 'map' ? 'map' :
                          item.type === 'color-list' ? 'color' : 'text';
         const badgeClass = item.type === 'multi-select' ? 'multi' : 
-                          item.type === 'color-list' ? 'color' : '';
+                          item.type === 'color-list' ? 'color' :
+                          item.type === 'map' ? 'map' : '';
 
         return \`
             <div class="env-item" style="animation: fadeInUp 0.3s ease-out \${index * 0.05}s backwards;">
@@ -961,6 +963,21 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
             value = selectedTags.join(',');
             const options = Array.from(document.querySelectorAll('.available-tag')).map(el => el.dataset.value);
             itemData = { key, value, description, type, options };
+        } else if (type === 'map') {
+            // 获取映射表值
+            const mapItems = document.querySelectorAll('#map-container .map-item:not(.map-item-template)');
+            const pairs = [];
+            mapItems.forEach(item => {
+                const leftInput = item.querySelector('.map-input-left');
+                const rightInput = item.querySelector('.map-input-right');
+                const leftValue = leftInput.value.trim();
+                const rightValue = rightInput.value.trim();
+                if (leftValue && rightValue) {
+                    pairs.push(leftValue + '->' + rightValue);
+                }
+            });
+            value = pairs.join(';');
+            itemData = { key, value, description, type };
         } else if (type === 'color-list') {
             // 安全获取 text-value
             const hiddenInput = document.getElementById('text-value');
@@ -1181,6 +1198,44 @@ function renderValueInput(item) {
         \`;
 
         setupDragAndDrop();
+
+    } else if (type === 'map') {
+        // 映射表类型
+        const pairs = value ? value.split(';').map(pair => pair.trim()).filter(pair => pair) : [];
+        const mapItems = pairs.map(pair => {
+            if (pair.includes('->')) {
+                const [left, right] = pair.split('->').map(s => s.trim());
+                return { left, right };
+            }
+            return { left: pair, right: '' };
+        });
+
+        container.innerHTML = \`
+            <label class="form-label">映射配置</label>
+            <div class="map-container" id="map-container">
+                \${mapItems.map((item, index) => \`
+                    <div class="map-item" data-index="\${index}">
+                        <input type="text" class="map-input-left form-input" placeholder="原始值" value="\${escapeHtml(item.left)}">
+                        <span class="map-separator">-></span>
+                        <input type="text" class="map-input-right form-input" placeholder="映射值" value="\${escapeHtml(item.right)}">
+                        <button type="button" class="btn btn-danger btn-sm map-remove-btn" onclick="removeMapItem(this)">删除</button>
+                    </div>
+                \`).join('')}
+                <div class="map-item-template" style="display: none;">
+                    <input type="text" class="map-input-left form-input" placeholder="原始值">
+                    <span class="map-separator">-></span>
+                    <input type="text" class="map-input-right form-input" placeholder="映射值">
+                    <button type="button" class="btn btn-danger btn-sm map-remove-btn" onclick="removeMapItem(this)">删除</button>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="addMapItem()" style="margin-top: 1rem;">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="12" y1="5" x2="12" y2="19" stroke-width="2"/>
+                    <line x1="5" y1="12" x2="19" y2="12" stroke-width="2"/>
+                </svg>
+                <span>添加映射项</span>
+            </button>
+        \`;
 
     } else if (type === 'color-list') {
         // 默认颜色池（与后端 danmu-util.js 保持一致）
@@ -1959,7 +2014,27 @@ function confirmBatchImport() {
         showImportModeDialog(colors);
     }, 350);
 }
+/* ========================================
+   映射表操作函数
+   ======================================== */
+function addMapItem() {
+    const container = document.getElementById('map-container');
+    const template = document.querySelector('.map-item-template');
+    const newItem = template.cloneNode(true);
+    newItem.style.display = 'flex';
+    newItem.classList.remove('map-item-template');
+    newItem.classList.add('map-item');
+    const index = container.querySelectorAll('.map-item:not(.map-item-template)').length;
+    newItem.setAttribute('data-index', index);
+    container.appendChild(newItem);
+}
 
+function removeMapItem(button) {
+    const item = button.closest('.map-item');
+    if (item && !item.classList.contains('map-item-template')) {
+        item.remove();
+    }
+}
 // 点击模态框背景关闭
 document.addEventListener('click', function(e) {
     const modal = document.getElementById('batch-import-modal');
