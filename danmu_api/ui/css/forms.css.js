@@ -530,6 +530,66 @@ export const formsCssContent = /* css */ `
 }
 
 /* ========================================
+   映射表样式
+   ======================================== */
+.map-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.map-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.map-item:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--primary-color);
+}
+
+.map-input-left,
+.map-input-right {
+    flex: 1;
+    min-width: 0;
+}
+
+.map-separator {
+    font-weight: bold;
+    color: var(--text-secondary);
+    font-size: 1.125rem;
+    flex-shrink: 0;
+}
+
+.map-remove-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.map-item-template {
+    display: none !important;
+}
+
+[data-theme="dark"] .map-item {
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+[data-theme="dark"] .map-item:hover {
+    background: rgba(17, 24, 39, 0.85);
+    border-color: rgba(129, 140, 248, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(129, 140, 248, 0.1);
+}
+
+/* ========================================
    紧凑型模态框底部
    ======================================== */
 .modal-footer-compact {
