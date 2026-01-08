@@ -1,4 +1,7 @@
-// danmu_api/utils/cookie-handler.js
+/**
+ * Cookie 管理处理模块
+ * 提供 B站 Cookie 的状态查询、二维码登录、保存和清除功能
+ */
 import { jsonResponse } from './http-util.js';
 import { log } from './log-util.js';
 import { Globals } from '../configs/globals.js';
@@ -11,8 +14,8 @@ const qrLoginSessions = new Map();
  */
 export async function handleCookieStatus() {
     try {
-        const globals = Globals.getInstance();
-        const cookie = globals.bilibiliCookie || Globals.envs.BILIBILI_COOKIE || '';
+        const globals = Globals.getConfig();
+        const cookie = globals.bilibliCookie || '';
         
         if (!cookie) {
             return jsonResponse({
@@ -173,7 +176,7 @@ export async function handleQRCheck(request) {
                         
                         if (SESSDATA) {
                             cookie = `SESSDATA=${SESSDATA}; bili_jct=${bili_jct}; DedeUserID=${DedeUserID}; DedeUserID__ckMd5=${DedeUserID__ckMd5}`;
-                            log("info", `从URL参数构建Cookie成功`);
+                            log("info", `从登录响应提取Cookie成功`);
                         }
                     } catch (urlError) {
                         log("error", `解析登录URL失败: ${urlError.message}`);
@@ -224,6 +227,7 @@ export async function handleCookieSave(request) {
             return jsonResponse({ success: false, message: '缺少cookie参数' }, 400);
         }
 
+        // 验证Cookie格式
         if (!cookie.includes('SESSDATA') || !cookie.includes('bili_jct')) {
             return jsonResponse({ 
                 success: false, 
@@ -231,7 +235,7 @@ export async function handleCookieSave(request) {
             }, 400);
         }
 
-        // 验证Cookie
+        // 验证Cookie有效性
         try {
             const verifyResponse = await fetch('https://api.bilibili.com/x/web-interface/nav', {
                 headers: {
@@ -249,10 +253,13 @@ export async function handleCookieSave(request) {
                 }, 400);
             }
 
-            // 保存到全局变量
-            const globals = Globals.getInstance();
-            globals.bilibiliCookie = cookie;
-            Globals.envs.BILIBILI_COOKIE = cookie;
+            // 保存到全局变量（注意使用 bilibliCookie，与 envs.js 保持一致）
+            Globals.envs.bilibliCookie = cookie;
+            
+            // 同时更新环境变量记录
+            if (Globals.accessedEnvVars) {
+                Globals.accessedEnvVars.set('BILIBILI_COOKIE', '********');
+            }
 
             log("info", `Cookie保存成功，用户: ${verifyData.data.uname}`);
 
@@ -261,7 +268,8 @@ export async function handleCookieSave(request) {
                 message: 'Cookie保存成功',
                 userInfo: {
                     uname: verifyData.data.uname,
-                    mid: verifyData.data.mid
+                    mid: verifyData.data.mid,
+                    face: verifyData.data.face
                 }
             });
         } catch (verifyError) {
@@ -282,9 +290,13 @@ export async function handleCookieSave(request) {
  */
 export async function handleCookieClear() {
     try {
-        const globals = Globals.getInstance();
-        globals.bilibiliCookie = '';
-        Globals.envs.BILIBILI_COOKIE = '';
+        // 清除内存中的Cookie
+        Globals.envs.bilibliCookie = '';
+        
+        // 更新环境变量记录
+        if (Globals.accessedEnvVars) {
+            Globals.accessedEnvVars.set('BILIBILI_COOKIE', '');
+        }
 
         log("info", `Cookie已清除`);
         return jsonResponse({ success: true, message: 'Cookie已清除' });
@@ -295,17 +307,17 @@ export async function handleCookieClear() {
 }
 
 /**
- * 刷新Cookie（验证当前Cookie是否有效）
+ * 刷新/验证Cookie
  */
 export async function handleCookieRefresh() {
     try {
-        const globals = Globals.getInstance();
-        const cookie = globals.bilibiliCookie || Globals.envs.BILIBILI_COOKIE || '';
+        const globals = Globals.getConfig();
+        const cookie = globals.bilibliCookie || '';
         
         if (!cookie) {
             return jsonResponse({ 
                 success: false, 
-                message: '当前没有已保存的Cookie' 
+                message: '没有已保存的Cookie' 
             }, 400);
         }
 
@@ -323,11 +335,13 @@ export async function handleCookieRefresh() {
             if (verifyData.code === 0 && verifyData.data?.isLogin) {
                 return jsonResponse({
                     success: true,
-                    message: 'Cookie仍然有效，无需刷新',
+                    message: 'Cookie仍然有效',
                     userInfo: {
                         uname: verifyData.data.uname,
                         mid: verifyData.data.mid,
-                        face: verifyData.data.face
+                        face: verifyData.data.face,
+                        level_info: verifyData.data.level_info,
+                        vipStatus: verifyData.data.vipStatus
                     }
                 });
             } else {
@@ -337,11 +351,11 @@ export async function handleCookieRefresh() {
                 }, 400);
             }
         } catch (verifyError) {
-            log("error", `验证Cookie时发生错误: ${verifyError.message}`);
-            return jsonResponse({
-                success: false,
-                message: '验证失败: ' + verifyError.message
-            }, 500);
+            log("error", `验证Cookie失败: ${verifyError.message}`);
+            return jsonResponse({ 
+                success: false, 
+                message: '验证失败: ' + verifyError.message 
+            }, 400);
         }
     } catch (error) {
         log("error", `刷新Cookie异常: ${error.message}`);
