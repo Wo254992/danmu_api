@@ -14,8 +14,9 @@ import {
     handleQRCheck,
     handleCookieSave,
     handleCookieClear,
-    handleCookieRefresh
-} from "./utils/cookie-handler.js";
+    handleCookieRefresh,
+    handleCookieVerify
+} from "./utils/cookie-util.js";
 
 let globals;
 
@@ -379,6 +380,11 @@ async function handleRequest(req, env, deployPlatform, clientIp) {
   // POST /api/cookie/qr/check - 检查二维码扫描状态
   if (path === "/api/cookie/qr/check" && method === "POST") {
     return handleQRCheck(req);
+  }
+
+  // POST /api/cookie/verify - 验证Cookie有效性（新增）
+  if (path === "/api/cookie/verify" && method === "POST") {
+    return handleCookieVerify(req);
   }
 
   // POST /api/cookie/save - 保存Cookie
