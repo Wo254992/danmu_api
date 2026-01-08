@@ -20,8 +20,11 @@ export async function handleCookieStatus() {
         if (!cookie) {
             return jsonResponse({
                 success: true,
-                hasLogin: false,
-                message: '未配置Cookie'
+                data: {
+                    isValid: false,
+                    uname: null,
+                    expiresAt: null
+                }
             });
         }
 
@@ -38,31 +41,44 @@ export async function handleCookieStatus() {
             const data = await response.json();
             
             if (data.code === 0 && data.data && data.data.isLogin) {
+                // 解析Cookie获取各个字段
+                const sessdataMatch = cookie.match(/SESSDATA=([^;]+)/);
+                const biliJctMatch = cookie.match(/bili_jct=([^;]+)/);
+                
                 return jsonResponse({
                     success: true,
-                    hasLogin: true,
-                    userInfo: {
+                    data: {
+                        isValid: true,
                         uname: data.data.uname,
                         face: data.data.face,
                         mid: data.data.mid,
                         level_info: data.data.level_info,
-                        vipStatus: data.data.vipStatus
-                    },
-                    message: 'Cookie有效'
+                        vipStatus: data.data.vipStatus,
+                        sessdata: sessdataMatch ? sessdataMatch[1].substring(0, 8) + '****' : null,
+                        bili_jct: biliJctMatch ? biliJctMatch[1].substring(0, 8) + '****' : null,
+                        fullCookie: cookie.substring(0, 20) + '****',
+                        expiresAt: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60 // 预估30天后过期
+                    }
                 });
             } else {
                 return jsonResponse({
                     success: true,
-                    hasLogin: false,
-                    message: 'Cookie已失效'
+                    data: {
+                        isValid: false,
+                        uname: null,
+                        expiresAt: null
+                    }
                 });
             }
         } catch (apiError) {
             log("error", `验证Cookie失败: ${apiError.message}`);
             return jsonResponse({
                 success: true,
-                hasLogin: false,
-                message: '验证Cookie失败: ' + apiError.message
+                data: {
+                    isValid: false,
+                    uname: null,
+                    error: apiError.message
+                }
             });
         }
     } catch (error) {
@@ -112,11 +128,13 @@ export async function handleQRGenerate() {
 
         log("info", `生成二维码成功, qrcode_key: ${qrcodeKey}`);
 
+        // 返回前端期望的格式
         return jsonResponse({
             success: true,
-            qrcodeKey: qrcodeKey,
-            qrcodeUrl: qrcodeUrl,
-            message: '二维码生成成功'
+            data: {
+                qrcode_key: qrcodeKey,
+                url: qrcodeUrl
+            }
         });
     } catch (error) {
         log("error", `生成二维码异常: ${error.message}`);
@@ -130,7 +148,8 @@ export async function handleQRGenerate() {
 export async function handleQRCheck(request) {
     try {
         const body = await request.json();
-        const { qrcodeKey } = body;
+        // 支持两种参数名：qrcodeKey 和 qrcode_key
+        const qrcodeKey = body.qrcodeKey || body.qrcode_key;
 
         if (!qrcodeKey) {
             return jsonResponse({ success: false, message: '缺少qrcodeKey参数' }, 400);
@@ -156,57 +175,52 @@ export async function handleQRCheck(request) {
          * 86101: 未扫码
          */
         
-        let status = 'pending';
         let cookie = null;
-        let message = '';
+        let refresh_token = null;
 
-        switch (data.data.code) {
-            case 0:
-                status = 'success';
-                message = '登录成功';
-                // 从响应URL中提取Cookie参数
-                if (data.data.url) {
-                    try {
-                        const url = new URL(data.data.url);
-                        const params = new URLSearchParams(url.search);
-                        const SESSDATA = params.get('SESSDATA') || '';
-                        const bili_jct = params.get('bili_jct') || '';
-                        const DedeUserID = params.get('DedeUserID') || '';
-                        const DedeUserID__ckMd5 = params.get('DedeUserID__ckMd5') || '';
-                        
-                        if (SESSDATA) {
-                            cookie = `SESSDATA=${SESSDATA}; bili_jct=${bili_jct}; DedeUserID=${DedeUserID}; DedeUserID__ckMd5=${DedeUserID__ckMd5}`;
-                            log("info", `从登录响应提取Cookie成功`);
-                        }
-                    } catch (urlError) {
-                        log("error", `解析登录URL失败: ${urlError.message}`);
-                    }
+        if (data.data.code === 0 && data.data.url) {
+            // 登录成功，从响应URL中提取Cookie参数
+            try {
+                const url = new URL(data.data.url);
+                const params = new URLSearchParams(url.search);
+                const SESSDATA = params.get('SESSDATA') || '';
+                const bili_jct = params.get('bili_jct') || '';
+                const DedeUserID = params.get('DedeUserID') || '';
+                const DedeUserID__ckMd5 = params.get('DedeUserID__ckMd5') || '';
+                
+                if (SESSDATA) {
+                    cookie = `SESSDATA=${SESSDATA}; bili_jct=${bili_jct}; DedeUserID=${DedeUserID}; DedeUserID__ckMd5=${DedeUserID__ckMd5}`;
+                    log("info", `从登录响应提取Cookie成功`);
                 }
-                break;
-            case 86038:
-                status = 'expired';
-                message = '二维码已失效';
-                break;
-            case 86090:
-                status = 'scanned';
-                message = '已扫码，请在手机上确认';
-                break;
-            case 86101:
-                status = 'pending';
-                message = '等待扫码';
-                break;
-            default:
-                status = 'error';
-                message = data.data.message || '未知状态';
+                
+                // 提取 refresh_token
+                if (data.data.refresh_token) {
+                    refresh_token = data.data.refresh_token;
+                }
+            } catch (urlError) {
+                log("error", `解析登录URL失败: ${urlError.message}`);
+            }
         }
 
         // 更新session状态
         if (qrLoginSessions.has(qrcodeKey)) {
-            qrLoginSessions.get(qrcodeKey).status = status;
+            qrLoginSessions.get(qrcodeKey).status = data.data.code === 0 ? 'success' : 'pending';
         }
 
-        const result = { success: true, status, message, code: data.data.code };
-        if (cookie) result.cookie = cookie;
+        // 返回前端期望的格式
+        const result = {
+            success: true,
+            data: {
+                code: data.data.code,
+                message: data.data.message || '',
+                url: data.data.url || null,
+                refresh_token: refresh_token
+            }
+        };
+        
+        if (cookie) {
+            result.data.cookie = cookie;
+        }
 
         return jsonResponse(result);
     } catch (error) {
@@ -221,7 +235,9 @@ export async function handleQRCheck(request) {
 export async function handleCookieSave(request) {
     try {
         const body = await request.json();
-        const { cookie } = body;
+        // 支持直接传cookie字符串，或者从data对象中获取
+        const cookie = body.cookie || body.data?.cookie || '';
+        const refresh_token = body.refresh_token || body.data?.refresh_token || '';
 
         if (!cookie) {
             return jsonResponse({ success: false, message: '缺少cookie参数' }, 400);
@@ -265,12 +281,12 @@ export async function handleCookieSave(request) {
 
             return jsonResponse({
                 success: true,
-                message: 'Cookie保存成功',
-                userInfo: {
+                data: {
                     uname: verifyData.data.uname,
                     mid: verifyData.data.mid,
                     face: verifyData.data.face
-                }
+                },
+                message: 'Cookie保存成功'
             });
         } catch (verifyError) {
             log("error", `验证Cookie时发生错误: ${verifyError.message}`);
@@ -299,7 +315,11 @@ export async function handleCookieClear() {
         }
 
         log("info", `Cookie已清除`);
-        return jsonResponse({ success: true, message: 'Cookie已清除' });
+        return jsonResponse({ 
+            success: true, 
+            data: null,
+            message: 'Cookie已清除' 
+        });
     } catch (error) {
         log("error", `清除Cookie异常: ${error.message}`);
         return jsonResponse({ success: false, message: error.message }, 500);
@@ -335,14 +355,15 @@ export async function handleCookieRefresh() {
             if (verifyData.code === 0 && verifyData.data?.isLogin) {
                 return jsonResponse({
                     success: true,
-                    message: 'Cookie仍然有效',
-                    userInfo: {
+                    data: {
+                        isValid: true,
                         uname: verifyData.data.uname,
                         mid: verifyData.data.mid,
                         face: verifyData.data.face,
                         level_info: verifyData.data.level_info,
                         vipStatus: verifyData.data.vipStatus
-                    }
+                    },
+                    message: 'Cookie仍然有效'
                 });
             } else {
                 return jsonResponse({
