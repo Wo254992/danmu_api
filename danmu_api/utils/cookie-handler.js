@@ -78,6 +78,106 @@ function getCookieFromGlobals() {
 }
 
 /**
+ * 标准化 Cookie 字符串
+ * 处理可能的编码问题和格式问题
+ * @param {string} cookie 原始Cookie字符串
+ * @returns {string} 标准化后的Cookie字符串
+ */
+function normalizeCookie(cookie) {
+    if (!cookie) return '';
+    
+    try {
+        // 去除首尾空白
+        let normalized = cookie.trim();
+        
+        // 如果整个 cookie 被 URL 编码过，先解码
+        if (normalized.includes('%3D') || normalized.includes('%3B')) {
+            try {
+                normalized = decodeURIComponent(normalized);
+            } catch (e) {
+                // 解码失败，保持原样
+            }
+        }
+        
+        // 标准化分号和空格
+        // 将多个空格替换为单个空格
+        normalized = normalized.replace(/\s+/g, ' ');
+        
+        // 确保分号后有空格（标准 Cookie 格式）
+        normalized = normalized.replace(/;\s*/g, '; ').trim();
+        
+        // 移除末尾的分号
+        if (normalized.endsWith(';')) {
+            normalized = normalized.slice(0, -1).trim();
+        }
+        
+        return normalized;
+    } catch (e) {
+        return cookie;
+    }
+}
+
+/**
+ * 验证 Cookie 有效性（核心验证函数）
+ * @param {string} cookie Cookie字符串
+ * @returns {Promise<{isValid: boolean, data?: object, error?: string}>}
+ */
+async function verifyCookieValidity(cookie) {
+    if (!cookie) {
+        return { isValid: false, error: '缺少Cookie' };
+    }
+    
+    // 标准化 Cookie
+    const normalizedCookie = normalizeCookie(cookie);
+    
+    // 基本格式检查
+    if (!normalizedCookie.includes('SESSDATA') || !normalizedCookie.includes('bili_jct')) {
+        return { isValid: false, error: 'Cookie格式不完整，需包含SESSDATA和bili_jct' };
+    }
+    
+    try {
+        const response = await fetch('https://api.bilibili.com/x/web-interface/nav', {
+            method: 'GET',
+            headers: {
+                'Cookie': normalizedCookie,
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Referer': 'https://www.bilibili.com/',
+                'Origin': 'https://www.bilibili.com',
+                'Accept': 'application/json, text/plain, */*',
+                'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8'
+            }
+        });
+        
+        const data = await response.json();
+        
+        log("info", `Cookie验证响应: code=${data.code}, isLogin=${data.data?.isLogin}`);
+        
+        if (data.code === 0 && data.data && data.data.isLogin) {
+            return {
+                isValid: true,
+                data: {
+                    uname: data.data.uname,
+                    mid: data.data.mid,
+                    face: data.data.face,
+                    level_info: data.data.level_info,
+                    vipStatus: data.data.vipStatus,
+                    isLogin: true
+                }
+            };
+        } else {
+            return {
+                isValid: false,
+                error: data.message || 'Cookie无效或已过期',
+                code: data.code
+            };
+        }
+    } catch (error) {
+        log("error", `验证Cookie请求失败: ${error.message}`);
+        return { isValid: false, error: '验证请求失败: ' + error.message };
+    }
+}
+
+/**
  * 获取Cookie状态
  */
 export async function handleCookieStatus() {
@@ -98,55 +198,36 @@ export async function handleCookieStatus() {
         }
 
         // 验证Cookie有效性
-        try {
-            const response = await fetch('https://api.bilibili.com/x/web-interface/nav', {
-                headers: {
-                    'Cookie': cookie,
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Referer': 'https://www.bilibili.com'
+        const verifyResult = await verifyCookieValidity(cookie);
+        
+        if (verifyResult.isValid && verifyResult.data) {
+            // 解析Cookie获取各个字段
+            const sessdataMatch = cookie.match(/SESSDATA=([^;]+)/);
+            const biliJctMatch = cookie.match(/bili_jct=([^;]+)/);
+            
+            return jsonResponse({
+                success: true,
+                data: {
+                    isValid: true,
+                    uname: verifyResult.data.uname,
+                    face: verifyResult.data.face,
+                    mid: verifyResult.data.mid,
+                    level_info: verifyResult.data.level_info,
+                    vipStatus: verifyResult.data.vipStatus,
+                    sessdata: sessdataMatch ? sessdataMatch[1].substring(0, 8) + '****' : null,
+                    bili_jct: biliJctMatch ? biliJctMatch[1].substring(0, 8) + '****' : null,
+                    fullCookie: cookie.substring(0, 20) + '****',
+                    expiresAt: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60 // 预估30天后过期
                 }
             });
-
-            const data = await response.json();
-            
-            if (data.code === 0 && data.data && data.data.isLogin) {
-                // 解析Cookie获取各个字段
-                const sessdataMatch = cookie.match(/SESSDATA=([^;]+)/);
-                const biliJctMatch = cookie.match(/bili_jct=([^;]+)/);
-                
-                return jsonResponse({
-                    success: true,
-                    data: {
-                        isValid: true,
-                        uname: data.data.uname,
-                        face: data.data.face,
-                        mid: data.data.mid,
-                        level_info: data.data.level_info,
-                        vipStatus: data.data.vipStatus,
-                        sessdata: sessdataMatch ? sessdataMatch[1].substring(0, 8) + '****' : null,
-                        bili_jct: biliJctMatch ? biliJctMatch[1].substring(0, 8) + '****' : null,
-                        fullCookie: cookie.substring(0, 20) + '****',
-                        expiresAt: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60 // 预估30天后过期
-                    }
-                });
-            } else {
-                return jsonResponse({
-                    success: true,
-                    data: {
-                        isValid: false,
-                        uname: null,
-                        expiresAt: null
-                    }
-                });
-            }
-        } catch (apiError) {
-            log("error", `验证Cookie失败: ${apiError.message}`);
+        } else {
             return jsonResponse({
                 success: true,
                 data: {
                     isValid: false,
                     uname: null,
-                    error: apiError.message
+                    expiresAt: null,
+                    error: verifyResult.error
                 }
             });
         }
@@ -247,8 +328,14 @@ export async function handleQRCheck(request) {
                 const DedeUserID__ckMd5 = params.get('DedeUserID__ckMd5') || '';
                 
                 if (SESSDATA) {
-                    cookie = `SESSDATA=${SESSDATA}; bili_jct=${bili_jct}; DedeUserID=${DedeUserID}; DedeUserID__ckMd5=${DedeUserID__ckMd5}`;
-                    log("info", `从登录响应提取Cookie成功`);
+                    // 注意：这里 SESSDATA 可能是 URL 编码的，需要解码
+                    const decodedSESSDATA = decodeURIComponent(SESSDATA);
+                    const decodedBiliJct = decodeURIComponent(bili_jct);
+                    const decodedDedeUserID = decodeURIComponent(DedeUserID);
+                    const decodedDedeUserID__ckMd5 = decodeURIComponent(DedeUserID__ckMd5);
+                    
+                    cookie = `SESSDATA=${decodedSESSDATA}; bili_jct=${decodedBiliJct}; DedeUserID=${decodedDedeUserID}; DedeUserID__ckMd5=${decodedDedeUserID__ckMd5}`;
+                    log("info", `从登录响应提取Cookie成功，长度: ${cookie.length}`);
                 }
                 
                 if (data.data.refresh_token) {
@@ -285,6 +372,53 @@ export async function handleQRCheck(request) {
 }
 
 /**
+ * 验证Cookie有效性（新增的独立验证接口）
+ * 用于环境变量配置界面中验证输入的Cookie
+ */
+export async function handleCookieVerify(request) {
+    try {
+        const body = await request.json();
+        const cookie = body.cookie;
+        
+        if (!cookie) {
+            return jsonResponse({ 
+                success: false, 
+                message: '缺少cookie参数' 
+            }, 400);
+        }
+        
+        log("info", `验证Cookie请求，Cookie长度: ${cookie.length}`);
+        
+        // 使用统一的验证函数
+        const verifyResult = await verifyCookieValidity(cookie);
+        
+        if (verifyResult.isValid) {
+            return jsonResponse({
+                success: true,
+                data: {
+                    isValid: true,
+                    uname: verifyResult.data.uname,
+                    mid: verifyResult.data.mid,
+                    face: verifyResult.data.face,
+                    vipStatus: verifyResult.data.vipStatus
+                }
+            });
+        } else {
+            return jsonResponse({
+                success: true,
+                data: {
+                    isValid: false,
+                    message: verifyResult.error
+                }
+            });
+        }
+    } catch (error) {
+        log("error", `验证Cookie异常: ${error.message}`);
+        return jsonResponse({ success: false, message: error.message }, 500);
+    }
+}
+
+/**
  * 保存Cookie
  */
 export async function handleCookieSave(request) {
@@ -299,51 +433,40 @@ export async function handleCookieSave(request) {
             return jsonResponse({ success: false, message: '缺少cookie参数' }, 400);
         }
 
-        if (!cookie.includes('SESSDATA') || !cookie.includes('bili_jct')) {
+        // 标准化 Cookie
+        const normalizedCookie = normalizeCookie(cookie);
+
+        if (!normalizedCookie.includes('SESSDATA') || !normalizedCookie.includes('bili_jct')) {
             return jsonResponse({ 
                 success: false, 
                 message: 'Cookie格式不正确，需要包含SESSDATA和bili_jct' 
             }, 400);
         }
 
-        try {
-            const verifyResponse = await fetch('https://api.bilibili.com/x/web-interface/nav', {
-                headers: {
-                    'Cookie': cookie,
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Referer': 'https://www.bilibili.com'
-                }
-            });
-
-            const verifyData = await verifyResponse.json();
-            if (verifyData.code !== 0 || !verifyData.data?.isLogin) {
-                return jsonResponse({ 
-                    success: false, 
-                    message: 'Cookie验证失败，请确保Cookie有效' 
-                }, 400);
-            }
-
-            // 保存Cookie
-            saveCookieToGlobals(cookie);
-
-            log("info", `Cookie保存成功，用户: ${verifyData.data.uname}`);
-
-            return jsonResponse({
-                success: true,
-                data: {
-                    uname: verifyData.data.uname,
-                    mid: verifyData.data.mid,
-                    face: verifyData.data.face
-                },
-                message: 'Cookie保存成功'
-            });
-        } catch (verifyError) {
-            log("error", `验证Cookie时发生错误: ${verifyError.message}`);
+        // 验证 Cookie
+        const verifyResult = await verifyCookieValidity(normalizedCookie);
+        
+        if (!verifyResult.isValid) {
             return jsonResponse({ 
                 success: false, 
-                message: '验证Cookie失败: ' + verifyError.message 
+                message: 'Cookie验证失败: ' + (verifyResult.error || '无效或已过期')
             }, 400);
         }
+
+        // 保存Cookie
+        saveCookieToGlobals(normalizedCookie);
+
+        log("info", `Cookie保存成功，用户: ${verifyResult.data.uname}`);
+
+        return jsonResponse({
+            success: true,
+            data: {
+                uname: verifyResult.data.uname,
+                mid: verifyResult.data.mid,
+                face: verifyResult.data.face
+            },
+            message: 'Cookie保存成功'
+        });
     } catch (error) {
         log("error", `保存Cookie异常: ${error.message}`);
         return jsonResponse({ success: false, message: error.message }, 500);
@@ -383,40 +506,25 @@ export async function handleCookieRefresh() {
             }, 400);
         }
 
-        try {
-            const verifyResponse = await fetch('https://api.bilibili.com/x/web-interface/nav', {
-                headers: {
-                    'Cookie': cookie,
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Referer': 'https://www.bilibili.com'
-                }
+        const verifyResult = await verifyCookieValidity(cookie);
+        
+        if (verifyResult.isValid) {
+            return jsonResponse({
+                success: true,
+                data: {
+                    isValid: true,
+                    uname: verifyResult.data.uname,
+                    mid: verifyResult.data.mid,
+                    face: verifyResult.data.face,
+                    level_info: verifyResult.data.level_info,
+                    vipStatus: verifyResult.data.vipStatus
+                },
+                message: 'Cookie仍然有效'
             });
-
-            const verifyData = await verifyResponse.json();
-            if (verifyData.code === 0 && verifyData.data?.isLogin) {
-                return jsonResponse({
-                    success: true,
-                    data: {
-                        isValid: true,
-                        uname: verifyData.data.uname,
-                        mid: verifyData.data.mid,
-                        face: verifyData.data.face,
-                        level_info: verifyData.data.level_info,
-                        vipStatus: verifyData.data.vipStatus
-                    },
-                    message: 'Cookie仍然有效'
-                });
-            } else {
-                return jsonResponse({
-                    success: false,
-                    message: 'Cookie已失效，请重新扫码登录'
-                }, 400);
-            }
-        } catch (verifyError) {
-            log("error", `验证Cookie失败: ${verifyError.message}`);
-            return jsonResponse({ 
-                success: false, 
-                message: '验证失败: ' + verifyError.message 
+        } else {
+            return jsonResponse({
+                success: false,
+                message: 'Cookie已失效: ' + (verifyResult.error || '请重新扫码登录')
             }, 400);
         }
     } catch (error) {
