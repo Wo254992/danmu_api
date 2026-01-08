@@ -116,12 +116,7 @@ export const HTML_TEMPLATE = /* html */ `
                     </svg>
                     <span class="nav-text">推送弹幕</span>
                 </a>
-                <a href="#cookie" class="nav-item" data-section="cookie" onclick="switchSection('cookie'); return false;">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" stroke-width="2"/>
-                    </svg>
-                    <span class="nav-text">Cookie管理</span>
-                </a>
+         
                 <a href="#env" class="nav-item" data-section="env" id="env-nav-btn" onclick="switchSection('env'); return false;">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
@@ -684,129 +679,6 @@ export const HTML_TEMPLATE = /* html */ `
                     </div>
                     <div id="push-anime-list" class="anime-grid" style="display: none;"></div>
                     <div id="push-episode-list" class="episode-grid" style="display: none;"></div>
-                </div>
-            </section>
-
-            <!-- Cookie管理 -->
-            <section class="content-section" id="cookie-section">
-                <div class="section-header">
-                    <div>
-                        <h2 class="section-title">Bilibili Cookie 管理</h2>
-                        <p class="section-desc">通过扫码登录获取 Bilibili Cookie，支持自动刷新</p>
-                    </div>
-                    <div class="header-actions">
-                        <button class="btn btn-primary" onclick="startQRLogin()">
-                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" stroke-width="2"/>
-                            </svg>
-                            扫码登录
-                        </button>
-                        <button class="btn btn-success" onclick="refreshCookie()" id="refresh-cookie-btn" style="display: none;">
-                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2"/>
-                            </svg>
-                            刷新Cookie
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Cookie 状态卡片 -->
-                <div class="preview-hero-card" id="cookie-status-card">
-                    <div class="preview-hero-content">
-                        <div class="preview-hero-header">
-                            <div class="preview-hero-icon" id="cookie-status-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                </svg>
-                            </div>
-                            <div class="preview-hero-titles">
-                                <h2 class="preview-hero-title" id="cookie-status-title">未登录</h2>
-                                <p class="preview-hero-subtitle" id="cookie-status-subtitle">请扫码登录获取 Cookie</p>
-                            </div>
-                        </div>
-                        <div class="preview-stats-grid" id="cookie-stats-grid">
-                            <div class="preview-stat-card stat-card-compact">
-                                <div class="stat-icon-wrapper stat-icon-primary">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                    </svg>
-                                </div>
-                                <div class="stat-content">
-                                    <div class="stat-value stat-value-text" id="bili-uname">--</div>
-                                    <div class="stat-label">用户名</div>
-                                </div>
-                            </div>
-                            <div class="preview-stat-card stat-card-compact">
-                                <div class="stat-icon-wrapper stat-icon-success">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                </div>
-                                <div class="stat-content">
-                                    <div class="stat-value stat-value-text" id="cookie-status-text">未获取</div>
-                                    <div class="stat-label">Cookie 状态</div>
-                                </div>
-                            </div>
-                            <div class="preview-stat-card stat-card-compact">
-                                <div class="stat-icon-wrapper stat-icon-warning">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                </div>
-                                <div class="stat-content">
-                                    <div class="stat-value stat-value-text" id="cookie-expire-time">--</div>
-                                    <div class="stat-label">过期时间</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cookie 详情 -->
-                <div class="form-card" id="cookie-detail-card" style="display: none;">
-                    <h3 class="card-title">Cookie 详情</h3>
-                    <div class="form-group">
-                        <label class="form-label">SESSDATA</label>
-                        <div class="preview-value-container">
-                            <code class="preview-value" id="cookie-sessdata">--</code>
-                            <button class="preview-copy-btn" onclick="copyCookieValue('sessdata')" title="复制">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">bili_jct (CSRF Token)</label>
-                        <div class="preview-value-container">
-                            <code class="preview-value" id="cookie-bili-jct">--</code>
-                            <button class="preview-copy-btn" onclick="copyCookieValue('bili_jct')" title="复制">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">完整 Cookie</label>
-                        <div class="preview-value-container">
-                            <code class="preview-value" id="cookie-full" style="white-space: pre-wrap; word-break: break-all;">--</code>
-                            <button class="preview-copy-btn" onclick="copyCookieValue('full')" title="复制">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <button class="btn btn-danger" onclick="clearCookieData()">
-                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2"/>
-                        </svg>
-                        清除 Cookie
-                    </button>
                 </div>
             </section>
 
