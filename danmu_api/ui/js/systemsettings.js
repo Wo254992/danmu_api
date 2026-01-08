@@ -1420,16 +1420,54 @@ FFFFFF FF5733 00FF00"></textarea>
         }, 100);
 
     } else {
+        // 获取当前编辑的 key（用于判断是否是 BILIBILI_COOKIE）
+        const currentKey = document.getElementById('env-key') ? document.getElementById('env-key').value : '';
+        const isBilibiliCookie = currentKey === 'BILIBILI_COOKIE';
+        
         if (value && value.length > 50) {
             const rows = Math.min(Math.max(Math.ceil(value.length / 50), 3), 10);
             container.innerHTML = \`
                 <label class="form-label">变量值 *</label>
                 <textarea class="form-textarea" id="text-value" placeholder="例如: localhost" rows="\${rows}">\${escapeHtml(value)}</textarea>
+                \${isBilibiliCookie ? \`
+                <div class="bilibili-cookie-actions" style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                    <button type="button" class="btn btn-primary" onclick="startBilibiliQRLogin()">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                        </svg>
+                        <span>扫码登录获取</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="verifyBilibiliCookie()">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>验证Cookie</span>
+                    </button>
+                    <span id="cookie-verify-status" style="font-size: 12px; color: var(--text-secondary);"></span>
+                </div>
+                \` : ''}
             \`;
         } else {
             container.innerHTML = \`
                 <label class="form-label">变量值 *</label>
-                <input type="text" class="form-input" id="text-value" placeholder="例如: localhost" value="\${escapeHtml(value)}" required>
+                <input type="text" class="form-input" id="text-value" placeholder="\${isBilibiliCookie ? 'SESSDATA=xxx; bili_jct=xxx; ...' : '例如: localhost'}" value="\${escapeHtml(value)}" \${isBilibiliCookie ? '' : 'required'}>
+                \${isBilibiliCookie ? \`
+                <div class="bilibili-cookie-actions" style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                    <button type="button" class="btn btn-primary" onclick="startBilibiliQRLogin()">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                        </svg>
+                        <span>扫码登录获取</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="verifyBilibiliCookie()">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>验证Cookie</span>
+                    </button>
+                    <span id="cookie-verify-status" style="font-size: 12px; color: var(--text-secondary);"></span>
+                </div>
+                \` : ''}
             \`;
         }
     }
@@ -2446,4 +2484,290 @@ syncHexToColorPicker = function(hexValue) {
         // 这里可以添加逻辑将hex转换回HSV并更新游标位置
     }
 };
+
+/* ========================================
+   Bilibili Cookie 扫码登录功能（嵌入环境变量编辑器）
+   ======================================== */
+let biliQRCheckInterval = null;
+let biliBiliQRKey = null;
+
+/**
+ * 开始 Bilibili 扫码登录
+ */
+async function startBilibiliQRLogin() {
+    // 创建扫码登录模态框（如果不存在）
+    if (!document.getElementById('bili-qr-modal')) {
+        const modalHTML = \`
+            <div class="modal-overlay" id="bili-qr-modal">
+                <div class="modal-container" style="max-width: 400px;">
+                    <div class="modal-header">
+                        <h3 class="modal-title">📱 扫码登录 Bilibili</h3>
+                        <button class="modal-close" onclick="closeBiliQRModal()">×</button>
+                    </div>
+                    <div class="modal-body" style="text-align: center; padding: 2rem;">
+                        <div id="bili-qr-container" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                            <div class="loading-spinner" id="bili-qr-loading"></div>
+                            <p id="bili-qr-status" style="color: var(--text-secondary); margin: 0;">正在生成二维码...</p>
+                            <div id="bili-qr-code" style="display: none; padding: 1rem; background: white; border-radius: var(--radius-md);"></div>
+                            <p id="bili-qr-hint" style="display: none; color: var(--text-secondary); font-size: 0.875rem; margin: 0;">
+                                请使用 Bilibili APP 扫描二维码登录
+                            </p>
+                        </div>
+                    </div>
+                    <div class="modal-footer modal-footer-compact">
+                        <button type="button" class="btn btn-secondary btn-modal" onclick="closeBiliQRModal()">
+                            <span>取消</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        \`;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+    
+    // 显示模态框
+    const modal = document.getElementById('bili-qr-modal');
+    const qrCode = document.getElementById('bili-qr-code');
+    const qrLoading = document.getElementById('bili-qr-loading');
+    const qrStatus = document.getElementById('bili-qr-status');
+    const qrHint = document.getElementById('bili-qr-hint');
+    
+    modal.classList.add('active');
+    
+    // 重置状态
+    qrCode.style.display = 'none';
+    qrCode.innerHTML = '';
+    qrLoading.style.display = 'block';
+    qrStatus.textContent = '正在生成二维码...';
+    qrStatus.style.color = 'var(--text-secondary)';
+    qrHint.style.display = 'none';
+    
+    // 清除之前的轮询
+    if (biliQRCheckInterval) {
+        clearInterval(biliQRCheckInterval);
+        biliQRCheckInterval = null;
+    }
+    
+    addLog('🔐 正在获取 Bilibili 登录二维码...', 'info');
+    
+    try {
+        // 调用后端API获取二维码
+        const response = await fetch(buildApiUrl('/api/cookie/qr/generate', true), {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            biliBiliQRKey = result.data.qrcode_key;
+            const qrUrl = result.data.url;
+            
+            // 使用第三方服务生成二维码图片
+            qrCode.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(qrUrl) + '" alt="二维码" style="max-width: 200px;">';
+            qrCode.style.display = 'block';
+            qrLoading.style.display = 'none';
+            qrStatus.textContent = '请使用 Bilibili APP 扫描';
+            qrHint.style.display = 'block';
+            
+            addLog('✅ 二维码生成成功，等待扫码...', 'success');
+            
+            // 开始轮询检查扫码状态
+            startBiliQRCheck();
+        } else {
+            throw new Error(result.message || '生成二维码失败');
+        }
+    } catch (error) {
+        qrLoading.style.display = 'none';
+        qrStatus.textContent = '❌ ' + error.message;
+        qrStatus.style.color = 'var(--danger-color)';
+        addLog('❌ 生成二维码失败: ' + error.message, 'error');
+    }
+}
+
+/**
+ * 轮询检查扫码状态
+ */
+function startBiliQRCheck() {
+    if (!biliBiliQRKey) return;
+    
+    const qrStatus = document.getElementById('bili-qr-status');
+    
+    biliQRCheckInterval = setInterval(async () => {
+        try {
+            const response = await fetch(buildApiUrl('/api/cookie/qr/check', true), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    qrcode_key: biliBiliQRKey
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                const code = result.data.code;
+                
+                switch (code) {
+                    case 86101:
+                        qrStatus.textContent = '⏳ 等待扫码...';
+                        qrStatus.style.color = 'var(--text-secondary)';
+                        break;
+                    case 86090:
+                        qrStatus.textContent = '📱 已扫码，请在手机上确认';
+                        qrStatus.style.color = 'var(--warning-color)';
+                        addLog('📱 用户已扫码，等待确认...', 'info');
+                        break;
+                    case 86038:
+                        qrStatus.textContent = '❌ 二维码已过期';
+                        qrStatus.style.color = 'var(--danger-color)';
+                        clearInterval(biliQRCheckInterval);
+                        biliQRCheckInterval = null;
+                        addLog('⏱️ 二维码已过期', 'warn');
+                        break;
+                    case 0:
+                        // 登录成功！
+                        qrStatus.textContent = '✅ 登录成功！';
+                        qrStatus.style.color = 'var(--success-color)';
+                        clearInterval(biliQRCheckInterval);
+                        biliQRCheckInterval = null;
+                        
+                        addLog('🎉 Bilibili 登录成功！', 'success');
+                        
+                        // 获取 Cookie 并填入输入框
+                        if (result.data.cookie) {
+                            fillBilibiliCookie(result.data.cookie);
+                        }
+                        
+                        setTimeout(() => {
+                            closeBiliQRModal();
+                            showSuccessAnimation('登录成功');
+                        }, 1000);
+                        break;
+                    default:
+                        qrStatus.textContent = '状态: ' + (result.data.message || code);
+                }
+            }
+        } catch (error) {
+            console.error('检查扫码状态失败:', error);
+        }
+    }, 2000);
+}
+
+/**
+ * 将获取到的 Cookie 填入输入框
+ */
+function fillBilibiliCookie(cookie) {
+    const textInput = document.getElementById('text-value');
+    if (textInput) {
+        // 根据输入框类型设置值
+        if (textInput.tagName === 'TEXTAREA') {
+            textInput.value = cookie;
+        } else {
+            textInput.value = cookie;
+        }
+        
+        // 触发 input 事件以便其他监听器能够响应
+        textInput.dispatchEvent(new Event('input', { bubbles: true }));
+        
+        // 高亮显示填入成功
+        textInput.style.borderColor = 'var(--success-color)';
+        textInput.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
+        
+        setTimeout(() => {
+            textInput.style.borderColor = '';
+            textInput.style.boxShadow = '';
+        }, 2000);
+        
+        addLog('✅ Cookie 已自动填入，请点击保存按钮提交', 'success');
+        
+        // 更新验证状态
+        const statusEl = document.getElementById('cookie-verify-status');
+        if (statusEl) {
+            statusEl.innerHTML = '<span style="color: var(--success-color);">✅ 已填入，请保存</span>';
+        }
+    }
+}
+
+/**
+ * 关闭扫码登录模态框
+ */
+function closeBiliQRModal() {
+    const modal = document.getElementById('bili-qr-modal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+    
+    if (biliQRCheckInterval) {
+        clearInterval(biliQRCheckInterval);
+        biliQRCheckInterval = null;
+    }
+    
+    biliBiliQRKey = null;
+}
+
+/**
+ * 验证当前输入的 Bilibili Cookie
+ */
+async function verifyBilibiliCookie() {
+    const textInput = document.getElementById('text-value');
+    const statusEl = document.getElementById('cookie-verify-status');
+    
+    if (!textInput) return;
+    
+    const cookie = textInput.value.trim();
+    
+    if (!cookie) {
+        if (statusEl) {
+            statusEl.innerHTML = '<span style="color: var(--warning-color);">⚠️ 请先输入或扫码获取 Cookie</span>';
+        }
+        return;
+    }
+    
+    // 基本格式检查
+    if (!cookie.includes('SESSDATA') || !cookie.includes('bili_jct')) {
+        if (statusEl) {
+            statusEl.innerHTML = '<span style="color: var(--danger-color);">❌ 格式不完整，需包含 SESSDATA 和 bili_jct</span>';
+        }
+        return;
+    }
+    
+    if (statusEl) {
+        statusEl.innerHTML = '<span style="color: var(--text-secondary);">🔍 验证中...</span>';
+    }
+    
+    addLog('🔍 正在验证 Bilibili Cookie...', 'info');
+    
+    try {
+        // 调用后端验证接口
+        const response = await fetch(buildApiUrl('/api/cookie/verify', true), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ cookie: cookie })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.data && result.data.isValid) {
+            const uname = result.data.uname || '未知用户';
+            if (statusEl) {
+                statusEl.innerHTML = '<span style="color: var(--success-color);">✅ 有效 (用户: ' + escapeHtml(uname) + ')</span>';
+            }
+            addLog('✅ Cookie 验证通过，用户: ' + uname, 'success');
+        } else {
+            if (statusEl) {
+                statusEl.innerHTML = '<span style="color: var(--danger-color);">❌ Cookie 无效或已过期</span>';
+            }
+            addLog('❌ Cookie 验证失败: ' + (result.message || '无效或已过期'), 'error');
+        }
+    } catch (error) {
+        if (statusEl) {
+            statusEl.innerHTML = '<span style="color: var(--danger-color);">❌ 验证请求失败</span>';
+        }
+        addLog('❌ Cookie 验证请求失败: ' + error.message, 'error');
+    }
+}
 `;
