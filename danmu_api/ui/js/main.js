@@ -445,7 +445,7 @@ function toggleSidebar() {
    ======================================== */
 function switchSection(section) {
     // 检查是否尝试访问受token保护的section
-    if (section === 'logs' || section === 'api' || section === 'env' || section === 'push') {
+    if (section === 'logs' || section === 'api' || section === 'env' || section === 'push' || section === 'cookie') {
         let _reverseProxy = customBaseUrl; // 使用全局配置
 
         // 获取URL路径并提取token
@@ -1100,6 +1100,7 @@ async function init() {
         loadEnvVariables();
         renderEnvList();
         renderPreview();
+        initCookieManager();
         addLog('🎉 系统初始化完成', 'success');
         fetchRealLogs();
     } catch (error) {
