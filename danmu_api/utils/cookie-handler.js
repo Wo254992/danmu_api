@@ -5,6 +5,7 @@
 import { jsonResponse } from './http-util.js';
 import { log } from './log-util.js';
 import { Globals } from '../configs/globals.js';
+import { Envs } from '../configs/envs.js';
 
 // 存储二维码登录会话（内存存储）
 const qrLoginSessions = new Map();
@@ -230,6 +231,27 @@ export async function handleQRCheck(request) {
 }
 
 /**
+ * 保存Cookie到内存和环境变量
+ * @param {string} cookie Cookie字符串
+ */
+function saveCookieToGlobals(cookie) {
+    // 保存到 Globals.envs（运行时使用）
+    if (Globals.envs) {
+        Globals.envs.bilibliCookie = cookie;
+    }
+    
+    // 更新 Envs 的 accessedEnvVars（用于显示）
+    if (Envs.accessedEnvVars && typeof Envs.accessedEnvVars.set === 'function') {
+        Envs.accessedEnvVars.set('BILIBILI_COOKIE', cookie ? '********' : '');
+    }
+    
+    // 同时更新 Globals.accessedEnvVars（对象形式）
+    if (Globals.accessedEnvVars) {
+        Globals.accessedEnvVars['BILIBILI_COOKIE'] = cookie ? '********' : '';
+    }
+}
+
+/**
  * 保存Cookie
  */
 export async function handleCookieSave(request) {
@@ -269,13 +291,8 @@ export async function handleCookieSave(request) {
                 }, 400);
             }
 
-            // 保存到全局变量（注意使用 bilibliCookie，与 envs.js 保持一致）
-            Globals.envs.bilibliCookie = cookie;
-            
-            // 同时更新环境变量记录
-            if (Globals.accessedEnvVars) {
-                Globals.accessedEnvVars.set('BILIBILI_COOKIE', '********');
-            }
+            // 保存Cookie
+            saveCookieToGlobals(cookie);
 
             log("info", `Cookie保存成功，用户: ${verifyData.data.uname}`);
 
@@ -306,13 +323,8 @@ export async function handleCookieSave(request) {
  */
 export async function handleCookieClear() {
     try {
-        // 清除内存中的Cookie
-        Globals.envs.bilibliCookie = '';
-        
-        // 更新环境变量记录
-        if (Globals.accessedEnvVars) {
-            Globals.accessedEnvVars.set('BILIBILI_COOKIE', '');
-        }
+        // 清除Cookie
+        saveCookieToGlobals('');
 
         log("info", `Cookie已清除`);
         return jsonResponse({ 
