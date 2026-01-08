@@ -7,7 +7,15 @@ import { formatDanmuResponse } from "./utils/danmu-util.js";
 import { getBangumi, getComment, getCommentByUrl, getSegmentComment, matchAnime, searchAnime, searchEpisodes } from "./apis/dandan-api.js";
 import { handleConfig, handleUI, handleLogs, handleClearLogs, handleDeploy, handleClearCache } from "./apis/system-api.js";
 import { handleSetEnv, handleAddEnv, handleDelEnv } from "./apis/env-api.js";
-import { Segment } from "./models/dandan-model.js"
+import { Segment } from "./models/dandan-model.js";
+import {
+    handleCookieStatus,
+    handleQRGenerate,
+    handleQRCheck,
+    handleCookieSave,
+    handleCookieClear,
+    handleCookieRefresh
+} from "./utils/cookie-handler.js";
 
 let globals;
 
@@ -115,18 +123,19 @@ async function handleRequest(req, env, deployPlatform, clientIp) {
 
   // 智能处理API路径前缀，确保最终有一个正确的 /api/v2
   if (path !== "/" && path !== "/api/logs" && !path.startsWith('/api/env') 
-    && !path.startsWith('/api/deploy') && !path.startsWith('/api/cache')) {
+    && !path.startsWith('/api/deploy') && !path.startsWith('/api/cache')
+    && !path.startsWith('/api/cookie')) {
       log("info", `[Path Check] Starting path normalization for: "${path}"`);
       const pathBeforeCleanup = path; // 保存清理前的路径检查是否修改
       
-      // 1. 清理：应对“用户填写/api/v2”+“客户端添加/api/v2”导致的重复前缀
+      // 1. 清理：应对"用户填写/api/v2"+"客户端添加/api/v2"导致的重复前缀
       while (path.startsWith('/api/v2/api/v2/')) {
           log("info", `[Path Check] Found redundant /api/v2 prefix. Cleaning...`);
           // 从第二个 /api/v2 的位置开始截取，相当于移除第一个
           path = path.substring('/api/v2'.length);
       }
       
-      // 打印日志：只有在发生清理时才显示清理后的路径，否则显示“无需清理”
+      // 打印日志：只有在发生清理时才显示清理后的路径，否则显示"无需清理"
       if (path !== pathBeforeCleanup) {
           log("info", `[Path Check] Path after cleanup: "${path}"`);
       } else {
@@ -141,7 +150,7 @@ async function handleRequest(req, env, deployPlatform, clientIp) {
           path = '/api/v2' + path;
       }
         
-      // 打印日志：只有在发生添加前缀时才显示添加后的路径，否则显示“无需补全”
+      // 打印日志：只有在发生添加前缀时才显示添加后的路径，否则显示"无需补全"
       if (path === pathBeforePrefixCheck) {
           log("info", `[Path Check] Prefix Check: No prefix addition needed.`);
       }
@@ -355,6 +364,38 @@ async function handleRequest(req, env, deployPlatform, clientIp) {
     return handleClearCache();
   }
 
+  // ========== Cookie 管理 API ==========
+  
+  // GET /api/cookie/status - 获取Cookie状态
+  if (path === "/api/cookie/status" && method === "GET") {
+    return handleCookieStatus();
+  }
+
+  // POST /api/cookie/qr/generate - 生成登录二维码
+  if (path === "/api/cookie/qr/generate" && method === "POST") {
+    return handleQRGenerate();
+  }
+
+  // POST /api/cookie/qr/check - 检查二维码扫描状态
+  if (path === "/api/cookie/qr/check" && method === "POST") {
+    return handleQRCheck(req);
+  }
+
+  // POST /api/cookie/save - 保存Cookie
+  if (path === "/api/cookie/save" && method === "POST") {
+    return handleCookieSave(req);
+  }
+
+  // POST /api/cookie/clear - 清除Cookie
+  if (path === "/api/cookie/clear" && method === "POST") {
+    return handleCookieClear();
+  }
+
+  // POST /api/cookie/refresh - 刷新Cookie
+  if (path === "/api/cookie/refresh" && method === "POST") {
+    return handleCookieRefresh();
+  }
+
   return jsonResponse({ message: "Not found" }, 404);
 }
 
@@ -435,4 +476,4 @@ export async function netlifyHandler(event, context) {
 }
 
 // 为了测试导出 handleRequest
-export { handleRequest};
+export { handleRequest };
