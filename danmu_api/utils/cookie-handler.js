@@ -11,12 +11,80 @@ import { Envs } from '../configs/envs.js';
 const qrLoginSessions = new Map();
 
 /**
+ * 保存Cookie到内存和环境变量
+ * @param {string} cookie Cookie字符串
+ */
+function saveCookieToGlobals(cookie) {
+    try {
+        // 方法1: 直接修改 Globals.envs 对象
+        if (Globals.envs) {
+            Globals.envs.bilibliCookie = cookie;
+            log("info", `Cookie已保存到 Globals.envs.bilibliCookie`);
+        }
+        
+        // 方法2: 同时更新 Envs 类的静态 env 对象
+        if (Envs.env) {
+            Envs.env.BILIBILI_COOKIE = cookie;
+        }
+        
+        // 方法3: 如果是 Node.js 环境，也更新 process.env
+        if (typeof process !== 'undefined' && process.env) {
+            process.env.BILIBILI_COOKIE = cookie;
+        }
+        
+        // 更新 Envs 的 accessedEnvVars（用于UI显示）
+        if (Envs.accessedEnvVars && typeof Envs.accessedEnvVars.set === 'function') {
+            Envs.accessedEnvVars.set('BILIBILI_COOKIE', cookie ? '********' : '');
+        }
+        
+        // 更新 Envs 的 originalEnvVars
+        if (Envs.originalEnvVars && typeof Envs.originalEnvVars.set === 'function') {
+            Envs.originalEnvVars.set('BILIBILI_COOKIE', cookie);
+        }
+        
+        log("info", `Cookie保存完成，长度: ${cookie ? cookie.length : 0}`);
+    } catch (err) {
+        log("error", `保存Cookie到Globals失败: ${err.message}`);
+    }
+}
+
+/**
+ * 从多个位置获取Cookie
+ * @returns {string} Cookie字符串
+ */
+function getCookieFromGlobals() {
+    // 1. 从 Globals.envs 获取
+    if (Globals.envs && Globals.envs.bilibliCookie) {
+        return Globals.envs.bilibliCookie;
+    }
+    // 2. 从 Envs.env 获取
+    if (Envs.env && Envs.env.BILIBILI_COOKIE) {
+        return Envs.env.BILIBILI_COOKIE;
+    }
+    // 3. 从 process.env 获取 (Node.js)
+    if (typeof process !== 'undefined' && process.env && process.env.BILIBILI_COOKIE) {
+        return process.env.BILIBILI_COOKIE;
+    }
+    // 4. 尝试通过 Globals.getConfig() 获取
+    try {
+        const config = Globals.getConfig();
+        if (config && config.bilibliCookie) {
+            return config.bilibliCookie;
+        }
+    } catch (e) {
+        // ignore
+    }
+    return '';
+}
+
+/**
  * 获取Cookie状态
  */
 export async function handleCookieStatus() {
     try {
-        const globals = Globals.getConfig();
-        const cookie = globals.bilibliCookie || '';
+        const cookie = getCookieFromGlobals();
+        
+        log("info", `检查Cookie状态，Cookie长度: ${cookie ? cookie.length : 0}`);
         
         if (!cookie) {
             return jsonResponse({
@@ -129,7 +197,6 @@ export async function handleQRGenerate() {
 
         log("info", `生成二维码成功, qrcode_key: ${qrcodeKey}`);
 
-        // 返回前端期望的格式
         return jsonResponse({
             success: true,
             data: {
@@ -149,7 +216,6 @@ export async function handleQRGenerate() {
 export async function handleQRCheck(request) {
     try {
         const body = await request.json();
-        // 支持两种参数名：qrcodeKey 和 qrcode_key
         const qrcodeKey = body.qrcodeKey || body.qrcode_key;
 
         if (!qrcodeKey) {
@@ -168,19 +234,10 @@ export async function handleQRCheck(request) {
 
         const data = await response.json();
         
-        /*
-         * B站返回的code含义：
-         * 0: 登录成功
-         * 86038: 二维码已失效
-         * 86090: 已扫码未确认
-         * 86101: 未扫码
-         */
-        
         let cookie = null;
         let refresh_token = null;
 
         if (data.data.code === 0 && data.data.url) {
-            // 登录成功，从响应URL中提取Cookie参数
             try {
                 const url = new URL(data.data.url);
                 const params = new URLSearchParams(url.search);
@@ -194,7 +251,6 @@ export async function handleQRCheck(request) {
                     log("info", `从登录响应提取Cookie成功`);
                 }
                 
-                // 提取 refresh_token
                 if (data.data.refresh_token) {
                     refresh_token = data.data.refresh_token;
                 }
@@ -203,12 +259,10 @@ export async function handleQRCheck(request) {
             }
         }
 
-        // 更新session状态
         if (qrLoginSessions.has(qrcodeKey)) {
             qrLoginSessions.get(qrcodeKey).status = data.data.code === 0 ? 'success' : 'pending';
         }
 
-        // 返回前端期望的格式
         const result = {
             success: true,
             data: {
@@ -231,41 +285,20 @@ export async function handleQRCheck(request) {
 }
 
 /**
- * 保存Cookie到内存和环境变量
- * @param {string} cookie Cookie字符串
- */
-function saveCookieToGlobals(cookie) {
-    // 保存到 Globals.envs（运行时使用）
-    if (Globals.envs) {
-        Globals.envs.bilibliCookie = cookie;
-    }
-    
-    // 更新 Envs 的 accessedEnvVars（用于显示）
-    if (Envs.accessedEnvVars && typeof Envs.accessedEnvVars.set === 'function') {
-        Envs.accessedEnvVars.set('BILIBILI_COOKIE', cookie ? '********' : '');
-    }
-    
-    // 同时更新 Globals.accessedEnvVars（对象形式）
-    if (Globals.accessedEnvVars) {
-        Globals.accessedEnvVars['BILIBILI_COOKIE'] = cookie ? '********' : '';
-    }
-}
-
-/**
  * 保存Cookie
  */
 export async function handleCookieSave(request) {
     try {
         const body = await request.json();
-        // 支持直接传cookie字符串，或者从data对象中获取
         const cookie = body.cookie || body.data?.cookie || '';
         const refresh_token = body.refresh_token || body.data?.refresh_token || '';
+
+        log("info", `收到保存Cookie请求，Cookie长度: ${cookie ? cookie.length : 0}`);
 
         if (!cookie) {
             return jsonResponse({ success: false, message: '缺少cookie参数' }, 400);
         }
 
-        // 验证Cookie格式
         if (!cookie.includes('SESSDATA') || !cookie.includes('bili_jct')) {
             return jsonResponse({ 
                 success: false, 
@@ -273,7 +306,6 @@ export async function handleCookieSave(request) {
             }, 400);
         }
 
-        // 验证Cookie有效性
         try {
             const verifyResponse = await fetch('https://api.bilibili.com/x/web-interface/nav', {
                 headers: {
@@ -323,7 +355,6 @@ export async function handleCookieSave(request) {
  */
 export async function handleCookieClear() {
     try {
-        // 清除Cookie
         saveCookieToGlobals('');
 
         log("info", `Cookie已清除`);
@@ -343,8 +374,7 @@ export async function handleCookieClear() {
  */
 export async function handleCookieRefresh() {
     try {
-        const globals = Globals.getConfig();
-        const cookie = globals.bilibliCookie || '';
+        const cookie = getCookieFromGlobals();
         
         if (!cookie) {
             return jsonResponse({ 
@@ -353,7 +383,6 @@ export async function handleCookieRefresh() {
             }, 400);
         }
 
-        // 验证当前Cookie是否有效
         try {
             const verifyResponse = await fetch('https://api.bilibili.com/x/web-interface/nav', {
                 headers: {
