@@ -90,7 +90,7 @@ function normalizeCookie(cookie) {
         // 去除首尾空白
         let normalized = cookie.trim();
         
-        // 如果整个 cookie 被 URL 编码过，先解码
+        // 如果整个 cookie 被 URL 编码过（包含 %3D 即 = 号被编码），先解码
         if (normalized.includes('%3D') || normalized.includes('%3B')) {
             try {
                 normalized = decodeURIComponent(normalized);
@@ -201,9 +201,10 @@ export async function handleCookieStatus() {
         const verifyResult = await verifyCookieValidity(cookie);
         
         if (verifyResult.isValid && verifyResult.data) {
+            const normalizedCookie = normalizeCookie(cookie);
             // 解析Cookie获取各个字段
-            const sessdataMatch = cookie.match(/SESSDATA=([^;]+)/);
-            const biliJctMatch = cookie.match(/bili_jct=([^;]+)/);
+            const sessdataMatch = normalizedCookie.match(/SESSDATA=([^;]+)/);
+            const biliJctMatch = normalizedCookie.match(/bili_jct=([^;]+)/);
             
             // 解析过期时间
             let expiresAt = null;
@@ -247,7 +248,7 @@ export async function handleCookieStatus() {
                     vipStatus: verifyResult.data.vipStatus,
                     sessdata: sessdataMatch ? sessdataMatch[1].substring(0, 8) + '****' : null,
                     bili_jct: biliJctMatch ? biliJctMatch[1].substring(0, 8) + '****' : null,
-                    fullCookie: cookie.substring(0, 20) + '****',
+                    fullCookie: normalizedCookie.substring(0, 20) + '****',
                     expiresAt: expiresAt
                 }
             });
@@ -272,6 +273,7 @@ export async function handleCookieStatus() {
  * 生成登录二维码
  */
 export async function handleQRGenerate() {
+    // ... 保持原有逻辑不变 ...
     try {
         const response = await fetch('https://passport.bilibili.com/x/passport-login/web/qrcode/generate', {
             headers: {
@@ -326,6 +328,7 @@ export async function handleQRGenerate() {
  * 检查二维码扫描状态
  */
 export async function handleQRCheck(request) {
+    // ... 保持原有逻辑不变 ...
     try {
         const body = await request.json();
         const qrcodeKey = body.qrcodeKey || body.qrcode_key;
@@ -467,16 +470,19 @@ export async function handleCookieVerify(request) {
         
         log("info", `验证Cookie请求，Cookie长度: ${cookie.length}`);
         
-        // 使用统一的验证函数
-        const verifyResult = await verifyCookieValidity(cookie);
+        // 1. 标准化 Cookie (关键步骤)
+        const normalizedCookie = normalizeCookie(cookie);
+
+        // 2. 使用统一的验证函数 (传入标准化后的 Cookie)
+        const verifyResult = await verifyCookieValidity(normalizedCookie);
         
         if (verifyResult.isValid) {
             // 尝试从 Cookie 中解析 SESSDATA 的过期时间
-            // SESSDATA 格式: value,timestamp,hash
-            // 例如: 680e344d,1783477842,2260a*11... 其中 1783477842 是过期时间戳（秒级）
             let expiresAt = null;
             try {
-                const sessdataMatch = cookie.match(/SESSDATA=([^;]+)/);
+                // 使用标准化后的 Cookie 进行匹配，避免编码问题
+                const sessdataMatch = normalizedCookie.match(/SESSDATA=([^;]+)/);
+                
                 if (sessdataMatch) {
                     // 先尝试 URL 解码
                     let sessdata = sessdataMatch[1];
@@ -498,10 +504,6 @@ export async function handleCookieVerify(request) {
                         
                         log("info", `解析时间戳字符串: "${timestampStr}" -> ${timestamp}`);
                         
-                        // 检查是否是有效的时间戳
-                        // 1. 必须是数字
-                        // 2. 秒级时间戳范围：1600000000 (2020-09-13) 到 2147483647 (2038-01-19，32位时间戳上限)
-                        // 3. 必须大于当前时间（未过期）
                         const now = Math.floor(Date.now() / 1000);
                         if (!isNaN(timestamp) && timestamp > 1600000000 && timestamp < 2147483647 && timestamp > now) {
                             expiresAt = timestamp;
@@ -558,8 +560,7 @@ export async function handleCookieSave(request) {
     try {
         const body = await request.json();
         const cookie = body.cookie || body.data?.cookie || '';
-        const refresh_token = body.refresh_token || body.data?.refresh_token || '';
-
+        
         log("info", `收到保存Cookie请求，Cookie长度: ${cookie ? cookie.length : 0}`);
 
         if (!cookie) {
@@ -685,7 +686,7 @@ export async function handleCookieRefreshToken(request) {
         
         log("info", `刷新Cookie请求，Cookie长度: ${cookie.length}`);
         
-        // 标准化 Cookie
+        // 1. 标准化 Cookie (关键步骤)
         const normalizedCookie = normalizeCookie(cookie);
         
         // 先验证当前 Cookie 是否有效
@@ -708,7 +709,8 @@ export async function handleCookieRefreshToken(request) {
             // 没有 refresh_token，返回当前 Cookie 状态
             let expiresAt = null;
             try {
-                const sessdataMatch = cookie.match(/SESSDATA=([^;]+)/);
+                // 使用标准化后的 normalizedCookie 进行正则匹配
+                const sessdataMatch = normalizedCookie.match(/SESSDATA=([^;]+)/);
                 if (sessdataMatch) {
                     let sessdata = sessdataMatch[1];
                     try {
@@ -916,5 +918,3 @@ function extractBiliJct(cookie) {
     const match = cookie.match(/bili_jct=([^;]+)/);
     return match ? match[1] : '';
 }
-
-
