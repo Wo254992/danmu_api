@@ -895,7 +895,7 @@ export const componentsCssContent = /* css */ `
 
 .bili-cookie-status-badge.loading .status-dot {
     background: var(--text-muted);
-    animation: pulse 1.5s ease-in-out infinite;
+    animation: bili-pulse 1.5s ease-in-out infinite;
 }
 
 .bili-cookie-status-badge.empty {
@@ -1210,7 +1210,7 @@ export const componentsCssContent = /* css */ `
 }
 
 /* 脉冲动画 */
-@keyframes pulse {
+@keyframes bili-pulse {
     0%, 100% {
         opacity: 1;
     }
