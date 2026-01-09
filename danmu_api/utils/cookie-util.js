@@ -205,6 +205,37 @@ export async function handleCookieStatus() {
             const sessdataMatch = cookie.match(/SESSDATA=([^;]+)/);
             const biliJctMatch = cookie.match(/bili_jct=([^;]+)/);
             
+            // 解析过期时间
+            let expiresAt = null;
+            try {
+                if (sessdataMatch) {
+                    let sessdata = sessdataMatch[1];
+                    try {
+                        sessdata = decodeURIComponent(sessdata);
+                    } catch (decodeErr) {
+                        // 解码失败，使用原值
+                    }
+                    
+                    const parts = sessdata.split(',');
+                    if (parts.length >= 2) {
+                        const timestamp = parseInt(parts[1], 10);
+                        const now = Math.floor(Date.now() / 1000);
+                        if (!isNaN(timestamp) && timestamp > 1600000000 && timestamp < 2147483647 && timestamp > now) {
+                            expiresAt = timestamp;
+                            log("info", `handleCookieStatus解析到过期时间: ${new Date(timestamp * 1000).toISOString()}`);
+                        }
+                    }
+                }
+            } catch (e) {
+                log("warn", `handleCookieStatus解析过期时间失败: ${e.message}`);
+            }
+            
+            // 如果无法解析，使用默认值
+            if (!expiresAt) {
+                expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+                log("info", `handleCookieStatus无法解析过期时间，使用默认值: 30天后`);
+            }
+            
             return jsonResponse({
                 success: true,
                 data: {
@@ -217,7 +248,7 @@ export async function handleCookieStatus() {
                     sessdata: sessdataMatch ? sessdataMatch[1].substring(0, 8) + '****' : null,
                     bili_jct: biliJctMatch ? biliJctMatch[1].substring(0, 8) + '****' : null,
                     fullCookie: cookie.substring(0, 20) + '****',
-                    expiresAt: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60 // 预估30天后过期
+                    expiresAt: expiresAt
                 }
             });
         } else {
