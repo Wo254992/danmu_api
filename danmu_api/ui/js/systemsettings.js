@@ -1424,62 +1424,139 @@ FFFFFF FF5733 00FF00"></textarea>
         const currentKey = document.getElementById('env-key') ? document.getElementById('env-key').value : '';
         const isBilibiliCookie = currentKey === 'BILIBILI_COOKIE';
         
-        if (value && value.length > 50) {
+        if (isBilibiliCookie) {
+            // Bilibili Cookie 专用编辑界面
+            const rows = value && value.length > 50 ? Math.min(Math.max(Math.ceil(value.length / 50), 3), 8) : 3;
+            container.innerHTML = \`
+                <div class="bili-cookie-editor">
+                    <!-- 状态卡片 -->
+                    <div class="bili-cookie-status-card" id="bili-cookie-status-card">
+                        <div class="bili-cookie-status-header">
+                            <div class="bili-cookie-status-icon" id="bili-cookie-status-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                            </div>
+                            <div class="bili-cookie-status-info">
+                                <div class="bili-cookie-status-title" id="bili-cookie-status-title">检测中...</div>
+                                <div class="bili-cookie-status-subtitle" id="bili-cookie-status-subtitle">正在获取Cookie状态</div>
+                            </div>
+                            <div class="bili-cookie-status-badge" id="bili-cookie-status-badge">
+                                <span class="status-dot"></span>
+                                <span class="status-text">检测中</span>
+                            </div>
+                        </div>
+                        <div class="bili-cookie-status-details" id="bili-cookie-status-details" style="display: none;">
+                            <div class="bili-cookie-detail-item">
+                                <span class="detail-icon">👤</span>
+                                <span class="detail-label">用户名</span>
+                                <span class="detail-value" id="bili-cookie-uname">--</span>
+                            </div>
+                            <div class="bili-cookie-detail-item">
+                                <span class="detail-icon">⏰</span>
+                                <span class="detail-label">到期时间</span>
+                                <span class="detail-value" id="bili-cookie-expire">--</span>
+                            </div>
+                            <div class="bili-cookie-detail-item">
+                                <span class="detail-icon">📅</span>
+                                <span class="detail-label">剩余天数</span>
+                                <span class="detail-value" id="bili-cookie-days-left">--</span>
+                            </div>
+                            <div class="bili-cookie-detail-item">
+                                <span class="detail-icon">👑</span>
+                                <span class="detail-label">会员状态</span>
+                                <span class="detail-value" id="bili-cookie-vip">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作按钮组 -->
+                    <div class="bili-cookie-actions-card">
+                        <div class="bili-cookie-actions-title">
+                            <span class="actions-icon">🔧</span>
+                            <span>快捷操作</span>
+                        </div>
+                        <div class="bili-cookie-actions-grid">
+                            <button type="button" class="bili-action-btn bili-action-primary" onclick="startBilibiliQRLogin()">
+                                <div class="action-btn-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                                    </svg>
+                                </div>
+                                <div class="action-btn-text">
+                                    <span class="action-btn-title">扫码登录</span>
+                                    <span class="action-btn-desc">使用B站APP扫码</span>
+                                </div>
+                            </button>
+                            <button type="button" class="bili-action-btn bili-action-secondary" onclick="verifyBilibiliCookie()">
+                                <div class="action-btn-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div class="action-btn-text">
+                                    <span class="action-btn-title">验证状态</span>
+                                    <span class="action-btn-desc">检查Cookie有效性</span>
+                                </div>
+                            </button>
+                            <button type="button" class="bili-action-btn bili-action-warning" onclick="refreshBilibiliCookie()">
+                                <div class="action-btn-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    </svg>
+                                </div>
+                                <div class="action-btn-text">
+                                    <span class="action-btn-title">刷新Cookie</span>
+                                    <span class="action-btn-desc">延长有效期</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Cookie 输入区域 -->
+                    <div class="bili-cookie-input-card">
+                        <div class="bili-cookie-input-header">
+                            <label class="form-label" style="margin-bottom: 0;">
+                                <span class="input-icon">🍪</span>
+                                Cookie 值
+                            </label>
+                            <button type="button" class="bili-toggle-visibility-btn" onclick="toggleBiliCookieVisibility()" title="显示/隐藏Cookie">
+                                <svg id="bili-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="bili-cookie-input-wrapper">
+                            <textarea class="form-textarea bili-cookie-textarea" id="text-value" placeholder="SESSDATA=xxx; bili_jct=xxx; DedeUserID=xxx; ..." rows="\${rows}">\${escapeHtml(value)}</textarea>
+                            <div class="bili-cookie-input-overlay" id="bili-cookie-overlay" style="display: none;">
+                                <span class="overlay-text">Cookie 已隐藏</span>
+                                <button type="button" class="overlay-show-btn" onclick="toggleBiliCookieVisibility()">点击显示</button>
+                            </div>
+                        </div>
+                        <div class="bili-cookie-input-hint">
+                            <span class="hint-icon">💡</span>
+                            <span>推荐使用「扫码登录」自动获取，或手动粘贴包含 SESSDATA 和 bili_jct 的完整 Cookie</span>
+                        </div>
+                    </div>
+                </div>
+            \`;
+            
+            // 自动检测 Cookie 状态
+            setTimeout(() => {
+                autoCheckBilibiliCookieStatus();
+            }, 100);
+        } else if (value && value.length > 50) {
             const rows = Math.min(Math.max(Math.ceil(value.length / 50), 3), 10);
             container.innerHTML = \`
                 <label class="form-label">变量值 *</label>
                 <textarea class="form-textarea" id="text-value" placeholder="例如: localhost" rows="\${rows}">\${escapeHtml(value)}</textarea>
-                \${isBilibiliCookie ? \`
-                <div class="bilibili-cookie-actions" style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                    <button type="button" class="btn btn-primary" onclick="startBilibiliQRLogin()">
-                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-                        </svg>
-                        <span>扫码登录获取</span>
-                    </button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="verifyBilibiliCookie()">
-                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span>验证Cookie</span>
-                    </button>
-                    <button type="button" class="btn btn-warning btn-sm" onclick="refreshBilibiliCookie()">
-                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                        <span>刷新Cookie</span>
-                    </button>
-                    <span id="cookie-verify-status" style="font-size: 12px; color: var(--text-secondary);"></span>
-                </div>
-                \` : ''}
             \`;
         } else {
             container.innerHTML = \`
                 <label class="form-label">变量值 *</label>
-                <input type="text" class="form-input" id="text-value" placeholder="\${isBilibiliCookie ? 'SESSDATA=xxx; bili_jct=xxx; ...' : '例如: localhost'}" value="\${escapeHtml(value)}" \${isBilibiliCookie ? '' : 'required'}>
-                \${isBilibiliCookie ? \`
-                <div class="bilibili-cookie-actions" style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                    <button type="button" class="btn btn-primary" onclick="startBilibiliQRLogin()">
-                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-                        </svg>
-                        <span>扫码登录获取</span>
-                    </button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="verifyBilibiliCookie()">
-                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span>验证Cookie</span>
-                    </button>
-                    <button type="button" class="btn btn-warning btn-sm" onclick="refreshBilibiliCookie()">
-                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                        <span>刷新Cookie</span>
-                    </button>
-                    <span id="cookie-verify-status" style="font-size: 12px; color: var(--text-secondary);"></span>
-                </div>
-                \` : ''}
+                <input type="text" class="form-input" id="text-value" placeholder="例如: localhost" value="\${escapeHtml(value)}" required>
             \`;
         }
     }
@@ -2927,4 +3004,191 @@ async function refreshBilibiliCookie() {
     }
 }
 
+/**
+ * 自动检测 Bilibili Cookie 状态
+ */
+async function autoCheckBilibiliCookieStatus() {
+    const textInput = document.getElementById('text-value');
+    const statusCard = document.getElementById('bili-cookie-status-card');
+    const statusIcon = document.getElementById('bili-cookie-status-icon');
+    const statusTitle = document.getElementById('bili-cookie-status-title');
+    const statusSubtitle = document.getElementById('bili-cookie-status-subtitle');
+    const statusBadge = document.getElementById('bili-cookie-status-badge');
+    const statusDetails = document.getElementById('bili-cookie-status-details');
+    
+    if (!textInput || !statusCard) return;
+    
+    const cookie = textInput.value.trim();
+    
+    // 更新为加载状态
+    statusIcon.innerHTML = \`
+        <div class="bili-status-spinner"></div>
+    \`;
+    statusIcon.className = 'bili-cookie-status-icon loading';
+    statusTitle.textContent = '检测中...';
+    statusSubtitle.textContent = '正在验证Cookie有效性';
+    statusBadge.innerHTML = '<span class="status-dot loading"></span><span class="status-text">检测中</span>';
+    statusBadge.className = 'bili-cookie-status-badge loading';
+    statusDetails.style.display = 'none';
+    
+    if (!cookie) {
+        // 无 Cookie
+        statusIcon.innerHTML = \`
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v4m0 4h.01"/>
+            </svg>
+        \`;
+        statusIcon.className = 'bili-cookie-status-icon empty';
+        statusTitle.textContent = '未配置';
+        statusSubtitle.textContent = '请扫码登录或手动输入Cookie';
+        statusBadge.innerHTML = '<span class="status-dot empty"></span><span class="status-text">未配置</span>';
+        statusBadge.className = 'bili-cookie-status-badge empty';
+        return;
+    }
+    
+    // 基本格式检查
+    if (!cookie.includes('SESSDATA') || !cookie.includes('bili_jct')) {
+        statusIcon.innerHTML = \`
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M15 9l-6 6m0-6l6 6"/>
+            </svg>
+        \`;
+        statusIcon.className = 'bili-cookie-status-icon error';
+        statusTitle.textContent = '格式错误';
+        statusSubtitle.textContent = '缺少 SESSDATA 或 bili_jct';
+        statusBadge.innerHTML = '<span class="status-dot error"></span><span class="status-text">无效</span>';
+        statusBadge.className = 'bili-cookie-status-badge error';
+        return;
+    }
+    
+    try {
+        const response = await fetch(buildApiUrl('/api/cookie/verify', true), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ cookie: cookie })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.data && result.data.isValid) {
+            const data = result.data;
+            
+            // 成功状态
+            statusIcon.innerHTML = \`
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            \`;
+            statusIcon.className = 'bili-cookie-status-icon success';
+            statusTitle.textContent = data.uname || '已登录';
+            statusSubtitle.textContent = 'Cookie 有效';
+            statusBadge.innerHTML = '<span class="status-dot success"></span><span class="status-text">有效</span>';
+            statusBadge.className = 'bili-cookie-status-badge success';
+            
+            // 显示详细信息
+            statusDetails.style.display = 'grid';
+            document.getElementById('bili-cookie-uname').textContent = data.uname || '--';
+            
+            // 计算到期时间
+            if (data.expiresAt) {
+                const expiresDate = new Date(data.expiresAt * 1000);
+                const now = new Date();
+                const daysLeft = Math.ceil((expiresDate - now) / (1000 * 60 * 60 * 24));
+                
+                document.getElementById('bili-cookie-expire').textContent = expiresDate.toLocaleDateString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+                
+                const daysLeftEl = document.getElementById('bili-cookie-days-left');
+                daysLeftEl.textContent = daysLeft + ' 天';
+                
+                if (daysLeft <= 3) {
+                    daysLeftEl.className = 'detail-value danger';
+                    statusSubtitle.textContent = '⚠️ 即将过期，请及时刷新';
+                } else if (daysLeft <= 7) {
+                    daysLeftEl.className = 'detail-value warning';
+                    statusSubtitle.textContent = '⚠️ 即将过期';
+                } else {
+                    daysLeftEl.className = 'detail-value';
+                }
+            } else {
+                document.getElementById('bili-cookie-expire').textContent = '--';
+                document.getElementById('bili-cookie-days-left').textContent = '--';
+            }
+            
+            // VIP 状态
+            const vipEl = document.getElementById('bili-cookie-vip');
+            if (data.vipStatus === 1) {
+                vipEl.textContent = '大会员';
+                vipEl.className = 'detail-value vip';
+            } else {
+                vipEl.textContent = '普通用户';
+                vipEl.className = 'detail-value';
+            }
+            
+            addLog('✅ Cookie 自动验证通过，用户: ' + (data.uname || '未知'), 'success');
+        } else {
+            // 无效状态
+            const errorMsg = result.data?.message || result.message || '无效或已过期';
+            statusIcon.innerHTML = \`
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M15 9l-6 6m0-6l6 6"/>
+                </svg>
+            \`;
+            statusIcon.className = 'bili-cookie-status-icon error';
+            statusTitle.textContent = '无效';
+            statusSubtitle.textContent = errorMsg;
+            statusBadge.innerHTML = '<span class="status-dot error"></span><span class="status-text">无效</span>';
+            statusBadge.className = 'bili-cookie-status-badge error';
+            
+            addLog('❌ Cookie 验证失败: ' + errorMsg, 'error');
+        }
+    } catch (error) {
+        statusIcon.innerHTML = \`
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v4m0 4h.01"/>
+            </svg>
+        \`;
+        statusIcon.className = 'bili-cookie-status-icon warning';
+        statusTitle.textContent = '检测失败';
+        statusSubtitle.textContent = '网络错误: ' + error.message;
+        statusBadge.innerHTML = '<span class="status-dot warning"></span><span class="status-text">未知</span>';
+        statusBadge.className = 'bili-cookie-status-badge warning';
+        
+        addLog('⚠️ Cookie 验证请求失败: ' + error.message, 'warn');
+    }
+}
+
+/**
+ * 切换 Cookie 显示/隐藏
+ */
+function toggleBiliCookieVisibility() {
+    const textarea = document.getElementById('text-value');
+    const overlay = document.getElementById('bili-cookie-overlay');
+    const eyeIcon = document.getElementById('bili-eye-icon');
+    
+    if (!textarea || !overlay) return;
+    
+    if (overlay.style.display === 'none') {
+        overlay.style.display = 'flex';
+        eyeIcon.innerHTML = \`
+            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+        \`;
+    } else {
+        overlay.style.display = 'none';
+        eyeIcon.innerHTML = \`
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+        \`;
+    }
+}
 `;
