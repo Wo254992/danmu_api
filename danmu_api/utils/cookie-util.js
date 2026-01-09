@@ -393,6 +393,33 @@ export async function handleCookieVerify(request) {
         const verifyResult = await verifyCookieValidity(cookie);
         
         if (verifyResult.isValid) {
+            // 尝试从 Cookie 中解析 SESSDATA 的过期时间
+            // SESSDATA 格式通常是: value,timestamp,hash
+            // 例如: abc123,1735689600,xxxx* 其中 1735689600 是过期时间戳
+            let expiresAt = null;
+            try {
+                const sessdataMatch = cookie.match(/SESSDATA=([^;]+)/);
+                if (sessdataMatch) {
+                    const sessdata = decodeURIComponent(sessdataMatch[1]);
+                    const parts = sessdata.split(',');
+                    if (parts.length >= 2) {
+                        const timestamp = parseInt(parts[1]);
+                        // 检查是否是有效的时间戳（大于当前时间的秒级时间戳）
+                        if (timestamp > Date.now() / 1000 && timestamp < 2000000000) {
+                            expiresAt = timestamp;
+                            log("info", `解析到Cookie过期时间: ${new Date(timestamp * 1000).toISOString()}`);
+                        }
+                    }
+                }
+            } catch (e) {
+                log("warn", `解析Cookie过期时间失败: ${e.message}`);
+            }
+            
+            // 如果无法从 SESSDATA 解析，使用预估值（30天）
+            if (!expiresAt) {
+                expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+            }
+            
             return jsonResponse({
                 success: true,
                 data: {
@@ -400,7 +427,8 @@ export async function handleCookieVerify(request) {
                     uname: verifyResult.data.uname,
                     mid: verifyResult.data.mid,
                     face: verifyResult.data.face,
-                    vipStatus: verifyResult.data.vipStatus
+                    vipStatus: verifyResult.data.vipStatus,
+                    expiresAt: expiresAt
                 }
             });
         } else {
@@ -532,3 +560,242 @@ export async function handleCookieRefresh() {
         return jsonResponse({ success: false, message: error.message }, 500);
     }
 }
+
+
+/**
+ * 使用 refresh_token 刷新 Cookie（新增接口）
+ * 用于环境变量配置界面中一键刷新 Cookie
+ */
+export async function handleCookieRefreshToken(request) {
+    try {
+        const body = await request.json();
+        const cookie = body.cookie;
+        
+        if (!cookie) {
+            return jsonResponse({ 
+                success: false, 
+                message: '缺少cookie参数' 
+            }, 400);
+        }
+        
+        log("info", `刷新Cookie请求，Cookie长度: ${cookie.length}`);
+        
+        // 标准化 Cookie
+        const normalizedCookie = normalizeCookie(cookie);
+        
+        // 先验证当前 Cookie 是否有效
+        const verifyResult = await verifyCookieValidity(normalizedCookie);
+        
+        if (!verifyResult.isValid) {
+            return jsonResponse({
+                success: false,
+                data: {
+                    isValid: false,
+                    message: 'Cookie已失效，请重新扫码登录'
+                }
+            });
+        }
+        
+        // 获取 refresh_token
+        const refreshToken = Globals.envs?.bilibiliRefreshToken || Envs.env?.BILIBILI_REFRESH_TOKEN;
+        
+        if (!refreshToken) {
+            // 没有 refresh_token，返回当前 Cookie 状态
+            let expiresAt = null;
+            try {
+                const sessdataMatch = cookie.match(/SESSDATA=([^;]+)/);
+                if (sessdataMatch) {
+                    const sessdata = decodeURIComponent(sessdataMatch[1]);
+                    const parts = sessdata.split(',');
+                    if (parts.length >= 2) {
+                        const timestamp = parseInt(parts[1]);
+                        if (timestamp > Date.now() / 1000 && timestamp < 2000000000) {
+                            expiresAt = timestamp;
+                        }
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+            
+            if (!expiresAt) {
+                expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+            }
+            return jsonResponse({
+                success: true,
+                data: {
+                    isValid: true,
+                    uname: verifyResult.data.uname,
+                    mid: verifyResult.data.mid,
+                    expiresAt: expiresAt,
+                    message: '没有refresh_token，无法刷新。当前Cookie仍有效。'
+                }
+            });
+        }
+        
+        // 使用 refresh_token 刷新 Cookie
+        log("info", "尝试使用refresh_token刷新Cookie...");
+        
+        try {
+            // 调用 Bilibili 刷新接口
+            const refreshResponse = await fetch('https://passport.bilibili.com/x/passport-login/web/cookie/refresh', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Referer': 'https://www.bilibili.com',
+                    'Cookie': normalizedCookie
+                },
+                body: new URLSearchParams({
+                    'csrf': extractBiliJct(normalizedCookie),
+                    'refresh_csrf': '',
+                    'source': 'main_web',
+                    'refresh_token': refreshToken
+                }).toString()
+            });
+            
+            const refreshResult = await refreshResponse.json();
+            log("info", `刷新Cookie响应: ${JSON.stringify(refreshResult)}`);
+            
+            if (refreshResult.code === 0 && refreshResult.data) {
+                // 刷新成功，从响应头获取新的 Cookie
+                const setCookieHeaders = refreshResponse.headers.getSetCookie ? 
+                    refreshResponse.headers.getSetCookie() : 
+                    [refreshResponse.headers.get('set-cookie')].filter(Boolean);
+                
+                let newCookieParts = {};
+                
+                // 解析 Set-Cookie 头
+                for (const setCookie of setCookieHeaders) {
+                    if (setCookie) {
+                        const parts = setCookie.split(';')[0].split('=');
+                        if (parts.length >= 2) {
+                            const key = parts[0].trim();
+                            const value = parts.slice(1).join('=').trim();
+                            if (['SESSDATA', 'bili_jct', 'DedeUserID', 'DedeUserID__ckMd5', 'sid'].includes(key)) {
+                                newCookieParts[key] = value;
+                            }
+                        }
+                    }
+                }
+                
+                // 如果从响应头没有获取到完整的 Cookie，尝试从响应数据中获取
+                if (refreshResult.data.refresh_token) {
+                    // 保存新的 refresh_token（如果需要）
+                    log("info", `获取到新的refresh_token`);
+                }
+                
+                // 合并新旧 Cookie
+                const oldCookieParts = {};
+                normalizedCookie.split(';').forEach(part => {
+                    const [key, ...valueParts] = part.trim().split('=');
+                    if (key && valueParts.length > 0) {
+                        oldCookieParts[key.trim()] = valueParts.join('=');
+                    }
+                });
+                
+                // 用新的值覆盖旧的值
+                const mergedCookieParts = { ...oldCookieParts, ...newCookieParts };
+                
+                // 构建新的 Cookie 字符串
+                const newCookie = Object.entries(mergedCookieParts)
+                    .filter(([key]) => ['SESSDATA', 'bili_jct', 'DedeUserID', 'DedeUserID__ckMd5', 'sid'].includes(key))
+                    .map(([key, value]) => `${key}=${value}`)
+                    .join('; ');
+                
+                // 验证新 Cookie
+                const newVerifyResult = await verifyCookieValidity(newCookie);
+                
+                if (newVerifyResult.isValid) {
+                    // 计算新的过期时间
+                    let expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60; // 默认30天
+                    
+                    try {
+                        const sessdataMatch = newCookie.match(/SESSDATA=([^;]+)/);
+                        if (sessdataMatch) {
+                            const sessdata = decodeURIComponent(sessdataMatch[1]);
+                            const parts = sessdata.split(',');
+                            if (parts.length >= 2) {
+                                const timestamp = parseInt(parts[1]);
+                                if (timestamp > Date.now() / 1000 && timestamp < 2000000000) {
+                                    expiresAt = timestamp;
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        // ignore
+                    }
+                    
+                    log("info", `Cookie刷新成功，用户: ${newVerifyResult.data.uname}`);
+                    
+                    return jsonResponse({
+                        success: true,
+                        data: {
+                            newCookie: newCookie,
+                            uname: newVerifyResult.data.uname,
+                            mid: newVerifyResult.data.mid,
+                            expiresAt: expiresAt,
+                            newRefreshToken: refreshResult.data.refresh_token || null
+                        }
+                    });
+                } else {
+                    log("warn", "刷新后的Cookie验证失败");
+                    return jsonResponse({
+                        success: false,
+                        data: {
+                            isValid: false,
+                            message: '刷新后的Cookie验证失败，请重新扫码登录'
+                        }
+                    });
+                }
+            } else {
+                // 刷新失败
+                const errorMsg = refreshResult.message || '刷新失败';
+                log("warn", `Cookie刷新失败: ${errorMsg}`);
+                
+                // 返回当前 Cookie 状态
+                let expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+                
+                return jsonResponse({
+                    success: true,
+                    data: {
+                        isValid: true,
+                        uname: verifyResult.data.uname,
+                        mid: verifyResult.data.mid,
+                        expiresAt: expiresAt,
+                        message: `刷新失败(${errorMsg})，当前Cookie仍有效`
+                    }
+                });
+            }
+        } catch (refreshError) {
+            log("error", `调用刷新接口异常: ${refreshError.message}`);
+            
+            // 返回当前 Cookie 状态
+            let expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+            
+            return jsonResponse({
+                success: true,
+                data: {
+                    isValid: true,
+                    uname: verifyResult.data.uname,
+                    mid: verifyResult.data.mid,
+                    expiresAt: expiresAt,
+                    message: '刷新请求失败，当前Cookie仍有效'
+                }
+            });
+        }
+    } catch (error) {
+        log("error", `刷新Cookie异常: ${error.message}`);
+        return jsonResponse({ success: false, message: error.message }, 500);
+    }
+}
+
+/**
+ * 从 Cookie 中提取 bili_jct（csrf token）
+ */
+function extractBiliJct(cookie) {
+    const match = cookie.match(/bili_jct=([^;]+)/);
+    return match ? match[1] : '';
+}
+
+
