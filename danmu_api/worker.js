@@ -16,6 +16,7 @@ import {
     handleCookieClear,
     handleCookieRefresh,
     handleCookieVerify
+    handleCookieRefreshToken
 } from "./utils/cookie-util.js";
 
 let globals;
@@ -385,6 +386,11 @@ async function handleRequest(req, env, deployPlatform, clientIp) {
   // POST /api/cookie/verify - 验证Cookie有效性（新增）
   if (path === "/api/cookie/verify" && method === "POST") {
     return handleCookieVerify(req);
+  }
+  
+  // 添加刷新Cookie的路由
+  if (pathname === '/api/cookie/refresh-token' && request.method === 'POST') {
+    return await handleCookieRefreshToken(request);
   }
 
   // POST /api/cookie/save - 保存Cookie
