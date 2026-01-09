@@ -2649,7 +2649,7 @@ function startBiliQRCheck() {
                         
                         // 获取 Cookie 并填入输入框
                         if (result.data.cookie) {
-                            fillBilibiliCookie(result.data.cookie);
+                            fillBilibiliCookie(result.data.cookie, result.data.refresh_token);
                         }
                         
                         setTimeout(() => {
@@ -2670,7 +2670,7 @@ function startBiliQRCheck() {
 /**
  * 将获取到的 Cookie 填入输入框
  */
-function fillBilibiliCookie(cookie) {
+function fillBilibiliCookie(cookie, refreshToken) {
     const textInput = document.getElementById('text-value');
     if (textInput) {
         // 根据输入框类型设置值
@@ -2693,6 +2693,12 @@ function fillBilibiliCookie(cookie) {
         }, 2000);
         
         addLog('✅ Cookie 已自动填入，请点击保存按钮提交', 'success');
+        
+        // 如果有 refresh_token，也记录下来（可以提示用户手动保存）
+        if (refreshToken) {
+            addLog(\`ℹ️ 获取到refresh_token: \${refreshToken.substring(0, 20)}...\`, 'info');
+            addLog('💡 建议将refresh_token保存到环境变量BILIBILI_REFRESH_TOKEN以支持自动刷新', 'info');
+        }
         
         // 更新验证状态
         const statusEl = document.getElementById('cookie-verify-status');
