@@ -395,19 +395,42 @@ export async function handleCookieVerify(request) {
         if (verifyResult.isValid) {
             // 尝试从 Cookie 中解析 SESSDATA 的过期时间
             // SESSDATA 格式通常是: value,timestamp,hash
-            // 例如: abc123,1735689600,xxxx* 其中 1735689600 是过期时间戳
+            // 例如: 918f1adf,1783455324,df8b6*12... 其中 1783455324 是过期时间戳
             let expiresAt = null;
             try {
                 const sessdataMatch = cookie.match(/SESSDATA=([^;]+)/);
                 if (sessdataMatch) {
-                    const sessdata = decodeURIComponent(sessdataMatch[1]);
+                    // 先尝试 URL 解码
+                    let sessdata = sessdataMatch[1];
+                    try {
+                        sessdata = decodeURIComponent(sessdata);
+                    } catch (decodeErr) {
+                        // 解码失败，使用原值
+                    }
+                    
+                    log("info", `解析SESSDATA: ${sessdata.substring(0, 50)}...`);
+                    
                     const parts = sessdata.split(',');
+                    log("info", `SESSDATA分割结果: ${parts.length} 部分`);
+                    
                     if (parts.length >= 2) {
-                        const timestamp = parseInt(parts[1]);
-                        // 检查是否是有效的时间戳（大于当前时间的秒级时间戳）
-                        if (timestamp > Date.now() / 1000 && timestamp < 2000000000) {
+                        // 第二部分是时间戳
+                        const timestampStr = parts[1].trim();
+                        const timestamp = parseInt(timestampStr, 10);
+                        
+                        log("info", `解析时间戳字符串: "${timestampStr}" -> ${timestamp}`);
+                        
+                        // 检查是否是有效的时间戳
+                        // 1. 必须是数字
+                        // 2. 秒级时间戳范围：1600000000 (2020年) 到 2100000000 (2036年)
+                        const now = Math.floor(Date.now() / 1000);
+                        if (!isNaN(timestamp) && timestamp > 1600000000 && timestamp < 2100000000) {
                             expiresAt = timestamp;
-                            log("info", `解析到Cookie过期时间: ${new Date(timestamp * 1000).toISOString()}`);
+                            const expiresDate = new Date(timestamp * 1000);
+                            const daysLeft = Math.ceil((timestamp - now) / (24 * 60 * 60));
+                            log("info", `解析到Cookie过期时间: ${expiresDate.toISOString()}, 剩余 ${daysLeft} 天`);
+                        } else {
+                            log("warn", `时间戳无效或超出范围: ${timestamp}, 当前时间: ${now}`);
                         }
                     }
                 }
@@ -415,9 +438,10 @@ export async function handleCookieVerify(request) {
                 log("warn", `解析Cookie过期时间失败: ${e.message}`);
             }
             
-            // 如果无法从 SESSDATA 解析，使用预估值（30天）
+            // 如果无法从 SESSDATA 解析，使用预估值（180天，B站Cookie通常有效期较长）
             if (!expiresAt) {
-                expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+                expiresAt = Math.floor(Date.now() / 1000) + 180 * 24 * 60 * 60;
+                log("info", `使用默认过期时间: 180天后`);
             }
             
             return jsonResponse({
