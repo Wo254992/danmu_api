@@ -1443,6 +1443,12 @@ FFFFFF FF5733 00FF00"></textarea>
                         </svg>
                         <span>验证Cookie</span>
                     </button>
+                    <button type="button" class="btn btn-warning btn-sm" onclick="refreshBilibiliCookie()">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span>刷新Cookie</span>
+                    </button>
                     <span id="cookie-verify-status" style="font-size: 12px; color: var(--text-secondary);"></span>
                 </div>
                 \` : ''}
@@ -1464,6 +1470,12 @@ FFFFFF FF5733 00FF00"></textarea>
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <span>验证Cookie</span>
+                    </button>
+                    <button type="button" class="btn btn-warning btn-sm" onclick="refreshBilibiliCookie()">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span>刷新Cookie</span>
                     </button>
                     <span id="cookie-verify-status" style="font-size: 12px; color: var(--text-secondary);"></span>
                 </div>
@@ -2752,16 +2764,40 @@ async function verifyBilibiliCookie() {
         const result = await response.json();
         
         if (result.success && result.data && result.data.isValid) {
-            const uname = result.data.uname || '未知用户';
-            if (statusEl) {
-                statusEl.innerHTML = '<span style="color: var(--success-color);">✅ 有效 (用户: ' + escapeHtml(uname) + ')</span>';
+            const data = result.data;
+            const uname = data.uname || '未知用户';
+            const vipStatus = data.vipStatus === 1 ? ' 👑' : '';
+            
+            // 计算有效期显示
+            let expiresInfo = '';
+            if (data.expiresAt) {
+                const expiresDate = new Date(data.expiresAt * 1000);
+                const now = new Date();
+                const daysLeft = Math.ceil((expiresDate - now) / (1000 * 60 * 60 * 24));
+                
+                if (daysLeft > 7) {
+                    expiresInfo = ' | 剩余 ' + daysLeft + ' 天';
+                } else if (daysLeft > 0) {
+                    expiresInfo = ' | <span style="color: var(--warning-color);">剩余 ' + daysLeft + ' 天</span>';
+                } else {
+                    expiresInfo = ' | <span style="color: var(--danger-color);">已过期</span>';
+                }
             }
-            addLog('✅ Cookie 验证通过，用户: ' + uname, 'success');
+            
+            if (statusEl) {
+                statusEl.innerHTML = \`
+                    <span style="color: var(--success-color);">
+                        ✅ 有效 | 用户: \${escapeHtml(uname)}\${vipStatus}\${expiresInfo}
+                    </span>
+                \`;
+            }
+            addLog('✅ Cookie 验证通过，用户: ' + uname + (data.expiresAt ? '，有效期至: ' + new Date(data.expiresAt * 1000).toLocaleDateString() : ''), 'success');
         } else {
+            const errorMsg = result.data?.message || result.message || '无效或已过期';
             if (statusEl) {
-                statusEl.innerHTML = '<span style="color: var(--danger-color);">❌ Cookie 无效或已过期</span>';
+                statusEl.innerHTML = '<span style="color: var(--danger-color);">❌ ' + escapeHtml(errorMsg) + '</span>';
             }
-            addLog('❌ Cookie 验证失败: ' + (result.message || '无效或已过期'), 'error');
+            addLog('❌ Cookie 验证失败: ' + errorMsg, 'error');
         }
     } catch (error) {
         if (statusEl) {
@@ -2770,4 +2806,119 @@ async function verifyBilibiliCookie() {
         addLog('❌ Cookie 验证请求失败: ' + error.message, 'error');
     }
 }
+
+/**
+ * 刷新 Bilibili Cookie（使用 refresh_token）
+ */
+async function refreshBilibiliCookie() {
+    const textInput = document.getElementById('text-value');
+    const statusEl = document.getElementById('cookie-verify-status');
+    
+    if (!textInput) return;
+    
+    const cookie = textInput.value.trim();
+    
+    if (!cookie) {
+        if (statusEl) {
+            statusEl.innerHTML = '<span style="color: var(--warning-color);">⚠️ 请先输入或扫码获取 Cookie</span>';
+        }
+        return;
+    }
+    
+    // 基本格式检查
+    if (!cookie.includes('SESSDATA') || !cookie.includes('bili_jct')) {
+        if (statusEl) {
+            statusEl.innerHTML = '<span style="color: var(--danger-color);">❌ 格式不完整，需包含 SESSDATA 和 bili_jct</span>';
+        }
+        return;
+    }
+    
+    if (statusEl) {
+        statusEl.innerHTML = '<span style="color: var(--text-secondary);">🔄 刷新中...</span>';
+    }
+    
+    addLog('🔄 正在刷新 Bilibili Cookie...', 'info');
+    
+    try {
+        // 调用后端刷新接口
+        const response = await fetch(buildApiUrl('/api/cookie/refresh-token', true), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ cookie: cookie })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.data && result.data.newCookie) {
+            const newCookie = result.data.newCookie;
+            const uname = result.data.uname || '未知用户';
+            
+            // 更新输入框中的 Cookie
+            textInput.value = newCookie;
+            textInput.dispatchEvent(new Event('input', { bubbles: true }));
+            
+            // 高亮显示更新成功
+            textInput.style.borderColor = 'var(--success-color)';
+            textInput.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
+            
+            setTimeout(() => {
+                textInput.style.borderColor = '';
+                textInput.style.boxShadow = '';
+            }, 2000);
+            
+            // 计算新的有效期
+            let expiresInfo = '';
+            if (result.data.expiresAt) {
+                const expiresDate = new Date(result.data.expiresAt * 1000);
+                const now = new Date();
+                const daysLeft = Math.ceil((expiresDate - now) / (1000 * 60 * 60 * 24));
+                expiresInfo = ' | 剩余 ' + daysLeft + ' 天';
+            }
+            
+            if (statusEl) {
+                statusEl.innerHTML = \`
+                    <span style="color: var(--success-color);">
+                        ✅ 刷新成功 | 用户: \${escapeHtml(uname)}\${expiresInfo} | 请保存
+                    </span>
+                \`;
+            }
+            
+            addLog('✅ Cookie 刷新成功，用户: ' + uname + '，请点击保存按钮提交', 'success');
+            showSuccessAnimation('Cookie 已刷新');
+        } else if (result.success && result.data && result.data.isValid) {
+            // Cookie 仍然有效，无需刷新
+            const uname = result.data.uname || '未知用户';
+            let expiresInfo = '';
+            if (result.data.expiresAt) {
+                const expiresDate = new Date(result.data.expiresAt * 1000);
+                const now = new Date();
+                const daysLeft = Math.ceil((expiresDate - now) / (1000 * 60 * 60 * 24));
+                expiresInfo = ' | 剩余 ' + daysLeft + ' 天';
+            }
+            
+            if (statusEl) {
+                statusEl.innerHTML = \`
+                    <span style="color: var(--success-color);">
+                        ✅ Cookie 仍有效 | 用户: \${escapeHtml(uname)}\${expiresInfo}
+                    </span>
+                \`;
+            }
+            addLog('ℹ️ Cookie 仍然有效，无需刷新', 'info');
+        } else {
+            const errorMsg = result.data?.message || result.message || '刷新失败';
+            if (statusEl) {
+                statusEl.innerHTML = '<span style="color: var(--danger-color);">❌ ' + escapeHtml(errorMsg) + '</span>';
+            }
+            addLog('❌ Cookie 刷新失败: ' + errorMsg + '，建议重新扫码登录', 'error');
+        }
+    } catch (error) {
+        if (statusEl) {
+            statusEl.innerHTML = '<span style="color: var(--danger-color);">❌ 刷新请求失败</span>';
+        }
+        addLog('❌ Cookie 刷新请求失败: ' + error.message, 'error');
+    }
+}
+
 `;
