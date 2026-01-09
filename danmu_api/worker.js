@@ -15,10 +15,9 @@ import {
     handleCookieSave,
     handleCookieClear,
     handleCookieRefresh,
-    handleCookieVerify
+    handleCookieVerify,
     handleCookieRefreshToken
 } from "./utils/cookie-util.js";
-
 let globals;
 
 async function handleRequest(req, env, deployPlatform, clientIp) {
@@ -387,11 +386,6 @@ async function handleRequest(req, env, deployPlatform, clientIp) {
   if (path === "/api/cookie/verify" && method === "POST") {
     return handleCookieVerify(req);
   }
-  
-  // 添加刷新Cookie的路由
-  if (pathname === '/api/cookie/refresh-token' && request.method === 'POST') {
-    return await handleCookieRefreshToken(request);
-  }
 
   // POST /api/cookie/save - 保存Cookie
   if (path === "/api/cookie/save" && method === "POST") {
@@ -406,6 +400,11 @@ async function handleRequest(req, env, deployPlatform, clientIp) {
   // POST /api/cookie/refresh - 刷新Cookie
   if (path === "/api/cookie/refresh" && method === "POST") {
     return handleCookieRefresh();
+  }
+
+  // POST /api/cookie/refresh-token - 使用refresh_token刷新Cookie（新增）
+  if (path === "/api/cookie/refresh-token" && method === "POST") {
+    return handleCookieRefreshToken(req);
   }
 
   return jsonResponse({ message: "Not found" }, 404);
