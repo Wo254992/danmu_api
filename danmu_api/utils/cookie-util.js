@@ -318,31 +318,78 @@ export async function handleQRCheck(request) {
         let cookie = null;
         let refresh_token = null;
 
-        if (data.data.code === 0 && data.data.url) {
+        if (data.data.code === 0) {
             try {
-                const url = new URL(data.data.url);
-                const params = new URLSearchParams(url.search);
-                const SESSDATA = params.get('SESSDATA') || '';
-                const bili_jct = params.get('bili_jct') || '';
-                const DedeUserID = params.get('DedeUserID') || '';
-                const DedeUserID__ckMd5 = params.get('DedeUserID__ckMd5') || '';
-                
-                if (SESSDATA) {
-                    // 注意：这里 SESSDATA 可能是 URL 编码的，需要解码
-                    const decodedSESSDATA = decodeURIComponent(SESSDATA);
-                    const decodedBiliJct = decodeURIComponent(bili_jct);
-                    const decodedDedeUserID = decodeURIComponent(DedeUserID);
-                    const decodedDedeUserID__ckMd5 = decodeURIComponent(DedeUserID__ckMd5);
+                // 方法1: 从 URL 参数提取
+                if (data.data.url) {
+                    const url = new URL(data.data.url);
+                    const params = new URLSearchParams(url.search);
+                    const SESSDATA = params.get('SESSDATA') || '';
+                    const bili_jct = params.get('bili_jct') || '';
+                    const DedeUserID = params.get('DedeUserID') || '';
+                    const DedeUserID__ckMd5 = params.get('DedeUserID__ckMd5') || '';
                     
-                    cookie = `SESSDATA=${decodedSESSDATA}; bili_jct=${decodedBiliJct}; DedeUserID=${decodedDedeUserID}; DedeUserID__ckMd5=${decodedDedeUserID__ckMd5}`;
-                    log("info", `从登录响应提取Cookie成功，长度: ${cookie.length}`);
+                    if (SESSDATA) {
+                        // 注意：这里 SESSDATA 可能是 URL 编码的，需要解码
+                        const decodedSESSDATA = decodeURIComponent(SESSDATA);
+                        const decodedBiliJct = decodeURIComponent(bili_jct);
+                        const decodedDedeUserID = decodeURIComponent(DedeUserID);
+                        const decodedDedeUserID__ckMd5 = decodeURIComponent(DedeUserID__ckMd5);
+                        
+                        cookie = `SESSDATA=${decodedSESSDATA}; bili_jct=${decodedBiliJct}; DedeUserID=${decodedDedeUserID}; DedeUserID__ckMd5=${decodedDedeUserID__ckMd5}`;
+                        log("info", `从登录URL提取Cookie成功，长度: ${cookie.length}`);
+                    }
                 }
                 
+                // 方法2: 从 Set-Cookie 响应头提取（更可靠）
+                const setCookieHeaders = response.headers.getSetCookie ? 
+                    response.headers.getSetCookie() : 
+                    [response.headers.get('set-cookie')].filter(Boolean);
+                
+                if (setCookieHeaders && setCookieHeaders.length > 0) {
+                    let cookieParts = {};
+                    
+                    for (const setCookie of setCookieHeaders) {
+                        if (setCookie) {
+                            const parts = setCookie.split(';')[0].split('=');
+                            if (parts.length >= 2) {
+                                const key = parts[0].trim();
+                                const value = parts.slice(1).join('=').trim();
+                                if (['SESSDATA', 'bili_jct', 'DedeUserID', 'DedeUserID__ckMd5', 'sid'].includes(key)) {
+                                    cookieParts[key] = value;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // 如果从响应头获取到了 Cookie，优先使用
+                    if (Object.keys(cookieParts).length > 0) {
+                        const cookieFromHeaders = Object.entries(cookieParts)
+                            .map(([key, value]) => `${key}=${value}`)
+                            .join('; ');
+                        
+                        if (cookieFromHeaders) {
+                            cookie = cookieFromHeaders;
+                            log("info", `从Set-Cookie响应头提取Cookie成功，长度: ${cookie.length}`);
+                        }
+                    }
+                }
+                
+                // 提取 refresh_token（用于后续刷新Cookie）
                 if (data.data.refresh_token) {
                     refresh_token = data.data.refresh_token;
+                    log("info", `获取到refresh_token: ${refresh_token.substring(0, 20)}...`);
+                    
+                    // 保存 refresh_token 到环境变量（可选）
+                    if (Globals.envs) {
+                        Globals.envs.bilibiliRefreshToken = refresh_token;
+                    }
+                    if (Envs.env) {
+                        Envs.env.BILIBILI_REFRESH_TOKEN = refresh_token;
+                    }
                 }
-            } catch (urlError) {
-                log("error", `解析登录URL失败: ${urlError.message}`);
+            } catch (parseError) {
+                log("error", `解析登录响应失败: ${parseError.message}`);
             }
         }
 
@@ -394,8 +441,8 @@ export async function handleCookieVerify(request) {
         
         if (verifyResult.isValid) {
             // 尝试从 Cookie 中解析 SESSDATA 的过期时间
-            // SESSDATA 格式通常是: value,timestamp,hash
-            // 例如: 918f1adf,1783455324,df8b6*12... 其中 1783455324 是过期时间戳
+            // SESSDATA 格式: value,timestamp,hash
+            // 例如: 680e344d,1783477842,2260a*11... 其中 1783477842 是过期时间戳（秒级）
             let expiresAt = null;
             try {
                 const sessdataMatch = cookie.match(/SESSDATA=([^;]+)/);
@@ -414,7 +461,7 @@ export async function handleCookieVerify(request) {
                     log("info", `SESSDATA分割结果: ${parts.length} 部分`);
                     
                     if (parts.length >= 2) {
-                        // 第二部分是时间戳
+                        // 第二部分是时间戳（秒级）
                         const timestampStr = parts[1].trim();
                         const timestamp = parseInt(timestampStr, 10);
                         
@@ -422,26 +469,29 @@ export async function handleCookieVerify(request) {
                         
                         // 检查是否是有效的时间戳
                         // 1. 必须是数字
-                        // 2. 秒级时间戳范围：1600000000 (2020年) 到 2100000000 (2036年)
+                        // 2. 秒级时间戳范围：1600000000 (2020-09-13) 到 2147483647 (2038-01-19，32位时间戳上限)
+                        // 3. 必须大于当前时间（未过期）
                         const now = Math.floor(Date.now() / 1000);
-                        if (!isNaN(timestamp) && timestamp > 1600000000 && timestamp < 2100000000) {
+                        if (!isNaN(timestamp) && timestamp > 1600000000 && timestamp < 2147483647 && timestamp > now) {
                             expiresAt = timestamp;
                             const expiresDate = new Date(timestamp * 1000);
                             const daysLeft = Math.ceil((timestamp - now) / (24 * 60 * 60));
-                            log("info", `解析到Cookie过期时间: ${expiresDate.toISOString()}, 剩余 ${daysLeft} 天`);
+                            log("info", `成功解析Cookie过期时间: ${expiresDate.toISOString()}, 剩余 ${daysLeft} 天`);
                         } else {
-                            log("warn", `时间戳无效或超出范围: ${timestamp}, 当前时间: ${now}`);
+                            log("warn", `时间戳无效或超出范围: ${timestamp}, 当前时间: ${now}, timestamp > now: ${timestamp > now}`);
                         }
+                    } else {
+                        log("warn", `SESSDATA格式不符合预期，parts.length = ${parts.length}`);
                     }
                 }
             } catch (e) {
                 log("warn", `解析Cookie过期时间失败: ${e.message}`);
             }
             
-            // 如果无法从 SESSDATA 解析，使用预估值（180天，B站Cookie通常有效期较长）
+            // 如果无法从 SESSDATA 解析，使用预估值（30天，保守估计）
             if (!expiresAt) {
-                expiresAt = Math.floor(Date.now() / 1000) + 180 * 24 * 60 * 60;
-                log("info", `使用默认过期时间: 180天后`);
+                expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+                log("info", `无法解析过期时间，使用默认值: 30天后`);
             }
             
             return jsonResponse({
@@ -629,17 +679,24 @@ export async function handleCookieRefreshToken(request) {
             try {
                 const sessdataMatch = cookie.match(/SESSDATA=([^;]+)/);
                 if (sessdataMatch) {
-                    const sessdata = decodeURIComponent(sessdataMatch[1]);
+                    let sessdata = sessdataMatch[1];
+                    try {
+                        sessdata = decodeURIComponent(sessdata);
+                    } catch (decodeErr) {
+                        // 解码失败，使用原值
+                    }
                     const parts = sessdata.split(',');
                     if (parts.length >= 2) {
-                        const timestamp = parseInt(parts[1]);
-                        if (timestamp > Date.now() / 1000 && timestamp < 2000000000) {
+                        const timestamp = parseInt(parts[1], 10);
+                        const now = Math.floor(Date.now() / 1000);
+                        if (!isNaN(timestamp) && timestamp > 1600000000 && timestamp < 2147483647 && timestamp > now) {
                             expiresAt = timestamp;
+                            log("info", `解析到过期时间: ${new Date(timestamp * 1000).toISOString()}`);
                         }
                     }
                 }
             } catch (e) {
-                // ignore
+                log("warn", `解析过期时间失败: ${e.message}`);
             }
             
             if (!expiresAt) {
@@ -737,17 +794,24 @@ export async function handleCookieRefreshToken(request) {
                     try {
                         const sessdataMatch = newCookie.match(/SESSDATA=([^;]+)/);
                         if (sessdataMatch) {
-                            const sessdata = decodeURIComponent(sessdataMatch[1]);
+                            let sessdata = sessdataMatch[1];
+                            try {
+                                sessdata = decodeURIComponent(sessdata);
+                            } catch (decodeErr) {
+                                // 解码失败，使用原值
+                            }
                             const parts = sessdata.split(',');
                             if (parts.length >= 2) {
-                                const timestamp = parseInt(parts[1]);
-                                if (timestamp > Date.now() / 1000 && timestamp < 2000000000) {
+                                const timestamp = parseInt(parts[1], 10);
+                                const now = Math.floor(Date.now() / 1000);
+                                if (!isNaN(timestamp) && timestamp > 1600000000 && timestamp < 2147483647 && timestamp > now) {
                                     expiresAt = timestamp;
+                                    log("info", `刷新后的Cookie过期时间: ${new Date(timestamp * 1000).toISOString()}`);
                                 }
                             }
                         }
                     } catch (e) {
-                        // ignore
+                        log("warn", `解析刷新后Cookie过期时间失败: ${e.message}`);
                     }
                     
                     log("info", `Cookie刷新成功，用户: ${newVerifyResult.data.uname}`);
