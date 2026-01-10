@@ -701,8 +701,19 @@ export async function handleCookieRefreshToken(request) {
             });
         }
         
-        // 获取 refresh_token（从请求体或环境变量）
+        // 获取 refresh_token
+        // 优先级：请求参数 -> Cookie 字符串中提取 -> 环境变量
         let refreshToken = body.refresh_token || '';
+        
+        // 如果请求体没有，尝试从 Cookie 字符串中提取 refresh_token
+        if (!refreshToken && cookie.includes('refresh_token=')) {
+            const match = cookie.match(/refresh_token=([^;]+)/);
+            if (match && match[1]) {
+                refreshToken = match[1].trim();
+                log("info", "从Cookie字符串中提取到 refresh_token");
+            }
+        }
+
         if (!refreshToken) {
             refreshToken = Globals.envs?.bilibiliRefreshToken || Envs.env?.BILIBILI_REFRESH_TOKEN || '';
         }
