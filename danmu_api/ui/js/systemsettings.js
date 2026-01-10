@@ -3094,10 +3094,33 @@ async function refreshBilibiliCookie() {
         if (result.success && result.data && result.data.newCookie) {
             const newCookie = result.data.newCookie;
             const uname = result.data.uname || '未知用户';
+            const newRefreshToken = result.data.newRefreshToken || '';
             
             // 更新输入框中的 Cookie
             textInput.value = newCookie;
             textInput.dispatchEvent(new Event('input', { bubbles: true }));
+            
+            // 如果有新的 refresh_token，也更新到隐藏字段和 sessionStorage
+            if (newRefreshToken && newRefreshToken.trim() !== '') {
+                // 更新隐藏字段
+                let refreshTokenField = document.getElementById('bili-refresh-token');
+                if (!refreshTokenField) {
+                    refreshTokenField = document.createElement('input');
+                    refreshTokenField.type = 'hidden';
+                    refreshTokenField.id = 'bili-refresh-token';
+                    textInput.parentNode.appendChild(refreshTokenField);
+                }
+                refreshTokenField.value = newRefreshToken;
+                
+                // 更新 sessionStorage
+                try {
+                    sessionStorage.setItem('bili_refresh_token', newRefreshToken);
+                } catch (e) {
+                    console.warn('sessionStorage 保存失败:', e);
+                }
+                
+                addLog('🔑 新的 refresh_token 已更新: ' + newRefreshToken.substring(0, 20) + '...', 'success');
+            }
             
             // 高亮显示更新成功
             textInput.style.borderColor = 'var(--success-color)';
@@ -3127,6 +3150,9 @@ async function refreshBilibiliCookie() {
             }
             
             addLog('✅ Cookie 刷新成功，用户: ' + uname + '，请点击保存按钮提交', 'success');
+            if (newRefreshToken) {
+                addLog('💡 提示：新的 refresh_token 会在保存 Cookie 时一起保存', 'info');
+            }
             showSuccessAnimation('Cookie 已刷新');
         } else if (result.success && result.data && result.data.isValid) {
             // Cookie 仍然有效但没有 refresh_token 无法刷新
