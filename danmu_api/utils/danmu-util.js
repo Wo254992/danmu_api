@@ -102,6 +102,7 @@ export function limitDanmusByCount(filteredDanmus, danmuLimit) {
 export function convertToDanmakuJson(contents, platform) {
   let danmus = [];
   let cidCounter = 1;
+  const danmuFontSize = globals.danmuFontSize || 25;
 
   // 统一处理输入为数组
   let items = [];
@@ -175,10 +176,12 @@ export function convertToDanmakuJson(contents, platform) {
       m = item.m.replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)));
     }
 
+    // 输出为 dandanplay 风格的 p 字段：time,mode,color,size,[platform]
     attributes = [
       time,
       mode,
       color,
+      danmuFontSize,
       `[${platform}]`
     ].join(",");
 
@@ -357,7 +360,7 @@ function buildBilibiliDanmuP(comment) {
   const timeNum = parseFloat(pValues[0]) || 0;
   const time = timeNum.toFixed(1); // 时间（秒，保留1位小数）
   const mode = pValues[1] || '1'; // 类型（1=滚动, 4=底部, 5=顶部）
-  const fontSize = '25'; // 字体大小（25=中, 18=小）
+  const fontSize = String(globals.danmuFontSize || 25); // 字体大小（25=中, 18=小）
 
   // 颜色字段（输入总是4字段格式：时间,类型,颜色,平台）
   const color = pValues[2] || '16777215'; // 默认白色
