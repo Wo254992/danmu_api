@@ -2696,6 +2696,8 @@ function startBiliQRCheck() {
             
             const result = await response.json();
             
+            console.log('[扫码登录] 轮询结果:', JSON.stringify(result));
+            
             if (result.success && result.data) {
                 const code = result.data.code;
                 
@@ -2725,22 +2727,45 @@ function startBiliQRCheck() {
                         
                         addLog('🎉 Bilibili 登录成功！', 'success');
                         
+                        // 详细记录返回的数据
+                        console.log('[扫码登录] 登录成功，完整数据:', result.data);
+                        console.log('[扫码登录] cookie:', result.data.cookie ? '有' : '无');
+                        console.log('[扫码登录] refresh_token:', result.data.refresh_token ? '有' : '无');
+                        
                         // 获取 Cookie 并填入输入框
-                        if (result.data.cookie) {
-                            fillBilibiliCookie(result.data.cookie, result.data.refresh_token);
+                        const cookieValue = result.data.cookie || '';
+                        const refreshTokenValue = result.data.refresh_token || result.data.refreshToken || '';
+                        
+                        if (cookieValue) {
+                            addLog('📝 获取到Cookie，长度: ' + cookieValue.length, 'info');
+                            if (refreshTokenValue) {
+                                addLog('🔑 获取到refresh_token: ' + refreshTokenValue.substring(0, 20) + '...', 'info');
+                            } else {
+                                addLog('⚠️ 未获取到refresh_token', 'warn');
+                            }
+                            fillBilibiliCookie(cookieValue, refreshTokenValue);
+                        } else {
+                            addLog('❌ 登录成功但未获取到Cookie', 'error');
                         }
                         
                         setTimeout(() => {
                             closeBiliQRModal();
                             showSuccessAnimation('登录成功');
+                            // 刷新状态卡片
+                            setTimeout(() => {
+                                autoCheckBilibiliCookieStatus();
+                            }, 500);
                         }, 1000);
                         break;
                     default:
                         qrStatus.textContent = '状态: ' + (result.data.message || code);
+                        console.log('[扫码登录] 未知状态码:', code, result.data);
                 }
+            } else {
+                console.log('[扫码登录] 响应格式异常:', result);
             }
         } catch (error) {
-            console.error('检查扫码状态失败:', error);
+            console.error('[扫码登录] 检查扫码状态失败:', error);
         }
     }, 2000);
 }
@@ -2749,62 +2774,74 @@ function startBiliQRCheck() {
  * 将获取到的 Cookie 填入输入框
  */
 function fillBilibiliCookie(cookie, refreshToken) {
+    console.log('[fillBilibiliCookie] 开始填入Cookie');
+    console.log('[fillBilibiliCookie] cookie长度:', cookie ? cookie.length : 0);
+    console.log('[fillBilibiliCookie] refreshToken:', refreshToken ? (refreshToken.substring(0, 20) + '...') : '无');
+    
     const textInput = document.getElementById('text-value');
-    if (textInput) {
-        // 根据输入框类型设置值
-        if (textInput.tagName === 'TEXTAREA') {
-            textInput.value = cookie;
+    if (!textInput) {
+        console.error('[fillBilibiliCookie] 找不到text-value输入框');
+        addLog('❌ 找不到Cookie输入框', 'error');
+        return;
+    }
+    
+    // 设置值
+    textInput.value = cookie;
+    console.log('[fillBilibiliCookie] 已设置textInput.value，当前长度:', textInput.value.length);
+    
+    // 触发 input 事件以便其他监听器能够响应
+    textInput.dispatchEvent(new Event('input', { bubbles: true }));
+    
+    // 高亮显示填入成功
+    textInput.style.borderColor = 'var(--success-color)';
+    textInput.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
+    
+    setTimeout(() => {
+        textInput.style.borderColor = '';
+        textInput.style.boxShadow = '';
+    }, 2000);
+    
+    addLog('✅ Cookie 已自动填入（长度: ' + cookie.length + '），请点击保存按钮提交', 'success');
+    
+    // 如果有 refresh_token，保存到隐藏字段并提示用户
+    if (refreshToken && refreshToken.trim() !== '') {
+        console.log('[fillBilibiliCookie] 保存refresh_token');
+        
+        // 创建或更新隐藏的 refresh_token 字段
+        let refreshTokenField = document.getElementById('bili-refresh-token');
+        if (!refreshTokenField) {
+            refreshTokenField = document.createElement('input');
+            refreshTokenField.type = 'hidden';
+            refreshTokenField.id = 'bili-refresh-token';
+            textInput.parentNode.appendChild(refreshTokenField);
+            console.log('[fillBilibiliCookie] 创建了新的隐藏字段');
+        }
+        refreshTokenField.value = refreshToken;
+        
+        // 同时保存到 sessionStorage 以便刷新时使用
+        try {
+            sessionStorage.setItem('bili_refresh_token', refreshToken);
+            console.log('[fillBilibiliCookie] 已保存到sessionStorage');
+        } catch (e) {
+            console.warn('[fillBilibiliCookie] sessionStorage保存失败:', e);
+        }
+        
+        addLog('🔑 已保存 refresh_token 用于自动刷新', 'success');
+        addLog('💡 提示：refresh_token 仅在当前会话有效，关闭页面后需重新扫码', 'info');
+    } else {
+        console.log('[fillBilibiliCookie] 没有refresh_token或为空');
+        addLog('⚠️ 未获取到 refresh_token，将无法自动刷新Cookie', 'warn');
+    }
+    
+    // 更新验证状态
+    const statusEl = document.getElementById('cookie-verify-status');
+    if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(16, 185, 129, 0.1)';
+        if (refreshToken && refreshToken.trim() !== '') {
+            statusEl.innerHTML = '<span style="color: var(--success-color);">✅ 已填入（含refresh_token），请保存</span>';
         } else {
-            textInput.value = cookie;
-        }
-        
-        // 触发 input 事件以便其他监听器能够响应
-        textInput.dispatchEvent(new Event('input', { bubbles: true }));
-        
-        // 高亮显示填入成功
-        textInput.style.borderColor = 'var(--success-color)';
-        textInput.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
-        
-        setTimeout(() => {
-            textInput.style.borderColor = '';
-            textInput.style.boxShadow = '';
-        }, 2000);
-        
-        addLog('✅ Cookie 已自动填入，请点击保存按钮提交', 'success');
-        
-        // 如果有 refresh_token，保存到隐藏字段并提示用户
-        if (refreshToken) {
-            // 创建或更新隐藏的 refresh_token 字段
-            let refreshTokenField = document.getElementById('bili-refresh-token');
-            if (!refreshTokenField) {
-                refreshTokenField = document.createElement('input');
-                refreshTokenField.type = 'hidden';
-                refreshTokenField.id = 'bili-refresh-token';
-                textInput.parentNode.appendChild(refreshTokenField);
-            }
-            refreshTokenField.value = refreshToken;
-            
-            // 同时保存到 sessionStorage 以便刷新时使用
-            try {
-                sessionStorage.setItem('bili_refresh_token', refreshToken);
-            } catch (e) {
-                // sessionStorage 可能被禁用
-            }
-            
-            addLog('ℹ️ 获取到 refresh_token，已保存用于自动刷新', 'info');
-            addLog('💡 提示：refresh_token 仅在当前会话有效，下次需重新扫码', 'info');
-        }
-        
-        // 更新验证状态
-        const statusEl = document.getElementById('cookie-verify-status');
-        if (statusEl) {
-            statusEl.style.display = 'block';
-            statusEl.style.background = 'rgba(16, 185, 129, 0.1)';
-            if (refreshToken) {
-                statusEl.innerHTML = '<span style="color: var(--success-color);">✅ 已填入（含refresh_token），请保存</span>';
-            } else {
-                statusEl.innerHTML = '<span style="color: var(--success-color);">✅ 已填入，请保存</span>';
-            }
+            statusEl.innerHTML = '<span style="color: var(--warning-color);">⚠️ 已填入（无refresh_token），请保存</span>';
         }
     }
 }
@@ -3107,9 +3144,14 @@ async function autoCheckBilibiliCookieStatus() {
     const statusBadge = document.getElementById('bili-cookie-status-badge');
     const statusDetails = document.getElementById('bili-cookie-status-details');
     
-    if (!textInput || !statusCard) return;
+    if (!textInput || !statusCard) {
+        console.log('[Cookie检测] 找不到必要的DOM元素');
+        return;
+    }
     
     const cookie = textInput.value.trim();
+    
+    console.log('[Cookie检测] 开始检测，Cookie长度:', cookie.length);
     
     // 更新为加载状态
     statusIcon.innerHTML = \`
@@ -3123,17 +3165,20 @@ async function autoCheckBilibiliCookieStatus() {
     statusDetails.style.display = 'none';
     
     if (!cookie) {
-        // 无 Cookie
+        // 无 Cookie - 显示未登录状态
+        console.log('[Cookie检测] Cookie为空，显示未登录状态');
         statusIcon.innerHTML = \`
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 8v4m0 4h.01"/>
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+                <line x1="18" y1="8" x2="23" y2="13"/>
+                <line x1="23" y1="8" x2="18" y2="13"/>
             </svg>
         \`;
         statusIcon.className = 'bili-cookie-status-icon empty';
-        statusTitle.textContent = '未配置';
-        statusSubtitle.textContent = '请扫码登录或手动输入Cookie';
-        statusBadge.innerHTML = '<span class="status-dot empty"></span><span class="status-text">未配置</span>';
+        statusTitle.textContent = '账号未登录';
+        statusSubtitle.textContent = '点击「扫码登录」使用B站APP扫码';
+        statusBadge.innerHTML = '<span class="status-dot empty"></span><span class="status-text">未登录</span>';
         statusBadge.className = 'bili-cookie-status-badge empty';
         return;
     }
