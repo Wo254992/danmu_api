@@ -271,6 +271,7 @@ export class Envs {
       'DANMU_SIMPLIFIED': { category: 'danmu', type: 'boolean', description: '弹幕繁体转简体开关' },
       'CONVERT_TOP_BOTTOM_TO_SCROLL': { category: 'danmu', type: 'boolean', description: '顶部/底部弹幕转换为浮动弹幕' },
       'CONVERT_COLOR': { category: 'danmu', type: 'color-list', description: '自定义随机转换颜色池（支持手动配置/排序/删除，支持真随机添加，为空则不转换）' },
+      'DANMU_FONT_SIZE': { category: 'danmu', type: 'number', description: '弹幕字体大小（B站标准），默认25', min: 10, max: 100 },
       'DANMU_OUTPUT_FORMAT': { category: 'danmu', type: 'select', options: ['json', 'xml'], description: '弹幕输出格式，默认json' },
       'DANMU_PUSH_URL': { category: 'danmu', type: 'text', description: '弹幕推送地址，示例 http://127.0.0.1:9978/action?do=refresh&type=danmaku&path= ' },
 
@@ -312,6 +313,15 @@ export class Envs {
       danmuLimit: this.get('DANMU_LIMIT', 0, 'number'), // 等间隔采样限制弹幕总数，单位为k，即千：默认 0，表示不限制弹幕数，若改为5，弹幕总数在超过5000的情况下会将弹幕数控制在5000
       proxyUrl: this.get('PROXY_URL', '', 'string', true), // 代理/反代地址
       danmuSimplified: this.get('DANMU_SIMPLIFIED', true, 'boolean'), // 弹幕繁体转简体开关
+      danmuFontSize: (() => {
+        const raw = this.get('DANMU_FONT_SIZE', 25, 'string');
+        let v = parseInt(raw, 10);
+        if (isNaN(v) || v <= 0) v = 25;
+        v = Math.min(Math.max(v, 10), 100);
+        // 覆盖 accessedEnvVars 为最终数值，便于 UI 预览
+        this.accessedEnvVars.set('DANMU_FONT_SIZE', v);
+        return v;
+      })(),
       danmuPushUrl: this.get('DANMU_PUSH_URL', '', 'string'), // 代理/反代地址
       tmdbApiKey: this.get('TMDB_API_KEY', '', 'string', true), // TMDB API KEY
       redisUrl: this.get('UPSTASH_REDIS_REST_URL', '', 'string', true), // upstash redis url
