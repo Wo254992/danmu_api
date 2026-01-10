@@ -876,7 +876,8 @@ export async function handleCookieRefreshToken(request) {
                             uname: newVerifyResult.data.uname,
                             mid: newVerifyResult.data.mid,
                             expiresAt: expiresAt,
-                            newRefreshToken: newRefreshToken || null
+                            newRefreshToken: newRefreshToken || null,
+                            refreshed: true
                         }
                     });
                 } else {
