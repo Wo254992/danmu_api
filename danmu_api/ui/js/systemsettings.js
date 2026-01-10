@@ -3099,6 +3099,29 @@ async function refreshBilibiliCookie() {
             // 更新输入框中的 Cookie
             textInput.value = newCookie;
             textInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+            // 如果有新的 refresh_token，更新 BILIBILI_REFRESH_TOKEN 输入框
+            if (newRefreshToken && newRefreshToken.trim() !== '') {
+                const allInputs = document.querySelectorAll('input[type="text"], input[type="password"]');
+                for (const input of allInputs) {
+                    const settingItem = input.closest('.setting-item');
+                    if (settingItem) {
+                        const label = settingItem.querySelector('label');
+                        if (label && label.textContent.includes('BILIBILI_REFRESH_TOKEN')) {
+                            input.value = newRefreshToken;
+                            input.dispatchEvent(new Event('input', { bubbles: true }));
+                            input.style.borderColor = 'var(--success-color)';
+                            input.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
+                            setTimeout(() => {
+                                input.style.borderColor = '';
+                                input.style.boxShadow = '';
+                            }, 2000);
+                            addLog('🔑 BILIBILI_REFRESH_TOKEN 已更新到输入框', 'success');
+                            break;
+                        }
+                    }
+                }
+            }
             
             // 如果有新的 refresh_token，也更新到隐藏字段和 sessionStorage
             if (newRefreshToken && newRefreshToken.trim() !== '') {
