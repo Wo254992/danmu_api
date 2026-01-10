@@ -669,8 +669,7 @@ export async function handleCookieRefresh() {
 
 
 /**
- * 使用 refresh_token 刷新 Cookie（新增接口）
- * 用于环境变量配置界面中一键刷新 Cookie
+ * 使用 refresh_token 刷新 Cookie（修复版）
  */
 export async function handleCookieRefreshToken(request) {
     try {
@@ -686,7 +685,7 @@ export async function handleCookieRefreshToken(request) {
         
         log("info", `刷新Cookie请求，Cookie长度: ${cookie.length}`);
         
-        // 1. 标准化 Cookie (关键步骤)
+        // 1. 标准化 Cookie
         const normalizedCookie = normalizeCookie(cookie);
         
         // 先验证当前 Cookie 是否有效
@@ -702,39 +701,16 @@ export async function handleCookieRefreshToken(request) {
             });
         }
         
-        // 获取 refresh_token
-        const refreshToken = Globals.envs?.bilibiliRefreshToken || Envs.env?.BILIBILI_REFRESH_TOKEN;
+        // 获取 refresh_token（从请求体或环境变量）
+        let refreshToken = body.refresh_token || '';
+        if (!refreshToken) {
+            refreshToken = Globals.envs?.bilibiliRefreshToken || Envs.env?.BILIBILI_REFRESH_TOKEN || '';
+        }
         
         if (!refreshToken) {
             // 没有 refresh_token，返回当前 Cookie 状态
-            let expiresAt = null;
-            try {
-                // 使用标准化后的 normalizedCookie 进行正则匹配
-                const sessdataMatch = normalizedCookie.match(/SESSDATA=([^;]+)/);
-                if (sessdataMatch) {
-                    let sessdata = sessdataMatch[1];
-                    try {
-                        sessdata = decodeURIComponent(sessdata);
-                    } catch (decodeErr) {
-                        // 解码失败，使用原值
-                    }
-                    const parts = sessdata.split(',');
-                    if (parts.length >= 2) {
-                        const timestamp = parseInt(parts[1], 10);
-                        const now = Math.floor(Date.now() / 1000);
-                        if (!isNaN(timestamp) && timestamp > 1600000000 && timestamp < 2147483647 && timestamp > now) {
-                            expiresAt = timestamp;
-                            log("info", `解析到过期时间: ${new Date(timestamp * 1000).toISOString()}`);
-                        }
-                    }
-                }
-            } catch (e) {
-                log("warn", `解析过期时间失败: ${e.message}`);
-            }
+            let expiresAt = parseExpiresFromCookie(normalizedCookie);
             
-            if (!expiresAt) {
-                expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
-            }
             return jsonResponse({
                 success: true,
                 data: {
@@ -747,22 +723,78 @@ export async function handleCookieRefreshToken(request) {
             });
         }
         
-        // 使用 refresh_token 刷新 Cookie
         log("info", "尝试使用refresh_token刷新Cookie...");
+        log("info", `refresh_token长度: ${refreshToken.length}`);
         
         try {
-            // 调用 Bilibili 刷新接口
+            // 提取 csrf (bili_jct)
+            const csrf = extractBiliJct(normalizedCookie);
+            if (!csrf) {
+                log("warn", "无法从Cookie中提取bili_jct");
+                return jsonResponse({
+                    success: true,
+                    data: {
+                        isValid: true,
+                        uname: verifyResult.data.uname,
+                        mid: verifyResult.data.mid,
+                        expiresAt: parseExpiresFromCookie(normalizedCookie),
+                        message: '无法提取csrf，刷新失败。当前Cookie仍有效。'
+                    }
+                });
+            }
+            
+            // 步骤1: 获取 correspondPath
+            const ts = Date.now();
+            const correspondPath = await getCorrespondPath(ts);
+            
+            if (!correspondPath) {
+                log("warn", "获取correspondPath失败");
+                return jsonResponse({
+                    success: true,
+                    data: {
+                        isValid: true,
+                        uname: verifyResult.data.uname,
+                        mid: verifyResult.data.mid,
+                        expiresAt: parseExpiresFromCookie(normalizedCookie),
+                        message: '获取correspondPath失败。当前Cookie仍有效。'
+                    }
+                });
+            }
+            
+            log("info", `获取到correspondPath: ${correspondPath.substring(0, 50)}...`);
+            
+            // 步骤2: 获取 refresh_csrf
+            const refreshCsrf = await getRefreshCsrf(correspondPath, normalizedCookie);
+            
+            if (!refreshCsrf) {
+                log("warn", "获取refresh_csrf失败");
+                return jsonResponse({
+                    success: true,
+                    data: {
+                        isValid: true,
+                        uname: verifyResult.data.uname,
+                        mid: verifyResult.data.mid,
+                        expiresAt: parseExpiresFromCookie(normalizedCookie),
+                        message: '获取refresh_csrf失败。当前Cookie仍有效。'
+                    }
+                });
+            }
+            
+            log("info", `获取到refresh_csrf: ${refreshCsrf.substring(0, 20)}...`);
+            
+            // 步骤3: 调用刷新接口
             const refreshResponse = await fetch('https://passport.bilibili.com/x/passport-login/web/cookie/refresh', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     'Referer': 'https://www.bilibili.com',
+                    'Origin': 'https://www.bilibili.com',
                     'Cookie': normalizedCookie
                 },
                 body: new URLSearchParams({
-                    'csrf': extractBiliJct(normalizedCookie),
-                    'refresh_csrf': '',
+                    'csrf': csrf,
+                    'refresh_csrf': refreshCsrf,
                     'source': 'main_web',
                     'refresh_token': refreshToken
                 }).toString()
@@ -793,12 +825,6 @@ export async function handleCookieRefreshToken(request) {
                     }
                 }
                 
-                // 如果从响应头没有获取到完整的 Cookie，尝试从响应数据中获取
-                if (refreshResult.data.refresh_token) {
-                    // 保存新的 refresh_token（如果需要）
-                    log("info", `获取到新的refresh_token`);
-                }
-                
                 // 合并新旧 Cookie
                 const oldCookieParts = {};
                 normalizedCookie.split(';').forEach(part => {
@@ -808,10 +834,8 @@ export async function handleCookieRefreshToken(request) {
                     }
                 });
                 
-                // 用新的值覆盖旧的值
                 const mergedCookieParts = { ...oldCookieParts, ...newCookieParts };
                 
-                // 构建新的 Cookie 字符串
                 const newCookie = Object.entries(mergedCookieParts)
                     .filter(([key]) => ['SESSDATA', 'bili_jct', 'DedeUserID', 'DedeUserID__ckMd5', 'sid'].includes(key))
                     .map(([key, value]) => `${key}=${value}`)
@@ -821,33 +845,29 @@ export async function handleCookieRefreshToken(request) {
                 const newVerifyResult = await verifyCookieValidity(newCookie);
                 
                 if (newVerifyResult.isValid) {
-                    // 计算新的过期时间
-                    let expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60; // 默认30天
-                    
-                    try {
-                        const sessdataMatch = newCookie.match(/SESSDATA=([^;]+)/);
-                        if (sessdataMatch) {
-                            let sessdata = sessdataMatch[1];
-                            try {
-                                sessdata = decodeURIComponent(sessdata);
-                            } catch (decodeErr) {
-                                // 解码失败，使用原值
-                            }
-                            const parts = sessdata.split(',');
-                            if (parts.length >= 2) {
-                                const timestamp = parseInt(parts[1], 10);
-                                const now = Math.floor(Date.now() / 1000);
-                                if (!isNaN(timestamp) && timestamp > 1600000000 && timestamp < 2147483647 && timestamp > now) {
-                                    expiresAt = timestamp;
-                                    log("info", `刷新后的Cookie过期时间: ${new Date(timestamp * 1000).toISOString()}`);
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        log("warn", `解析刷新后Cookie过期时间失败: ${e.message}`);
-                    }
+                    let expiresAt = parseExpiresFromCookie(newCookie);
                     
                     log("info", `Cookie刷新成功，用户: ${newVerifyResult.data.uname}`);
+                    
+                    // 保存新的 refresh_token（如果有）
+                    const newRefreshToken = refreshResult.data.refresh_token;
+                    if (newRefreshToken) {
+                        if (Globals.envs) {
+                            Globals.envs.bilibiliRefreshToken = newRefreshToken;
+                        }
+                        if (Envs.env) {
+                            Envs.env.BILIBILI_REFRESH_TOKEN = newRefreshToken;
+                        }
+                        log("info", `新的refresh_token已保存`);
+                    }
+                    
+                    // 步骤4: 确认刷新（可选但推荐）
+                    try {
+                        await confirmRefresh(csrf, refreshToken);
+                        log("info", "刷新确认成功");
+                    } catch (confirmErr) {
+                        log("warn", `刷新确认失败（不影响使用）: ${confirmErr.message}`);
+                    }
                     
                     return jsonResponse({
                         success: true,
@@ -856,7 +876,7 @@ export async function handleCookieRefreshToken(request) {
                             uname: newVerifyResult.data.uname,
                             mid: newVerifyResult.data.mid,
                             expiresAt: expiresAt,
-                            newRefreshToken: refreshResult.data.refresh_token || null
+                            newRefreshToken: newRefreshToken || null
                         }
                     });
                 } else {
@@ -870,12 +890,8 @@ export async function handleCookieRefreshToken(request) {
                     });
                 }
             } else {
-                // 刷新失败
                 const errorMsg = refreshResult.message || '刷新失败';
                 log("warn", `Cookie刷新失败: ${errorMsg}`);
-                
-                // 返回当前 Cookie 状态
-                let expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
                 
                 return jsonResponse({
                     success: true,
@@ -883,7 +899,7 @@ export async function handleCookieRefreshToken(request) {
                         isValid: true,
                         uname: verifyResult.data.uname,
                         mid: verifyResult.data.mid,
-                        expiresAt: expiresAt,
+                        expiresAt: parseExpiresFromCookie(normalizedCookie),
                         message: `刷新失败(${errorMsg})，当前Cookie仍有效`
                     }
                 });
@@ -891,16 +907,13 @@ export async function handleCookieRefreshToken(request) {
         } catch (refreshError) {
             log("error", `调用刷新接口异常: ${refreshError.message}`);
             
-            // 返回当前 Cookie 状态
-            let expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
-            
             return jsonResponse({
                 success: true,
                 data: {
                     isValid: true,
                     uname: verifyResult.data.uname,
                     mid: verifyResult.data.mid,
-                    expiresAt: expiresAt,
+                    expiresAt: parseExpiresFromCookie(normalizedCookie),
                     message: '刷新请求失败，当前Cookie仍有效'
                 }
             });
@@ -910,6 +923,131 @@ export async function handleCookieRefreshToken(request) {
         return jsonResponse({ success: false, message: error.message }, 500);
     }
 }
+
+/**
+ * 从Cookie中解析过期时间
+ */
+function parseExpiresFromCookie(cookie) {
+    try {
+        const sessdataMatch = cookie.match(/SESSDATA=([^;]+)/);
+        if (sessdataMatch) {
+            let sessdata = sessdataMatch[1];
+            try {
+                sessdata = decodeURIComponent(sessdata);
+            } catch (e) {}
+            
+            const parts = sessdata.split(',');
+            if (parts.length >= 2) {
+                const timestamp = parseInt(parts[1], 10);
+                const now = Math.floor(Date.now() / 1000);
+                if (!isNaN(timestamp) && timestamp > 1600000000 && timestamp < 2147483647 && timestamp > now) {
+                    return timestamp;
+                }
+            }
+        }
+    } catch (e) {
+        log("warn", `解析过期时间失败: ${e.message}`);
+    }
+    return Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+}
+
+/**
+ * 获取 correspondPath（用于刷新Cookie）
+ * 使用 RSA 加密时间戳
+ */
+async function getCorrespondPath(timestamp) {
+    try {
+        // B站的公钥
+        const publicKey = `-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLgd2OAkcGVtoE3ThUREbio0Eg
+Uc/prcajMKXvkCKFCWhJYJcLkcM2DKKcSeFpD/j6Boy538YXnR6VhcuUJOhH2x71
+nzPjfdTcqMz7djHum0qSZA0AyCBDABUqCrfNgCiJ00Ra7GmRj+YCK1NJEuewlb40
+JNrRuoEUXpabUzGB8QIDAQAB
+-----END PUBLIC KEY-----`;
+
+        // 动态导入 crypto 模块（Node.js 环境）
+        let crypto;
+        try {
+            crypto = await import('crypto');
+        } catch (e) {
+            // 如果是浏览器环境或其他环境，尝试使用 Web Crypto API
+            log("warn", "无法导入crypto模块，尝试其他方式");
+            return null;
+        }
+        
+        const data = `refresh_${timestamp}`;
+        
+        const encrypted = crypto.publicEncrypt(
+            {
+                key: publicKey,
+                padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+                oaepHash: 'sha256'
+            },
+            Buffer.from(data)
+        );
+        
+        return encrypted.toString('hex');
+    } catch (error) {
+        log("error", `生成correspondPath失败: ${error.message}`);
+        return null;
+    }
+}
+
+/**
+ * 获取 refresh_csrf
+ */
+async function getRefreshCsrf(correspondPath, cookie) {
+    try {
+        const url = `https://www.bilibili.com/correspond/1/${correspondPath}`;
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Referer': 'https://www.bilibili.com/',
+                'Cookie': cookie
+            }
+        });
+        
+        const html = await response.text();
+        
+        // 从 HTML 中提取 refresh_csrf
+        const match = html.match(/<div id="1-name">([^<]+)<\/div>/);
+        if (match && match[1]) {
+            return match[1];
+        }
+        
+        log("warn", `无法从页面提取refresh_csrf，响应长度: ${html.length}`);
+        return null;
+    } catch (error) {
+        log("error", `获取refresh_csrf失败: ${error.message}`);
+        return null;
+    }
+}
+
+/**
+ * 确认刷新（使旧的 refresh_token 失效）
+ */
+async function confirmRefresh(csrf, oldRefreshToken) {
+    try {
+        await fetch('https://passport.bilibili.com/x/passport-login/web/confirm/refresh', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Referer': 'https://www.bilibili.com'
+            },
+            body: new URLSearchParams({
+                'csrf': csrf,
+                'refresh_token': oldRefreshToken
+            }).toString()
+        });
+    } catch (error) {
+        // 确认失败不是致命错误
+        throw error;
+    }
+}
+
 
 /**
  * 从 Cookie 中提取 bili_jct（csrf token）
