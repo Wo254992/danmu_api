@@ -1009,6 +1009,54 @@ document.getElementById('env-form').addEventListener('submit', async function(e)
     submitBtn.disabled = true;
 
     try {
+        // 特殊处理 BILIBILI_COOKIE：同时保存 refresh_token
+        if (key === 'BILIBILI_COOKIE') {
+            // 尝试获取 refresh_token
+            let refreshToken = '';
+            const refreshTokenField = document.getElementById('bili-refresh-token');
+            if (refreshTokenField && refreshTokenField.value) {
+                refreshToken = refreshTokenField.value;
+                console.log('[保存Cookie] 找到refresh_token字段，长度:', refreshToken.length);
+            } else {
+                // 尝试从 sessionStorage 获取
+                try {
+                    refreshToken = sessionStorage.getItem('bili_refresh_token') || '';
+                    if (refreshToken) {
+                        console.log('[保存Cookie] 从sessionStorage获取refresh_token，长度:', refreshToken.length);
+                    }
+                } catch (e) {
+                    console.warn('[保存Cookie] sessionStorage访问失败:', e);
+                }
+            }
+            
+            // 如果有 refresh_token，先保存它
+            if (refreshToken && refreshToken.trim() !== '') {
+                addLog('🔑 同时保存 BILIBILI_REFRESH_TOKEN...', 'info');
+                try {
+                    const rtResponse = await fetch(buildApiUrl('/api/env/set'), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            key: 'BILIBILI_REFRESH_TOKEN', 
+                            value: refreshToken 
+                        })
+                    });
+                    const rtResult = await rtResponse.json();
+                    if (rtResult.success) {
+                        addLog('✅ BILIBILI_REFRESH_TOKEN 保存成功', 'success');
+                    } else {
+                        addLog('⚠️ BILIBILI_REFRESH_TOKEN 保存失败: ' + rtResult.message, 'warn');
+                    }
+                } catch (rtError) {
+                    addLog('⚠️ BILIBILI_REFRESH_TOKEN 保存请求失败: ' + rtError.message, 'warn');
+                }
+            } else {
+                addLog('ℹ️ 没有refresh_token需要保存', 'info');
+            }
+        }
+        
         let response = await fetch(buildApiUrl('/api/env/set'), {
             method: 'POST',
             headers: {
