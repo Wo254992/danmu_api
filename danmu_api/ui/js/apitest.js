@@ -1692,8 +1692,8 @@ function loadMoreDanmu(comments, container) {
         const modeInt = parseInt(mode);
         
         // 正确解析颜色值
-        // 后端返回格式：时间,类型,颜色,来源 (4字段)
-        // 示例：5.0,1,16777215,[qq]
+        // 后端返回格式：时间,类型,颜色,字体大小,来源 (5字段)
+        // 示例：5.0,1,16777215,25,[qq]
         let colorInt = 16777215; // 默认白色
         
         // 直接从第3个字段（索引2）读取颜色
