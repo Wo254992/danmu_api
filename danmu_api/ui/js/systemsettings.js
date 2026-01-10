@@ -3293,26 +3293,9 @@ async function refreshBilibiliCookie() {
                 }
             }
             
-            // 如果有新的 refresh_token，更新到输入框、隐藏字段和 sessionStorage
+            // 如果有新的 refresh_token，也更新到隐藏字段和 sessionStorage
             if (newRefreshToken && newRefreshToken.trim() !== '') {
-                // 更新显式的 refresh_token 输入框
-                const refreshTokenInput = document.getElementById('bili-refresh-token-input');
-                if (refreshTokenInput) {
-                    refreshTokenInput.value = newRefreshToken;
-                    refreshTokenInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    
-                    // 高亮显示
-                    refreshTokenInput.style.borderColor = 'var(--success-color)';
-                    refreshTokenInput.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
-                    setTimeout(() => {
-                        refreshTokenInput.style.borderColor = '';
-                        refreshTokenInput.style.boxShadow = '';
-                    }, 2000);
-                    
-                    addLog('🔑 新的 refresh_token 已更新到输入框', 'success');
-                }
-                
-                // 更新隐藏字段作为降级方案
+                // 更新隐藏字段
                 let refreshTokenField = document.getElementById('bili-refresh-token');
                 if (!refreshTokenField) {
                     refreshTokenField = document.createElement('input');
@@ -3329,7 +3312,7 @@ async function refreshBilibiliCookie() {
                     console.warn('sessionStorage 保存失败:', e);
                 }
                 
-                addLog('🔑 新的 refresh_token 已保存: ' + newRefreshToken.substring(0, 20) + '...', 'success');
+                addLog('🔑 新的 refresh_token 已更新: ' + newRefreshToken.substring(0, 20) + '...', 'success');
             }
             
             // 高亮显示更新成功
