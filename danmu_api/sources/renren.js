@@ -82,12 +82,42 @@ export default class RenrenSource extends BaseSource {
         retries: 1,
       });
 
-      if (!resp.data) return [];
+      // ===== 添加调试日志 =====
+      log("info", `[Renren] searchAppContent 原始响应:`, {
+        hasData: !!resp.data,
+        dataType: typeof resp.data,
+        code: resp?.data?.code,
+        dataKeys: resp?.data ? Object.keys(resp.data) : [],
+        fullResponse: JSON.stringify(resp.data).substring(0, 500) // 只打印前500字符
+      });
+      // =====================
+
+      if (!resp.data) {
+        log("warn", "[Renren] searchAppContent: resp.data 为空");
+        return [];
+      }
 
       // 服务端明确提示"版本过低/强制更新"时：直接返回空，让上层走备用搜索
-      if (resp?.data?.code === "0001") return [];
+      if (resp?.data?.code === "0001") {
+        log("warn", "[Renren] searchAppContent: 版本过低/强制更新 (code: 0001)");
+        return [];
+      }
 
       const list = resp?.data?.data?.searchDramaList || [];
+      
+      // ===== 添加调试日志 =====
+      log("info", `[Renren] searchAppContent 解析结果:`, {
+        hasDataField: !!resp?.data?.data,
+        hasSearchDramaList: !!resp?.data?.data?.searchDramaList,
+        listLength: list.length,
+        firstItem: list[0] ? {
+          id: list[0].id,
+          title: list[0].title,
+          year: list[0].year
+        } : null
+      });
+      // =====================
+      
       return list.map((item) => ({
         provider: "renren",
         mediaId: String(item.id),
