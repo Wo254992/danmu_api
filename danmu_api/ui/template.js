@@ -948,7 +948,6 @@ export const HTML_TEMPLATE = /* html */ `
         ${apitestJsContent}
         ${pushDanmuJsContent}
         ${systemSettingsJsContent}
-        ${cookieManagerJsContent}
     </script>
 </body>
 </html>
