@@ -2781,11 +2781,7 @@ function fillBilibiliCookie(cookie, refreshToken) {
             textInput.style.boxShadow = '';
         }, 2000);
         
-        addLog('✅ Cookie 及 Refresh Token 已自动填入，请点击保存按钮提交', 'success');
-        
-        if (refreshToken) {
-             addLog(\`ℹ️ 已自动追加 refresh_token 到输入框\`, 'info');
-        }
+        addLog('✅ Cookie 已自动填入，请点击保存按钮提交', 'success');
         
         // 触发一次自动检测以更新 UI 状态 (解决 UI 不刷新的问题)
         setTimeout(() => {
@@ -2834,8 +2830,6 @@ async function verifyBilibiliCookie() {
             statusBadge.className = 'bili-cookie-status-badge loading';
             statusBadge.innerHTML = '<span class="status-dot loading"></span><span class="status-text">验证中</span>';
         }
-        
-        addLog('🔍 正在验证 Bilibili Cookie...', 'info');
         
         // 调用核心检测函数
         await autoCheckBilibiliCookieStatus();
