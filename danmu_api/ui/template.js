@@ -12,6 +12,7 @@ import { logviewJsContent } from "./js/logview.js";
 import { apitestJsContent } from "./js/apitest.js";
 import { pushDanmuJsContent } from "./js/pushdanmu.js";
 import { systemSettingsJsContent } from "./js/systemsettings.js";
+import { cookieManagerJsContent } from "./js/cookiemanager.js";
 import { modeBadgeCssContent } from "./css/mode-badge.css.js";
 import { colorsCssContent } from "./css/colors.css.js";
 // language=HTML
@@ -948,6 +949,7 @@ export const HTML_TEMPLATE = /* html */ `
         ${apitestJsContent}
         ${pushDanmuJsContent}
         ${systemSettingsJsContent}
+        ${cookieManagerJsContent}
     </script>
 </body>
 </html>
