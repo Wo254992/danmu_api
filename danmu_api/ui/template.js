@@ -2,6 +2,7 @@ import { globals } from "../configs/globals.js";
 import { tokensCssContent } from "./css/tokens.css.js";
 import { baseCssContent } from "./css/base.css.js";
 import { componentsCssContent } from "./css/components.css.js";
+import { cookieEditorCssContent } from "./css/cookie-editor.css.js";
 import { formsCssContent } from "./css/forms.css.js";
 import { responsiveCssContent } from "./css/responsive.css.js";
 import { dynamicCssContent } from "./css/dynamic.css.js";
@@ -38,6 +39,7 @@ export const HTML_TEMPLATE = /* html */ `
     <style>${baseCssContent}</style>
     <style>${colorsCssContent}</style>
     <style>${componentsCssContent}</style>
+    <style>${cookieEditorCssContent}</style>
     <style>${formsCssContent}</style>
     <style>${modeBadgeCssContent}</style>
     <style>${dynamicCssContent}</style>
