@@ -1923,88 +1923,13 @@ function exportDanmu(format) {
             .catch(error => {
                 console.error('导出弹幕失败:', error);
                 addLog(\`❌ 导出弹幕失败: \${error.message}\`, 'error');
-                // 如果后端导出失败，尝试使用本地数据
-                exportDanmuFromLocal(format);
+                customAlert('导出弹幕失败: ' + error.message, '❌ 导出失败');
             });
         return;
     }
     
-    // 如果没有 episodeId，使用本地数据导出
-    exportDanmuFromLocal(format);
-}
-
-/* ========================================
-   从本地数据导出弹幕（备用方案）
-   ======================================== */
-function exportDanmuFromLocal(format) {
-    if (!currentDanmuData || currentDanmuData.length === 0) {
-        customAlert('没有可导出的弹幕数据', '⚠️ 提示');
-        return;
-    }
-    
-    const title = document.getElementById('danmu-title').textContent;
-    const filename = formatDanmuFilename(title, format);
-    
-    let content = '';
-    let mimeType = '';
-    
-    if (format === 'json') {
-        content = JSON.stringify(currentDanmuData, null, 2);
-        mimeType = 'application/json';
-    } else if (format === 'xml') {
-        content = convertToXML(currentDanmuData);
-        mimeType = 'application/xml';
-    }
-    
-    const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    addLog(\`📥 导出弹幕: \${filename}\`, 'success');
-    customAlert(\`弹幕已导出为 \${format.toUpperCase()} 格式\`, '✅ 导出成功');
-}
-
-/* ========================================
-   转换为 XML 格式
-   ======================================== */
-function convertToXML(comments) {
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\\n';
-    xml += '<i>\\n';
-    xml += '  <chatserver>chat.bilibili.com</chatserver>\\n';
-    xml += '  <chatid>0</chatid>\\n';
-    xml += '  <mission>0</mission>\\n';
-    xml += \`  <maxlimit>\${comments.length}</maxlimit>\\n\`;
-    xml += '  <state>0</state>\\n';
-    xml += '  <real_name>0</real_name>\\n';
-    xml += '  <source>logvar-danmu-api</source>\\n';
-    
-    comments.forEach(comment => {
-        const p = comment.p;
-        const m = escapeXml(comment.m);
-        xml += \`  <d p="\${p}">\${m}</d>\\n\`;
-    });
-    
-    xml += '</i>';
-    return xml;
-}
-
-/* ========================================
-   转义 XML 特殊字符
-   ======================================== */
-function escapeXml(text) {
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&apos;'
-    };
-    return String(text).replace(/[&<>"']/g, m => map[m]);
+    // 如果没有 episodeId，提示用户无法导出
+    customAlert('无法导出：缺少弹幕ID，请重新加载弹幕后再试', '⚠️ 提示');
+    addLog('❌ 导出失败：缺少 episodeId', 'error');
 }
 `;
