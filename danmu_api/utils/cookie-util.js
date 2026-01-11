@@ -16,35 +16,23 @@ const qrLoginSessions = new Map();
  */
 function saveCookieToGlobals(cookie) {
     try {
-        // 方法1: 直接修改 Globals.envs 对象
+        // 只更新运行时内存中的配置
         if (Globals.envs) {
             Globals.envs.bilibliCookie = cookie;
-            log("info", `Cookie已保存到 Globals.envs.bilibliCookie`);
         }
         
-        // 方法2: 同时更新 Envs 类的静态 env 对象
         if (Envs.env) {
             Envs.env.BILIBILI_COOKIE = cookie;
         }
         
-        // 方法3: 如果是 Node.js 环境，也更新 process.env
-        if (typeof process !== 'undefined' && process.env) {
-            process.env.BILIBILI_COOKIE = cookie;
-        }
-        
-        // 更新 Envs 的 accessedEnvVars（用于UI显示）
-        if (Envs.accessedEnvVars && typeof Envs.accessedEnvVars.set === 'function') {
-            Envs.accessedEnvVars.set('BILIBILI_COOKIE', cookie ? '********' : '');
-        }
-        
-        // 更新 Envs 的 originalEnvVars
+        // 更新 UI 显示用的变量
         if (Envs.originalEnvVars && typeof Envs.originalEnvVars.set === 'function') {
             Envs.originalEnvVars.set('BILIBILI_COOKIE', cookie);
         }
         
-        log("info", `Cookie保存完成，长度: ${cookie ? cookie.length : 0}`);
+        log("info", `Cookie已保存，长度: ${cookie ? cookie.length : 0}`);
     } catch (err) {
-        log("error", `保存Cookie到Globals失败: ${err.message}`);
+        log("error", `保存Cookie失败: ${err.message}`);
     }
 }
 
@@ -150,9 +138,8 @@ async function verifyCookieValidity(cookie) {
         
         const data = await response.json();
         
-        log("info", `Cookie验证响应: code=${data.code}, isLogin=${data.data?.isLogin}`);
-        
         if (data.code === 0 && data.data && data.data.isLogin) {
+            log("info", `Cookie验证成功: ${data.data.uname}`);
             return {
                 isValid: true,
                 data: {
@@ -184,9 +171,8 @@ export async function handleCookieStatus() {
     try {
         const cookie = getCookieFromGlobals();
         
-        log("info", `检查Cookie状态，Cookie长度: ${cookie ? cookie.length : 0}`);
-        
         if (!cookie) {
+            log("info", `Cookie状态检查: 未配置`);
             return jsonResponse({
                 success: true,
                 data: {
@@ -223,18 +209,15 @@ export async function handleCookieStatus() {
                         const now = Math.floor(Date.now() / 1000);
                         if (!isNaN(timestamp) && timestamp > 1600000000 && timestamp < 2147483647 && timestamp > now) {
                             expiresAt = timestamp;
-                            log("info", `handleCookieStatus解析到过期时间: ${new Date(timestamp * 1000).toISOString()}`);
                         }
                     }
                 }
             } catch (e) {
-                log("warn", `handleCookieStatus解析过期时间失败: ${e.message}`);
             }
             
             // 如果无法解析，使用默认值
             if (!expiresAt) {
                 expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
-                log("info", `handleCookieStatus无法解析过期时间，使用默认值: 30天后`);
             }
             
             return jsonResponse({
@@ -295,7 +278,7 @@ export async function handleQRGenerate() {
         const qrcodeKey = data.data.qrcode_key;
         const qrcodeUrl = data.data.url;
 
-        // 存储session
+        // 存储session（5分钟有效期）
         qrLoginSessions.set(qrcodeKey, {
             createTime: Date.now(),
             status: 'pending'
@@ -371,7 +354,6 @@ export async function handleQRCheck(request) {
                         const decodedDedeUserID__ckMd5 = decodeURIComponent(DedeUserID__ckMd5);
                         
                         cookie = `SESSDATA=${decodedSESSDATA}; bili_jct=${decodedBiliJct}; DedeUserID=${decodedDedeUserID}; DedeUserID__ckMd5=${decodedDedeUserID__ckMd5}`;
-                        log("info", `从登录URL提取Cookie成功，长度: ${cookie.length}`);
                     }
                 }
                 
@@ -412,15 +394,7 @@ export async function handleQRCheck(request) {
                 // 提取 refresh_token（用于后续刷新Cookie）
                 if (data.data.refresh_token) {
                     refresh_token = data.data.refresh_token;
-                    log("info", `获取到refresh_token: ${refresh_token.substring(0, 20)}...`);
-                    
-                    // 保存 refresh_token 到环境变量（可选）
-                    if (Globals.envs) {
-                        Globals.envs.bilibiliRefreshToken = refresh_token;
-                    }
-                    if (Envs.env) {
-                        Envs.env.BILIBILI_REFRESH_TOKEN = refresh_token;
-                    }
+                    log("info", `获取到refresh_token`);
                 }
             } catch (parseError) {
                 log("error", `解析登录响应失败: ${parseError.message}`);
@@ -468,8 +442,6 @@ export async function handleCookieVerify(request) {
             }, 400);
         }
         
-        log("info", `验证Cookie请求，Cookie长度: ${cookie.length}`);
-        
         // 1. 标准化 Cookie (关键步骤)
         const normalizedCookie = normalizeCookie(cookie);
 
@@ -492,39 +464,25 @@ export async function handleCookieVerify(request) {
                         // 解码失败，使用原值
                     }
                     
-                    log("info", `解析SESSDATA: ${sessdata.substring(0, 50)}...`);
-                    
                     const parts = sessdata.split(',');
-                    log("info", `SESSDATA分割结果: ${parts.length} 部分`);
                     
                     if (parts.length >= 2) {
                         // 第二部分是时间戳（秒级）
                         const timestampStr = parts[1].trim();
                         const timestamp = parseInt(timestampStr, 10);
                         
-                        log("info", `解析时间戳字符串: "${timestampStr}" -> ${timestamp}`);
-                        
                         const now = Math.floor(Date.now() / 1000);
                         if (!isNaN(timestamp) && timestamp > 1600000000 && timestamp < 2147483647 && timestamp > now) {
                             expiresAt = timestamp;
-                            const expiresDate = new Date(timestamp * 1000);
-                            const daysLeft = Math.ceil((timestamp - now) / (24 * 60 * 60));
-                            log("info", `成功解析Cookie过期时间: ${expiresDate.toISOString()}, 剩余 ${daysLeft} 天`);
-                        } else {
-                            log("warn", `时间戳无效或超出范围: ${timestamp}, 当前时间: ${now}, timestamp > now: ${timestamp > now}`);
                         }
-                    } else {
-                        log("warn", `SESSDATA格式不符合预期，parts.length = ${parts.length}`);
                     }
                 }
             } catch (e) {
-                log("warn", `解析Cookie过期时间失败: ${e.message}`);
             }
             
             // 如果无法从 SESSDATA 解析，使用预估值（30天，保守估计）
             if (!expiresAt) {
                 expiresAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
-                log("info", `无法解析过期时间，使用默认值: 30天后`);
             }
             
             return jsonResponse({
@@ -560,8 +518,6 @@ export async function handleCookieSave(request) {
     try {
         const body = await request.json();
         const cookie = body.cookie || body.data?.cookie || '';
-        
-        log("info", `收到保存Cookie请求，Cookie长度: ${cookie ? cookie.length : 0}`);
 
         if (!cookie) {
             return jsonResponse({ success: false, message: '缺少cookie参数' }, 400);
@@ -715,11 +671,7 @@ export async function handleCookieRefreshToken(request) {
         }
 
         if (!refreshToken) {
-            refreshToken = Globals.envs?.bilibiliRefreshToken || Envs.env?.BILIBILI_REFRESH_TOKEN || '';
-        }
-        
-        if (!refreshToken) {
-            // 没有 refresh_token，返回当前 Cookie 状态
+            // 没有 refresh_token，返回当前 Cookie 仍有效
             let expiresAt = parseExpiresFromCookie(normalizedCookie);
             
             return jsonResponse({
@@ -734,8 +686,7 @@ export async function handleCookieRefreshToken(request) {
             });
         }
         
-        log("info", "尝试使用refresh_token刷新Cookie...");
-        log("info", `refresh_token长度: ${refreshToken.length}`);
+        log("info", "尝试刷新Cookie");
         
         try {
             // 提取 csrf (bili_jct)
@@ -759,7 +710,6 @@ export async function handleCookieRefreshToken(request) {
             const correspondPath = await getCorrespondPath(ts);
             
             if (!correspondPath) {
-                log("warn", "获取correspondPath失败");
                 return jsonResponse({
                     success: true,
                     data: {
@@ -772,13 +722,10 @@ export async function handleCookieRefreshToken(request) {
                 });
             }
             
-            log("info", `获取到correspondPath: ${correspondPath.substring(0, 50)}...`);
-            
             // 步骤2: 获取 refresh_csrf
             const refreshCsrf = await getRefreshCsrf(correspondPath, normalizedCookie);
             
             if (!refreshCsrf) {
-                log("warn", "获取refresh_csrf失败");
                 return jsonResponse({
                     success: true,
                     data: {
@@ -790,8 +737,6 @@ export async function handleCookieRefreshToken(request) {
                     }
                 });
             }
-            
-            log("info", `获取到refresh_csrf: ${refreshCsrf.substring(0, 20)}...`);
             
             // 步骤3: 调用刷新接口
             const refreshResponse = await fetch('https://passport.bilibili.com/x/passport-login/web/cookie/refresh', {
@@ -812,7 +757,6 @@ export async function handleCookieRefreshToken(request) {
             });
             
             const refreshResult = await refreshResponse.json();
-            log("info", `刷新Cookie响应: ${JSON.stringify(refreshResult)}`);
             
             if (refreshResult.code === 0 && refreshResult.data) {
                 // 刷新成功，从响应头获取新的 Cookie
@@ -860,24 +804,14 @@ export async function handleCookieRefreshToken(request) {
                     
                     log("info", `Cookie刷新成功，用户: ${newVerifyResult.data.uname}`);
                     
-                    // 保存新的 refresh_token（如果有）
+                    // 获取新的 refresh_token（如果有）
                     const newRefreshToken = refreshResult.data.refresh_token;
-                    if (newRefreshToken) {
-                        if (Globals.envs) {
-                            Globals.envs.bilibiliRefreshToken = newRefreshToken;
-                        }
-                        if (Envs.env) {
-                            Envs.env.BILIBILI_REFRESH_TOKEN = newRefreshToken;
-                        }
-                        log("info", `新的refresh_token已保存`);
-                    }
                     
-                    // 步骤4: 确认刷新（可选但推荐）
+                    // 步骤4: 确认刷新（使旧token失效）
                     try {
                         await confirmRefresh(csrf, refreshToken);
-                        log("info", "刷新确认成功");
                     } catch (confirmErr) {
-                        log("warn", `刷新确认失败（不影响使用）: ${confirmErr.message}`);
+                        // 确认失败不影响使用
                     }
                     
                     return jsonResponse({
@@ -892,7 +826,6 @@ export async function handleCookieRefreshToken(request) {
                         }
                     });
                 } else {
-                    log("warn", "刷新后的Cookie验证失败");
                     return jsonResponse({
                         success: false,
                         data: {
@@ -903,7 +836,6 @@ export async function handleCookieRefreshToken(request) {
                 }
             } else {
                 const errorMsg = refreshResult.message || '刷新失败';
-                log("warn", `Cookie刷新失败: ${errorMsg}`);
                 
                 return jsonResponse({
                     success: true,
@@ -917,7 +849,6 @@ export async function handleCookieRefreshToken(request) {
                 });
             }
         } catch (refreshError) {
-            log("error", `调用刷新接口异常: ${refreshError.message}`);
             
             return jsonResponse({
                 success: true,
@@ -982,8 +913,7 @@ JNrRuoEUXpabUzGB8QIDAQAB
         try {
             crypto = await import('crypto');
         } catch (e) {
-            // 如果是浏览器环境或其他环境，尝试使用 Web Crypto API
-            log("warn", "无法导入crypto模块，尝试其他方式");
+            // 浏览器环境不支持
             return null;
         }
         
@@ -1029,7 +959,6 @@ async function getRefreshCsrf(correspondPath, cookie) {
             return match[1];
         }
         
-        log("warn", `无法从页面提取refresh_csrf，响应长度: ${html.length}`);
         return null;
     } catch (error) {
         log("error", `获取refresh_csrf失败: ${error.message}`);
