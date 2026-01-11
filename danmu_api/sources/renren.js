@@ -18,23 +18,30 @@ export default class RenrenSource extends BaseSource {
     DRAMA_HOST: "api.zhimeisj.top",
     DANMU_HOST: "static-dm.qwdjapp.com",
     APP_VERSION: "10.31.2",
-    USER_AGENT: 'Mozilla/5.0 (Linux; Android 15; PJC110 Build/AP3A.240617.008; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/140.0.7339.207 Mobile Safari/537.36 App/RRSPApp platform/android AppVersion/10.31.2'
+    USER_AGENT: 'Mozilla/5.0 (Linux; Android 16; 23127PN0CC Build/BP2A.250605.031.A3; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/143.0.7499.146 Mobile Safari/537.36 App/RRSPApp platform/android AppVersion/10.31.2'
   };
 
   generateAppCommonHeaders(timestamp, sign, xCaSign = null) {
     const headers = {
       'User-Agent': this.API_CONFIG.USER_AGENT,
-      'deviceId': 'fG1vO5jzBm22vJ5mfcCYGp2NrBii5SPysgiy%2FaUb63EOTrtXyXdxHm1cUajUR1zbszl62ApHyWc1GKZtH%2FbmF0UMZWgEetdDy9QVXd9WvPU%3D',
-      'aliId': 'aPuaf9shK3QDAL6WwVdhc7cC',
-      'umId': '380998657e22ed51b5a21f2b519aa5beod',
-      'clientType': 'android_rrsp_xb_RRSP',
+      'deviceId': 'T2%2Bjh%2FnHhJkWEzPnQT2E0%2FEw865FTT0uL%2BiBwRa2ZdM%3D',
+      'aliId': 'aUzmLtnZIYoDAA9KyLdcLQpM',
+      'umId': '53e0f078fa8474ae7ba412f766989b54od',
+      'clientType': 'android_rrsp_xb_XiaoMi',
       't': timestamp.toString(),
       'sign': sign,
       'isAgree': '1',
       'cv': this.API_CONFIG.APP_VERSION,
+      'ct': 'android_rrsp_xb_XiaoMi',
+      'pkt': 'rrmj',
+      'p': 'Android',
+      'wcode': '3',
+      'et': '2',
+      'uet': '1',
+      'folding-screen': '1',
       'Accept': 'application/json',
       'Accept-Encoding': 'gzip',
-      'Connection': 'Keep-Alive'
+      'Connection': 'close'
     };
 
     if (xCaSign) {
@@ -78,7 +85,7 @@ export default class RenrenSource extends BaseSource {
 
       if (!resp.data) return [];
 
-      // 服务端明确提示“版本过低/强制更新”时：直接返回空，让上层走备用搜索
+      // 服务端明确提示"版本过低/强制更新"时：直接返回空，让上层走备用搜索
       if (resp?.data?.code === "0001") return [];
 
       const list = resp?.data?.data?.searchDramaList || [];
@@ -158,6 +165,7 @@ export default class RenrenSource extends BaseSource {
   async getAppDanmu(episodeSid) {
     try {
       const timestamp = Date.now();
+      // ✅ 使用抓包中成功的路径
       const path = `/v1/produce/danmu/emo/EPISODE/${episodeSid}`;
 
       const sign = generateSign(path, timestamp, {}, this.API_CONFIG.SECRET_KEY);
@@ -175,7 +183,7 @@ export default class RenrenSource extends BaseSource {
 
       return resp.data;
     } catch (error) {
-      log("error", "getRenrenDramaDetail error:", {
+      log("error", "getRenrenAppDanmu error:", {
         message: error.message,
         name: error.name,
         stack: error.stack,
@@ -262,27 +270,25 @@ export default class RenrenSource extends BaseSource {
     keyword,
     {
       lockRef = null,
-      lastRequestTimeRef = { value: 0 },  // 调用方传引用
-      minInterval = 500                   // 默认节流间隔（毫秒）
+      lastRequestTimeRef = { value: 0 },
+      minInterval = 500
     } = {}
   ) {
     try {
       const url = `https://api.rrmj.plus/m-station/search/drama`;
       const params = { keywords: keyword, size: 20, order: "match", search_after: "", isExecuteVipActivity: true };
 
-      // 🔒 锁逻辑（可选）
       if (lockRef) {
         while (lockRef.value) await new Promise(r => setTimeout(r, 50));
         lockRef.value = true;
       }
 
-      // ⏱️ 节流逻辑（依赖 lastRequestTimeRef）
       const now = Date.now();
       const dt = now - lastRequestTimeRef.value;
       if (dt < minInterval) await new Promise(r => setTimeout(r, minInterval - dt));
 
       const resp = await this.renrenRequest("GET", url, params);
-      lastRequestTimeRef.value = Date.now(); // 更新引用
+      lastRequestTimeRef.value = Date.now();
 
       if (lockRef) lockRef.value = false;
 
@@ -312,12 +318,11 @@ export default class RenrenSource extends BaseSource {
   }
 
   async search(keyword) {
-    const parsedKeyword = { title: keyword, season: null }; // 简化 parse_search_keyword
+    const parsedKeyword = { title: keyword, season: null };
     const searchTitle = parsedKeyword.title;
     const searchSeason = parsedKeyword.season;
 
     let allResults = [];
-    // 先使用APP API进行搜索
     allResults = await this.searchAppContent(searchTitle);
     if (allResults.length === 0) {
       const lock = { value: false };
@@ -327,7 +332,6 @@ export default class RenrenSource extends BaseSource {
 
     if (searchSeason == null) return allResults;
 
-    // 按 season 过滤
     return allResults.filter(r => r.season === searchSeason);
   }
 
@@ -369,13 +373,11 @@ export default class RenrenSource extends BaseSource {
   async handleAnimes(sourceAnimes, queryTitle, curAnimes) {
     const tmpAnimes = [];
 
-    // 添加错误处理，确保sourceAnimes是数组
     if (!sourceAnimes || !Array.isArray(sourceAnimes)) {
       log("error", "[Renren] sourceAnimes is not a valid array");
       return [];
     }
 
-    // 使用 map 和 async 时需要返回 Promise 数组，并等待所有 Promise 完成
     const processRenrenAnimes = await Promise.all(sourceAnimes
       .filter(s => titleMatches(s.title, queryTitle))
       .map(async (anime) => {
