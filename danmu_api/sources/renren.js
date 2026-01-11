@@ -58,20 +58,28 @@ export default class RenrenSource extends BaseSource {
       };
 
       const sign = generateSign(path, timestamp, queryParams, this.API_CONFIG.SECRET_KEY);
+
+      // 保持与原来一致：明确 String 化 + encode，避免 false/0 被当成空值
       const queryString = Object.entries(queryParams)
-        .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+        .map(([k, v]) => `${k}=${encodeURIComponent(v === null || v === undefined ? "" : String(v))}`)
         .join('&');
+
       const xCaSign = generateXCaSign(path, timestamp, queryString, this.API_CONFIG.SECRET_KEY);
 
       const headers = this.generateAppCommonHeaders(timestamp, sign, xCaSign);
       headers['Host'] = this.API_CONFIG.SEARCH_HOST;
-
+      headers['Origin'] = 'https://d.rrsp.com.cn';
+      headers['Referer'] = 'https://d.rrsp.com.cn/';
 
       const resp = await httpGet(`https://${this.API_CONFIG.SEARCH_HOST}${path}?${queryString}`, {
         headers: headers,
+        retries: 1,
       });
 
       if (!resp.data) return [];
+
+      // 服务端明确提示“版本过低/强制更新”时：直接返回空，让上层走备用搜索
+      if (resp?.data?.code === "0001") return [];
 
       const list = resp?.data?.data?.searchDramaList || [];
       return list.map((item, idx) => ({
@@ -86,6 +94,14 @@ export default class RenrenSource extends BaseSource {
         currentEpisodeIndex: null,
       }));
     } catch (error) {
+      const msg = String(error?.message || "");
+      const is418 = /status:\s*418\b/.test(msg);
+
+      if (is418) {
+        log("warn", "[Renren] /search/content 被服务端拦截 (418)，已降级为备用搜索接口");
+        return [];
+      }
+
       log("error", "getRenrenAppAnimes error:", {
         message: error.message,
         name: error.name,
