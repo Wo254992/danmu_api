@@ -1100,7 +1100,6 @@ async function init() {
         loadEnvVariables();
         renderEnvList();
         renderPreview();
-        initCookieManager();
         addLog('🎉 系统初始化完成', 'success');
         fetchRealLogs();
     } catch (error) {
