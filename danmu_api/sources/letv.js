@@ -367,8 +367,9 @@ export default class LetvSource extends BaseSource {
       return [];
     }
 
+    // 修复：移除 titleMatches 过滤，因为搜索引擎（如乐视）已经处理了模糊搜索（如错别字修正），
+    // 强制前端精确匹配会导致像 "铁血沪淞" vs "铁血淞沪" 这样的正确结果被丢弃。
     const processLetvAnimes = await Promise.all(sourceAnimes
-      .filter(s => titleMatches(s.title, queryTitle))
       .map(async (anime) => {
         try {
           const eps = await this.getEpisodes(anime.mediaId);
