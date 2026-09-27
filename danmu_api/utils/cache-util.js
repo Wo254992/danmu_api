@@ -2,7 +2,7 @@ import { globals } from '../configs/globals.js';
 import { log } from './log-util.js'
 import { Anime } from "../models/dandan-model.js";
 import { simpleHash } from "./codec-util.js";
-import { resolveFavoriteForSearchKeyword, saveFavorites } from "./favorite-util.js";
+import { resolveFavoriteForSearchKeyword } from "./favorite-util.js";
 import { canPersistCacheKey, restoreCacheGroups } from './cache-state-util.js';
 let fs, path;
 let nodeModulesPromise;
@@ -849,8 +849,7 @@ export async function updateLocalCaches() {
       { key: 'episodeNum', value: globals.episodeNum },
       { key: 'reqRecords', value: globals.reqRecords },
       { key: 'lastSelectMap', value: globals.lastSelectMap },
-      { key: 'todayReqNum', value: globals.todayReqNum },
-      { key: 'favoritesCache', value: globals.favoriteCache }
+      { key: 'todayReqNum', value: globals.todayReqNum }
     ];
 
     for (const { key, value } of variables) {
@@ -858,11 +857,9 @@ export async function updateLocalCaches() {
       // 对于 lastSelectMap（Map 对象），需要转换为普通对象后再序列化
       const serializedValue = key === 'lastSelectMap'
         ? JSON.stringify(Object.fromEntries(value))
-        : key === 'favoritesCache'
-          ? JSON.stringify(saveFavorites())
-          : JSON.stringify(value);
+        : JSON.stringify(value);
       const currentHash = simpleHash(serializedValue);
-      const hashKey = key === 'favoritesCache' ? 'favoriteCache' : key;
+      const hashKey = key;
       if (currentHash !== globals.localFileHashes[hashKey]) {
         if (!writeCacheToFile(key, serializedValue)) continue;
         globals.localFileHashes[hashKey] = currentHash;
@@ -883,6 +880,18 @@ export async function updateLocalCaches() {
     log("error", `[cache] Error details - Name: ${error.name}, Cause: ${error.cause ? error.cause.message : 'N/A'}`);
     return false;
   }
+}
+
+// 收藏使用独立保存队列；普通查询缓存写入不能抢先覆盖收藏快照。
+export async function writeFavoriteCacheToFile(snapshot) {
+  await loadFileCacheModules();
+  if (!globals.localCacheEnabled || !globals.localCacheValid || !globals.favoriteCacheInitialized) return false;
+  const serialized = JSON.stringify(snapshot);
+  const hash = simpleHash(serialized);
+  if (globals.localFileHashes.favoriteCache === hash) return true;
+  if (!writeCacheToFile('favoritesCache', serialized)) return false;
+  globals.localFileHashes.favoriteCache = hash;
+  return true;
 }
 
 // 判断是否有效的本地缓存目录

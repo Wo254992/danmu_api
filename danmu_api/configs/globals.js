@@ -27,7 +27,9 @@ export const Globals = {
   localCacheInitialized: false, // 本地缓存是否已初始化
   localRedisCacheInitialized: false, // 本地 Redis 缓存是否已初始化
   queryCacheInitialized: false, // 查询数据只从选定后端恢复一次，之后以内存为准
-  favoriteCacheInitialized: false, // 收藏独立恢复，Local Redis 不负责收藏持久化
+  favoriteCacheInitialized: false, // 收藏独立恢复，不阻断已恢复的查询数据
+  favoritePersistencePending: false, // 内存中的收藏更改尚未被全部启用后端确认
+  favoritePersistenceRevision: 0, // 丢弃与本实例收藏保存并发的旧远端读取
   redisValid: false, // redis是否生效
   localRedisValid: false, // 本地redis是否生效
   aiValid: false, // AI配置是否生效

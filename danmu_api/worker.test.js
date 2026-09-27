@@ -15,7 +15,8 @@ import { handleRequest } from './worker.js';
 import { extractTitleSeasonEpisode, getBangumi, getComment, getCommentByUrl, getSegmentComment, matchAnime, searchAnime, buildSearchAnimeUrl, matchSeason, matchAniAndEp, fallbackMatchAniAndEp } from "./apis/dandan-api.js";
 import { stripLinkOffset, applyOffset } from "./utils/offset-util.js";
 import { extractSeasonNumberFromAnimeTitle, normalizeTitleForMatch } from "./utils/common-util.js";
-import { handleFavoriteRefresh } from './apis/favorite-api.js';
+import { handleFavoriteRefresh, persistFavorites } from './apis/favorite-api.js';
+import { initializePersistentCaches } from './utils/cache-init-util.js';
 import { handleClearCache } from './apis/system-api.js';
 import { getRedisCaches, getRedisKey, pingRedis, setRedisKey, setRedisKeyWithExpiry, updateRedisCaches } from "./utils/redis-util.js";
 import { getLocalRedisKey, setLocalRedisKey, setLocalRedisKeyWithExpiry } from "./utils/local-redis-util.js";
@@ -148,6 +149,7 @@ function resetFavoriteState(env = {}) {
   Globals.localCacheInitialized = false;
   Globals.queryCacheInitialized = false;
   Globals.favoriteCacheInitialized = false;
+  Globals.favoritePersistencePending = false;
 }
 
 function createFavoriteAnime(title = '收藏测试', episodeCount = 2, id = 910001) {
@@ -190,7 +192,7 @@ test('persistent cache regression: Local Redis priority and independent backends
     import path from 'node:path';
     const base = ${JSON.stringify(base)};
     const { Globals } = await import(base + 'configs/globals.js');
-    let backend, remote, reads, writes, remoteCommands, unavailable, failedRead, failedWrite, upstashOffline, clients;
+    let backend, remote, reads, writes, remoteCommands, unavailable, failedRead, failedWrite, upstashOffline, clients, beforeWrite;
     mock.module(${JSON.stringify(import.meta.resolve('redis'))}, { namedExports: { createClient: () => {
       const client = {
         isReady: false, isOpen: false, on() {},
@@ -207,6 +209,7 @@ test('persistent cache regression: Local Redis priority and independent backends
         },
         async set(key, value) {
           writes.push(key);
+          if (beforeWrite) await beforeWrite(key, value);
           if (key === failedWrite) throw new Error('write failed');
           backend.set(key, value); return 'OK';
         },
@@ -217,6 +220,11 @@ test('persistent cache regression: Local Redis priority and independent backends
     mock.method(globalThis, 'fetch', async (url, opts) => {
       if (upstashOffline) throw new Error('Upstash offline');
       if (String(url).endsWith('/ping')) return Response.json({ result: 'PONG' });
+      if (String(url).includes('/set/')) {
+        const key = decodeURIComponent(new URL(url).pathname.split('/')[2]);
+        remoteCommands.push(['SET', key, opts.body]); remote.set(key, opts.body);
+        return Response.json({ result: 'OK' });
+      }
       const commands = JSON.parse(opts.body);
       remoteCommands.push(...commands);
       return Response.json(commands.map(([op, key, value]) => {
@@ -231,7 +239,8 @@ test('persistent cache regression: Local Redis priority and independent backends
     const { initializePersistentCaches } = await import(base + 'utils/cache-init-util.js');
     const { handleRequest } = await import(base + 'worker.js');
     const { getComment } = await import(base + 'apis/dandan-api.js');
-    const { persistFavorites, handleFavoriteRemove } = await import(base + 'apis/favorite-api.js');
+    const { persistFavorites, handleFavoriteRemove, handleFavoriteSchedule, handleFavoriteList } = await import(base + 'apis/favorite-api.js');
+    const { retryFavoritePersistence } = await import(base + 'utils/favorite-persistence-util.js');
     const { startFavoriteScheduler, stopFavoriteScheduler } = await import(base + 'utils/favorite-schedule-util.js');
     const settings = { LOCAL_REDIS_URL: 'redis://mock', LOCAL_CACHE_ENABLED: 'false', LOG_LEVEL: 'error', RATE_LIMIT_MAX_REQUESTS: '0', SOURCE_ORDER: 'tencent' };
     const upstash = { UPSTASH_REDIS_REST_URL: 'https://mock.invalid', UPSTASH_REDIS_REST_TOKEN: 'mock' };
@@ -245,13 +254,13 @@ test('persistent cache regression: Local Redis priority and independent backends
         Object.assign(Globals, {
           deployPlatform: 'node', localCacheValid: false, localCacheInitialized: false,
           localRedisValid: false, redisValid: false, localRedisCacheInitialized: false, redisCacheInitialized: false,
-          queryCacheInitialized: false, favoriteCacheInitialized: false,
+          queryCacheInitialized: false, favoriteCacheInitialized: false, favoritePersistencePending: false,
           localFileHashes: {}, upstashHashes: {}, localRedisHashes: {}, animes: [], episodeIds: [], episodeNum: 10001,
           reqRecords: [], todayReqNum: 0, lastSelectMap: new Map(), favoriteCache: new Map(),
           searchCache: new Map(), commentCache: new Map(), requestHistory: new Map()
         });
         backend = new Map(); remote = new Map(); clients = []; reads = []; writes = []; remoteCommands = [];
-        unavailable = upstashOffline = false; failedRead = failedWrite = null;
+        unavailable = upstashOffline = false; failedRead = failedWrite = beforeWrite = null;
         try { await run(env); }
         finally {
           await local.closeLocalRedisConnection();
@@ -300,13 +309,13 @@ test('persistent cache regression: Local Redis priority and independent backends
     await isolated('Local Redis restores first; other backends independently receive current data', { ...upstash, LOCAL_CACHE_ENABLED: 'true' }, async () => {
       await file('animes', [{ animeId: 'file' }]);
       remote.set('animes', '[{"animeId":"upstash"}]');
-      remote.set('favoriteCache', JSON.stringify({ saved: favorite() }));
+      backend.set('favoriteCache', JSON.stringify({ saved: favorite() }));
       backend.set('animes', '[{"animeId":"local"}]');
       await initializePersistentCaches('node');
       assert.equal(Globals.animes[0].animeId, 'local');
-      assert.equal(reads.length, 6);
+      assert.equal(reads.length, 7);
       assert.ok(Globals.favoriteCache.has('saved'));
-      assert.deepEqual(remoteCommands, [['GET', 'favoriteCache']]);
+      assert.deepEqual(remoteCommands, []);
       Globals.animes.push({ animeId: 'new' });
       await cache.updateLocalCaches(); await redis.updateRedisCaches(); await local.updateLocalRedisCaches();
       assert.deepEqual(await storedFile('animes'), Globals.animes);
@@ -322,40 +331,41 @@ test('persistent cache regression: Local Redis priority and independent backends
       await request({ ...env, LOCAL_CACHE_ENABLED: 'true' }, '/api/config');
       assert.equal(Globals.animes[0].animeId, 'current-redis'); assert.equal(Globals.episodeNum, 12000);
       assert.deepEqual([...Globals.favoriteCache.keys()], ['current']);
-      await cache.updateLocalCaches(); await local.updateLocalRedisCaches();
+      await cache.updateLocalCaches(); await local.updateLocalRedisCaches(); await persistFavorites();
       assert.equal(JSON.parse(backend.get('animes'))[0].animeId, 'current-redis');
       assert.equal((await storedFile('animes'))[0].animeId, 'current-redis');
       assert.deepEqual(Object.keys(await storedFile('favoritesCache')), ['current']);
     });
-    await isolated('broken query files do not prevent Redis queries or legacy file favorites', { LOCAL_CACHE_ENABLED: 'true' }, async env => {
-      await file('favoritesCache', { saved: favorite() });
+    await isolated('broken query files do not prevent Redis queries or Local Redis favorites', { LOCAL_CACHE_ENABLED: 'true' }, async env => {
+      await file('favoritesCache', { stale: favorite() });
+      backend.set('favoriteCache', JSON.stringify({ saved: favorite() }));
       await fs.writeFile('.cache/reqRecords', 'invalid json');
       backend.set('animes', '[{"animeId":"redis"}]');
       assert.equal((await request(env, '/api/v2/comment/999')).status, 404);
-      assert.equal(reads.length, 6); assert.equal(Globals.animes[0].animeId, 'redis');
+      assert.equal(reads.length, 7); assert.equal(Globals.animes[0].animeId, 'redis');
       assert.ok(Globals.favoriteCache.has('saved'));
       const remove = await handleFavoriteRemove(new Request('http://localhost', { method: 'POST', body: JSON.stringify({ keyword: 'saved' }) }));
       assert.equal(remove.status, 200);
       assert.deepEqual(await storedFile('favoritesCache'), {});
-      assert.equal(backend.has('favoriteCache'), false);
+      assert.deepEqual(JSON.parse(backend.get('favoriteCache')), {});
     });
-    await isolated('broken favorite files only block favorites and are not overwritten by query saves', { LOCAL_CACHE_ENABLED: 'true' }, async env => {
+    await isolated('broken secondary favorite files do not block Local Redis and are not overwritten by query saves', { LOCAL_CACHE_ENABLED: 'true' }, async env => {
       await fs.mkdir('.cache'); await fs.writeFile('.cache/favoritesCache', 'broken');
       assert.equal((await request(env, '/api/v2/comment/999')).status, 404);
-      assert.equal((await request(env, '/api/v2/favorite/list')).status, 503);
+      assert.equal((await request(env, '/api/v2/favorite/list')).status, 200);
       await cache.updateLocalCaches();
       assert.equal(await fs.readFile('.cache/favoritesCache', 'utf8'), 'broken');
     });
     await isolated('unavailable Upstash does not block healthy Local Redis or later replace queries', upstash, async env => {
       upstashOffline = true; backend.set('animes', '[{"animeId":"redis"}]');
       assert.equal((await request(env, '/api/v2/comment/999')).status, 404);
-      assert.equal(reads.length, 6);
-      assert.equal((await request(env, '/api/v2/favorite/list')).status, 503);
+      assert.equal(reads.length, 7);
+      assert.equal((await request(env, '/api/v2/favorite/list')).status, 200);
       upstashOffline = false; remote.set('animes', '[{"animeId":"stale"}]');
       remote.set('favoriteCache', JSON.stringify({ saved: favorite() }));
       assert.equal((await request(env, '/api/v2/favorite/list')).status, 200);
       assert.equal(Globals.animes[0].animeId, 'redis');
-      assert.ok(Globals.favoriteCache.has('saved'));
+      assert.equal(Globals.favoriteCache.has('saved'), false);
     });
     await isolated('failed primary GET does not fall back or permit writes, and retries atomically', { LOCAL_CACHE_ENABLED: 'true' }, async env => {
       await file('animes', [{ animeId: 'stale' }]);
@@ -439,10 +449,10 @@ test('persistent cache regression: Local Redis priority and independent backends
       await cache.updateLocalCaches();
       assert.equal((await storedFile('animes'))[0].animeId, 'current');
     });
-    await isolated('scheduler waits for primary recovery before refreshing file favorites', { LOCAL_CACHE_ENABLED: 'true' }, async () => {
+    await isolated('scheduler waits for primary recovery before refreshing Local Redis favorites', { LOCAL_CACHE_ENABLED: 'true' }, async () => {
       const saved = favorite();
       saved.refreshSchedule = { frequency: 'daily', time: '03:00', nextRunAt: Date.now() - 1000 };
-      await file('favoritesCache', { saved }); await file('animes', [{ animeId: 'stale' }]);
+      backend.set('favoriteCache', JSON.stringify({ saved })); await file('animes', [{ animeId: 'stale' }]);
       backend.set('animes', '[{"animeId":"redis"}]'); failedRead = 'animes';
       let tick, refreshed = 0;
       const timer = mock.method(globalThis, 'setInterval', callback => { tick = callback; return { unref() {} }; });
@@ -457,6 +467,119 @@ test('persistent cache regression: Local Redis priority and independent backends
         failedRead = null; await tick();
         assert.equal(refreshed, 1);
         assert.equal((await storedFile('favoritesCache')).saved.refreshSchedule.lastStatus, 'success');
+      } finally { stopFavoriteScheduler(); timer.mock.restore(); clear.mock.restore(); }
+    });
+
+    const removeRequest = () => new Request('http://localhost', { method: 'POST', body: JSON.stringify({ keyword: 'saved' }) });
+    await isolated('Local Redis alone restores favorites and schedules after restart without files', {}, async () => {
+      await initializePersistentCaches('node');
+      const entry = favorite(); entry.refreshSchedule = { frequency: 'daily', time: '03:00', nextRunAt: Date.now() + 60000 };
+      Globals.favoriteCache.set('saved', entry); await persistFavorites();
+      Globals.favoriteCache.clear(); Globals.animes = [];
+      Globals.queryCacheInitialized = Globals.favoriteCacheInitialized = Globals.localRedisCacheInitialized = false;
+      await initializePersistentCaches('node');
+      assert.equal(Globals.favoriteCache.get('saved').refreshSchedule.time, '03:00');
+      await assert.rejects(fs.stat('.cache'), { code: 'ENOENT' });
+    });
+    await isolated('failed favorite GET only blocks favorites, retries without losing Redis data', {}, async env => {
+      backend.set('favoriteCache', JSON.stringify({ saved: favorite() })); failedRead = 'favoriteCache';
+      assert.equal((await request(env, '/api/v2/comment/999')).status, 404);
+      assert.equal((await request(env, '/api/v2/favorite/list')).status, 503);
+      assert.equal((await local.setLocalRedisKey('favoriteCache', {})).result, 'ERROR');
+      failedRead = null; assert.equal((await request(env, '/api/v2/favorite/list')).status, 200);
+      assert.ok(Globals.favoriteCache.has('saved'));
+    });
+    await isolated('delete retries persist an absent in-memory favorite after a failed save', {}, async () => {
+      backend.set('favoriteCache', JSON.stringify({ saved: favorite() })); await initializePersistentCaches('node');
+      failedWrite = 'favoriteCache';
+      assert.equal((await handleFavoriteRemove(removeRequest())).status, 500);
+      assert.equal(Globals.favoriteCache.has('saved'), false); assert.equal(Globals.favoritePersistencePending, true);
+      assert.ok(JSON.parse(backend.get('favoriteCache')).saved);
+      failedWrite = null;
+      assert.equal((await handleFavoriteRemove(removeRequest())).status, 200);
+      assert.equal(Globals.favoritePersistencePending, false); assert.deepEqual(JSON.parse(backend.get('favoriteCache')), {});
+      assert.equal((await handleFavoriteRemove(removeRequest())).status, 200);
+    });
+    await isolated('partial delete success retries only failed backends and never restores old memory', { ...upstash, LOCAL_CACHE_ENABLED: 'true' }, async () => {
+      await file('favoritesCache', { saved: favorite() });
+      backend.set('favoriteCache', JSON.stringify({ saved: favorite() })); remote.set('favoriteCache', backend.get('favoriteCache'));
+      await initializePersistentCaches('node'); failedWrite = 'favoriteCache';
+      assert.equal((await handleFavoriteRemove(removeRequest())).status, 500);
+      assert.deepEqual(await storedFile('favoritesCache'), {}); assert.deepEqual(JSON.parse(remote.get('favoriteCache')), {});
+      const count = remoteCommands.length;
+      failedWrite = null; assert.equal((await handleFavoriteRemove(removeRequest())).status, 200);
+      assert.equal(remoteCommands.length, count); assert.deepEqual(JSON.parse(backend.get('favoriteCache')), {});
+      assert.equal(Globals.favoritePersistencePending, false);
+    });
+    await isolated('file save failure is retried after Redis has already saved the deletion', { LOCAL_CACHE_ENABLED: 'true' }, async () => {
+      await fs.mkdir('.cache/favoritesCache', { recursive: true });
+      backend.set('favoriteCache', JSON.stringify({ saved: favorite() })); await initializePersistentCaches('node');
+      assert.equal((await handleFavoriteRemove(removeRequest())).status, 500);
+      assert.deepEqual(JSON.parse(backend.get('favoriteCache')), {});
+      const count = writes.length;
+      await fs.rmdir('.cache/favoritesCache');
+      assert.equal((await handleFavoriteRemove(removeRequest())).status, 200);
+      assert.equal(writes.length, count); assert.deepEqual(await storedFile('favoritesCache'), {});
+    });
+    await isolated('failed Upstash persistence stays pending, list retries without importing stale data', { LOCAL_REDIS_URL: '', ...upstash }, async () => {
+      remote.set('favoriteCache', JSON.stringify({ saved: favorite() })); await initializePersistentCaches('node');
+      upstashOffline = true;
+      assert.equal((await handleFavoriteRemove(removeRequest())).status, 500);
+      assert.equal(await redis.getFavoriteCachesFromRedis(), true);
+      assert.equal(Globals.favoriteCache.size, 0);
+      assert.equal((await (await handleFavoriteList()).json()).persistencePending, true);
+      upstashOffline = false;
+      assert.equal((await (await handleFavoriteList()).json()).persistencePending, false);
+      assert.deepEqual(JSON.parse(remote.get('favoriteCache')), {});
+    });
+    await isolated('concurrent favorite saves are serialized and finish with the newest snapshot', {}, async () => {
+      await initializePersistentCaches('node'); Globals.favoriteCache.set('saved', favorite());
+      let release, entered;
+      const started = new Promise(resolve => { entered = resolve; });
+      const wait = new Promise(resolve => { release = resolve; });
+      beforeWrite = async key => { if (key === 'favoriteCache') { beforeWrite = null; entered(); await wait; } };
+      const first = persistFavorites(); await started;
+      Globals.favoriteCache.set('newer', favorite()); const second = persistFavorites();
+      release(); await Promise.all([first, second]);
+      assert.deepEqual(Object.keys(JSON.parse(backend.get('favoriteCache'))), ['saved', 'newer']);
+      assert.equal(Globals.favoritePersistencePending, false);
+      assert.equal(writes.filter(key => key === 'favoriteCache').length, 2);
+    });
+    await isolated('an in-flight serverless GET cannot resurrect a concurrently saved deletion', { LOCAL_REDIS_URL: '', ...upstash }, async () => {
+      const old = JSON.stringify({ saved: favorite() });
+      remote.set('favoriteCache', old); await initializePersistentCaches('node');
+      let release, entered;
+      const started = new Promise(resolve => { entered = resolve; });
+      const wait = new Promise(resolve => { release = resolve; });
+      const fetching = mock.method(globalThis, 'fetch', async () => { entered(); await wait; return Response.json([{ result: old }]); });
+      const reading = redis.getFavoriteCachesFromRedis(); await started;
+      fetching.mock.restore();
+      assert.equal((await handleFavoriteRemove(removeRequest())).status, 200);
+      release(); assert.equal(await reading, true);
+      assert.equal(Globals.favoriteCache.size, 0); assert.deepEqual(JSON.parse(remote.get('favoriteCache')), {});
+    });
+    await isolated('failed schedule save retries persistence without refreshing twice', {}, async () => {
+      const entry = favorite(); entry.refreshSchedule = { frequency: 'daily', time: '03:00', nextRunAt: Date.now() - 1000 };
+      backend.set('favoriteCache', JSON.stringify({ saved: entry }));
+      let tick, refreshed = 0;
+      const timer = mock.method(globalThis, 'setInterval', callback => { tick = callback; return { unref() {} }; });
+      const clear = mock.method(globalThis, 'clearInterval', () => {});
+      failedWrite = 'favoriteCache';
+      try {
+        await startFavoriteScheduler({
+          beforeRun: async () => (await initializePersistentCaches('node')) && Globals.favoriteCacheInitialized,
+          retryPending: retryFavoritePersistence,
+          refresh: async () => { refreshed++; }, persist: persistFavorites
+        });
+        assert.equal(refreshed, 1); assert.equal(Globals.favoritePersistencePending, true);
+        failedWrite = null; await tick();
+        assert.equal(refreshed, 1); assert.equal(Globals.favoritePersistencePending, false);
+        assert.equal(JSON.parse(backend.get('favoriteCache')).saved.refreshSchedule.lastStatus, 'success');
+        failedWrite = 'favoriteCache';
+        const req = () => new Request('http://localhost', { method: 'POST', body: JSON.stringify({ keyword: 'saved', schedule: null }) });
+        assert.equal((await handleFavoriteSchedule(req())).status, 500);
+        failedWrite = null; assert.equal((await handleFavoriteSchedule(req())).status, 200);
+        assert.equal(JSON.parse(backend.get('favoriteCache')).saved.refreshSchedule, null);
       } finally { stopFavoriteScheduler(); timer.mock.restore(); clear.mock.restore(); }
     });
   `;
@@ -1016,6 +1139,11 @@ test('worker.js API endpoints', async (t) => {
     const redisData = new Map();
     const redisCommands = [];
     await withMockFetch(async (_url, options) => {
+      if (String(_url).includes('/set/')) {
+        redisData.set('favoriteCache', options.body);
+        redisCommands.push(['SET', 'favoriteCache', options.body]);
+        return { ok: true, json: async () => ({ result: 'OK' }) };
+      }
       const commands = JSON.parse(options.body);
       redisCommands.push(...commands);
       return {
@@ -1031,6 +1159,7 @@ test('worker.js API endpoints', async (t) => {
     }, async () => {
       assert.equal(await getRedisCaches(), true);
       await updateRedisCaches();
+      await persistFavorites();
       assert.ok(redisData.has('favoriteCache'));
       assert.equal(redisData.has('searchCache'), false);
       assert.equal(redisData.has('commentCache'), false);
@@ -1291,6 +1420,7 @@ test('worker.js API endpoints', async (t) => {
 
     await t.test('refresh always performs a new source search and rebuilds the favorite', async () => {
       resetFavoriteState();
+      await initializePersistentCaches('node');
       const oldAnime = createFavoriteAnime('刷新测试', 1, 920001);
       const refreshedAnime = createFavoriteAnime('刷新测试', 3, 920002);
       const originalTimestamp = Date.now() - 60_000;

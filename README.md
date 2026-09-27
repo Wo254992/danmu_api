@@ -88,8 +88,8 @@ LogVar 弹幕 API 服务器
   - 收藏不受 `SEARCH_CACHE_MINUTES`、普通搜索缓存 500 条上限或过期清理影响。
   - 支持定时刷新收藏：在“收藏”标签页点击“定时刷新”按钮，选择每天或每周（1-7 对应周一至周日）与执行时间，固定按北京时间（`Asia/Shanghai`）运行；已配置的条目按钮会显示类似“每天 03:00”“周一 03:00”，条目下方显示下次执行时间和最近状态。
   - 定时刷新失败会保留旧缓存并在 10 分钟后自动重试一次，仍失败则等待下一个正常周期，不再继续重试；服务停机错过执行时间时，重启后只补执行一次并重新计算下一周期。
-  - 定时刷新计划随收藏一起保存在 `.cache/favoritesCache` 或 Redis 中，Node/Docker 重启后如需保留请挂载 `.cache` 目录或配置 Upstash Redis；纯内存收藏及计划会随进程重启丢失。Vercel、Cloudflare、Netlify、EdgeOne、Hugging Face 等 serverless 平台不启动调度器，按钮会禁用并提示“仅支持 Node/Docker 部署”。
-  - Node/Docker 部署会写入 `.cache/favoritesCache` 永久保存，请挂载 `.cache` 目录；serverless 平台必须配置 Redis 才启用收藏按钮，否则界面会置灰并提示配置 `UPSTASH_REDIS_REST_URL`、`UPSTASH_REDIS_REST_TOKEN`。配置 Redis 后可跨冷启动和实例恢复。
+  - 定时刷新计划随收藏一起保存在 `.cache/favoritesCache` 或 Redis 中，Node/Docker 重启后如需保留请挂载 `.cache` 目录或配置 Local Redis / Upstash Redis；纯内存收藏及计划会随进程重启丢失。Vercel、Cloudflare、Netlify、EdgeOne、Hugging Face 等 serverless 平台不启动调度器，按钮会禁用并提示“仅支持 Node/Docker 部署”。
+  - Node/Docker 可通过 `.cache/favoritesCache`、Local Redis 或 Upstash Redis 保存收藏与计划；使用文件缓存时请挂载 `.cache` 目录；serverless 平台必须配置 Redis 才启用收藏按钮，否则界面会置灰并提示配置 `UPSTASH_REDIS_REST_URL`、`UPSTASH_REDIS_REST_TOKEN`。配置 Redis 后可跨冷启动和实例恢复。
 - **智能缓存管理**：支持内存缓存搜索结果和弹幕数据，避免短期内重复的不必要API请求。包括：
   - 搜索结果缓存（可通过 `SEARCH_CACHE_MINUTES` 配置，默认1分钟）
   - 弹幕缓存（可通过 `COMMENT_CACHE_MINUTES` 配置，默认5分钟）
@@ -503,8 +503,8 @@ API 支持返回 Bilibili 标准 XML 格式的弹幕数据，通过查询参数 
 | BANGUMI_DATA_CACHE_DAYS    | 【可选】指定 Bangumi Data 数据有效期(天)，默认为：`7`，超过有效期后会下载更新，设置0则每次请求时强制异步更新（需开启`USE_BANGUMI_DATA`）'       |
 | UPSTASH_REDIS_REST_URL    | 【可选】Upstash redis url，需配合UPSTASH_REDIS_REST_TOKEN使用，用于持久化原有查询信息和收藏缓存，避免 serverless 冷启动丢失收藏；搜索结果和弹幕缓存不会写入 Redis（会稍微影响收藏操作和冷启动请求速度），获取方法请参考：`https://cloud.tencent.cn/developer/article/2424508`       |
 | UPSTASH_REDIS_REST_TOKEN    | 【可选】Upstash redis token，需配合UPSTASH_REDIS_REST_URL使用，用于持久化原有查询信息和收藏缓存，避免 serverless 冷启动丢失收藏；搜索结果和弹幕缓存不会写入 Redis（会稍微影响收藏操作和冷启动请求速度），获取方法请参考：`https://cloud.tencent.cn/developer/article/2424508`       |
-| LOCAL_CACHE_ENABLED | 【可选】Node/Docker 通用文件缓存开关，默认 `true` 且仍需已有 `.cache` 目录；设置 `false` 禁止读取和写入通用文件缓存，不影响本地弹幕文件、Bangumi Data、内存缓存或 Redis。收藏与定时计划仍需文件缓存或 Upstash，Local Redis 仅保存查询数据。 |
-| LOCAL_REDIS_URL    | 【可选】本地Redis连接URL，用于本地缓存存储，适用于docker和本地部署环境，格式：`redis://:password@127.0.0.1:6379/0`，默认为空（不使用本地Redis）       |
+| LOCAL_CACHE_ENABLED | 【可选】Node/Docker 通用文件缓存开关，默认 `true` 且仍需已有 `.cache` 目录；设置 `false` 禁止读取和写入通用文件缓存，不影响本地弹幕文件、Bangumi Data、内存缓存或 Redis。收藏与定时计划可单独保存在 Local Redis 或 Upstash，关闭文件缓存不会自动迁移旧收藏。 |
+| LOCAL_REDIS_URL    | 【可选】本地Redis连接URL，用于查询数据、收藏和定时计划持久化，适用于docker和本地部署环境，格式：`redis://:password@127.0.0.1:6379/0`，默认为空（不使用本地Redis）       |
 | DEPLOY_PLATFROM_ACCOUNT    | 【可选】部署账号ID，调用部署服务API需要，配置后可使用UI界面配置服务，不同部署平台获取方式可查看 [部署平台环境变量配置指南](https://github.com/huangxd-/danmu_api/tree/main/danmu_api/ui/README.md#部署平台环境变量配置指南) ，docker部署和本地node部署并不需要配置      |
 | DEPLOY_PLATFROM_PROJECT    | 【可选】部署项目名称，调用部署服务API需要，配置后可使用UI界面配置服务，不同部署平台获取方式可查看 [部署平台环境变量配置指南](https://github.com/huangxd-/danmu_api/tree/main/danmu_api/ui/README.md#部署平台环境变量配置指南) ，docker部署和本地node部署并不需要配置       |
 | DEPLOY_PLATFROM_TOKEN    | 【可选】部署平台token，调用部署服务API需要，配置后可使用UI界面配置服务，不同部署平台获取方式可查看 [部署平台环境变量配置指南](https://github.com/huangxd-/danmu_api/tree/main/danmu_api/ui/README.md#部署平台环境变量配置指南) ，docker部署和本地node部署并不需要配置       |
@@ -792,10 +792,13 @@ API 支持返回 Bilibili 标准 XML 格式的弹幕数据，通过查询参数 
 - 弹幕分片下载请求已加入重试机制，重试次数为1次
 - Node/Docker 的通用文件缓存由 `LOCAL_CACHE_ENABLED` 控制，默认 `true`，仍需已有 `.cache` 目录；设为 `false` 后不读取或写入通用文件缓存，不影响本地弹幕文件、Bangumi Data、内存缓存或 Redis。上传弹幕等操作仍可能创建 `.cache`，因此此开关提供显式禁用能力，并未改变默认按目录存在启用文件缓存的兼容行为。
 - 查询数据按配置选择恢复来源：Local Redis > Upstash > 文件。配置 Local Redis 时优先从它恢复 `animes`、`episodeIds`、`episodeNum`、`reqRecords`、`lastSelectMap`、`todayReqNum`；其他后端的旧查询快照不再覆盖内存。各启用后端仍独立检测变化并写入，不是只向优先后端写入。
-- 收藏与定时计划继续使用文件缓存或 Upstash，Local Redis 暂不保存这部分数据；配置 Upstash 时收藏从 Upstash 恢复，否则从启用的文件缓存恢复。仅配置 Local Redis 又关闭文件缓存时，收藏与计划只保留在内存中，重启会丢失。
-- 主数据源读取失败不等于键不存在：后续请求会重试，不自动回退到旧快照，也不写回尚未恢复的数据。只有依赖未恢复数据的操作返回 `503`；例如 Local Redis 查询数据已恢复时，Upstash 收藏读取失败不会阻断查询接口。已恢复的查询数据在 Redis 重连时不重新加载，避免覆盖运行中的内存变化。
+- 收藏与定时计划同样按 Local Redis > Upstash > 文件选择恢复来源，使用 `favoriteCache` 保存，文件名仍为 `.cache/favoritesCache`。仅配置 Local Redis 并设置 `LOCAL_CACHE_ENABLED=false` 时，收藏与计划也能跨重启恢复。查询数据和收藏分别恢复，某组读取失败不会覆盖另一组已经恢复的数据。
+- 主数据源读取失败不等于键不存在：后续请求会重试，不自动回退到旧快照，也不写回尚未恢复的数据。只有依赖未恢复数据的操作返回 `503`；例如查询数据已恢复但 `favoriteCache` 读取失败时，查询接口仍可使用，收藏操作等待恢复。已恢复的查询数据在 Redis 重连时不重新加载，避免覆盖运行中的内存变化。
 - 运行中开启文件缓存，只会在后续保存时写入当前内存，不会自动导入旧文件。切换恢复来源或迁移旧文件数据请在启动前完成配置与数据准备；空 Redis 不会自动导入低优先级旧快照。
-- 从受 #491 影响的版本升级后，已有 `.cache` 默认仍可使用。只需要 Redis 查询持久化的用户可设置 `LOCAL_CACHE_ENABLED=false`；关闭前请确认收藏与计划已有 Upstash 持久化或不需要保留。无需删除整个 `.cache`，其中可能有上传的弹幕和收藏；关闭开关不会自动迁移旧文件。
+- 从受 #491 影响的版本升级后，已有 `.cache` 默认仍可使用。只需要 Redis 查询持久化的用户可设置 `LOCAL_CACHE_ENABLED=false`；关闭前请确认收藏与计划已迁移到目标 Redis 或不需要保留。无需删除整个 `.cache`，其中可能有上传的弹幕和收藏；关闭开关不会自动迁移旧文件。
+- 收藏保存使用独立队列，新增、删除、刷新和计划更改会写入所有启用的收藏后端；只有全部成功才报告保存成功。部分失败时保留当前内存和待保存状态，已成功后端不回滚，重试继续补写失败后端。普通查询缓存保存不再顺带写入收藏。
+- 删除收藏是幂等操作：即使内存中已经不存在该条目，重试仍会保存当前收藏快照，完成上次未持久化的删除。保存失败返回 `500`，收藏列表返回 `persistencePending` 表示是否还有待保存更改；列表请求会重试，Node/Docker 定时器也会每分钟重试，保存失败不会重复执行已完成的定时刷新。
+- 待保存状态仅在当前进程内存中；所有后端尚未同步前退出进程，仍可能丢失未完成的更改。本实现不提供跨后端事务或跨实例写入冲突解决。部署此版本前若收藏仅在文件或 Upstash 中，请先备份并迁移到优先使用的 Local Redis；空 Redis 不会自动导入低优先级快照。
 - 有任何问题，如部署/环境变量配置等，可通过deepwiki对本项目进行提问，链接入口：https://deepwiki.com/huangxd-/danmu_api ，其中项目内容一般每周刷新一次
 
 ### 部署完成后在播放器填写后弹幕未生效自主排查步骤

@@ -1,7 +1,7 @@
 import { globals } from '../configs/globals.js';
 import { log } from './log-util.js'
 import { simpleHash, serializeValue } from "./codec-util.js";
-import { persistentCacheKeys, canPersistCacheKey, restoreCacheGroups, parseCacheSnapshot, applyCacheSnapshot } from './cache-state-util.js';
+import { queryCacheKeys, canPersistCacheKey, restoreCacheGroups, parseCacheSnapshot, applyCacheSnapshot } from './cache-state-util.js';
 
 let initializing = null;
 
@@ -201,9 +201,13 @@ function readPipelineValues(results, count) {
 // Redis 中的收藏是跨实例的持久数据，但实例内存中的 favoriteCache 只在首次初始化时加载，
 // 预热实例可能错过其他实例新增的收藏，这里在收藏相关请求时直接从 Redis 重新读取。
 export async function getFavoriteCachesFromRedis() {
+  // 先保留本实例尚未保存的新增/删除/计划，不能用远端旧值覆盖待重试更改。
+  if (globals.favoritePersistencePending) return true;
   if (!globals.redisValid) return false;
+  const revision = globals.favoritePersistenceRevision;
   try {
     const results = await runPipeline([['GET', 'favoriteCache']]);
+    if (globals.favoritePersistencePending || globals.favoritePersistenceRevision !== revision) return true;
     const [raw] = readPipelineValues(results, 1);
     const snapshot = parseCacheSnapshot([raw], ['favoriteCache']);
     // 只刷新收藏；成功确认缺失时清除旧内存，避免跨实例删除后又被写回。
@@ -219,14 +223,14 @@ export async function getFavoriteCachesFromRedis() {
 
 // 优化后的 updateRedisCaches，仅更新有变化的变量
 export async function updateRedisCaches() {
-  if (!globals.queryCacheInitialized && !globals.favoriteCacheInitialized) return false;
+  if (!globals.queryCacheInitialized) return false;
   try {
     log("info", '[system] [redis] updateCaches start.');
     const commands = [];
     const updates = [];
 
     // 检查每个变量的哈希值
-    const variables = persistentCacheKeys.filter(canPersistCacheKey).map(key => ({ key, value: globals[key] }));
+    const variables = queryCacheKeys.map(key => ({ key, value: globals[key] }));
 
     for (const { key, value } of variables) {
       const serializedValue = serializeValue(key, value);

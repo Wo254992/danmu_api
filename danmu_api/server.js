@@ -14,6 +14,7 @@ import { Envs } from './configs/envs.js';
 import { clearBangumiDataCache, initBangumiData, syncBangumiDataLifecycleOnConfigChange } from './utils/bangumi-data-util.js';
 import { initializePersistentCaches } from './utils/cache-init-util.js';
 import { persistFavorites, refreshFavoriteByKeyword } from './apis/favorite-api.js';
+import { retryFavoritePersistence } from './utils/favorite-persistence-util.js';
 import { startFavoriteScheduler, stopFavoriteScheduler } from './utils/favorite-schedule-util.js';
 import { formatHostForUrl, listenOnAllInterfaces } from './utils/server-listen-util.js';
 
@@ -550,6 +551,7 @@ async function initializeFavoriteScheduler(mainPort) {
   const refreshUrl = new URL(`http://127.0.0.1:${mainPort}/api/v2/favorite/refresh`);
   await startFavoriteScheduler({
     beforeRun: async () => (await initializePersistentCaches('node')) && Globals.favoriteCacheInitialized,
+    retryPending: retryFavoritePersistence,
     refresh: keyword => refreshFavoriteByKeyword(keyword, refreshUrl, { persist: false }),
     persist: persistFavorites
   });

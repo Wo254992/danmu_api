@@ -1,4 +1,5 @@
 import { globals } from '../configs/globals.js';
+import { log } from './log-util.js';
 
 const SHANGHAI_OFFSET_MS = 8 * 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -151,7 +152,7 @@ export async function runDueFavoriteSchedules({
   return results;
 }
 
-export async function startFavoriteScheduler({ refresh, persist, beforeRun, intervalMs = 60 * 1000 }) {
+export async function startFavoriteScheduler({ refresh, persist, beforeRun, retryPending, intervalMs = 60 * 1000 }) {
   if (schedulerTimer || typeof refresh !== 'function') return false;
 
   const tick = async () => {
@@ -160,11 +161,14 @@ export async function startFavoriteScheduler({ refresh, persist, beforeRun, inte
     try {
       // 与请求使用同一恢复入口，避免定时刷新先使用文件中的旧查询数据。
       if (beforeRun && !(await beforeRun())) return;
+      if (retryPending) await retryPending();
       await runDueFavoriteSchedules({
         favoriteCache: globals.favoriteCache,
         refresh,
         persist
       });
+    } catch (error) {
+      log('error', `[favorite] 定时任务持久化待重试: ${error.message}`);
     } finally {
       schedulerRunning = false;
     }

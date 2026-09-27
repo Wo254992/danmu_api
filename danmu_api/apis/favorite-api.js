@@ -1,5 +1,7 @@
 import { globals } from '../configs/globals.js';
-import { getSearchCache, updateLocalCaches } from '../utils/cache-util.js';
+import { getSearchCache } from '../utils/cache-util.js';
+import { persistFavorites, retryFavoritePersistence } from '../utils/favorite-persistence-util.js';
+export { persistFavorites } from '../utils/favorite-persistence-util.js';
 import { jsonResponse } from '../utils/http-util.js';
 import { log } from '../utils/log-util.js';
 import { simplized } from '../utils/zh-util.js';
@@ -46,14 +48,6 @@ function cacheKeyFor(title, season) {
 
 function detailsFromMap(detailsMap) {
   return [...new Set(detailsMap instanceof Map ? detailsMap.values() : [])];
-}
-
-export async function persistFavorites() {
-  if (globals.localCacheValid) await updateLocalCaches();
-  if (globals.redisValid) {
-    const { updateRedisCaches } = await import('../utils/redis-util.js');
-    await updateRedisCaches();
-  }
 }
 
 function removeRelatedSearchCaches(keyword) {
@@ -127,12 +121,19 @@ export async function handleFavoriteAdd(req, url) {
   }
 }
 
-export function handleFavoriteList() {
+export async function handleFavoriteList() {
+  try {
+    await retryFavoritePersistence();
+  } catch (error) {
+    log('warn', `[favorite] 持久化仍待重试: ${error.message}`);
+  }
   // Node/Docker 可以使用本地文件缓存；无持久化存储的 serverless 实例
   // 会在冷启动或实例切换后丢失收藏，因此不向前端开放收藏写入按钮。
   const favoriteSupported = globals.deployPlatform === 'node' || globals.redisValid === true;
   return jsonResponse({
     success: true,
+    persistencePending: globals.favoritePersistencePending,
+    persistenceMessage: globals.favoritePersistencePending ? '收藏更改尚未全部保存，重启可能丢失，请稍后重试' : '',
     favoriteSupported,
     favoriteSupportMessage: favoriteSupported
       ? ''
@@ -188,11 +189,11 @@ export async function handleFavoriteRemove(req) {
     }
 
     const resolved = resolveFavoriteForKeyword(keyword);
-    if (!resolved || !removeFavorite(resolved.keyword)) {
-      return jsonResponse({ success: false, message: '未找到该收藏' }, 404);
+    if (resolved) {
+      removeFavorite(resolved.keyword);
+      removeRelatedSearchCaches(resolved.keyword);
     }
-
-    removeRelatedSearchCaches(resolved.keyword);
+    // 删除幂等：内存中已不存在时仍保存，完成上次失败或部分成功的删除。
     await persistFavorites();
     return jsonResponse({ success: true, message: '已删除收藏' });
   } catch (error) {

@@ -11,10 +11,10 @@ export const persistentCacheKeys = [...queryCacheKeys, 'favoriteCache'];
 // 后端按配置选择；暂时不可用不等于改用另一个后端的旧快照。
 export function cacheSources() {
   const upstash = globals.redisUrl && globals.redisToken;
+  const localRedis = globals.deployPlatform === 'node' && globals.localRedisUrl;
   return {
-    query: globals.deployPlatform === 'node' && globals.localRedisUrl
-      ? 'localRedis' : upstash ? 'upstash' : 'file',
-    favorite: upstash ? 'upstash' : 'file'
+    query: localRedis ? 'localRedis' : upstash ? 'upstash' : 'file',
+    favorite: localRedis ? 'localRedis' : upstash ? 'upstash' : 'file'
   };
 }
 
