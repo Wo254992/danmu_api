@@ -151,13 +151,15 @@ export async function runDueFavoriteSchedules({
   return results;
 }
 
-export async function startFavoriteScheduler({ refresh, persist, intervalMs = 60 * 1000 }) {
+export async function startFavoriteScheduler({ refresh, persist, beforeRun, intervalMs = 60 * 1000 }) {
   if (schedulerTimer || typeof refresh !== 'function') return false;
 
   const tick = async () => {
     if (schedulerRunning) return;
     schedulerRunning = true;
     try {
+      // 与请求使用同一恢复入口，避免定时刷新先使用文件中的旧查询数据。
+      if (beforeRun && !(await beforeRun())) return;
       await runDueFavoriteSchedules({
         favoriteCache: globals.favoriteCache,
         refresh,

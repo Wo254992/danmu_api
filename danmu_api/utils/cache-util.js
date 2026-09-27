@@ -2,8 +2,17 @@ import { globals } from '../configs/globals.js';
 import { log } from './log-util.js'
 import { Anime } from "../models/dandan-model.js";
 import { simpleHash } from "./codec-util.js";
-import { loadFavorites, resolveFavoriteForSearchKeyword, saveFavorites } from "./favorite-util.js";
+import { resolveFavoriteForSearchKeyword, saveFavorites } from "./favorite-util.js";
+import { canPersistCacheKey, restoreCacheGroups } from './cache-state-util.js';
 let fs, path;
+let nodeModulesPromise;
+async function loadFileCacheModules() {
+  nodeModulesPromise ||= Promise.all([import('fs'), import('path')]).catch(error => {
+    nodeModulesPromise = null;
+    throw error;
+  });
+  [fs, path] = await nodeModulesPromise;
+}
 
 // =====================
 // cache数据结构处理函数
@@ -802,55 +811,34 @@ export function readCacheFromFile(key) {
 
 // 将缓存数据写入本地缓存文件
 export function writeCacheToFile(key, value) {
+  if (globals.localCacheEnabled === false || !canPersistCacheKey(key)) return false;
   const cacheFilePath = path.join(getDirname(), '..', '..', '.cache', `${key}`);
   fs.writeFileSync(cacheFilePath, JSON.stringify(value), 'utf8');
+  return true;
 }
 
 // 从本地获取缓存
 export async function getLocalCaches() {
-  if (!globals.localCacheInitialized) {
-    try {
-      log("info", '[cache] getLocalCaches start.');
-      // 从本地缓存文件读取数据并恢复到 globals 中
-      globals.animes = JSON.parse(readCacheFromFile('animes')) || globals.animes;
-      globals.episodeIds = JSON.parse(readCacheFromFile('episodeIds')) || globals.episodeIds;
-      globals.episodeNum = JSON.parse(readCacheFromFile('episodeNum')) || globals.episodeNum;
-      globals.reqRecords = JSON.parse(readCacheFromFile('reqRecords')) || globals.reqRecords;
-      globals.todayReqNum = JSON.parse(readCacheFromFile('todayReqNum')) || globals.todayReqNum;
-
-      const favoriteCacheData = readCacheFromFile('favoritesCache');
-      if (favoriteCacheData) {
-        loadFavorites(typeof favoriteCacheData === 'string' ? JSON.parse(favoriteCacheData) : favoriteCacheData);
-      }
-
-      // 恢复 lastSelectMap 并转换为 Map 对象
-      const lastSelectMapData = readCacheFromFile('lastSelectMap');
-      if (lastSelectMapData) {
-        globals.lastSelectMap = new Map(Object.entries(JSON.parse(lastSelectMapData)));
-        log("info", `[cache] Restored lastSelectMap from local cache with ${globals.lastSelectMap.size} entries`);
-      }
-
-      // 更新哈希值
-      globals.lastHashes.animes = simpleHash(JSON.stringify(globals.animes));
-      globals.lastHashes.episodeIds = simpleHash(JSON.stringify(globals.episodeIds));
-      globals.lastHashes.episodeNum = simpleHash(JSON.stringify(globals.episodeNum));
-      globals.lastHashes.reqRecords = simpleHash(JSON.stringify(globals.reqRecords));
-      globals.lastHashes.todayReqNum = simpleHash(JSON.stringify(globals.todayReqNum));
-      globals.lastHashes.lastSelectMap = simpleHash(JSON.stringify(Object.fromEntries(globals.lastSelectMap)));
-      globals.lastHashes.favoriteCache = simpleHash(JSON.stringify(saveFavorites()));
-
-      globals.localCacheInitialized = true;
-      log("info", '[cache] getLocalCaches completed successfully.');
-    } catch (error) {
-      log("error", `[cache] getLocalCaches failed: ${error.message}`, error.stack);
-      globals.localCacheInitialized = true; // 标记为已初始化，避免重复尝试
-    }
+  if (globals.localCacheEnabled === false) return true;
+  try {
+    await loadFileCacheModules();
+    const success = await restoreCacheGroups('file', keys => keys.map(key => {
+      const raw = readCacheFromFile(key === 'favoriteCache' ? 'favoritesCache' : key);
+      return raw == null ? null : typeof raw === 'string' ? raw : JSON.stringify(raw);
+    }), globals.localFileHashes);
+    globals.localCacheInitialized = success;
+    return success;
+  } catch (error) {
+    log("error", `[cache] getLocalCaches failed: ${error.message}`, error.stack);
+    return false;
   }
 }
 
 // 更新本地缓存
 export async function updateLocalCaches() {
+  if (globals.localCacheEnabled === false) return true;
   try {
+    await loadFileCacheModules();
     log("info", '[cache] updateLocalCaches start.');
     const updates = [];
 
@@ -866,6 +854,7 @@ export async function updateLocalCaches() {
     ];
 
     for (const { key, value } of variables) {
+      if (!canPersistCacheKey(key)) continue;
       // 对于 lastSelectMap（Map 对象），需要转换为普通对象后再序列化
       const serializedValue = key === 'lastSelectMap'
         ? JSON.stringify(Object.fromEntries(value))
@@ -874,34 +863,37 @@ export async function updateLocalCaches() {
           : JSON.stringify(value);
       const currentHash = simpleHash(serializedValue);
       const hashKey = key === 'favoritesCache' ? 'favoriteCache' : key;
-      if (currentHash !== globals.lastHashes[hashKey]) {
-        writeCacheToFile(key, serializedValue);
-        updates.push({ key, hashKey, hash: currentHash });
+      if (currentHash !== globals.localFileHashes[hashKey]) {
+        if (!writeCacheToFile(key, serializedValue)) continue;
+        globals.localFileHashes[hashKey] = currentHash;
+        updates.push({ key });
       }
     }
 
     // 输出更新日志
     if (updates.length > 0) {
       log("info", `[cache] Updated local caches for keys: ${updates.map(u => u.key).join(', ')}`);
-      updates.forEach(({ hashKey, hash }) => {
-        globals.lastHashes[hashKey] = hash; // 更新本地哈希
-      });
     } else {
       log("info", '[cache] No changes detected, skipping local cache update.');
     }
 
+    return true;
   } catch (error) {
     log("error", `[cache] updateLocalCaches failed: ${error.message}`, error.stack);
     log("error", `[cache] Error details - Name: ${error.name}, Cause: ${error.cause ? error.cause.message : 'N/A'}`);
+    return false;
   }
 }
 
 // 判断是否有效的本地缓存目录
 export async function judgeLocalCacheValid(urlPath, deployPlatform) {
+  if (globals.localCacheEnabled === false) {
+    globals.localCacheValid = false;
+    return;
+  }
   if (deployPlatform === 'node') {
     try {
-      fs = await import('fs');
-      path = await import('path');
+      await loadFileCacheModules();
 
       if (!globals.localCacheValid && urlPath !== "/favicon.ico" && urlPath !== "/robots.txt") {
         const cacheDirPath = path.join(getDirname(), '..', '..', '.cache');

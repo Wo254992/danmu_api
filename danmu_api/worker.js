@@ -1,8 +1,9 @@
 import { Globals } from './configs/globals.js';
 import { jsonResponse } from './utils/http-util.js';
 import { log, formatLogMessage } from './utils/log-util.js'
-import { getFavoriteCachesFromRedis, getRedisCaches, judgeRedisValid } from "./utils/redis-util.js";
-import { cleanupExpiredIPs, findUrlById, getCommentCache, getLocalCaches, judgeLocalCacheValid } from "./utils/cache-util.js";
+import { getFavoriteCachesFromRedis, judgeRedisValid } from "./utils/redis-util.js";
+import { initializePersistentCaches } from './utils/cache-init-util.js';
+import { cleanupExpiredIPs, findUrlById, getCommentCache, judgeLocalCacheValid } from "./utils/cache-util.js";
 import { formatDanmuResponse } from "./utils/danmu-util.js";
 import AIClient from './utils/ai-util.js';
 import { getBangumi, getComment, getCommentByUrl, getSegmentComment, matchAnime, searchAnime, searchEpisodes } from "./apis/dandan-api.js";
@@ -108,19 +109,20 @@ async function handleRequest(req, env, deployPlatform, clientIp) {
     }
   }
 
-  if (deployPlatform === "node" && globals.localCacheValid && path !== "/favicon.ico" && path !== "/robots.txt") {
-    await getLocalCaches();
-  }
-  if (globals.redisValid && path !== "/favicon.ico" && path !== "/robots.txt") {
-    await getRedisCaches();
-  }
-  // serverless 多实例下，收藏请求每次都从 Redis 刷新收藏缓存，避免读到预热实例的过期空快照
-  if (globals.redisValid && deployPlatform !== "node" && path.includes("/favorite")) {
-    await getFavoriteCachesFromRedis();
-  }
-  if (deployPlatform === "node" && globals.localRedisValid && path !== "/favicon.ico" && path !== "/robots.txt") {
-    const { getLocalRedisCaches } = await import("./utils/local-redis-util.js");
-    await getLocalRedisCaches();
+  if (path !== '/favicon.ico' && path !== '/robots.txt' && method !== 'OPTIONS') {
+    const queryReady = await initializePersistentCaches(deployPlatform);
+    let favoritesReady = globals.favoriteCacheInitialized;
+    if (favoritesReady && globals.redisValid && deployPlatform !== 'node' && isFavoriteRequest) {
+      favoritesReady = await getFavoriteCachesFromRedis();
+    }
+    // 仅限制依赖尚未恢复数据的操作；收藏后端失败不阻断已恢复的查询数据。
+    const needsQueryCache = /(?:^|\/)(?:search|match|bangumi|segmentcomment|danmaku)(?:\/|$)/.test(tokenlessPath)
+      || (/(?:^|\/)comment(?:\/|$)/.test(tokenlessPath) && !url.searchParams.has('url'))
+      || /\/api\/cache\/(?:clear|animes)$/.test(tokenlessPath)
+      || /(?:^|\/)favorite\/(?:add|refresh)(?:\/|$)/.test(tokenlessPath);
+    if ((!queryReady && needsQueryCache) || (!favoritesReady && isFavoriteRequest)) {
+      return jsonResponse({ success: false, errorCode: 503, errorMessage: '持久化数据暂时无法恢复，请稍后重试' }, 503);
+    }
   }
 
   // 检查路径是否包含指定的接口关键字

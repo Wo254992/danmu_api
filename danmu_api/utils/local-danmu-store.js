@@ -89,6 +89,8 @@ async function rebuildIndex() {
 // 列表是只读路径：索引写不进去（只读挂载、磁盘临时故障）时退化为本次扫描结果，不能整个列表报错。
 async function rebuildIndexForRead() {
   const { resources, names } = await scanResources();
+  // 目录不存在或无法扫描时，读取不能为了空索引创建目录或覆盖索引。
+  if (names === null) return sortByUpdatedAt(resources);
   try {
     const sorted = await writeIndex(resources);
     // 把目录快照绑到新索引上：目录里解析不了的遗留文件不会导致每次列表都全量重建。

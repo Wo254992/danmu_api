@@ -503,6 +503,7 @@ API 支持返回 Bilibili 标准 XML 格式的弹幕数据，通过查询参数 
 | BANGUMI_DATA_CACHE_DAYS    | 【可选】指定 Bangumi Data 数据有效期(天)，默认为：`7`，超过有效期后会下载更新，设置0则每次请求时强制异步更新（需开启`USE_BANGUMI_DATA`）'       |
 | UPSTASH_REDIS_REST_URL    | 【可选】Upstash redis url，需配合UPSTASH_REDIS_REST_TOKEN使用，用于持久化原有查询信息和收藏缓存，避免 serverless 冷启动丢失收藏；搜索结果和弹幕缓存不会写入 Redis（会稍微影响收藏操作和冷启动请求速度），获取方法请参考：`https://cloud.tencent.cn/developer/article/2424508`       |
 | UPSTASH_REDIS_REST_TOKEN    | 【可选】Upstash redis token，需配合UPSTASH_REDIS_REST_URL使用，用于持久化原有查询信息和收藏缓存，避免 serverless 冷启动丢失收藏；搜索结果和弹幕缓存不会写入 Redis（会稍微影响收藏操作和冷启动请求速度），获取方法请参考：`https://cloud.tencent.cn/developer/article/2424508`       |
+| LOCAL_CACHE_ENABLED | 【可选】Node/Docker 通用文件缓存开关，默认 `true` 且仍需已有 `.cache` 目录；设置 `false` 禁止读取和写入通用文件缓存，不影响本地弹幕文件、Bangumi Data、内存缓存或 Redis。收藏与定时计划仍需文件缓存或 Upstash，Local Redis 仅保存查询数据。 |
 | LOCAL_REDIS_URL    | 【可选】本地Redis连接URL，用于本地缓存存储，适用于docker和本地部署环境，格式：`redis://:password@127.0.0.1:6379/0`，默认为空（不使用本地Redis）       |
 | DEPLOY_PLATFROM_ACCOUNT    | 【可选】部署账号ID，调用部署服务API需要，配置后可使用UI界面配置服务，不同部署平台获取方式可查看 [部署平台环境变量配置指南](https://github.com/huangxd-/danmu_api/tree/main/danmu_api/ui/README.md#部署平台环境变量配置指南) ，docker部署和本地node部署并不需要配置      |
 | DEPLOY_PLATFROM_PROJECT    | 【可选】部署项目名称，调用部署服务API需要，配置后可使用UI界面配置服务，不同部署平台获取方式可查看 [部署平台环境变量配置指南](https://github.com/huangxd-/danmu_api/tree/main/danmu_api/ui/README.md#部署平台环境变量配置指南) ，docker部署和本地node部署并不需要配置       |
@@ -789,7 +790,12 @@ API 支持返回 Bilibili 标准 XML 格式的弹幕数据，通过查询参数 
 - TMDB源请求逻辑：search tmdb -> tmdbId -> imdbId -> doubanId -> playUrl；优点：emby通过tmdb刮削，标题通过tmdb搜索，返回的信息可能更加匹配；缺点：链条过长，请求时长5-10s左右，中间一环数据有缺失，就没有返回结果。
 - TMDB源在SOURCE_ORDER添加tmdb的同时，需要添加TMDB_API_KEY环境变量
 - 弹幕分片下载请求已加入重试机制，重试次数为1次
-- 如果同时配置了本地缓存和upstash redis缓存和本地redis缓存，优先级为本地redis > upstash redis缓存 > 本地缓存
+- Node/Docker 的通用文件缓存由 `LOCAL_CACHE_ENABLED` 控制，默认 `true`，仍需已有 `.cache` 目录；设为 `false` 后不读取或写入通用文件缓存，不影响本地弹幕文件、Bangumi Data、内存缓存或 Redis。上传弹幕等操作仍可能创建 `.cache`，因此此开关提供显式禁用能力，并未改变默认按目录存在启用文件缓存的兼容行为。
+- 查询数据按配置选择恢复来源：Local Redis > Upstash > 文件。配置 Local Redis 时优先从它恢复 `animes`、`episodeIds`、`episodeNum`、`reqRecords`、`lastSelectMap`、`todayReqNum`；其他后端的旧查询快照不再覆盖内存。各启用后端仍独立检测变化并写入，不是只向优先后端写入。
+- 收藏与定时计划继续使用文件缓存或 Upstash，Local Redis 暂不保存这部分数据；配置 Upstash 时收藏从 Upstash 恢复，否则从启用的文件缓存恢复。仅配置 Local Redis 又关闭文件缓存时，收藏与计划只保留在内存中，重启会丢失。
+- 主数据源读取失败不等于键不存在：后续请求会重试，不自动回退到旧快照，也不写回尚未恢复的数据。只有依赖未恢复数据的操作返回 `503`；例如 Local Redis 查询数据已恢复时，Upstash 收藏读取失败不会阻断查询接口。已恢复的查询数据在 Redis 重连时不重新加载，避免覆盖运行中的内存变化。
+- 运行中开启文件缓存，只会在后续保存时写入当前内存，不会自动导入旧文件。切换恢复来源或迁移旧文件数据请在启动前完成配置与数据准备；空 Redis 不会自动导入低优先级旧快照。
+- 从受 #491 影响的版本升级后，已有 `.cache` 默认仍可使用。只需要 Redis 查询持久化的用户可设置 `LOCAL_CACHE_ENABLED=false`；关闭前请确认收藏与计划已有 Upstash 持久化或不需要保留。无需删除整个 `.cache`，其中可能有上传的弹幕和收藏；关闭开关不会自动迁移旧文件。
 - 有任何问题，如部署/环境变量配置等，可通过deepwiki对本项目进行提问，链接入口：https://deepwiki.com/huangxd-/danmu_api ，其中项目内容一般每周刷新一次
 
 ### 部署完成后在播放器填写后弹幕未生效自主排查步骤
