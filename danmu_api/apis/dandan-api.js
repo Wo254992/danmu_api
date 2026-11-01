@@ -1900,7 +1900,7 @@ function prepareQueryTitle(title) {
 }
 
 function resolveLegacyMatchTitle(title) {
-  const mapped = globals.titleMappingTable instanceof Map ? globals.titleMappingTable.get(title) : null;
+  const mapped = globals.resolveTitleMapping(title);
   if (mapped) log("info", `[system] [match] Title mapped from original: ${title} to: ${mapped}`);
   return prepareQueryTitle(mapped || title);
 }
