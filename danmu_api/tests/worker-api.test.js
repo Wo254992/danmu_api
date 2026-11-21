@@ -31,6 +31,7 @@ import {
   parseRemoteTitleMappings,
   refreshRemoteTitleMappingNow,
 } from '../utils/remote-title-mapping-util.js';
+import { resetRemoteAutoMatchMappingForTests } from '../utils/auto-match-mapping-url-util.js';
 
 test('GET / should return welcome message', async () => {
     const req = new MockRequest(urlPrefix, { method: 'GET' });
@@ -1183,6 +1184,7 @@ const ADMIN_ONLY_PROBES = [
   ['/api/ai/verify', 'POST'],
   ['/api/nipaplay/verify', 'POST'],
   ['/api/title-mapping/refresh', 'POST'],
+  ['/api/auto-match-mapping/refresh', 'POST'],
 ];
 
 test('worker 默认 TOKEN 下管理接口无 token 一律 401（默认 token 不是凭据）', async () => {
@@ -1332,6 +1334,28 @@ test('远程映射表：本机规则优先，禁用或切换地址后清理旧�
   assert.strictEqual(Globals.resolveTitleMapping('本地剧A'), '本地映射A');
 });
 
+test('剧名映射：精确键优先，尾部年份作为兜底', () => {
+  try {
+    Globals.init({
+      TITLE_MAPPING_TABLE: [
+        '某剧(2020)->精确年份结果',
+        '某剧->无年份结果',
+        '变形金刚3：月黑之时->变形金刚3',
+        '方括号剧->方括号结果'
+      ].join(';')
+    });
+
+    assert.strictEqual(Globals.resolveTitleMapping('某剧(2020)'), '精确年份结果');
+    assert.strictEqual(Globals.resolveTitleMapping('某剧(2019)'), '无年份结果');
+    assert.strictEqual(Globals.resolveTitleMapping('某剧（2019）'), '无年份结果');
+    assert.strictEqual(Globals.resolveTitleMapping('变形金刚3：月黑之时(2011)'), '变形金刚3');
+    assert.strictEqual(Globals.resolveTitleMapping('方括号剧【2019】'), '方括号结果');
+    assert.strictEqual(Globals.resolveTitleMapping('某剧 2020'), null);
+  } finally {
+    Globals.init({});
+  }
+});
+
 test('远程映射表：Node 启动复用磁盘缓存且不发起网络请求', async () => {
   const cacheRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'danmu-api-title-mapping-node-'));
   const originalCwd = process.cwd();
@@ -1466,4 +1490,47 @@ test('远程映射表：刷新接口只接受 ADMIN_TOKEN，并返回更新结�
   assert.strictEqual(admin.status, 200);
   assert.strictEqual(admin.json.success, true);
   assert.strictEqual(admin.json.count, 1);
+});
+
+test('远程季集映射表：刷新接口保留路径、只接受 ADMIN_TOKEN，并返回更新结果', async () => {
+  Globals.deployPlatform = 'vercel';
+  const env = {
+    TOKEN: 'user-token-1',
+    ADMIN_TOKEN: 'admin-tok',
+    AUTO_MATCH_MAPPING_TABLE_URL: 'https://maps.example.test/admin-season-refresh.txt',
+  };
+
+  try {
+    const anonymous = await callWorker('http://localhost/api/auto-match-mapping/refresh', { method: 'POST', env });
+    assert.strictEqual(anonymous.status, 401);
+
+    const userToken = await callWorker('http://localhost/user-token-1/api/auto-match-mapping/refresh', {
+      method: 'POST',
+      env,
+    });
+    assert.strictEqual(userToken.status, 401);
+
+    const admin = await withMockFetch(
+      async () => new Response([
+        '永生 S05E02->永生 S01E58',
+        '一念永恒 S01E53->一念永恒 S02E01',
+      ].join('\n'), {
+        status: 200,
+        headers: { 'content-type': 'text/plain; charset=utf-8' },
+      }),
+      () => callWorker('http://localhost/admin-tok/api/auto-match-mapping/refresh', { method: 'POST', env }),
+    );
+    assert.strictEqual(admin.status, 200);
+    assert.strictEqual(admin.json.success, true);
+    assert.strictEqual(admin.json.count, 2);
+
+    const unconfigured = await callWorker('http://localhost/admin-tok/api/auto-match-mapping/refresh', {
+      method: 'POST',
+      env: { ADMIN_TOKEN: 'admin-tok' },
+    });
+    assert.strictEqual(unconfigured.status, 400);
+    assert.match(unconfigured.json.errorMessage, /未配置 AUTO_MATCH_MAPPING_TABLE_URL/);
+  } finally {
+    resetRemoteAutoMatchMappingForTests();
+  }
 });
